@@ -1,5 +1,6 @@
 package magmac.app.compile.rule;
 
+import magmac.api.collect.list.Lists;
 import magmac.app.compile.error.CompileResult;
 import magmac.app.compile.error.InlineCompileResult;
 import magmac.app.compile.error.context.Context;
@@ -10,11 +11,9 @@ import magmac.app.compile.error.error.CompileErrors;
 import magmac.app.compile.node.Node;
 import magmac.app.error.ImmutableCompileError;
 
-import java.util.List;
-
 public record TypeRule(String type, Rule childRule) implements Rule {
     private CompileError createError(Context context, CompileError err) {
-        return new ImmutableCompileError("Cannot use type '" + this.type + "'", context, List.of(err));
+        return new ImmutableCompileError("Cannot use type '" + this.type + "'", context, Lists.of(err));
     }
 
     @Override

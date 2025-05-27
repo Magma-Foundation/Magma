@@ -1,10 +1,12 @@
 package magmac.app.lang;
 
 import magmac.api.Tuple2;
-import magmac.api.iter.collect.ListCollector;
+import magmac.api.collect.list.List;
+import magmac.api.collect.list.Lists;
 import magmac.api.collect.map.Map;
 import magmac.api.collect.map.Maps;
 import magmac.api.iter.Iters;
+import magmac.api.iter.collect.ListCollector;
 import magmac.app.compile.node.InlineNodeList;
 import magmac.app.compile.node.MapNode;
 import magmac.app.compile.node.Node;
@@ -12,18 +14,12 @@ import magmac.app.compile.node.NodeList;
 import magmac.app.io.Location;
 import magmac.app.stage.AfterAll;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-
 public class MergeDiagram implements AfterAll {
     private static List<String> findParentDependencies(String child, Map<String, List<String>> childToParents, Map<String, List<String>> dependencyMap) {
-        return childToParents.getOrDefault(child, Collections.emptyList())
-                .stream()
-                .map(parent -> dependencyMap.getOrDefault(parent, Collections.emptyList()))
-                .flatMap(Collection::stream)
-                .toList();
+        return childToParents.getOrDefault(child, Lists.empty())
+                .iter()
+                .map(parent -> dependencyMap.getOrDefault(parent, Lists.empty()))
+                .flatMap(stringList -> stringList.iter()).collect(new ListCollector<>());
     }
 
     private static Map<String, List<String>> findChildrenWithDependencies(NodeList rootSegments) {
@@ -32,31 +28,22 @@ public class MergeDiagram implements AfterAll {
                 String parent = node.findString("parent").orElse("");
                 String child = node.findString("child").orElse("");
 
-                if (!current.containsKey(parent)) {
-                    current.put(parent, new ArrayList<>());
-                }
-
-                current.get(parent).add(child);
+                return current.mapOrPut(parent, stringList -> stringList.add(child), () -> Lists.of(child));
             }
             return current;
         });
     }
 
     private static Map<String, List<String>> findChildrenWithInheritedTypes(NodeList rootSegments) {
-        return rootSegments.iter().fold(Maps.empty(), (current1, node1) -> {
+        return rootSegments.iter().fold(Maps.empty(), (current, node1) -> {
             if (!node1.is("inherits")) {
-                return current1;
+                return current;
             }
 
             String parent = node1.findString("parent").orElse("");
             String child = node1.findString("child").orElse("");
 
-            if (!current1.containsKey(child)) {
-                current1.put(child, new ArrayList<>());
-            }
-
-            current1.get(child).add(parent);
-            return current1;
+            return current.mapOrPut(child, stringList -> stringList.add(parent), () -> Lists.of(parent));
         });
     }
 
@@ -76,13 +63,11 @@ public class MergeDiagram implements AfterAll {
             List<String> currentDependencies = entry.right();
 
             List<String> parentDependencies = MergeDiagram.findParentDependencies(child, childrenWithInheritedTypes, childrenWithDependencies);
-            List<String> toRemove = new ArrayList<>(parentDependencies);
-            toRemove.addAll(childrenWithInheritedTypes.getOrDefault(child, new ArrayList<>()));
+            List<String> childWithInheritedTypes = childrenWithInheritedTypes.getOrDefault(child, Lists.empty());
+            List<String> toRemove = parentDependencies.addAll(childWithInheritedTypes);
+            List<String> list = currentDependencies.removeAll(toRemove);
 
-            List<String> list = new ArrayList<>(currentDependencies);
-            list.removeAll(toRemove);
-
-            NodeList others = new InlineNodeList(Iters.fromList(list)
+            NodeList others = new InlineNodeList(list.iter()
                     .map(parent -> new MapNode("dependency").withString("parent", parent).withString("child", child))
                     .collect(new ListCollector<>()));
 
@@ -101,7 +86,7 @@ public class MergeDiagram implements AfterAll {
 
         Node node = new MapNode();
         Node root = node.withNodeList("children", copy);
-        Location location = new Location(Collections.emptyList(), "diagram");
+        Location location = new Location(Lists.empty(), "diagram");
         return Maps.<Location, Node>empty().put(location, root);
     }
 }

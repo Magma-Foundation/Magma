@@ -6,12 +6,7 @@ import magmac.api.head.HeadedIter;
 import magmac.api.head.RangeHead;
 import magmac.api.head.SingleHead;
 
-import java.util.List;
-
 public final class Iters {
-    public static <T> Iter<T> fromList(List<T> list) {
-        return new HeadedIter<>(new RangeHead(list.size())).map(list::get);
-    }
 
     public static <T> Iter<T> fromArray(T[] array) {
         return new HeadedIter<>(new RangeHead(array.length)).map(index -> array[index]);

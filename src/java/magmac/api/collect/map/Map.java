@@ -3,6 +3,9 @@ package magmac.api.collect.map;
 import magmac.api.Tuple2;
 import magmac.api.iter.Iter;
 
+import java.util.function.Function;
+import java.util.function.Supplier;
+
 public interface Map<K, V> {
     V getOrDefault(K key, V other);
 
@@ -15,4 +18,6 @@ public interface Map<K, V> {
     V get(K key);
 
     boolean isEmpty();
+
+    Map<K, V> mapOrPut(K key, Function<V, V> mapper, Supplier<V> supplier);
 }

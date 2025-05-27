@@ -7,7 +7,6 @@ import magmac.api.iter.collect.Joiner;
 import magmac.api.iter.collect.ListCollector;
 import magmac.api.iter.collect.ResultCollector;
 import magmac.api.iter.Iter;
-import magmac.api.iter.Iters;
 import magmac.app.compile.error.CompileResult;
 import magmac.app.compile.error.InlineCompileResult;
 import magmac.app.compile.error.error.CompileErrors;
@@ -52,7 +51,7 @@ public record DivideRule(String key, Folder folder, Rule childRule) implements R
                     .orElseGet(() -> this.folder.fold(finalCurrent, c));
         }
 
-        return Iters.fromList(current.advance().stream().toList());
+        return current.advance().iter();
     }
 
     private Option<DivideState> foldSingleQuotes(DivideState current, char c) {

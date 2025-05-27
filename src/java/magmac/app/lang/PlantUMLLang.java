@@ -1,5 +1,6 @@
 package magmac.app.lang;
 
+import magmac.api.collect.list.Lists;
 import magmac.app.compile.rule.DivideRule;
 import magmac.app.compile.rule.ExactRule;
 import magmac.app.compile.rule.LocatingRule;
@@ -11,15 +12,13 @@ import magmac.app.compile.rule.SuffixRule;
 import magmac.app.compile.rule.TypeRule;
 import magmac.app.compile.rule.fold.StatementFolder;
 
-import java.util.List;
-
 public final class PlantUMLLang {
     public static Rule createRule() {
         return new DivideRule("children", new StatementFolder(), PlantUMLLang.createRootSegmentRule());
     }
 
     private static SuffixRule createRootSegmentRule() {
-        return new SuffixRule(new OrRule(List.of(
+        return new SuffixRule(new OrRule(Lists.of(
                 CommonLang.createWhitespaceRule(),
                 new TypeRule("start", new ExactRule("@startuml\nskinparam linetype ortho")),
                 new TypeRule("end", new ExactRule("@enduml")),

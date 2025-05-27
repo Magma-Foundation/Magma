@@ -1,17 +1,17 @@
 package magmac.app.error;
 
-import magmac.app.compile.error.error.CompileError;
+import magmac.api.collect.list.List;
+import magmac.api.collect.list.Lists;
+import magmac.api.iter.Iter;
+import magmac.api.iter.collect.Joiner;
+import magmac.api.iter.collect.Max;
 import magmac.app.compile.error.context.Context;
-
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.stream.Collectors;
+import magmac.app.compile.error.error.CompileError;
 
 public record ImmutableCompileError(String message, Context context,
                                     List<CompileError> errors) implements CompileError {
     public ImmutableCompileError(String message, Context context) {
-        this(message, context, new ArrayList<>());
+        this(message, context, Lists.empty());
     }
 
     @Override
@@ -21,22 +21,22 @@ public record ImmutableCompileError(String message, Context context,
 
     @Override
     public String format(int depth) {
-        List<CompileError> copy = new ArrayList<>(this.errors);
-        copy.sort(Comparator.comparingInt(CompileError::computeMaxDepth));
+        List<CompileError> copy = this.errors.sort((first, second) -> first.computeMaxDepth() - second.computeMaxDepth());
 
-        String joined = copy.stream()
+        String joined = copy.iter()
                 .map(compileError -> compileError.format(depth + 1))
                 .map(display -> "\n" + "\t".repeat(depth + 1) + display)
-                .collect(Collectors.joining());
+                .collect(new Joiner())
+                .orElse("");
 
         return this.message + ": " + this.context.display() + joined;
     }
 
     @Override
     public int computeMaxDepth() {
-        return 1 + this.errors.stream()
-                .mapToInt(CompileError::computeMaxDepth)
-                .max()
+        Iter<CompileError> compileErrorIter = this.errors.iter();
+        return 1 + compileErrorIter.map(CompileError::computeMaxDepth)
+                .collect(new Max())
                 .orElse(0);
     }
 }

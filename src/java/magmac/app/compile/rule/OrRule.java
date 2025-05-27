@@ -1,12 +1,14 @@
 package magmac.app.compile.rule;
 
+import magmac.api.iter.Iter;
 import magmac.app.compile.error.CompileResult;
 import magmac.app.compile.error.context.Context;
 import magmac.app.compile.error.context.NodeContext;
 import magmac.app.compile.error.context.StringContext;
 import magmac.app.compile.node.Node;
 
-import java.util.List;
+import magmac.api.collect.list.List;
+
 import java.util.function.Function;
 
 public record OrRule(List<Rule> rules) implements Rule {
@@ -15,9 +17,9 @@ public record OrRule(List<Rule> rules) implements Rule {
     }
 
     private <T> CompileResult<T> foldAll(Function<Rule, CompileResult<T>> mapper, Context context) {
-        return this.rules.stream().reduce(new OrState<T>(),
-                        (state, rule) -> OrRule.foldElement(state, rule, mapper),
-                        (_, next) -> next)
+        Iter<Rule> ruleIter = this.rules.iter();
+        OrState<T> initial = new OrState<T>();
+        return ruleIter.fold(initial, (state, rule) -> OrRule.foldElement(state, rule, mapper))
                 .toResult(context);
     }
 

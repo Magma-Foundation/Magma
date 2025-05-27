@@ -1,5 +1,6 @@
 package magmac.app.lang;
 
+import magmac.api.collect.list.Lists;
 import magmac.app.compile.rule.DivideRule;
 import magmac.app.compile.rule.ExactRule;
 import magmac.app.compile.rule.LocatingRule;
@@ -10,11 +11,9 @@ import magmac.app.compile.rule.StringRule;
 import magmac.app.compile.rule.SuffixRule;
 import magmac.app.compile.rule.TypeRule;
 
-import java.util.List;
-
 public final class TypescriptRoots {
     public static Rule createRule() {
-        return new TypeRule("root", DivideRule.Statements("children", new OrRule(List.of(
+        return new TypeRule("root", DivideRule.Statements("children", new OrRule(Lists.of(
                 CommonLang.createWhitespaceRule(),
                 new TypeRule("import", new ExactRule("import { ? } from ?;\n")),
                 TypescriptRoots.createClassRule(),
@@ -30,7 +29,7 @@ public final class TypescriptRoots {
     }
 
     private static Rule createStructureMemberRule() {
-        return new OrRule(List.of(
+        return new OrRule(Lists.of(
                 CommonLang.createWhitespaceRule(),
                 new TypeRule("method", new ExactRule("\n\ttemp(){\n\t}")),
                 new TypeRule("definition-statement", new ExactRule("\n\ttemp : ?;")),

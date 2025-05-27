@@ -3,14 +3,14 @@ package magmac.app.compile.rule.divide;
 import magmac.api.Tuple2;
 
 import magmac.api.Option;
-import java.util.stream.Stream;
+import magmac.api.iter.Iter;
 
 public interface DivideState {
     DivideState append(char c);
 
     DivideState advance();
 
-    Stream<String> stream();
+    Iter<String> iter();
 
     boolean isLevel();
 

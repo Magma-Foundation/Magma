@@ -1,10 +1,8 @@
 package magmac.app.compile.node;
 
+import magmac.api.collect.list.List;
+import magmac.api.collect.list.Lists;
 import magmac.api.iter.Iter;
-import magmac.api.iter.Iters;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public final class InlineNodeList implements NodeList {
     private final List<Node> elements;
@@ -14,12 +12,12 @@ public final class InlineNodeList implements NodeList {
     }
 
     public static NodeList empty() {
-        return new InlineNodeList(new ArrayList<>());
+        return new InlineNodeList(Lists.empty());
     }
 
     @Override
     public Iter<Node> iter() {
-        return Iters.fromList(this.elements);
+        return this.elements.iter();
     }
 
     @Override
@@ -29,9 +27,7 @@ public final class InlineNodeList implements NodeList {
 
     @Override
     public NodeList add(Node element) {
-        ArrayList<Node> copy = new ArrayList<>(this.elements);
-        copy.add(element);
-        return new InlineNodeList(copy);
+        return new InlineNodeList(this.elements.add(element));
     }
 
     @Override

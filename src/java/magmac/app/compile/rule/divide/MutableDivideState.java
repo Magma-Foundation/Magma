@@ -1,16 +1,15 @@
 package magmac.app.compile.rule.divide;
 
 import magmac.api.None;
+import magmac.api.Option;
 import magmac.api.Some;
 import magmac.api.Tuple2;
-
-import java.util.ArrayList;
-import java.util.List;
-import magmac.api.Option;
-import java.util.stream.Stream;
+import magmac.api.collect.list.List;
+import magmac.api.collect.list.Lists;
+import magmac.api.iter.Iter;
 
 public class MutableDivideState implements DivideState {
-    private final List<String> segments;
+    private List<String> segments;
     private final String input;
     private StringBuilder buffer;
     private int depth;
@@ -24,7 +23,7 @@ public class MutableDivideState implements DivideState {
     }
 
     public MutableDivideState(String input) {
-        this(new ArrayList<>(), new StringBuilder(), input);
+        this(Lists.empty(), new StringBuilder(), input);
     }
 
     @Override
@@ -35,14 +34,14 @@ public class MutableDivideState implements DivideState {
 
     @Override
     public DivideState advance() {
-        this.segments.add(this.buffer.toString());
+        this.segments = this.segments.add(this.buffer.toString());
         this.buffer = new StringBuilder();
         return this;
     }
 
     @Override
-    public Stream<String> stream() {
-        return this.segments.stream();
+    public Iter<String> iter() {
+        return this.segments.iter();
     }
 
     @Override

@@ -1,9 +1,9 @@
 package magmac.api.iter;
 
+import magmac.api.Option;
 import magmac.api.iter.collect.Collector;
 import magmac.api.result.Result;
 
-import magmac.api.Option;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;

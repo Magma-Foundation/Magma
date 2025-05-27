@@ -4,20 +4,20 @@ import magmac.api.None;
 import magmac.api.Option;
 import magmac.api.Some;
 import magmac.api.Tuple2;
-import magmac.api.iter.collect.Joiner;
 import magmac.api.collect.map.Map;
 import magmac.api.collect.map.Maps;
 import magmac.api.iter.Iter;
 import magmac.api.iter.Iters;
+import magmac.api.iter.collect.Joiner;
 
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
 public final class MapNode implements Node {
     private final Option<String> maybeType;
-    private final Map<String, String> strings;
-    private final Map<String, Node> nodes;
-    private final Map<String, NodeList> nodeLists;
+    private Map<String, NodeList> nodeLists;
+    private Map<String, Node> nodes;
+    private Map<String, String> strings;
 
     public MapNode() {
         this(new None<String>(), Maps.empty(), Maps.empty(), Maps.empty());
@@ -105,7 +105,7 @@ public final class MapNode implements Node {
 
     @Override
     public Node withString(String key, String value) {
-        this.strings.put(key, value);
+        this.strings = this.strings.put(key, value);
         return this;
     }
 
@@ -135,7 +135,7 @@ public final class MapNode implements Node {
 
     @Override
     public Node withNode(String key, Node value) {
-        this.nodes.put(key, value);
+        this.nodes = this.nodes.put(key, value);
         return this;
     }
 
@@ -168,7 +168,7 @@ public final class MapNode implements Node {
 
     @Override
     public Node withNodeList(String key, NodeList values) {
-        this.nodeLists.put(key, values);
+        this.nodeLists = this.nodeLists.put(key, values);
         return this;
     }
 

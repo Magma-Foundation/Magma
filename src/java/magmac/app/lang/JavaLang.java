@@ -1,5 +1,6 @@
 package magmac.app.lang;
 
+import magmac.api.collect.list.Lists;
 import magmac.app.compile.rule.ContextRule;
 import magmac.app.compile.rule.DivideRule;
 import magmac.app.compile.rule.LocatingRule;
@@ -14,11 +15,9 @@ import magmac.app.compile.rule.FilterRule;
 import magmac.app.compile.rule.TypeRule;
 import magmac.app.compile.rule.fold.DelimitedFolder;
 
-import java.util.List;
-
 public final class JavaLang {
     public static Rule createRule() {
-        return new TypeRule("root", DivideRule.Statements("children", new OrRule(List.of(
+        return new TypeRule("root", DivideRule.Statements("children", new OrRule(Lists.of(
                 CommonLang.createWhitespaceRule(),
                 JavaLang.createRule("package", "package "),
                 JavaLang.createRule("import", "import "),
@@ -31,22 +30,22 @@ public final class JavaLang {
 
     private static Rule createStructureRule(String keyword) {
         Rule name = new StripRule(FilterRule.Symbol(new StringRule("name")));
-        Rule beforeContent = new OrRule(List.of(
+        Rule beforeContent = new OrRule(Lists.of(
                 new StripRule(new SuffixRule(LocatingRule.First(name, "<", new StringRule("type-params")), ">")),
                 name
         ));
 
-        Rule withParameters = new OrRule(List.of(
+        Rule withParameters = new OrRule(Lists.of(
                 new StripRule(new SuffixRule(LocatingRule.First(beforeContent, "(", new StringRule("parameters")), ")")),
                 beforeContent
         ));
 
-        Rule withEnds = new OrRule(List.of(
+        Rule withEnds = new OrRule(Lists.of(
                 LocatingRule.First(withParameters, " extends ", new NodeRule("extended", JavaLang.createTypeRule())),
                 withParameters
         ));
 
-        Rule withImplements = new OrRule(List.of(
+        Rule withImplements = new OrRule(Lists.of(
                 new ContextRule("With implements", LocatingRule.First(withEnds, " implements ", new NodeRule("implemented", JavaLang.createTypeRule()))),
                 new ContextRule("Without implements", withEnds)
         ));
@@ -56,7 +55,7 @@ public final class JavaLang {
     }
 
     private static OrRule createStructureMemberRule() {
-        return new OrRule(List.of(
+        return new OrRule(Lists.of(
                 CommonLang.createWhitespaceRule(),
                 JavaLang.createStatementRule(),
                 JavaLang.createMethodRule()
@@ -64,7 +63,7 @@ public final class JavaLang {
     }
 
     private static Rule createStatementRule() {
-        Rule definition = new OrRule(List.of(
+        Rule definition = new OrRule(Lists.of(
                 new NodeRule("value", new TypeRule("definition", JavaLang.createDefinitionRule())),
                 JavaLang.createAssignmentRule())
         );
@@ -79,13 +78,13 @@ public final class JavaLang {
     }
 
     private static Rule createValueRule() {
-        return new OrRule(List.of(
+        return new OrRule(Lists.of(
                 new StripRule(FilterRule.Number(new StringRule("value")))
         ));
     }
 
     private static Rule createMethodRule() {
-        return new TypeRule("method", LocatingRule.First(new NodeRule("header", new OrRule(List.of(
+        return new TypeRule("method", LocatingRule.First(new NodeRule("header", new OrRule(Lists.of(
                 JavaLang.createDefinitionRule(),
                 new StringRule("name")
         ))), "(", new StringRule("with-params")));
@@ -97,7 +96,7 @@ public final class JavaLang {
     }
 
     private static OrRule createTypeRule() {
-        return new OrRule(List.of(
+        return new OrRule(Lists.of(
                 JavaLang.createTemplateRule(),
                 JavaLang.createSymbolTypeRule(),
                 new StringRule("placeholder")
