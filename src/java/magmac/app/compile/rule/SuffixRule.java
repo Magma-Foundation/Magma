@@ -10,7 +10,7 @@ public record SuffixRule(Rule childRule, String suffix) implements Rule {
     @Override
     public Result<Node, CompileError> lex(String input) {
         if (!input.endsWith(this.suffix())) {
-            return new Err<>(new CompileError("Suffix '" + suffix + "' not present", new StringContext(suffix)));
+            return new Err<>(new CompileError("Suffix '" + suffix + "' not present", new StringContext(input)));
         }
 
         String slice = input.substring(0, input.length() - this.suffix.length());

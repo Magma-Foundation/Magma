@@ -26,7 +26,11 @@ public final class JavaRoots {
     }
 
     private static Rule createStructureRule(String keyword) {
-        Rule beforeContent = new SymbolRule(new StringRule("name"));
+        Rule name = new StripRule(new SymbolRule(new StringRule("name")));
+        Rule beforeContent = new OrRule(List.of(
+                new StripRule(new SuffixRule(new InfixRule(name, "<", new StringRule("type-params")), ">")),
+                name
+        ));
 
         Rule withParameters = new OrRule(List.of(
                 new StripRule(new SuffixRule(new InfixRule(beforeContent, "(", new StringRule("parameters")), ")")),

@@ -7,6 +7,18 @@ import magmac.app.compile.rule.result.StringContext;
 import magmac.app.error.CompileError;
 
 public record SymbolRule(Rule childRule) implements Rule {
+    private static boolean isSymbol(String input) {
+        int length = input.length();
+        for (int i = 0; i < length; i++) {
+            char c = input.charAt(i);
+            if (Character.isLetter(c) || (0 != i && Character.isDigit(c))) {
+                continue;
+            }
+            return false;
+        }
+        return true;
+    }
+
     @Override
     public Result<Node, CompileError> lex(String input) {
         if (SymbolRule.isSymbol(input)) {
@@ -15,18 +27,6 @@ public record SymbolRule(Rule childRule) implements Rule {
         else {
             return new Err<>(new CompileError("Not a symbol", new StringContext(input)));
         }
-    }
-
-    private static boolean isSymbol(String input) {
-        int length = input.length();
-        for (int i = 0; i < length; i++) {
-            char c = input.charAt(i);
-            if (Character.isLetter(c)) {
-                continue;
-            }
-            return false;
-        }
-        return true;
     }
 
     @Override
