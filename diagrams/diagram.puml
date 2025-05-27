@@ -186,6 +186,7 @@ DivideRule --> MapNode
 DivideRule --> DivideState
 DivideRule --> MutableDivideState
 DivideRule --> Folder
+DivideRule --> StatementFolder
 DivideRule --> List
 DivideRule --> Optional
 ListCollector --> ArrayList
@@ -202,6 +203,7 @@ ResultCollector --> Ok
 ResultCollector --> Result
 AfterPasser --> MapNode
 AfterPasser --> ArrayList
+AfterPasser --> Collections
 AfterPasser --> List
 AfterPasser --> Stream
 PrefixRule --> Err
@@ -260,6 +262,11 @@ TreeParser --> List
 TreeParser --> Map
 MapRoots --> Iters
 MapRoots --> Map
+TypescriptRoots --> DivideRule
+TypescriptRoots --> OrRule
+TypescriptRoots --> Rule
+TypescriptRoots --> TypeRule
+TypescriptRoots --> List
 Rule --> Result
 Rule --> CompileError
 Rule --> Node
@@ -341,8 +348,8 @@ JavaRoots --> SuffixRule
 JavaRoots --> SymbolRule
 JavaRoots --> TypeRule
 JavaRoots --> DelimitedFolder
-JavaRoots --> StatementFolder
 JavaRoots --> List
+TargetPlatform --> Rule
 TargetPlatform --> PathTargets
 TargetPlatform --> Targets
 TargetPlatform --> AfterAll
@@ -403,6 +410,7 @@ SuffixRule --> ImmutableCompileError
 SymbolRule --> Err
 SymbolRule --> StringContext
 SymbolRule --> ImmutableCompileError
+Main --> Tuple2
 Main --> Iters
 Main --> Application
 Main --> CompileApplication
@@ -410,18 +418,20 @@ Main --> Config
 Main --> Error
 Main --> Compiler
 Main --> StagedCompiler
+Main --> Node
 Main --> Rule
 Main --> PathSources
 Main --> Sources
 Main --> Targets
 Main --> AfterPasser
 Main --> JavaToPlantUML
-Main --> PlantUMLRoots
 Main --> TargetPlatform
 Main --> AfterAll
+Main --> Passer
 Main --> Generator
 Main --> RuleGenerator
 Main --> Lexer
+Main --> ParseState
 Main --> Parser
 Main --> TreeParser
 Main --> Paths

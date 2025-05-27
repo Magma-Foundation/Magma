@@ -23,20 +23,6 @@ public class JavaToPlantUML implements Passer {
             return Optional.of(new Tuple2<>(state, node.withNodeList("children", newChildren)));
         }
 
-        if (node.is("import")) {
-            String child = node.findNodeList("segments")
-                    .orElse(Collections.emptyList())
-                    .getLast()
-                    .findString("value")
-                    .orElse("");
-
-            Node dependency = new MapNode("dependency")
-                    .withString("parent", state.findLocation().name())
-                    .withString("child", child);
-
-            return Optional.of(new Tuple2<ParseState, Node>(state, dependency));
-        }
-
         if(node.is("record")) {
             return Optional.of(new Tuple2<>(state, node.retype("class")));
         }

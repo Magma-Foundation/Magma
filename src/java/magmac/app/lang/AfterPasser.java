@@ -7,6 +7,7 @@ import magmac.app.stage.Passer;
 import magmac.app.stage.parse.ParseState;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -35,16 +36,30 @@ public class AfterPasser implements Passer {
         if (node.is("root")) {
             List<Node> children = node.findNodeList("children").orElse(new ArrayList<>())
                     .stream()
-                    .flatMap(child -> this.expandInherits(child))
+                    .flatMap(child -> AfterPasser.expandInherits(child))
                     .toList();
 
             return Optional.of(new Tuple2<>(state, node.withNodeList("children", children)));
         }
 
+        if (node.is("import")) {
+            String child = node.findNodeList("segments")
+                    .orElse(Collections.emptyList())
+                    .getLast()
+                    .findString("value")
+                    .orElse("");
+
+            Node dependency = new MapNode("dependency")
+                    .withString("parent", state.findLocation().name())
+                    .withString("child", child);
+
+            return Optional.of(new Tuple2<ParseState, Node>(state, dependency));
+        }
+
         return Optional.empty();
     }
 
-    private Stream<Node> expandInherits(Node child) {
+    private static Stream<Node> expandInherits(Node child) {
         Stream<Node> maybeExtends = AfterPasser.createInherits(child, "extended").stream();
         Stream<Node> maybeImplemented = AfterPasser.createInherits(child, "implemented").stream();
         return Stream.concat(Stream.of(child), Stream.concat(maybeExtends, maybeImplemented));

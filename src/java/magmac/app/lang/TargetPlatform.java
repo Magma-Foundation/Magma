@@ -1,5 +1,6 @@
 package magmac.app.lang;
 
+import magmac.app.compile.rule.Rule;
 import magmac.app.io.targets.PathTargets;
 import magmac.app.io.targets.Targets;
 import magmac.app.stage.AfterAll;
@@ -11,6 +12,13 @@ import java.nio.file.Paths;
 public enum TargetPlatform {
     PlantUML,
     TypeScript;
+
+    public Rule createRule() {
+        return switch (this) {
+            case PlantUML -> PlantUMLRoots.createRule();
+            case TypeScript -> TypescriptRoots.createRule();
+        };
+    }
 
     public Targets createTargets() {
         Path targetPath = this.createTargetPath();
