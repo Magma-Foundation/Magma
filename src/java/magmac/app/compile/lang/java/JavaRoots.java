@@ -5,9 +5,9 @@ import magmac.app.compile.rule.DivideRule;
 import magmac.app.compile.rule.InfixRule;
 import magmac.app.compile.rule.OrRule;
 import magmac.app.compile.rule.Rule;
-import magmac.app.compile.rule.fold.StatementFolder;
 import magmac.app.compile.rule.StringRule;
 import magmac.app.compile.rule.TypeRule;
+import magmac.app.compile.rule.fold.StatementFolder;
 
 import java.util.List;
 
@@ -16,14 +16,14 @@ public final class JavaRoots {
         return new TypeRule("root", new DivideRule("children", new StatementFolder(), new OrRule(List.of(
                 Namespaced.createRule("package", "package "),
                 Namespaced.createRule("import", "import "),
-                JavaRoots.createStructureRule("record "),
-                JavaRoots.createStructureRule("interface "),
-                JavaRoots.createStructureRule("class ")
+                JavaRoots.createStructureRule("record"),
+                JavaRoots.createStructureRule("interface"),
+                JavaRoots.createStructureRule("class")
         ))));
     }
 
     private static Rule createStructureRule(String keyword) {
         Rule afterKeyword = new InfixRule(new StringRule("before-content"), "{", new StringRule("after-content"));
-        return new InfixRule(new StringRule("before-keyword"), keyword, afterKeyword);
+        return new TypeRule(keyword, new InfixRule(new StringRule("before-keyword"), keyword + " ", afterKeyword));
     }
 }
