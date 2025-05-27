@@ -140,7 +140,6 @@ Passer --> Node
 Passer --> ParseState
 Passer --> Optional
 Result --> Tuple2
-Result --> Optional
 Result --> Function
 Result --> Supplier
 Namespaced --> DelimitedFolder

@@ -2,7 +2,6 @@ package magmac.api.result;
 
 import magmac.api.Tuple2;
 
-import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -25,11 +24,6 @@ public record Err<T, X>(X error) implements Result<T, X> {
     @Override
     public <R> Result<R, X> flatMapValue(Function<T, Result<R, X>> mapper) {
         return new Err<>(this.error);
-    }
-
-    @Override
-    public Optional<T> findValue() {
-        return Optional.empty();
     }
 
     @Override

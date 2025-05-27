@@ -2,7 +2,6 @@ package magmac.api.result;
 
 import magmac.api.Tuple2;
 
-import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -14,8 +13,6 @@ public interface Result<T, X> {
     <R> R match(Function<T, R> whenOk, Function<X, R> whenErr);
 
     <R> Result<R, X> flatMapValue(Function<T, Result<R, X>> mapper);
-
-    Optional<T> findValue();
 
     <R> Result<T, R> mapErr(Function<X, R> mapper);
 }
