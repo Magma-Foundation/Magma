@@ -3,10 +3,10 @@ package magmac.app.compile.rule;
 import magmac.api.result.Err;
 import magmac.api.result.Ok;
 import magmac.api.result.Result;
-import magmac.app.error.CompileError;
 import magmac.app.compile.Context;
 import magmac.app.compile.node.Node;
 import magmac.app.compile.rule.result.StringContext;
+import magmac.app.error.CompileError;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,7 +29,7 @@ public record OrRule(List<Rule> rules) implements Rule {
         Result<T, CompileError> toResult(Context context) {
             return this.maybeValue
                     .<Result<T, CompileError>>map(value -> new Ok<>(value))
-                    .orElseGet(() -> new Err<>(new CompileError("Value not present", context, errors)));
+                    .orElseGet(() -> new Err<>(new CompileError("Invalid combination", context, this.errors)));
         }
 
         public State<T> withError(CompileError error) {

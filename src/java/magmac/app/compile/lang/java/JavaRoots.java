@@ -27,17 +27,18 @@ public final class JavaRoots {
 
     private static Rule createStructureRule(String keyword) {
         Rule beforeContent = new SymbolRule(new StringRule("name"));
-        Rule withImplements = new OrRule(List.of(
-                new InfixRule(beforeContent, " implements ", new StringRule("implemented")),
-                beforeContent
-        ));
 
         Rule withParameters = new OrRule(List.of(
                 new StripRule(new SuffixRule(new InfixRule(beforeContent, "(", new StringRule("parameters")), ")")),
-                withImplements
+                beforeContent
         ));
 
-        Rule afterKeyword = new InfixRule(withParameters, "{", new StringRule("after-content"));
+        Rule withImplements = new OrRule(List.of(
+                new InfixRule(withParameters, " implements ", new StringRule("implemented")),
+                withParameters
+        ));
+
+        Rule afterKeyword = new InfixRule(withImplements, "{", new StringRule("after-content"));
         return new TypeRule(keyword, new InfixRule(new StringRule("before-keyword"), keyword + " ", afterKeyword));
     }
 }
