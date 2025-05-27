@@ -1,5 +1,6 @@
 package magmac.app.stage;
 
+import magmac.api.collect.Iters;
 import magmac.app.compile.node.MapNode;
 import magmac.app.compile.node.Node;
 import magmac.app.io.Location;
@@ -7,6 +8,7 @@ import magmac.app.io.Location;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -21,13 +23,61 @@ public class CreateDiagram implements All {
                 .flatMap(Collection::stream)
                 .toList();
 
+        Map<String, List<String>> inheritances = Iters.fromList(allChildren).fold(new HashMap<String, List<String>>(), (current1, node1) -> {
+            if (node1.is("inherits")) {
+                String parent1 = node1.findString("parent").orElse("");
+                String child1 = node1.findString("child").orElse("");
+
+                if (!current1.containsKey(child1)) {
+                    current1.put(child1, new ArrayList<>());
+                }
+
+                current1.get(child1).add(parent1);
+            }
+            return current1;
+        });
+
+        Map<String, List<String>> dependencies = Iters.fromList(allChildren).fold(new HashMap<String, List<String>>(), (current, node) -> {
+            if (node.is("dependency")) {
+                String parent = node.findString("parent").orElse("");
+                String child = node.findString("child").orElse("");
+
+                if (!current.containsKey(parent)) {
+                    current.put(parent, new ArrayList<>());
+                }
+
+                current.get(parent).add(child);
+            }
+            return current;
+        });
+
+        List<Node> newDependencies = Iters.fromMap(dependencies).fold(new ArrayList<Node>(), (current, entry) -> {
+            String parent = entry.left();
+            List<String> currentDependencies = entry.right();
+
+            List<String> parentDependencies = this.findParentDependencies(parent);
+            List<String> list = new ArrayList<>(currentDependencies);
+            list.removeAll(parentDependencies);
+
+            list.forEach(child -> current.add(new MapNode("dependency").withString("parent", parent).withString("child", child)));
+            return current;
+        });
+
         List<Node> copy = new ArrayList<Node>();
         copy.add(new MapNode("start"));
-        copy.addAll(allChildren);
+        copy.addAll(allChildren.stream()
+                .filter(child -> !child.is("dependency"))
+                .toList());
+
+        copy.addAll(newDependencies);
         copy.add(new MapNode("end"));
 
         Node root = new MapNode().withNodeList("children", copy);
         Location location = new Location(Collections.emptyList(), "diagram");
         return Map.of(location, root);
+    }
+
+    private List<String> findParentDependencies(String child) {
+        return Collections.emptyList();
     }
 }
