@@ -5,6 +5,8 @@ Collector <|-- ListCollector
 class RangeHead
 Head <|-- RangeHead
 interface Source
+class TypeScriptTargetPlatform
+TargetPlatform <|-- TypeScriptTargetPlatform
 class Config
 interface Roots
 interface Targets
@@ -80,8 +82,6 @@ class StringContext
 Context <|-- StringContext
 class TypeRule
 Rule <|-- TypeRule
-class TSTargetPlatform
-TargetPlatform <|-- TSTargetPlatform
 class InlineNodeList
 NodeList <|-- InlineNodeList
 class OrState
@@ -211,10 +211,6 @@ Iter --> Optional
 Iter --> BiFunction
 Iter --> Function
 Iter --> Predicate
-TSTargetPlatform --> TypeScriptPasser
-TSTargetPlatform --> TypescriptRoots
-TSTargetPlatform --> EmptyAfterAll
-TSTargetPlatform --> Paths
 ResultCollector --> Ok
 ResultCollector --> Result
 AfterPasser --> ListCollector
@@ -375,6 +371,10 @@ AfterAll --> Map
 MapCollector --> Tuple2
 MapCollector --> HashMap
 MapCollector --> Map
+TypeScriptTargetPlatform --> TypeScriptPasser
+TypeScriptTargetPlatform --> TypescriptRoots
+TypeScriptTargetPlatform --> EmptyAfterAll
+TypeScriptTargetPlatform --> Paths
 Joiner --> Optional
 ImmutableCompileError --> Context
 ImmutableCompileError --> ArrayList
@@ -431,7 +431,7 @@ Main --> Error
 Main --> Compiler
 Main --> StagedCompiler
 Main --> PlantUMLTargetPlatform
-Main --> TSTargetPlatform
+Main --> TypeScriptTargetPlatform
 Main --> TargetPlatform
 Main --> PathSources
 Main --> Sources
