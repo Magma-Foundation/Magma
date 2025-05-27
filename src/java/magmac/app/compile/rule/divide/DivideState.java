@@ -14,4 +14,6 @@ public interface DivideState {
     DivideState enter();
 
     DivideState exit();
+
+    boolean isShallow();
 }

@@ -29,7 +29,6 @@ public class TypescriptRoots {
 
     private static Rule createStructureMemberRule() {
         return new OrRule(List.of(
-                new ExactRule("")
         ));
     }
 }

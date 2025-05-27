@@ -5,6 +5,7 @@ import magmac.app.compile.error.CompileError;
 import magmac.app.compile.error.CompileErrors;
 import magmac.app.compile.node.Node;
 import magmac.app.compile.rule.locate.FirstLocator;
+import magmac.app.compile.rule.locate.LastLocator;
 import magmac.app.compile.rule.locate.Locator;
 
 import java.util.Optional;
@@ -24,6 +25,10 @@ public final class LocatingRule implements Rule {
 
     public static Rule First(Rule leftRule, String infix, Rule rightRule) {
         return new LocatingRule(leftRule, infix, rightRule, new FirstLocator());
+    }
+
+    public static Rule Last(Rule leftRule, String infix, Rule rightRule) {
+        return new LocatingRule(leftRule, infix, rightRule, new LastLocator());
     }
 
     @Override

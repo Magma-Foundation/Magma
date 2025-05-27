@@ -20,6 +20,7 @@ import java.util.List;
 public final class JavaRoots {
     public static Rule createRule() {
         return new TypeRule("root", DivideRule.Statements("children", new OrRule(List.of(
+                new StripRule(new ExactRule("")),
                 JavaRoots.createRule("package", "package "),
                 JavaRoots.createRule("import", "import "),
                 JavaRoots.createStructureRule("record"),
@@ -72,7 +73,7 @@ public final class JavaRoots {
     }
 
     private static Rule createDefinitionRule() {
-        return new StringRule("definition");
+        return new StripRule(LocatingRule.Last(new StringRule("before-name"), " ", new StringRule("name")));
     }
 
     private static OrRule createTypeRule() {

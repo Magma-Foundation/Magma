@@ -53,4 +53,9 @@ public class MutableDivideState implements DivideState {
         this.depth--;
         return this;
     }
+
+    @Override
+    public boolean isShallow() {
+        return 1 == depth;
+    }
 }
