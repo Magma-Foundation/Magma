@@ -29,7 +29,7 @@ public class TreeParser implements Parser {
     }
 
     private Tuple2<ParseState, Node> parseNodeLists(ParseState state, Node root) {
-        return root.iterNodeLists().map(tuple -> new Tuple2<>(tuple.left(), tuple.right().elements())).fold(new Tuple2<>(state, root), (current, entry) -> this.parseNodeList(current, entry));
+        return root.iterNodeLists().fold(new Tuple2<>(state, root), (current, entry) -> this.parseNodeList(current, entry));
     }
 
     private Tuple2<ParseState, Node> parseNodeList(Tuple2<ParseState, Node> current, Tuple2<String, List<Node>> entry) {
