@@ -58,13 +58,30 @@ public final class JavaLang {
     private static OrRule createStructureMemberRule() {
         return new OrRule(List.of(
                 CommonLang.createWhitespaceRule(),
-                JavaLang.createDefinitionStatementRule(),
+                JavaLang.createStatementRule(),
                 JavaLang.createMethodRule()
         ));
     }
 
-    private static Rule createDefinitionStatementRule() {
-        return new TypeRule("definition-statement", new StripRule(new SuffixRule(new NodeRule("definition", JavaLang.createDefinitionRule()), ";")));
+    private static Rule createStatementRule() {
+        Rule definition = new OrRule(List.of(
+                new NodeRule("value", new TypeRule("definition", JavaLang.createDefinitionRule())),
+                JavaLang.createAssignmentRule())
+        );
+
+        return new TypeRule("statement", new StripRule(new SuffixRule(definition, ";")));
+    }
+
+    private static Rule createAssignmentRule() {
+        Rule definition = new NodeRule("definition", JavaLang.createDefinitionRule());
+        Rule value = new NodeRule("value", JavaLang.createValueRule());
+        return new TypeRule("assignment", LocatingRule.First(definition, "=", value));
+    }
+
+    private static Rule createValueRule() {
+        return new OrRule(List.of(
+                new StripRule(new SymbolRule(new StringRule("value")))
+        ));
     }
 
     private static Rule createMethodRule() {
