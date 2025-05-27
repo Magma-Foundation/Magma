@@ -20,4 +20,6 @@ public interface Iter<T> {
     Iter<T> filter(Predicate<T> predicate);
 
     Optional<T> next();
+
+    <R> Iter<R> flatMap(Function<T, Iter<R>> mapper);
 }

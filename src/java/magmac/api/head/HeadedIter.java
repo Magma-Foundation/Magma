@@ -55,7 +55,8 @@ public record HeadedIter<T>(Head<T> head) implements Iter<T> {
         return this.head.next();
     }
 
-    private <R> Iter<R> flatMap(Function<T, Iter<R>> mapper) {
+    @Override
+    public <R> Iter<R> flatMap(Function<T, Iter<R>> mapper) {
         return new HeadedIter<>(this.head.next()
                 .map(mapper)
                 .<Head<R>>map(initial -> new FlatMapHead<>(this.head, mapper, initial))

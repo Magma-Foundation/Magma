@@ -2,8 +2,8 @@ package magmac.app;
 
 import magmac.app.compile.Compiler;
 import magmac.app.compile.StagedCompiler;
+import magmac.app.compile.rule.Rule;
 import magmac.app.lang.JavaRoots;
-import magmac.app.lang.PlantUMLRoots;
 import magmac.app.lang.AfterPasser;
 import magmac.app.lang.CreateDiagram;
 import magmac.app.stage.generate.Generator;
@@ -15,22 +15,18 @@ import magmac.app.stage.lexer.RuleLexer;
 import magmac.app.stage.parse.TreeParser;
 
 public final class Config {
-    public static Compiler createCompiler() {
+    public static Compiler createCompiler(Rule rootRule) {
         Lexer lexer = Config.createLexer();
         Parser parser = Config.createParser();
-        Generator generator = Config.createGenerator();
+        Generator generator = new RuleGenerator(rootRule);
         return new StagedCompiler(lexer, parser, generator);
     }
 
-    private static Generator createGenerator() {
-        return new RuleGenerator(PlantUMLRoots.createRule());
-    }
-
-    private static Lexer createLexer() {
+    public static Lexer createLexer() {
         return new RuleLexer(JavaRoots.createRule());
     }
 
-    private static Parser createParser() {
+    public static Parser createParser() {
         return new TreeParser(new JavaToPlantUML(), new AfterPasser(), new CreateDiagram());
     }
 }

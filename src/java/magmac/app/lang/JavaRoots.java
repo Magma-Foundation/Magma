@@ -24,7 +24,8 @@ public final class JavaRoots {
                 JavaRoots.createRule("import", "import "),
                 JavaRoots.createStructureRule("record"),
                 JavaRoots.createStructureRule("interface"),
-                JavaRoots.createStructureRule("class")
+                JavaRoots.createStructureRule("class"),
+                JavaRoots.createStructureRule("enum")
         ))));
     }
 
