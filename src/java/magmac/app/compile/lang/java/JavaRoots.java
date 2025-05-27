@@ -23,7 +23,13 @@ public final class JavaRoots {
     }
 
     private static Rule createStructureRule(String keyword) {
-        Rule afterKeyword = new InfixRule(new StringRule("before-content"), "{", new StringRule("after-content"));
+        Rule beforeContent = new StringRule("before-content");
+        Rule leftRule = new OrRule(List.of(
+                new InfixRule(beforeContent, " implements ", new StringRule("implemeted")),
+                beforeContent
+        ));
+
+        Rule afterKeyword = new InfixRule(leftRule, "{", new StringRule("after-content"));
         return new TypeRule(keyword, new InfixRule(new StringRule("before-keyword"), keyword + " ", afterKeyword));
     }
 }
