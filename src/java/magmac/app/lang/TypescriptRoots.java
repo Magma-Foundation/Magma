@@ -11,10 +11,10 @@ import java.util.List;
 public class TypescriptRoots {
     public static Rule createRule() {
         return new TypeRule("root", DivideRule.Statements("children", new OrRule(List.of(
-                new TypeRule("import", new ExactRule("")),
-                new TypeRule("class", new ExactRule("")),
-                new TypeRule("interface", new ExactRule("")),
-                new TypeRule("enum", new ExactRule(""))
+                new TypeRule("import", new ExactRule("import { ? } from ?;\n")),
+                new TypeRule("class", new ExactRule("class ? {\n}\n")),
+                new TypeRule("interface", new ExactRule("interface ? {\n}\n")),
+                new TypeRule("enum", new ExactRule("enum ? {\n}\n"))
         ))));
     }
 }
