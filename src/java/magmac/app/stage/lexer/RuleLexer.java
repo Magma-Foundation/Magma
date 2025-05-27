@@ -9,6 +9,7 @@ import magmac.app.compile.error.CompileError;
 import magmac.app.compile.node.Node;
 import magmac.app.compile.rule.Rule;
 import magmac.app.io.Location;
+import magmac.app.stage.MapRoots;
 import magmac.app.stage.Roots;
 
 import java.util.Map;
@@ -34,6 +35,6 @@ public class RuleLexer implements Lexer {
         return Iters.fromMap(values)
                 .map(entry -> this.foldEntry(entry))
                 .collect(new ResultCollector<>(new MapCollector<>()))
-                .mapValue(Roots::new);
+                .mapValue(MapRoots::new);
     }
 }

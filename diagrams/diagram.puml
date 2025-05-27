@@ -4,7 +4,7 @@ class RangeHead
 Head <|-- RangeHead
 interface Source
 class Config
-class Roots
+interface Roots
 interface Targets
 class FlatMapHead
 Head <|-- FlatMapHead
@@ -44,6 +44,8 @@ Sources <|-- PathSources
 class ResultCollector
 Collector <|-- ResultCollector
 interface DivideState
+class MapRoots
+Roots <|-- MapRoots
 interface CompileError
 Error <|-- CompileError
 class RuleGenerator
@@ -129,9 +131,10 @@ Iters --> RangeHead
 Iters --> ArrayList
 Iters --> List
 Iters --> Map
+Roots --> Tuple2
+Roots --> Iter
 Roots --> Node
 Roots --> Location
-Roots --> Map
 Node --> Tuple2
 Node --> Iter
 Node --> List
@@ -218,18 +221,21 @@ Lexer --> Location
 Lexer --> Roots
 Lexer --> Map
 TreeParser --> Tuple2
-TreeParser --> Iters
 TreeParser --> MapCollector
+TreeParser --> Iters
 TreeParser --> Ok
 TreeParser --> Result
 TreeParser --> CompileError
 TreeParser --> Node
 TreeParser --> Location
 TreeParser --> AfterAll
+TreeParser --> MapRoots
 TreeParser --> Passer
 TreeParser --> ArrayList
 TreeParser --> List
 TreeParser --> Map
+MapRoots --> Iters
+MapRoots --> Map
 Rule --> Result
 Rule --> CompileError
 Rule --> Node
@@ -238,7 +244,6 @@ JavaToPlantUML --> ArrayList
 JavaToPlantUML --> Collections
 JavaToPlantUML --> List
 RuleGenerator --> Tuple2
-RuleGenerator --> Iters
 RuleGenerator --> MapCollector
 RuleGenerator --> ResultCollector
 RuleGenerator --> Result
@@ -394,6 +399,7 @@ RuleLexer --> Result
 RuleLexer --> CompileError
 RuleLexer --> Node
 RuleLexer --> Rule
+RuleLexer --> MapRoots
 TypeRule --> Err
 TypeRule --> Context
 TypeRule --> NodeContext

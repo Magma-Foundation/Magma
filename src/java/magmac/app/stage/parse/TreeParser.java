@@ -1,14 +1,15 @@
 package magmac.app.stage.parse;
 
 import magmac.api.Tuple2;
-import magmac.api.iter.Iters;
 import magmac.api.collect.MapCollector;
+import magmac.api.iter.Iters;
 import magmac.api.result.Ok;
 import magmac.api.result.Result;
 import magmac.app.compile.error.CompileError;
 import magmac.app.compile.node.Node;
 import magmac.app.io.Location;
 import magmac.app.stage.AfterAll;
+import magmac.app.stage.MapRoots;
 import magmac.app.stage.Passer;
 import magmac.app.stage.Roots;
 
@@ -54,12 +55,6 @@ public class TreeParser implements Parser {
         return new Tuple2<>(newTuple.left(), currentNode.withNodeList(key, newTuple.right()));
     }
 
-    private Map<Location, Node> parseAllRaw(Map<Location, Node> roots) {
-        return Iters.fromMap(roots)
-                .map(tuple -> this.parse(tuple.left(), tuple.right()))
-                .collect(new MapCollector<>());
-    }
-
     private Tuple2<Location, Node> parse(Location location, Node root) {
         ParseState initial = new ImmutableParseState(location);
         Tuple2<ParseState, Node> parsed = this.parseTree(initial, root);
@@ -74,12 +69,12 @@ public class TreeParser implements Parser {
         return this.afterChild.pass(state1, node).orElseGet(() -> new Tuple2<>(state1, node));
     }
 
-    private Map<Location, Node> parseAll0(Map<Location, Node> roots) {
-        return this.afterAllChildren.afterAll(this.parseAllRaw(roots));
-    }
-
     @Override
     public Result<Roots, CompileError> apply(Roots roots) {
-        return new Ok<>(new Roots(this.parseAll0(roots.roots())));
+        Map<Location, Node> parsed = roots.iter()
+                .map(tuple -> this.parse(tuple.left(), tuple.right()))
+                .collect(new MapCollector<>());
+
+        return new Ok<>(new MapRoots(this.afterAllChildren.afterAll(parsed)));
     }
 }

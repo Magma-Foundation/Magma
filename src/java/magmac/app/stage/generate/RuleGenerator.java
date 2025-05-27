@@ -1,7 +1,6 @@
 package magmac.app.stage.generate;
 
 import magmac.api.Tuple2;
-import magmac.api.iter.Iters;
 import magmac.api.collect.MapCollector;
 import magmac.api.collect.ResultCollector;
 import magmac.api.result.Result;
@@ -21,7 +20,7 @@ public class RuleGenerator implements Generator {
 
     @Override
     public Result<Map<Location, String>, CompileError> apply(Roots roots) {
-        return Iters.fromMap(roots.roots())
+        return roots.iter()
                 .map(entry -> this.rootRule.generate(entry.right()).mapValue(generated -> new Tuple2<>(entry.left(), generated)))
                 .collect(new ResultCollector<>(new MapCollector<>()));
     }
