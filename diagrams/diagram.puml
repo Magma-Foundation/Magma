@@ -3,62 +3,48 @@ skinparam linetype ortho
 interface Filter
 
 class ListCollector
-Collector <|-- ListCollector
 
 class TypeScriptTargetPlatform
-TargetPlatform <|-- TypeScriptTargetPlatform
 
 interface Targets
 
 interface TargetPlatform
 
 class Joiner
-Collector <|-- Joiner
 
 class FlattenJava
-Passer <|-- FlattenJava
 
 class Tuple2
 
 class ApplicationError
-Error <|-- ApplicationError
 
 class StagedCompiler
-Compiler <|-- StagedCompiler
 
 interface Compiler
 
 class TypescriptRoots
 
 class ImmutableCompileError
-CompileError <|-- ImmutableCompileError
 
 interface NodeList
 
 class MapCollector
-Collector <|-- MapCollector
 
 interface Folder
 
 class SymbolFilter
-Filter <|-- SymbolFilter
 
 class RuleGenerator
-Generator <|-- RuleGenerator
 
 interface Passer
 
 class InlineCompileResult
-CompileResult <|-- InlineCompileResult
 
 class NumberFilter
-Filter <|-- NumberFilter
 
 class RuleLexer
-Lexer <|-- RuleLexer
 
 class CompileApplication
-Application <|-- CompileApplication
 
 interface Collector
 
@@ -71,40 +57,32 @@ interface Rule
 interface Error
 
 class PathTargets
-Targets <|-- PathTargets
 
 class Location
 
 class SingleHead
-Head <|-- SingleHead
+
+interface Option
 
 class StripRule
-Rule <|-- StripRule
 
 class CompileErrors
 
 class Ok
-Result <|-- Ok
 
 interface Parser
-Stage <|-- Parser
 
 interface Lexer
-Stage <|-- Lexer
 
 class DivideRule
-Rule <|-- DivideRule
 
 interface IOResult
 
 class LocatingRule
-Rule <|-- LocatingRule
 
 class SuffixRule
-Rule <|-- SuffixRule
 
 class TypeScriptPasser
-Passer <|-- TypeScriptPasser
 
 interface Result
 
@@ -115,147 +93,122 @@ class PlantUMLLang
 class Main
 
 class LastLocator
-Locator <|-- LastLocator
 
 class MutableDivideState
-DivideState <|-- MutableDivideState
 
 interface CompileError
-Error <|-- CompileError
 
 interface Locator
 
 class ContextRule
-Rule <|-- ContextRule
 
 class RangeHead
-Head <|-- RangeHead
 
 interface Source
 
 interface Roots
 
 class FlatMapHead
-Head <|-- FlatMapHead
 
 class CommonLang
 
 class JavaLang
 
 class StringRule
-Rule <|-- StringRule
 
 class ThrowableError
-Error <|-- ThrowableError
+
+class None
 
 interface Head
 
 class StatementFolder
-Folder <|-- StatementFolder
 
 interface Generator
-Stage <|-- Generator
 
 class NodeContext
-Context <|-- NodeContext
 
 interface CompileResult
 
 class EmptyHead
-Head <|-- EmptyHead
 
 interface Stage
 
 class PathSources
-Sources <|-- PathSources
 
 class ResultCollector
-Collector <|-- ResultCollector
 
 interface DivideState
 
 class PlantUMLTargetPlatform
-TargetPlatform <|-- PlantUMLTargetPlatform
 
 class MapRoots
-Roots <|-- MapRoots
 
 class PrefixRule
-Rule <|-- PrefixRule
 
 class EmptyAfterAll
-AfterAll <|-- EmptyAfterAll
 
 class ExactRule
-Rule <|-- ExactRule
 
 class PathSource
-Source <|-- PathSource
 
 class StringContext
-Context <|-- StringContext
 
 class TypeRule
-Rule <|-- TypeRule
 
 class InlineNodeList
-NodeList <|-- InlineNodeList
 
 class FirstLocator
-Locator <|-- FirstLocator
 
 interface Node
 
 class OrRule
-Rule <|-- OrRule
 
 interface Iter
 
 class NodeRule
-Rule <|-- NodeRule
 
 class Iters
 
 class ApplicationBuilder
 
 class DelimitedFolder
-Folder <|-- DelimitedFolder
+
+class Some
 
 interface Context
 
 class MergeDiagram
-AfterAll <|-- MergeDiagram
 
 interface Sources
 
 interface Application
 
 class ImmutableParseState
-ParseState <|-- ImmutableParseState
 
 class TreeParser
-Parser <|-- TreeParser
 
 class Err
-Result <|-- Err
 
 class AfterPasser
-Passer <|-- AfterPasser
 
 class SafeFiles
 
 class HeadedIter
-Iter <|-- HeadedIter
 
 class MapNode
-Node <|-- MapNode
 
 class FilterRule
-Rule <|-- FilterRule
 
 class InlineIOResult
-IOResult <|-- InlineIOResult
 
+CompileError --> Error
+InlineCompileResult --> Tuple2
+InlineCompileResult --> Result
+InlineCompileResult --> CompileError
+InlineCompileResult --> Function
+InlineCompileResult --> Supplier
+StatementFolder --> DivideState
 Iters --> Tuple2
 Iters --> EmptyHead
 Iters --> HeadedIter
@@ -264,36 +217,48 @@ Iters --> SingleHead
 Iters --> ArrayList
 Iters --> List
 Iters --> Map
-Iters --> Optional
+Iters --> Option
+RangeHead --> None
+RangeHead --> Option
+RangeHead --> Some
 MergeDiagram --> Tuple2
 MergeDiagram --> ListCollector
 MergeDiagram --> Iters
 MergeDiagram --> InlineNodeList
 MergeDiagram --> MapNode
+MergeDiagram --> Node
 MergeDiagram --> NodeList
+MergeDiagram --> Location
+MergeDiagram --> AfterAll
 MergeDiagram --> ArrayList
 MergeDiagram --> Collection
 MergeDiagram --> Collections
 MergeDiagram --> HashMap
 MergeDiagram --> List
+MergeDiagram --> Map
 Roots --> Tuple2
 Roots --> Iter
 Roots --> Node
 Roots --> Location
 Node --> Tuple2
 Node --> Iter
-Node --> Optional
+Node --> Option
 ParseState --> Location
+FilterRule --> CompileResult
 FilterRule --> CompileErrors
+FilterRule --> Node
 Passer --> Tuple2
 Passer --> Node
 Passer --> ParseState
-Passer --> Optional
+Passer --> Option
+FlatMapHead --> None
 FlatMapHead --> Iter
+FlatMapHead --> Option
 FlatMapHead --> Function
 Result --> Tuple2
 Result --> Function
 Result --> Supplier
+ImmutableParseState --> Location
 ApplicationBuilder --> Error
 ApplicationBuilder --> Compiler
 ApplicationBuilder --> StagedCompiler
@@ -312,7 +277,9 @@ ApplicationBuilder --> RuleLexer
 ApplicationBuilder --> Parser
 ApplicationBuilder --> TreeParser
 ApplicationBuilder --> Path
-ApplicationBuilder --> Optional
+ApplicationBuilder --> Option
+OrState --> None
+OrState --> Some
 OrState --> Err
 OrState --> Ok
 OrState --> CompileResult
@@ -322,24 +289,28 @@ OrState --> Context
 OrState --> ImmutableCompileError
 OrState --> ArrayList
 OrState --> List
-OrState --> Optional
+OrState --> Option
+DivideRule --> None
+DivideRule --> Some
 DivideRule --> Tuple2
 DivideRule --> Joiner
 DivideRule --> ListCollector
 DivideRule --> ResultCollector
 DivideRule --> Iter
 DivideRule --> Iters
+DivideRule --> CompileResult
 DivideRule --> InlineCompileResult
 DivideRule --> CompileErrors
 DivideRule --> InlineNodeList
 DivideRule --> MapNode
+DivideRule --> Node
 DivideRule --> NodeList
 DivideRule --> DivideState
 DivideRule --> MutableDivideState
 DivideRule --> Folder
 DivideRule --> StatementFolder
-DivideRule --> Optional
-Locator --> Optional
+DivideRule --> Option
+Locator --> Option
 ListCollector --> ArrayList
 ListCollector --> List
 IOResult --> Result
@@ -348,39 +319,68 @@ IOResult --> Function
 Stage --> CompileResult
 Iter --> Collector
 Iter --> Result
-Iter --> Optional
+Iter --> Option
 Iter --> BiFunction
 Iter --> Function
 Iter --> Predicate
 ResultCollector --> Ok
 ResultCollector --> Result
+AfterPasser --> None
+AfterPasser --> Some
+AfterPasser --> Tuple2
 AfterPasser --> ListCollector
 AfterPasser --> Iter
 AfterPasser --> Iters
 AfterPasser --> InlineNodeList
 AfterPasser --> MapNode
+AfterPasser --> Node
 AfterPasser --> NodeList
+AfterPasser --> Passer
+AfterPasser --> ParseState
+AfterPasser --> Option
+PrefixRule --> CompileResult
 PrefixRule --> CompileErrors
+PrefixRule --> Node
 Compiler --> CompileResult
 Compiler --> Location
 Compiler --> Map
-Head --> Optional
+TypeScriptPasser --> None
+TypeScriptPasser --> Tuple2
+TypeScriptPasser --> Node
+TypeScriptPasser --> Passer
+TypeScriptPasser --> ParseState
+TypeScriptPasser --> Option
+Head --> Option
+OrRule --> CompileResult
 OrRule --> Context
 OrRule --> NodeContext
 OrRule --> StringContext
+OrRule --> Node
 OrRule --> List
 OrRule --> Function
 NodeContext --> Node
 NodeList --> Iter
+PathSource --> IOResult
+PathSource --> Location
 PathSource --> SafeFiles
 PathSource --> Path
 PathSource --> ArrayList
 PathSource --> Collections
 PathSource --> List
+StripRule --> CompileResult
+StripRule --> Node
+SingleHead --> None
+SingleHead --> Option
+SingleHead --> Some
+PathTargets --> None
 PathTargets --> Iters
+PathTargets --> Location
 PathTargets --> SafeFiles
+PathTargets --> IOException
 PathTargets --> Files
 PathTargets --> Path
+PathTargets --> Map
+PathTargets --> Option
 CompileErrors --> Err
 CompileErrors --> CompileResult
 CompileErrors --> InlineCompileResult
@@ -389,16 +389,32 @@ CompileErrors --> StringContext
 CompileErrors --> Node
 CompileErrors --> ImmutableCompileError
 DivideState --> Tuple2
-DivideState --> Optional
+DivideState --> Option
 DivideState --> Stream
 Sources --> IOResult
 Sources --> Location
 Sources --> Map
 Parser --> Roots
+Parser --> Stage
+HeadedIter --> Collector
+HeadedIter --> Iter
 HeadedIter --> Ok
+HeadedIter --> Result
+HeadedIter --> Option
+HeadedIter --> BiFunction
+HeadedIter --> Function
+HeadedIter --> Predicate
 Lexer --> Location
 Lexer --> Roots
+Lexer --> Stage
 Lexer --> Map
+EmptyAfterAll --> Node
+EmptyAfterAll --> Location
+EmptyAfterAll --> Map
+Some --> Consumer
+Some --> Function
+Some --> Predicate
+Some --> Supplier
 TreeParser --> Tuple2
 TreeParser --> MapCollector
 TreeParser --> Ok
@@ -412,12 +428,22 @@ TreeParser --> Location
 TreeParser --> AfterAll
 TreeParser --> MapRoots
 TreeParser --> Passer
+TreeParser --> Roots
 TreeParser --> Map
+MapRoots --> Tuple2
+MapRoots --> Iter
 MapRoots --> Iters
+MapRoots --> Node
+MapRoots --> Location
 MapRoots --> Map
+InlineNodeList --> Iter
 InlineNodeList --> Iters
 InlineNodeList --> ArrayList
 InlineNodeList --> List
+Option --> Consumer
+Option --> Function
+Option --> Predicate
+Option --> Supplier
 TypescriptRoots --> DivideRule
 TypescriptRoots --> ExactRule
 TypescriptRoots --> LocatingRule
@@ -436,19 +462,33 @@ RuleGenerator --> ResultCollector
 RuleGenerator --> CompileResult
 RuleGenerator --> InlineCompileResult
 RuleGenerator --> Rule
+RuleGenerator --> Location
+RuleGenerator --> Roots
+RuleGenerator --> Map
 Application --> Error
-Application --> Optional
+Application --> Option
 Generator --> Location
 Generator --> Roots
+Generator --> Stage
 Generator --> Map
 StringRule --> Ok
+StringRule --> CompileResult
 StringRule --> InlineCompileResult
 StringRule --> CompileErrors
 StringRule --> MapNode
+StringRule --> Node
+Err --> Tuple2
+Err --> Function
+Err --> Supplier
+MapNode --> None
+MapNode --> Some
+MapNode --> Tuple2
 MapNode --> Joiner
+MapNode --> Iter
 MapNode --> Iters
 MapNode --> HashMap
 MapNode --> Map
+MapNode --> Option
 MapNode --> BiFunction
 MapNode --> Function
 MapNode --> Collectors
@@ -460,16 +500,30 @@ PathSources --> Tuple2
 PathSources --> MapCollector
 PathSources --> ResultCollector
 PathSources --> Iter
+PathSources --> IOResult
 PathSources --> InlineIOResult
+PathSources --> Location
 PathSources --> SafeFiles
 PathSources --> Files
 PathSources --> Path
+PathSources --> Map
+ThrowableError --> Error
 ThrowableError --> PrintWriter
 ThrowableError --> StringWriter
 ExactRule --> Ok
+ExactRule --> CompileResult
 ExactRule --> InlineCompileResult
 ExactRule --> CompileErrors
 ExactRule --> MapNode
+ExactRule --> Node
+DelimitedFolder --> DivideState
+InlineIOResult --> Result
+InlineIOResult --> IOException
+InlineIOResult --> Function
+ApplicationError --> Error
+FirstLocator --> None
+FirstLocator --> Option
+FirstLocator --> Some
 TargetPlatform --> Rule
 TargetPlatform --> AfterAll
 TargetPlatform --> Passer
@@ -480,16 +534,30 @@ AfterAll --> Map
 MapCollector --> Tuple2
 MapCollector --> HashMap
 MapCollector --> Map
+TypeScriptTargetPlatform --> Rule
 TypeScriptTargetPlatform --> TypeScriptPasser
 TypeScriptTargetPlatform --> TypescriptRoots
+TypeScriptTargetPlatform --> AfterAll
 TypeScriptTargetPlatform --> EmptyAfterAll
+TypeScriptTargetPlatform --> Passer
+TypeScriptTargetPlatform --> Path
 TypeScriptTargetPlatform --> Paths
-Joiner --> Optional
+Joiner --> None
+Joiner --> Option
+Joiner --> Some
+LastLocator --> None
+LastLocator --> Option
+LastLocator --> Some
+EmptyHead --> None
+EmptyHead --> Option
+ImmutableCompileError --> CompileError
 ImmutableCompileError --> Context
 ImmutableCompileError --> ArrayList
 ImmutableCompileError --> Comparator
 ImmutableCompileError --> List
 ImmutableCompileError --> Collectors
+SafeFiles --> None
+SafeFiles --> Some
 SafeFiles --> Iter
 SafeFiles --> Iters
 SafeFiles --> Err
@@ -497,18 +565,28 @@ SafeFiles --> Ok
 SafeFiles --> IOException
 SafeFiles --> Files
 SafeFiles --> Path
-SafeFiles --> Optional
+SafeFiles --> Option
 SafeFiles --> Collectors
 SafeFiles --> Stream
 Targets --> Location
 Targets --> IOException
 Targets --> Map
-Targets --> Optional
+Targets --> Option
+StagedCompiler --> CompileResult
+StagedCompiler --> Location
 StagedCompiler --> Generator
 StagedCompiler --> Lexer
 StagedCompiler --> Parser
+StagedCompiler --> Map
+MutableDivideState --> None
+MutableDivideState --> Some
+MutableDivideState --> Tuple2
 MutableDivideState --> ArrayList
 MutableDivideState --> List
+MutableDivideState --> Option
+MutableDivideState --> Stream
+CompileApplication --> Some
+CompileApplication --> Error
 CompileApplication --> Compiler
 CompileApplication --> ApplicationError
 CompileApplication --> ThrowableError
@@ -516,28 +594,41 @@ CompileApplication --> Location
 CompileApplication --> Sources
 CompileApplication --> Targets
 CompileApplication --> Map
+CompileApplication --> Option
+ContextRule --> CompileResult
 ContextRule --> NodeContext
+ContextRule --> Node
 ContextRule --> StringContext
 ContextRule --> ImmutableCompileError
 ContextRule --> List
+PlantUMLTargetPlatform --> Rule
 PlantUMLTargetPlatform --> AfterPasser
 PlantUMLTargetPlatform --> MergeDiagram
 PlantUMLTargetPlatform --> PlantUMLLang
+PlantUMLTargetPlatform --> AfterAll
+PlantUMLTargetPlatform --> Passer
+PlantUMLTargetPlatform --> Path
 PlantUMLTargetPlatform --> Paths
 CommonLang --> ExactRule
 CommonLang --> Rule
 CommonLang --> StripRule
 CommonLang --> TypeRule
+LocatingRule --> CompileResult
 LocatingRule --> CompileErrors
+LocatingRule --> Node
 LocatingRule --> FirstLocator
 LocatingRule --> LastLocator
 LocatingRule --> Locator
-LocatingRule --> Optional
+LocatingRule --> Option
 NodeRule --> Ok
+NodeRule --> CompileResult
 NodeRule --> InlineCompileResult
 NodeRule --> CompileErrors
 NodeRule --> MapNode
+NodeRule --> Node
+SuffixRule --> CompileResult
 SuffixRule --> CompileErrors
+SuffixRule --> Node
 JavaLang --> ContextRule
 JavaLang --> DivideRule
 JavaLang --> LocatingRule
@@ -568,6 +659,9 @@ CompileResult --> Result
 CompileResult --> CompileError
 CompileResult --> Function
 CompileResult --> Supplier
+Ok --> Tuple2
+Ok --> Function
+Ok --> Supplier
 Main --> Iters
 Main --> ApplicationBuilder
 Main --> Error
@@ -576,9 +670,20 @@ Main --> TypeScriptTargetPlatform
 Main --> PathSources
 Main --> Sources
 Main --> Paths
+None --> Consumer
+None --> Function
+None --> Predicate
+None --> Supplier
+FlattenJava --> None
+FlattenJava --> Some
+FlattenJava --> Tuple2
 FlattenJava --> ListCollector
 FlattenJava --> InlineNodeList
+FlattenJava --> Node
 FlattenJava --> NodeList
+FlattenJava --> Passer
+FlattenJava --> ParseState
+FlattenJava --> Option
 RuleLexer --> Tuple2
 RuleLexer --> MapCollector
 RuleLexer --> ResultCollector
@@ -587,14 +692,19 @@ RuleLexer --> CompileResult
 RuleLexer --> InlineCompileResult
 RuleLexer --> Node
 RuleLexer --> Rule
+RuleLexer --> Location
 RuleLexer --> MapRoots
+RuleLexer --> Roots
+RuleLexer --> Map
 Location --> List
+TypeRule --> CompileResult
 TypeRule --> InlineCompileResult
 TypeRule --> Context
 TypeRule --> NodeContext
 TypeRule --> StringContext
 TypeRule --> CompileError
 TypeRule --> CompileErrors
+TypeRule --> Node
 TypeRule --> ImmutableCompileError
 TypeRule --> List
 @enduml

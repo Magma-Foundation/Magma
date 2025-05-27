@@ -1,19 +1,21 @@
 package magmac.api.collect;
 
-import java.util.Optional;
+import magmac.api.None;
+import magmac.api.Option;
+import magmac.api.Some;
 
-public record Joiner(String delimiter) implements Collector<String, Optional<String>> {
+public record Joiner(String delimiter) implements Collector<String, Option<String>> {
     public Joiner() {
         this("");
     }
 
     @Override
-    public Optional<String> createInitial() {
-        return Optional.empty();
+    public Option<String> createInitial() {
+        return new None<>();
     }
 
     @Override
-    public Optional<String> fold(Optional<String> current, String element) {
-        return Optional.of(current.map(inner -> inner + this.delimiter + element).orElse(element));
+    public Option<String> fold(Option<String> current, String element) {
+        return new Some<>(current.map(inner -> inner + this.delimiter + element).orElse(element));
     }
 }

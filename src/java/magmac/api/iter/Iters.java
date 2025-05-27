@@ -9,7 +9,7 @@ import magmac.api.head.SingleHead;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
+import magmac.api.Option;
 
 public final class Iters {
     public static <T> Iter<T> fromList(List<T> list) {
@@ -25,8 +25,8 @@ public final class Iters {
         return new HeadedIter<>(new RangeHead(array.length)).map(index -> array[index]);
     }
 
-    public static <T> Iter<T> fromOption(Optional<T> optional) {
-        return optional
+    public static <T> Iter<T> fromOption(Option<T> option) {
+        return option
                 .<Iter<T>>map(t -> new HeadedIter<>(new SingleHead<>(t)))
                 .orElseGet(() -> new HeadedIter<>(new EmptyHead<>()));
     }

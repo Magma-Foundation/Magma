@@ -1,5 +1,6 @@
 package magmac.app.io.targets;
 
+import magmac.api.None;
 import magmac.api.iter.Iters;
 import magmac.app.io.Location;
 import magmac.app.io.SafeFiles;
@@ -8,15 +9,15 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
-import java.util.Optional;
+import magmac.api.Option;
 
 public record PathTargets(Path root, String extension) implements Targets {
-    private Optional<IOException> write(Location location, String output) {
+    private Option<IOException> write(Location location, String output) {
         Path targetParent = Iters.fromList(location.namespace())
                 .fold(this.root(), Path::resolve);
 
         if (!Files.exists(targetParent)) {
-            Optional<IOException> maybeError = SafeFiles.createDirectories(targetParent);
+            Option<IOException> maybeError = SafeFiles.createDirectories(targetParent);
             if (maybeError.isPresent()) {
                 return maybeError;
             }
@@ -27,13 +28,13 @@ public record PathTargets(Path root, String extension) implements Targets {
     }
 
     @Override
-    public Optional<IOException> writeAll(Map<Location, String> outputs) {
+    public Option<IOException> writeAll(Map<Location, String> outputs) {
         for (Map.Entry<Location, String> tuple : outputs.entrySet()) {
-            Optional<IOException> maybeError = this.write(tuple.getKey(), tuple.getValue());
+            Option<IOException> maybeError = this.write(tuple.getKey(), tuple.getValue());
             if (maybeError.isPresent()) {
                 return maybeError;
             }
         }
-        return Optional.empty();
+        return new None<>();
     }
 }

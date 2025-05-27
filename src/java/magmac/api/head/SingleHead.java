@@ -1,6 +1,8 @@
 package magmac.api.head;
 
-import java.util.Optional;
+import magmac.api.None;
+import magmac.api.Option;
+import magmac.api.Some;
 
 public class SingleHead<T> implements Head<T> {
     private final T element;
@@ -12,12 +14,12 @@ public class SingleHead<T> implements Head<T> {
     }
 
     @Override
-    public Optional<T> next() {
+    public Option<T> next() {
         if (this.retrieved) {
-            return Optional.empty();
+            return new None<>();
         }
 
         this.retrieved = true;
-        return Optional.of(this.element);
+        return new Some<>(this.element);
     }
 }

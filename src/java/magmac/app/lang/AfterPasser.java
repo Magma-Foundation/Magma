@@ -1,5 +1,7 @@
 package magmac.app.lang;
 
+import magmac.api.None;
+import magmac.api.Some;
 import magmac.api.Tuple2;
 import magmac.api.collect.ListCollector;
 import magmac.api.iter.Iter;
@@ -11,10 +13,10 @@ import magmac.app.compile.node.NodeList;
 import magmac.app.stage.Passer;
 import magmac.app.stage.parse.ParseState;
 
-import java.util.Optional;
+import magmac.api.Option;
 
 public class AfterPasser implements Passer {
-    private static Optional<Node> createInherits(Node child, String key) {
+    private static Option<Node> createInherits(Node child, String key) {
         return child.findNode(key).map(implemented -> new MapNode("inherits")
                 .withString("child", child.findString("name").orElse(""))
                 .withString("parent", AfterPasser.findValue(implemented)));
@@ -47,10 +49,10 @@ public class AfterPasser implements Passer {
     }
 
     @Override
-    public Optional<Tuple2<ParseState, Node>> pass(ParseState state, Node node) {
+    public Option<Tuple2<ParseState, Node>> pass(ParseState state, Node node) {
         if (node.is("root")) {
             NodeList values = AfterPasser.replaceRootChildren(node);
-            return Optional.of(new Tuple2<>(state, node.withNodeList("children", values)));
+            return new Some<>(new Tuple2<ParseState, Node>(state, node.withNodeList("children", values)));
         }
 
         if (node.is("import")) {
@@ -64,10 +66,10 @@ public class AfterPasser implements Passer {
                     .withString("parent", state.findLocation().name())
                     .withString("child", child);
 
-            return Optional.of(new Tuple2<ParseState, Node>(state, dependency));
+            return new Some<>(new Tuple2<ParseState, Node>(state, dependency));
         }
 
-        return Optional.empty();
+        return new None<>();
     }
 
 }

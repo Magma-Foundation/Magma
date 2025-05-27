@@ -1,6 +1,8 @@
 package magmac.api.head;
 
-import java.util.Optional;
+import magmac.api.None;
+import magmac.api.Option;
+import magmac.api.Some;
 
 public class RangeHead implements Head<Integer> {
     private final int length;
@@ -12,14 +14,14 @@ public class RangeHead implements Head<Integer> {
     }
 
     @Override
-    public Optional<Integer> next() {
+    public Option<Integer> next() {
         if (this.counter < this.length) {
             int value = this.counter;
             this.counter++;
-            return Optional.of(value);
+            return new Some<>(value);
         }
         else {
-            return Optional.empty();
+            return new None<>();
         }
     }
 }

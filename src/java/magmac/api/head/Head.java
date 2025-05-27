@@ -1,7 +1,7 @@
 package magmac.api.head;
 
-import java.util.Optional;
+import magmac.api.Option;
 
 public interface Head<T> {
-    Optional<T> next();
+    Option<T> next();
 }

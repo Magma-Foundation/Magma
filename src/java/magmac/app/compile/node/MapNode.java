@@ -1,5 +1,7 @@
 package magmac.app.compile.node;
 
+import magmac.api.None;
+import magmac.api.Some;
 import magmac.api.Tuple2;
 import magmac.api.collect.Joiner;
 import magmac.api.iter.Iter;
@@ -7,24 +9,24 @@ import magmac.api.iter.Iters;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
+import magmac.api.Option;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public final class MapNode implements Node {
-    private final Optional<String> maybeType;
+    private final Option<String> maybeType;
     private final Map<String, String> strings;
     private final Map<String, Node> nodes;
     private final Map<String, NodeList> nodeLists;
 
     public MapNode() {
-        this(Optional.empty(), new HashMap<>(), new HashMap<>(), new HashMap<>());
+        this(new None<String>(), new HashMap<>(), new HashMap<>(), new HashMap<>());
     }
 
     private MapNode(
-            Optional<String> maybeType,
+            Option<String> maybeType,
             Map<String, String> strings,
             Map<String, Node> nodes,
             Map<String, NodeList> nodeLists
@@ -36,7 +38,7 @@ public final class MapNode implements Node {
     }
 
     public MapNode(String type) {
-        this(Optional.of(type), new HashMap<>(), new HashMap<>(), new HashMap<>());
+        this(new Some<String>(type), new HashMap<>(), new HashMap<>(), new HashMap<>());
     }
 
     private static <T> Node fold(Node node, Iter<Tuple2<String, T>> iter, Function<Node, BiFunction<String, T, Node>> mapper) {
@@ -109,12 +111,12 @@ public final class MapNode implements Node {
     }
 
     @Override
-    public Optional<String> findString(String key) {
+    public Option<String> findString(String key) {
         if (this.strings.containsKey(key)) {
-            return Optional.of(this.strings.get(key));
+            return new Some<>(this.strings.get(key));
         }
         else {
-            return Optional.empty();
+            return new None<>();
         }
     }
 
@@ -129,7 +131,7 @@ public final class MapNode implements Node {
 
     @Override
     public Node retype(String type) {
-        return new MapNode(Optional.of(type), this.strings, this.nodes, this.nodeLists);
+        return new MapNode(new Some<String>(type), this.strings, this.nodes, this.nodeLists);
     }
 
     @Override
@@ -139,12 +141,12 @@ public final class MapNode implements Node {
     }
 
     @Override
-    public Optional<Node> findNode(String key) {
+    public Option<Node> findNode(String key) {
         if (this.nodes.containsKey(key)) {
-            return Optional.of(this.nodes.get(key));
+            return new Some<>(this.nodes.get(key));
         }
         else {
-            return Optional.empty();
+            return new None<>();
         }
     }
 
@@ -172,12 +174,12 @@ public final class MapNode implements Node {
     }
 
     @Override
-    public Optional<NodeList> findNodeList(String key) {
+    public Option<NodeList> findNodeList(String key) {
         if (this.nodeLists.containsKey(key)) {
-            return Optional.of(this.nodeLists.get(key));
+            return new Some<>(this.nodeLists.get(key));
         }
         else {
-            return Optional.empty();
+            return new None<>();
         }
     }
 }

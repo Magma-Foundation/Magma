@@ -5,7 +5,7 @@ import magmac.api.iter.Iter;
 import magmac.api.result.Ok;
 import magmac.api.result.Result;
 
-import java.util.Optional;
+import magmac.api.Option;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -28,9 +28,9 @@ public record HeadedIter<T>(Head<T> head) implements Iter<T> {
         R current = initial;
         while (true) {
             R finalCurrent = current;
-            Optional<R> optional = this.head.next().map(next -> folder.apply(finalCurrent, next));
-            if (optional.isPresent()) {
-                current = optional.get();
+            Option<R> option = this.head.next().map(next -> folder.apply(finalCurrent, next));
+            if (option.isPresent()) {
+                current = option.orElse(null);
             }
             else {
                 return current;
@@ -51,7 +51,7 @@ public record HeadedIter<T>(Head<T> head) implements Iter<T> {
     }
 
     @Override
-    public Optional<T> next() {
+    public Option<T> next() {
         return this.head.next();
     }
 

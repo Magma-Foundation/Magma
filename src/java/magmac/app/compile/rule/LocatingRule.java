@@ -7,7 +7,7 @@ import magmac.app.compile.rule.locate.FirstLocator;
 import magmac.app.compile.rule.locate.LastLocator;
 import magmac.app.compile.rule.locate.Locator;
 
-import java.util.Optional;
+import magmac.api.Option;
 
 public final class LocatingRule implements Rule {
     private final Rule leftRule;
@@ -32,12 +32,12 @@ public final class LocatingRule implements Rule {
 
     @Override
     public CompileResult<Node> lex(String input) {
-        Optional<Integer> maybeSeparator = this.locator.locate(input, this.infix);
+        Option<Integer> maybeSeparator = this.locator.locate(input, this.infix);
         if (maybeSeparator.isEmpty()) {
             return CompileErrors.createStringError("Infix '" + this.infix + "' not present", input);
         }
 
-        int separator = maybeSeparator.get();
+        int separator = maybeSeparator.orElse(null);
         String left = input.substring(0, separator);
         String right = input.substring(separator + this.infix.length());
         return this.leftRule.lex(left)

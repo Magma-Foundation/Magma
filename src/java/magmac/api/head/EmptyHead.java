@@ -1,10 +1,11 @@
 package magmac.api.head;
 
-import java.util.Optional;
+import magmac.api.None;
+import magmac.api.Option;
 
 public class EmptyHead<T> implements Head<T> {
     @Override
-    public Optional<T> next() {
-        return Optional.empty();
+    public Option<T> next() {
+        return new None<>();
     }
 }

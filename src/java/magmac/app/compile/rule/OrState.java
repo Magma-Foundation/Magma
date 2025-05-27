@@ -1,5 +1,7 @@
 package magmac.app.compile.rule;
 
+import magmac.api.None;
+import magmac.api.Some;
 import magmac.api.result.Err;
 import magmac.api.result.Ok;
 import magmac.app.compile.error.CompileResult;
@@ -10,18 +12,18 @@ import magmac.app.error.ImmutableCompileError;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
+import magmac.api.Option;
 
-record OrState<T>(Optional<T> maybeValue, List<CompileError> errors) {
+record OrState<T>(Option<T> maybeValue, List<CompileError> errors) {
     OrState() {
-        this(Optional.empty(), new ArrayList<>());
+        this(new None<T>(), new ArrayList<>());
     }
 
     OrState<T> withValue(T value) {
         if (this.maybeValue.isPresent()) {
             return this;
         }
-        return new OrState<>(Optional.of(value), this.errors);
+        return new OrState<>(new Some<T>(value), this.errors);
     }
 
     CompileResult<T> toResult(Context context) {

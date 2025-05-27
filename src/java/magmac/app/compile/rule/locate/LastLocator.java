@@ -1,13 +1,13 @@
 package magmac.app.compile.rule.locate;
 
-import java.util.Optional;
+import magmac.api.None;
+import magmac.api.Option;
+import magmac.api.Some;
 
 public class LastLocator implements Locator {
     @Override
-    public Optional<Integer> locate(String input, String infix) {
+    public Option<Integer> locate(String input, String infix) {
         int index = input.lastIndexOf(infix);
-        return -1 == index
-                ? Optional.empty()
-                : Optional.of(index);
+        return -1 == index ? new None<Integer>() : new Some<>(index);
     }
 }

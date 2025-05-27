@@ -2,8 +2,8 @@ package magmac.app;
 
 import magmac.api.error.Error;
 
-import java.util.Optional;
+import magmac.api.Option;
 
 public interface Application {
-    Optional<Error> run();
+    Option<Error> run();
 }

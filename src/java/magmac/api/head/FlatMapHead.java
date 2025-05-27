@@ -1,8 +1,9 @@
 package magmac.api.head;
 
+import magmac.api.None;
 import magmac.api.iter.Iter;
 
-import java.util.Optional;
+import magmac.api.Option;
 import java.util.function.Function;
 
 public class FlatMapHead<T, R> implements Head<R> {
@@ -17,23 +18,23 @@ public class FlatMapHead<T, R> implements Head<R> {
     }
 
     @Override
-    public Optional<R> next() {
+    public Option<R> next() {
         while (true) {
             // 1) Try to pull from the current inner
-            Optional<R> maybeInner = this.current.next();
+            Option<R> maybeInner = this.current.next();
             if (maybeInner.isPresent()) {
                 return maybeInner;
             }
 
             // 2) Current inner is exhausted, pull the next T
-            Optional<T> maybeOuter = this.head.next();
+            Option<T> maybeOuter = this.head.next();
             if (maybeOuter.isEmpty()) {
                 // No more Ts ⇒ done
-                return Optional.empty();
+                return new None<>();
             }
 
             // 3) Map T to Iter<R> and switch to its head
-            this.current = this.mapper.apply(maybeOuter.get());
+            this.current = this.mapper.apply(maybeOuter.orElse(null));
         }
     }
 }

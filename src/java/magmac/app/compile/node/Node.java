@@ -3,7 +3,7 @@ package magmac.app.compile.node;
 import magmac.api.Tuple2;
 import magmac.api.iter.Iter;
 
-import java.util.Optional;
+import magmac.api.Option;
 
 public interface Node {
     Iter<Tuple2<String, Node>> iterNodes();
@@ -16,7 +16,7 @@ public interface Node {
 
     Node withString(String key, String value);
 
-    Optional<String> findString(String key);
+    Option<String> findString(String key);
 
     Node merge(Node other);
 
@@ -26,11 +26,11 @@ public interface Node {
 
     Node withNodeList(String key, NodeList values);
 
-    Optional<NodeList> findNodeList(String key);
+    Option<NodeList> findNodeList(String key);
 
     Node withNode(String key, Node value);
 
-    Optional<Node> findNode(String key);
+    Option<Node> findNode(String key);
 
     Iter<Tuple2<String, String>> iterStrings();
 }

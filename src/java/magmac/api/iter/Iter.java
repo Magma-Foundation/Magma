@@ -3,7 +3,7 @@ package magmac.api.iter;
 import magmac.api.collect.Collector;
 import magmac.api.result.Result;
 
-import java.util.Optional;
+import magmac.api.Option;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -19,7 +19,7 @@ public interface Iter<T> {
 
     Iter<T> filter(Predicate<T> predicate);
 
-    Optional<T> next();
+    Option<T> next();
 
     <R> Iter<R> flatMap(Function<T, Iter<R>> mapper);
 

@@ -1,5 +1,7 @@
 package magmac.app.io;
 
+import magmac.api.None;
+import magmac.api.Some;
 import magmac.api.iter.Iter;
 import magmac.api.iter.Iters;
 import magmac.api.result.Err;
@@ -8,17 +10,17 @@ import magmac.api.result.Ok;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Optional;
+import magmac.api.Option;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public final class SafeFiles {
-    public static Optional<IOException> writeString(Path target, String output) {
+    public static Option<IOException> writeString(Path target, String output) {
         try {
             Files.writeString(target, output);
-            return Optional.empty();
+            return new None<>();
         } catch (IOException e) {
-            return Optional.of(e);
+            return new Some<>(e);
         }
     }
 
@@ -38,12 +40,12 @@ public final class SafeFiles {
         }
     }
 
-    public static Optional<IOException> createDirectories(Path targetParent) {
+    public static Option<IOException> createDirectories(Path targetParent) {
         try {
             Files.createDirectories(targetParent);
-            return Optional.empty();
+            return new None<>();
         } catch (IOException e) {
-            return Optional.of(e);
+            return new Some<>(e);
         }
     }
 }

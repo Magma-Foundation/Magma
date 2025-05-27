@@ -2,7 +2,7 @@ package magmac.app.compile.rule.divide;
 
 import magmac.api.Tuple2;
 
-import java.util.Optional;
+import magmac.api.Option;
 import java.util.stream.Stream;
 
 public interface DivideState {
@@ -20,9 +20,9 @@ public interface DivideState {
 
     boolean isShallow();
 
-    Optional<Tuple2<DivideState, Character>> pop();
+    Option<Tuple2<DivideState, Character>> pop();
 
-    Optional<Tuple2<DivideState, Character>> popAndAppendToTuple();
+    Option<Tuple2<DivideState, Character>> popAndAppendToTuple();
 
-    Optional<DivideState> popAndAppendToOption();
+    Option<DivideState> popAndAppendToOption();
 }

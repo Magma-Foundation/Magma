@@ -19,10 +19,10 @@ import magmac.app.stage.parse.Parser;
 import magmac.app.stage.parse.TreeParser;
 
 import java.nio.file.Path;
-import java.util.Optional;
+import magmac.api.Option;
 
 public class ApplicationBuilder {
-    public static Optional<Error> run(TargetPlatform platform, Sources sources) {
+    public static Option<Error> run(TargetPlatform platform, Sources sources) {
         Path targetPath = platform.createTargetPath();
         String extension = platform.createExtension();
         Targets targets = new PathTargets(targetPath, extension);

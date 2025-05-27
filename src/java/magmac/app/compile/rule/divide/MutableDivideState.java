@@ -1,10 +1,12 @@
 package magmac.app.compile.rule.divide;
 
+import magmac.api.None;
+import magmac.api.Some;
 import magmac.api.Tuple2;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
+import magmac.api.Option;
 import java.util.stream.Stream;
 
 public class MutableDivideState implements DivideState {
@@ -66,19 +68,19 @@ public class MutableDivideState implements DivideState {
     }
 
     @Override
-    public Optional<Tuple2<DivideState, Character>> pop() {
+    public Option<Tuple2<DivideState, Character>> pop() {
         if (this.index < this.input.length()) {
             char c = this.input.charAt(this.index);
             this.index++;
-            return Optional.of(new Tuple2<>(this, c));
+            return new Some<>(new Tuple2<DivideState, Character>(this, c));
         }
         else {
-            return Optional.empty();
+            return new None<>();
         }
     }
 
     @Override
-    public Optional<Tuple2<DivideState, Character>> popAndAppendToTuple() {
+    public Option<Tuple2<DivideState, Character>> popAndAppendToTuple() {
         return this.pop().map(popped -> {
             DivideState append = popped.left().append(popped.right());
             return new Tuple2<>(append, popped.right());
@@ -86,7 +88,7 @@ public class MutableDivideState implements DivideState {
     }
 
     @Override
-    public Optional<DivideState> popAndAppendToOption() {
+    public Option<DivideState> popAndAppendToOption() {
         return this.popAndAppendToTuple().map(Tuple2::left);
     }
 }

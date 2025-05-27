@@ -1,5 +1,6 @@
 package magmac.app;
 
+import magmac.api.Some;
 import magmac.api.error.Error;
 import magmac.app.compile.Compiler;
 import magmac.app.error.ApplicationError;
@@ -9,7 +10,7 @@ import magmac.app.io.sources.Sources;
 import magmac.app.io.targets.Targets;
 
 import java.util.Map;
-import java.util.Optional;
+import magmac.api.Option;
 
 public final class CompileApplication implements Application {
     private final Sources sources;
@@ -23,17 +24,17 @@ public final class CompileApplication implements Application {
     }
 
     @Override
-    public Optional<magmac.api.error.Error> run() {
+    public Option<Error> run() {
         return this.sources.readAll()
                 .mapErr(ThrowableError::new)
                 .mapErr(ApplicationError::new)
-                .match(units -> this.compileAndWrite(units), Optional::of);
+                .match(units -> this.compileAndWrite(units), value -> new Some<>(value));
     }
 
-    private Optional<Error> compileAndWrite(Map<Location, String> units) {
+    private Option<Error> compileAndWrite(Map<Location, String> units) {
         return this.compiler.compile(units).result()
                 .mapErr(ApplicationError::new)
-                .match(outputs -> this.targets.writeAll(outputs).map(ThrowableError::new).map(ApplicationError::new), err -> Optional.of(err));
+                .match(outputs -> this.targets.writeAll(outputs).map(ThrowableError::new).map(ApplicationError::new), err -> new Some<>(err));
     }
 }
 

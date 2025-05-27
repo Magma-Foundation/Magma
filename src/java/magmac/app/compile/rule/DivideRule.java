@@ -1,5 +1,7 @@
 package magmac.app.compile.rule;
 
+import magmac.api.None;
+import magmac.api.Some;
 import magmac.api.Tuple2;
 import magmac.api.collect.Joiner;
 import magmac.api.collect.ListCollector;
@@ -18,32 +20,32 @@ import magmac.app.compile.rule.divide.MutableDivideState;
 import magmac.app.compile.rule.fold.Folder;
 import magmac.app.compile.rule.fold.StatementFolder;
 
-import java.util.Optional;
+import magmac.api.Option;
 
 public record DivideRule(String key, Folder folder, Rule childRule) implements Rule {
     public static DivideRule Statements(String key, Rule childRule) {
         return new DivideRule(key, new StatementFolder(), childRule);
     }
 
-    private static Optional<DivideState> foldEscape(DivideState current, char c) {
+    private static Option<DivideState> foldEscape(DivideState current, char c) {
         if ('\\' == c) {
             return current.popAndAppendToOption();
         }
         else {
-            return Optional.of(current);
+            return new Some<>(current);
         }
     }
 
     private Iter<String> divide(String input) {
         DivideState current = new MutableDivideState(input);
         while (true) {
-            Optional<Tuple2<DivideState, Character>> maybePopped = current.pop();
+            Option<Tuple2<DivideState, Character>> maybePopped = current.pop();
             if (maybePopped.isEmpty()) {
                 break;
             }
 
-            current = maybePopped.get().left();
-            char c = maybePopped.get().right();
+            current = maybePopped.orElse(null).left();
+            char c = maybePopped.orElse(null).right();
 
             DivideState finalCurrent = current;
             current = this.foldSingleQuotes(current, c)
@@ -53,9 +55,9 @@ public record DivideRule(String key, Folder folder, Rule childRule) implements R
         return Iters.fromList(current.advance().stream().toList());
     }
 
-    private Optional<DivideState> foldSingleQuotes(DivideState current, char c) {
+    private Option<DivideState> foldSingleQuotes(DivideState current, char c) {
         if ('\'' != c) {
-            return Optional.empty();
+            return new None<>();
         }
 
         return current.append(c)
@@ -64,7 +66,7 @@ public record DivideRule(String key, Folder folder, Rule childRule) implements R
                 .flatMap(DivideState::popAndAppendToOption);
     }
 
-    private CompileResult<Optional<String>> join(NodeList list) {
+    private CompileResult<Option<String>> join(NodeList list) {
         return InlineCompileResult.fromResult(list.iter()
                 .map(node -> this.childRule.generate(node).result())
                 .collect(new ResultCollector<>(new Joiner())));

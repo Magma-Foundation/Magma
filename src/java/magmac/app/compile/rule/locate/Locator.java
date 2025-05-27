@@ -1,7 +1,7 @@
 package magmac.app.compile.rule.locate;
 
-import java.util.Optional;
+import magmac.api.Option;
 
 public interface Locator {
-    Optional<Integer> locate(String input, String infix);
+    Option<Integer> locate(String input, String infix);
 }
