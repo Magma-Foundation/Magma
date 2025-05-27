@@ -33,7 +33,7 @@ public record OrRule(List<Rule> rules) implements Rule {
                     .orElseGet(() -> new Err<>(new ImmutableCompileError("Invalid combination", context, this.errors)));
         }
 
-        public State<T> withError(CompileError error) {
+        State<T> withError(CompileError error) {
             this.errors.add(error);
             return this;
         }

@@ -21,7 +21,7 @@ public final class MapNode implements Node {
         this(Optional.empty(), new HashMap<>(), new HashMap<>(), new HashMap<>());
     }
 
-    public MapNode(Optional<String> maybeType, Map<String, String> strings, Map<String, Node> nodes, Map<String, List<Node>> nodeLists) {
+    private MapNode(Optional<String> maybeType, Map<String, String> strings, Map<String, Node> nodes, Map<String, List<Node>> nodeLists) {
         this.strings = strings;
         this.maybeType = maybeType;
         this.nodes = nodes;
@@ -132,6 +132,6 @@ public final class MapNode implements Node {
 
     @Override
     public Iter<Tuple2<String, String>> iterStrings() {
-        return Iters.fromMap(strings());
+        return Iters.fromMap(this.strings());
     }
 }

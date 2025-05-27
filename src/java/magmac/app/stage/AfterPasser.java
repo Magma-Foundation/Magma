@@ -26,18 +26,18 @@ public class AfterPasser implements Passer {
     }
 
     private Stream<Node> expandInherits(Node child) {
-        Stream<Node> maybeExtends = this.createInherits(child, "extended").stream();
-        Stream<Node> maybeImplemented = this.createInherits(child, "implemented").stream();
+        Stream<Node> maybeExtends = AfterPasser.createInherits(child, "extended").stream();
+        Stream<Node> maybeImplemented = AfterPasser.createInherits(child, "implemented").stream();
         return Stream.concat(Stream.of(child), Stream.concat(maybeExtends, maybeImplemented));
     }
 
-    private Optional<Node> createInherits(Node child, String key) {
+    private static Optional<Node> createInherits(Node child, String key) {
         return child.findNode(key).map(implemented -> new MapNode("inherits")
                 .withString("child", child.findString("name").orElse(""))
-                .withString("parent", this.findValue(implemented)));
+                .withString("parent", AfterPasser.findValue(implemented)));
     }
 
-    private String findValue(Node type) {
+    private static String findValue(Node type) {
         if (type.is("template")) {
             return type.findString("base").orElse("?");
         }

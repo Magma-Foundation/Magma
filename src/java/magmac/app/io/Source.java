@@ -4,7 +4,7 @@ import magmac.api.result.Result;
 
 import java.io.IOException;
 
-public interface Source {
+interface Source {
     String computeName();
 
     Result<String, IOException> read();

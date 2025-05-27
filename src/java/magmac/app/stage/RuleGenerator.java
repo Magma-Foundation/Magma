@@ -19,8 +19,8 @@ public class RuleGenerator implements Generator {
     }
 
     @Override
-    public Result<Map<Location, String>, CompileError> generateAll(Roots parsed) {
-        return Iters.fromMap(parsed.roots())
+    public Result<Map<Location, String>, CompileError> generateAll(Roots roots) {
+        return Iters.fromMap(roots.roots())
                 .map(entry -> this.rootRule.generate(entry.right()).mapValue(generated -> new Tuple2<>(entry.left(), generated)))
                 .collect(new ResultCollector<>(new MapCollector<>()));
     }

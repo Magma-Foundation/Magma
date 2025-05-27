@@ -31,8 +31,8 @@ public class CreateDiagram implements All {
                 .flatMap(Collection::stream)
                 .toList();
 
-        Map<String, List<String>> childrenWithInheritedTypes = this.findChildrenWithInheritedTypes(oldRootSegments);
-        Map<String, List<String>> childrenWithDependencies = this.findChildrenWithDependencies(oldRootSegments);
+        Map<String, List<String>> childrenWithInheritedTypes = CreateDiagram.findChildrenWithInheritedTypes(oldRootSegments);
+        Map<String, List<String>> childrenWithDependencies = CreateDiagram.findChildrenWithDependencies(oldRootSegments);
         List<Node> newDependencies = Iters.fromMap(childrenWithDependencies).fold(new ArrayList<Node>(), (current, entry) -> {
             String child = entry.left();
             List<String> currentDependencies = entry.right();
@@ -65,7 +65,7 @@ public class CreateDiagram implements All {
         return Map.of(location, root);
     }
 
-    private Map<String, List<String>> findChildrenWithDependencies(List<Node> rootSegments) {
+    private static Map<String, List<String>> findChildrenWithDependencies(List<Node> rootSegments) {
         return Iters.fromList(rootSegments).fold(new HashMap<String, List<String>>(), (current, node) -> {
             if (node.is("dependency")) {
                 String parent = node.findString("parent").orElse("");
@@ -81,7 +81,7 @@ public class CreateDiagram implements All {
         });
     }
 
-    private Map<String, List<String>> findChildrenWithInheritedTypes(List<Node> rootSegments) {
+    private static Map<String, List<String>> findChildrenWithInheritedTypes(List<Node> rootSegments) {
         return Iters.fromList(rootSegments).fold(new HashMap<String, List<String>>(), (current1, node1) -> {
             if (!node1.is("inherits")) {
                 return current1;

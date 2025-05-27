@@ -12,7 +12,7 @@ import magmac.app.io.Targets;
 
 import java.nio.file.Paths;
 
-public final class Main {
+final class Main {
     public static void main() {
         Sources sources = new PathSources(Paths.get(".", "src", "java"));
         Targets targets = new PathTargets(Paths.get(".", "diagrams"));

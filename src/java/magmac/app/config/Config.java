@@ -14,11 +14,23 @@ import magmac.app.stage.RuleGenerator;
 import magmac.app.stage.RuleLexer;
 import magmac.app.stage.TreeParser;
 
-public class Config {
+public final class Config {
     public static Compiler createCompiler() {
-        Lexer lexer = new RuleLexer(JavaRoots.createRule());
-        Parser parser = new TreeParser(new JavaToPlantUML(), new AfterPasser(), new CreateDiagram());
-        Generator generator = new RuleGenerator(PlantUMLRoots.createRule());
+        Lexer lexer = Config.createLexer();
+        Parser parser = Config.createParser();
+        Generator generator = Config.createGenerator();
         return new StagedCompiler(lexer, parser, generator);
+    }
+
+    private static Generator createGenerator() {
+        return new RuleGenerator(PlantUMLRoots.createRule());
+    }
+
+    private static Lexer createLexer() {
+        return new RuleLexer(JavaRoots.createRule());
+    }
+
+    private static Parser createParser() {
+        return new TreeParser(new JavaToPlantUML(), new AfterPasser(), new CreateDiagram());
     }
 }

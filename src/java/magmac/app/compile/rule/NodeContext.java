@@ -6,7 +6,7 @@ import magmac.app.compile.node.Node;
 public record NodeContext(Node node) implements Context {
     @Override
     public String display() {
-        return node.toString();
+        return this.node.toString();
     }
 }
 

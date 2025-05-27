@@ -15,7 +15,7 @@ public record ExactRule(String value) implements Rule {
         if (input.equals(this.value)) {
             return new Ok<>(new MapNode());
         }
-        return new Err<>(new ImmutableCompileError("Slice '" + value + "' not present", new StringContext(value)));
+        return new Err<>(new ImmutableCompileError("Slice '" + this.value + "' not present", new StringContext(this.value)));
     }
 
     @Override
