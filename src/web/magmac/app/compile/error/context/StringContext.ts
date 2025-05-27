@@ -1,2 +1,0 @@
-class StringContext
-Context <|-- StringContext

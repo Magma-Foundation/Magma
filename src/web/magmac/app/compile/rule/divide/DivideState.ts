@@ -1,2 +1,0 @@
-Stream --> DivideState
-interface DivideState

@@ -1,2 +1,0 @@
-Location --> ParseState
-interface ParseState

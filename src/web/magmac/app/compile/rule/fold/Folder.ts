@@ -1,2 +1,0 @@
-DivideState --> Folder
-interface Folder

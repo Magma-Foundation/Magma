@@ -1,2 +1,0 @@
-List --> Location
-class Location

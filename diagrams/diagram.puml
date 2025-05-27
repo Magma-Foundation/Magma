@@ -263,6 +263,7 @@ TreeParser --> Map
 MapRoots --> Iters
 MapRoots --> Map
 TypescriptRoots --> DivideRule
+TypescriptRoots --> ExactRule
 TypescriptRoots --> OrRule
 TypescriptRoots --> Rule
 TypescriptRoots --> TypeRule
