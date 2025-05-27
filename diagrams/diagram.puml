@@ -610,6 +610,7 @@ StringRule --> Ok
 StringRule --> InlineCompileResult
 StringRule --> CompileErrors
 StringRule --> MapNode
+InlinePassResult --> None
 Source --> IOResult
 Source --> Location
 PathSources --> Tuple2

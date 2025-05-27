@@ -10,6 +10,6 @@ import magmac.app.stage.parse.ParseState;
 public class TypeScriptPasser implements Passer {
     @Override
     public PassResult pass(ParseState state, Node node) {
-        return new InlinePassResult(new None<>());
+        return InlinePassResult.empty();
     }
 }

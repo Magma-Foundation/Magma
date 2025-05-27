@@ -71,6 +71,6 @@ public class AfterPasser implements Passer {
             return new InlinePassResult(new Some<>(new Tuple2<ParseState, Node>(state, dependency)));
         }
 
-        return new InlinePassResult(new None<>());
+        return InlinePassResult.empty();
     }
 }

@@ -28,7 +28,7 @@ public class FlattenJava implements Passer {
             return FlattenJava.getChildren(state, node.retype("class"));
         }
 
-        return new InlinePassResult(new None<>());
+        return InlinePassResult.empty();
     }
 
     private static InlinePassResult getChildren(ParseState state, Node node) {
