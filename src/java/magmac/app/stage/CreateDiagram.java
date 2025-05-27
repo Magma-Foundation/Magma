@@ -55,7 +55,7 @@ public class CreateDiagram implements All {
             String parent = entry.left();
             List<String> currentDependencies = entry.right();
 
-            List<String> parentDependencies = this.findParentDependencies(parent);
+            List<String> parentDependencies = this.findParentDependencies(parent, inheritances, dependencies);
             List<String> list = new ArrayList<>(currentDependencies);
             list.removeAll(parentDependencies);
 
@@ -77,7 +77,11 @@ public class CreateDiagram implements All {
         return Map.of(location, root);
     }
 
-    private List<String> findParentDependencies(String child) {
-        return Collections.emptyList();
+    private List<String> findParentDependencies(String child, Map<String, List<String>> childToParents, Map<String, List<String>> dependencyMap) {
+        return childToParents.getOrDefault(child, Collections.emptyList())
+                .stream()
+                .map(parent -> dependencyMap.getOrDefault(parent, Collections.emptyList()))
+                .flatMap(Collection::stream)
+                .toList();
     }
 }
