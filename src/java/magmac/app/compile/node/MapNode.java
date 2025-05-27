@@ -152,7 +152,7 @@ public final class MapNode implements Node {
     public Node merge(Node other) {
         var withStrings = MapNode.fold(this, other.iterStrings(), current -> current::withString);
         var withNodes = MapNode.fold(withStrings, other.iterNodes(), current -> current::withNode);
-        return MapNode.fold(withNodes, other.iterNodeLists().map(tuple -> new Tuple2<>(tuple.left(), tuple.right().unwrap())), current -> (key, values) -> current.withNodeList(key, new InlineNodeList(values)));
+        return MapNode.fold(withNodes, other.iterNodeLists(), current -> (key, values) -> current.withNodeList(key, values));
     }
 
     @Override

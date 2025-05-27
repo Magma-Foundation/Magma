@@ -1,9 +1,12 @@
 package magmac.app.lang;
 
+import magmac.api.Tuple2;
+import magmac.api.collect.ListCollector;
 import magmac.api.iter.Iters;
 import magmac.app.compile.node.InlineNodeList;
 import magmac.app.compile.node.MapNode;
 import magmac.app.compile.node.Node;
+import magmac.app.compile.node.NodeList;
 import magmac.app.io.Location;
 import magmac.app.stage.AfterAll;
 
@@ -13,7 +16,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 public class MergeDiagram implements AfterAll {
     private static List<String> findParentDependencies(String child, Map<String, List<String>> childToParents, Map<String, List<String>> dependencyMap) {
@@ -22,50 +24,6 @@ public class MergeDiagram implements AfterAll {
                 .map(parent -> dependencyMap.getOrDefault(parent, Collections.emptyList()))
                 .flatMap(Collection::stream)
                 .toList();
-    }
-
-    @Override
-    public Map<Location, Node> afterAll(Map<Location, Node> roots) {
-        List<Node> oldRootSegments = roots.values()
-                .stream()
-                .map(node -> node.findNodeList("children").map(list -> list.unwrap()))
-                .flatMap(Optional::stream)
-                .flatMap(Collection::stream)
-                .toList();
-
-        Map<String, List<String>> childrenWithInheritedTypes = MergeDiagram.findChildrenWithInheritedTypes(oldRootSegments);
-        Map<String, List<String>> childrenWithDependencies = MergeDiagram.findChildrenWithDependencies(oldRootSegments);
-        List<Node> newDependencies = Iters.fromMap(childrenWithDependencies).fold(new ArrayList<Node>(), (current, entry) -> {
-            String child = entry.left();
-            List<String> currentDependencies = entry.right();
-
-            List<String> parentDependencies = MergeDiagram.findParentDependencies(child, childrenWithInheritedTypes, childrenWithDependencies);
-            List<String> toRemove = new ArrayList<>(parentDependencies);
-            toRemove.addAll(childrenWithInheritedTypes.getOrDefault(child, new ArrayList<>()));
-
-            List<String> list = new ArrayList<>(currentDependencies);
-            list.removeAll(toRemove);
-
-            list.forEach(parent -> {
-                Node dependency = new MapNode("dependency").withString("parent", parent).withString("child", child);
-                current.add(dependency);
-            });
-            return current;
-        });
-
-        List<Node> copy = new ArrayList<Node>();
-        copy.add(new MapNode("start"));
-        copy.addAll(oldRootSegments.stream()
-                .filter(child -> !child.is("dependency"))
-                .toList());
-
-        copy.addAll(newDependencies);
-        copy.add(new MapNode("end"));
-
-        Node node = new MapNode();
-        Node root = node.withNodeList("children", new InlineNodeList(copy));
-        Location location = new Location(Collections.emptyList(), "diagram");
-        return Map.of(location, root);
     }
 
     private static Map<String, List<String>> findChildrenWithDependencies(List<Node> rootSegments) {
@@ -100,5 +58,49 @@ public class MergeDiagram implements AfterAll {
             current1.get(child).add(parent);
             return current1;
         });
+    }
+
+    @Override
+    public Map<Location, Node> afterAll(Map<Location, Node> roots) {
+        List<Node> oldRootSegments = Iters.fromMap(roots)
+                .map(Tuple2::right)
+                .map(node -> node.findNodeList("children"))
+                .flatMap(Iters::fromOption)
+                .flatMap(NodeList::iter)
+                .collect(new ListCollector<>());
+
+        Map<String, List<String>> childrenWithInheritedTypes = MergeDiagram.findChildrenWithInheritedTypes(oldRootSegments);
+        Map<String, List<String>> childrenWithDependencies = MergeDiagram.findChildrenWithDependencies(oldRootSegments);
+        List<Node> newDependencies = Iters.fromMap(childrenWithDependencies).fold(new ArrayList<Node>(), (current, entry) -> {
+            String child = entry.left();
+            List<String> currentDependencies = entry.right();
+
+            List<String> parentDependencies = MergeDiagram.findParentDependencies(child, childrenWithInheritedTypes, childrenWithDependencies);
+            List<String> toRemove = new ArrayList<>(parentDependencies);
+            toRemove.addAll(childrenWithInheritedTypes.getOrDefault(child, new ArrayList<>()));
+
+            List<String> list = new ArrayList<>(currentDependencies);
+            list.removeAll(toRemove);
+
+            list.forEach(parent -> {
+                Node dependency = new MapNode("dependency").withString("parent", parent).withString("child", child);
+                current.add(dependency);
+            });
+            return current;
+        });
+
+        List<Node> copy = new ArrayList<Node>();
+        copy.add(new MapNode("start"));
+        copy.addAll(oldRootSegments.stream()
+                .filter(child -> !child.is("dependency"))
+                .toList());
+
+        copy.addAll(newDependencies);
+        copy.add(new MapNode("end"));
+
+        Node node = new MapNode();
+        Node root = node.withNodeList("children", new InlineNodeList(copy));
+        Location location = new Location(Collections.emptyList(), "diagram");
+        return Map.of(location, root);
     }
 }

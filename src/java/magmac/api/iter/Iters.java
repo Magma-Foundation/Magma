@@ -30,4 +30,8 @@ public final class Iters {
                 .<Iter<T>>map(t -> new HeadedIter<>(new SingleHead<>(t)))
                 .orElseGet(() -> new HeadedIter<>(new EmptyHead<>()));
     }
+
+    public static <T> Iter<T> fromValues(T... values) {
+        return Iters.fromArray(values);
+    }
 }

@@ -22,4 +22,6 @@ public interface Iter<T> {
     Optional<T> next();
 
     <R> Iter<R> flatMap(Function<T, Iter<R>> mapper);
+
+    Iter<T> concat(Iter<T> other);
 }

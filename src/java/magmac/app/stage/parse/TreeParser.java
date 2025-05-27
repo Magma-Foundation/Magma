@@ -8,6 +8,7 @@ import magmac.api.result.Result;
 import magmac.app.compile.error.CompileError;
 import magmac.app.compile.node.InlineNodeList;
 import magmac.app.compile.node.Node;
+import magmac.app.compile.node.NodeList;
 import magmac.app.io.Location;
 import magmac.app.stage.AfterAll;
 import magmac.app.stage.MapRoots;
@@ -30,18 +31,17 @@ public class TreeParser implements Parser {
     }
 
     private Tuple2<ParseState, Node> parseNodeLists(ParseState state, Node root) {
-        return root.iterNodeLists().map(tuple -> new Tuple2<>(tuple.left(), tuple.right().unwrap())).fold(new Tuple2<>(state, root), (current, entry) -> this.parseNodeList(current, entry));
+        return root.iterNodeLists().fold(new Tuple2<>(state, root), (current, entry) -> this.parseNodeList(current, entry));
     }
 
-    private Tuple2<ParseState, Node> parseNodeList(Tuple2<ParseState, Node> current, Tuple2<String, List<Node>> entry) {
+    private Tuple2<ParseState, Node> parseNodeList(Tuple2<ParseState, Node> current, Tuple2<String, NodeList> entry) {
         ParseState currentState = current.left();
         Node currentNode = current.right();
 
         String key = entry.left();
-        List<Node> values = entry.right();
 
         Tuple2<ParseState, List<Node>> initial = new Tuple2<>(currentState, new ArrayList<Node>());
-        Tuple2<ParseState, List<Node>> newTuple = Iters.fromList(values).fold(initial, (currentTuple, node) -> {
+        Tuple2<ParseState, List<Node>> newTuple = entry.right().iter().fold(initial, (currentTuple, node) -> {
             ParseState currentState1 = currentTuple.left();
             List<Node> currentElements = currentTuple.right();
 

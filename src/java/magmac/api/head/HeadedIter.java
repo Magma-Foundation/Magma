@@ -62,4 +62,9 @@ public record HeadedIter<T>(Head<T> head) implements Iter<T> {
                 .<Head<R>>map(initial -> new FlatMapHead<>(this.head, mapper, initial))
                 .orElse(new EmptyHead<>()));
     }
+
+    @Override
+    public Iter<T> concat(Iter<T> other) {
+        return new HeadedIter<>(() -> this.head.next().or(() -> other.next()));
+    }
 }

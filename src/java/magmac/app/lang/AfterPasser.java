@@ -1,17 +1,18 @@
 package magmac.app.lang;
 
 import magmac.api.Tuple2;
+import magmac.api.collect.ListCollector;
+import magmac.api.iter.Iter;
+import magmac.api.iter.Iters;
 import magmac.app.compile.node.InlineNodeList;
 import magmac.app.compile.node.MapNode;
 import magmac.app.compile.node.Node;
 import magmac.app.stage.Passer;
 import magmac.app.stage.parse.ParseState;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Stream;
 
 public class AfterPasser implements Passer {
     private static Optional<Node> createInherits(Node child, String key) {
@@ -32,21 +33,23 @@ public class AfterPasser implements Passer {
         return "?";
     }
 
+    private static Iter<Node> replaceRootChild(Node child) {
+        Iter<Node> maybeExtends = Iters.fromOption(AfterPasser.createInherits(child, "extended"));
+        Iter<Node> maybeImplemented = Iters.fromOption(AfterPasser.createInherits(child, "implemented"));
+        return Iters.fromValues(child).concat(maybeExtends).concat(maybeImplemented);
+    }
+
     @Override
     public Optional<Tuple2<ParseState, Node>> pass(ParseState state, Node node) {
         if (node.is("root")) {
-            List<Node> children = node.findNodeList("children").map(list -> list.unwrap()).orElse(new ArrayList<>())
-                    .stream()
-                    .flatMap(child -> AfterPasser.expandInherits(child))
-                    .toList();
-
+            List<Node> children = AfterPasser.replaceRootChildren(node);
             return Optional.of(new Tuple2<>(state, node.withNodeList("children", new InlineNodeList(children))));
         }
 
         if (node.is("import")) {
-            String child = node.findNodeList("segments").map(list -> list.unwrap())
-                    .orElse(Collections.emptyList())
-                    .getLast()
+            String child = node.findNodeList("segments")
+                    .orElse(InlineNodeList.empty())
+                    .last()
                     .findString("value")
                     .orElse("");
 
@@ -60,9 +63,11 @@ public class AfterPasser implements Passer {
         return Optional.empty();
     }
 
-    private static Stream<Node> expandInherits(Node child) {
-        Stream<Node> maybeExtends = AfterPasser.createInherits(child, "extended").stream();
-        Stream<Node> maybeImplemented = AfterPasser.createInherits(child, "implemented").stream();
-        return Stream.concat(Stream.of(child), Stream.concat(maybeExtends, maybeImplemented));
+    private static List<Node> replaceRootChildren(Node node) {
+        return node.findNodeList("children")
+                .orElse(InlineNodeList.empty())
+                .iter()
+                .flatMap(child -> AfterPasser.replaceRootChild(child))
+                .collect(new ListCollector<>());
     }
 }

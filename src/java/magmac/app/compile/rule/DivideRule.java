@@ -11,12 +11,12 @@ import magmac.app.compile.error.CompileErrors;
 import magmac.app.compile.node.InlineNodeList;
 import magmac.app.compile.node.MapNode;
 import magmac.app.compile.node.Node;
+import magmac.app.compile.node.NodeList;
 import magmac.app.compile.rule.divide.DivideState;
 import magmac.app.compile.rule.divide.MutableDivideState;
 import magmac.app.compile.rule.fold.Folder;
 import magmac.app.compile.rule.fold.StatementFolder;
 
-import java.util.List;
 import java.util.Optional;
 
 public record DivideRule(String key, Folder folder, Rule childRule) implements Rule {
@@ -48,14 +48,14 @@ public record DivideRule(String key, Folder folder, Rule childRule) implements R
 
     @Override
     public Result<String, CompileError> generate(Node node) {
-        return node.findNodeList(this.key).map(list1 -> list1.unwrap())
+        return node.findNodeList(this.key)
                 .map(list -> this.join(list))
                 .orElseGet(() -> CompileErrors.createNodeError(node, "Node list '" + this.key + "' not present"))
                 .mapValue(value -> value.orElse(""));
     }
 
-    private Result<Optional<String>, CompileError> join(List<Node> list) {
-        return Iters.fromList(list)
+    private Result<Optional<String>, CompileError> join(NodeList list) {
+        return list.iter()
                 .map(this.childRule::generate)
                 .collect(new ResultCollector<>(new Joiner()));
     }
