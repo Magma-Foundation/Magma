@@ -82,6 +82,8 @@ class Location
 interface Parser
 class StringContext
 Context <|-- StringContext
+class StagedCompiler
+Compiler <|-- StagedCompiler
 class PathTargets
 Targets <|-- PathTargets
 class SingleHead
@@ -89,6 +91,7 @@ Head <|-- SingleHead
 class StripRule
 Rule <|-- StripRule
 interface Error
+interface Compiler
 interface Iter
 class Ok
 Result <|-- Ok
@@ -174,6 +177,10 @@ AfterPasser --> Stream
 PrefixRule --> Err
 PrefixRule --> StringContext
 PrefixRule --> ImmutableCompileError
+Compiler --> Result
+Compiler --> CompileError
+Compiler --> Location
+Compiler --> Map
 Head --> Optional
 InfixRule --> Err
 InfixRule --> StringContext
@@ -315,6 +322,10 @@ SafeFiles --> Stream
 Targets --> IOException
 Targets --> Map
 Targets --> Optional
+StagedCompiler --> Generator
+StagedCompiler --> Lexer
+StagedCompiler --> Parser
+StagedCompiler --> Roots
 MutableDivideState --> ArrayList
 MutableDivideState --> List
 CompileApplication --> ApplicationError
@@ -322,10 +333,6 @@ CompileApplication --> ThrowableError
 CompileApplication --> Location
 CompileApplication --> Sources
 CompileApplication --> Targets
-CompileApplication --> Generator
-CompileApplication --> Lexer
-CompileApplication --> Parser
-CompileApplication --> Roots
 CompileApplication --> Map
 ContextRule --> StringContext
 ContextRule --> ImmutableCompileError
@@ -342,15 +349,17 @@ SymbolRule --> StringContext
 SymbolRule --> ImmutableCompileError
 Main --> Application
 Main --> CompileApplication
+Main --> Error
+Main --> StagedCompiler
 Main --> JavaRoots
 Main --> PlantUMLRoots
-Main --> Error
 Main --> PathSources
 Main --> PathTargets
 Main --> Sources
 Main --> Targets
-Main --> CreateDiagram
 Main --> AfterPasser
+Main --> CreateDiagram
+Main --> Generator
 Main --> JavaToPlantUML
 Main --> Lexer
 Main --> Parser

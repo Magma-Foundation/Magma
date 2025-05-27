@@ -2,15 +2,17 @@ package magmac;
 
 import magmac.app.Application;
 import magmac.app.CompileApplication;
+import magmac.app.Error;
+import magmac.app.StagedCompiler;
 import magmac.app.compile.lang.java.JavaRoots;
 import magmac.app.compile.lang.plant.PlantUMLRoots;
-import magmac.app.Error;
 import magmac.app.io.PathSources;
 import magmac.app.io.PathTargets;
 import magmac.app.io.Sources;
 import magmac.app.io.Targets;
-import magmac.app.stage.CreateDiagram;
 import magmac.app.stage.AfterPasser;
+import magmac.app.stage.CreateDiagram;
+import magmac.app.stage.Generator;
 import magmac.app.stage.JavaToPlantUML;
 import magmac.app.stage.Lexer;
 import magmac.app.stage.Parser;
@@ -26,7 +28,8 @@ public final class Main {
         Targets targets = new PathTargets(Paths.get(".", "diagrams"));
         Lexer lexer = new RuleLexer(JavaRoots.createRule());
         Parser parser = new TreeParser(new JavaToPlantUML(), new AfterPasser(), new CreateDiagram());
-        Application application = new CompileApplication(sources, targets, lexer, parser, new RuleGenerator(PlantUMLRoots.createRule()));
+        Generator generator = new RuleGenerator(PlantUMLRoots.createRule());
+        Application application = new CompileApplication(sources, new StagedCompiler(lexer, parser, generator), targets);
         application.run().ifPresent(error -> Main.handleError(error));
     }
 

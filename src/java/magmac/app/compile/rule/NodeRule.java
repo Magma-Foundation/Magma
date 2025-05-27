@@ -16,9 +16,7 @@ public record NodeRule(String key, Rule childRule) implements Rule {
 
     @Override
     public Result<String, CompileError> generate(Node node) {
-        return this.findNode(node).flatMapValue(child -> {
-            return this.childRule.generate(child);
-        });
+        return this.findNode(node).flatMapValue(child -> this.childRule.generate(child));
     }
 
     private Result<Node, CompileError> findNode(Node node) {
