@@ -10,7 +10,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-public class BeforePasser implements Passer {
+public class JavaToPlantUML implements Passer {
     @Override
     public Optional<Tuple2<ParseState, Node>> pass(ParseState state, Node node) {
         if (node.is("root")) {
