@@ -4,23 +4,18 @@ import magmac.api.Tuple2;
 import magmac.api.collect.Iter;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 public interface Node {
+    Iter<Tuple2<String, Node>> iterNodes();
+
     Iter<Tuple2<String, List<Node>>> iterNodeLists();
 
     Node withString(String key, String value);
 
     Optional<String> findString(String key);
 
-    Map<String, Node> nodes();
-
-    Map<String, List<Node>> nodeLists();
-
     Node merge(Node other);
-
-    Map<String, String> strings();
 
     boolean is(String type);
 
@@ -33,4 +28,6 @@ public interface Node {
     Node withNode(String key, Node value);
 
     Optional<Node> findNode(String key);
+
+    Iter<Tuple2<String, String>> iterStrings();
 }

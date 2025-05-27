@@ -8,6 +8,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 
 public final class MapNode implements Node {
     private final Optional<String> maybeType;
@@ -28,6 +30,11 @@ public final class MapNode implements Node {
 
     public MapNode(String type) {
         this(Optional.of(type), new HashMap<>(), new HashMap<>(), new HashMap<>());
+    }
+
+    @Override
+    public Iter<Tuple2<String, Node>> iterNodes() {
+        return Iters.fromMap(this.nodes);
     }
 
     @Override
@@ -61,8 +68,7 @@ public final class MapNode implements Node {
         }
     }
 
-    @Override
-    public Map<String, String> strings() {
+    private Map<String, String> strings() {
         return this.strings;
     }
 
@@ -109,20 +115,23 @@ public final class MapNode implements Node {
     }
 
     @Override
-    public Map<String, Node> nodes() {
-        return this.nodes;
-    }
-
-    @Override
-    public Map<String, List<Node>> nodeLists() {
-        return this.nodeLists;
-    }
-
-    @Override
     public Node merge(Node other) {
-        this.strings.putAll(other.strings());
-        this.nodes.putAll(other.nodes());
-        this.nodeLists.putAll(other.nodeLists());
-        return this;
+        var withStrings = MapNode.fold(this, other.iterStrings(), current -> current::withString);
+        var withNodes = MapNode.fold(withStrings, other.iterNodes(), current -> current::withNode);
+        return MapNode.fold(withNodes, other.iterNodeLists(), current -> current::withNodeList);
+    }
+
+    private static <T> Node fold(Node node, Iter<Tuple2<String, T>> iter, Function<Node, BiFunction<String, T, Node>> mapper) {
+        return iter.fold(node, (current, tuple) -> {
+            String left = tuple.left();
+            T right = tuple.right();
+
+            return mapper.apply(current).apply(left, right);
+        });
+    }
+
+    @Override
+    public Iter<Tuple2<String, String>> iterStrings() {
+        return Iters.fromMap(strings());
     }
 }

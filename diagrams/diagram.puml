@@ -130,7 +130,6 @@ Roots --> Map
 Node --> Tuple2
 Node --> Iter
 Node --> List
-Node --> Map
 Node --> Optional
 ParseState --> Location
 FlatMapHead --> Head
@@ -266,6 +265,9 @@ StringRule --> MapNode
 StringRule --> ImmutableCompileError
 MapNode --> Iters
 MapNode --> HashMap
+MapNode --> Map
+MapNode --> BiFunction
+MapNode --> Function
 Folder --> DivideState
 PathSources --> SafeFiles
 PathSources --> Tuple2
