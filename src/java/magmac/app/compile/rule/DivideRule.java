@@ -7,6 +7,7 @@ import magmac.api.collect.ResultCollector;
 import magmac.api.iter.Iter;
 import magmac.api.iter.Iters;
 import magmac.app.compile.error.CompileResult;
+import magmac.app.compile.error.InlineCompileResult;
 import magmac.app.compile.error.error.CompileErrors;
 import magmac.app.compile.node.InlineNodeList;
 import magmac.app.compile.node.MapNode;
@@ -64,14 +65,14 @@ public record DivideRule(String key, Folder folder, Rule childRule) implements R
     }
 
     private CompileResult<Optional<String>> join(NodeList list) {
-        return new CompileResult<>(list.iter()
+        return InlineCompileResult.fromResult(list.iter()
                 .map(node -> this.childRule.generate(node).result())
                 .collect(new ResultCollector<>(new Joiner())));
     }
 
     @Override
     public CompileResult<Node> lex(String input) {
-        return new CompileResult<>(this.divide(input)
+        return InlineCompileResult.fromResult(this.divide(input)
                 .map(segment -> this.childRule.lex(segment).result())
                 .collect(new ResultCollector<>(new ListCollector<>()))
                 .mapValue(children -> {

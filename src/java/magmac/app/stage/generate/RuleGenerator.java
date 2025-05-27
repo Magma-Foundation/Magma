@@ -4,6 +4,7 @@ import magmac.api.Tuple2;
 import magmac.api.collect.MapCollector;
 import magmac.api.collect.ResultCollector;
 import magmac.app.compile.error.CompileResult;
+import magmac.app.compile.error.InlineCompileResult;
 import magmac.app.compile.rule.Rule;
 import magmac.app.io.Location;
 import magmac.app.stage.Roots;
@@ -19,7 +20,7 @@ public class RuleGenerator implements Generator {
 
     @Override
     public CompileResult<Map<Location, String>> apply(Roots initial) {
-        return new CompileResult<>(initial.iter()
+        return InlineCompileResult.fromResult(initial.iter()
                 .map(entry -> this.rootRule.generate(entry.right()).result().mapValue(generated -> new Tuple2<>(entry.left(), generated)))
                 .collect(new ResultCollector<>(new MapCollector<>())));
     }

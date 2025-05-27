@@ -5,6 +5,7 @@ import magmac.api.collect.MapCollector;
 import magmac.api.collect.ResultCollector;
 import magmac.api.iter.Iter;
 import magmac.app.io.IOResult;
+import magmac.app.io.InlineIOResult;
 import magmac.app.io.Location;
 import magmac.app.io.SafeFiles;
 
@@ -19,7 +20,7 @@ public record PathSources(Path root) implements Sources {
     }
 
     private IOResult<Map<Location, String>> apply(Iter<Path> sources) {
-        return new IOResult<>(sources.filter(Files::isRegularFile)
+        return new InlineIOResult<>(sources.filter(Files::isRegularFile)
                 .filter(file -> file.toString().endsWith(".java"))
                 .map(path -> new PathSource(this.root, path))
                 .map(source -> source.read().mapValue(input -> new Tuple2<>(source.computeLocation(), input)))

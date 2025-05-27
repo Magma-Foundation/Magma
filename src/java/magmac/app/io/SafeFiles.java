@@ -24,17 +24,17 @@ public final class SafeFiles {
 
     public static IOResult<Iter<Path>> walk(Path sourceDirectory) {
         try (Stream<Path> stream = Files.walk(sourceDirectory)) {
-            return new IOResult<>(new Ok<>(Iters.fromList(stream.collect(Collectors.toList()))));
+            return new InlineIOResult<>(new Ok<>(Iters.fromList(stream.collect(Collectors.toList()))));
         } catch (IOException e) {
-            return new IOResult<>(new Err<>(e));
+            return new InlineIOResult<>(new Err<>(e));
         }
     }
 
     public static IOResult<String> readString(Path source) {
         try {
-            return new IOResult<>(new Ok<>(Files.readString(source)));
+            return new InlineIOResult<>(new Ok<>(Files.readString(source)));
         } catch (IOException e) {
-            return new IOResult<>(new Err<>(e));
+            return new InlineIOResult<>(new Err<>(e));
         }
     }
 
