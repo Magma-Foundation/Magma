@@ -26,8 +26,8 @@ public class MergeDiagram implements AfterAll {
                 .toList();
     }
 
-    private static Map<String, List<String>> findChildrenWithDependencies(List<Node> rootSegments) {
-        return Iters.fromList(rootSegments).fold(new HashMap<String, List<String>>(), (current, node) -> {
+    private static Map<String, List<String>> findChildrenWithDependencies(NodeList rootSegments) {
+        return rootSegments.iter().fold(new HashMap<String, List<String>>(), (current, node) -> {
             if (node.is("dependency")) {
                 String parent = node.findString("parent").orElse("");
                 String child = node.findString("child").orElse("");
@@ -42,8 +42,8 @@ public class MergeDiagram implements AfterAll {
         });
     }
 
-    private static Map<String, List<String>> findChildrenWithInheritedTypes(List<Node> rootSegments) {
-        return Iters.fromList(rootSegments).fold(new HashMap<String, List<String>>(), (current1, node1) -> {
+    private static Map<String, List<String>> findChildrenWithInheritedTypes(NodeList rootSegments) {
+        return rootSegments.iter().fold(new HashMap<String, List<String>>(), (current1, node1) -> {
             if (!node1.is("inherits")) {
                 return current1;
             }
@@ -62,16 +62,16 @@ public class MergeDiagram implements AfterAll {
 
     @Override
     public Map<Location, Node> afterAll(Map<Location, Node> roots) {
-        List<Node> oldRootSegments = Iters.fromMap(roots)
+        NodeList oldRootSegments = new InlineNodeList(Iters.fromMap(roots)
                 .map(Tuple2::right)
                 .map(node -> node.findNodeList("children"))
                 .flatMap(Iters::fromOption)
                 .flatMap(NodeList::iter)
-                .collect(new ListCollector<>());
+                .collect(new ListCollector<>()));
 
         Map<String, List<String>> childrenWithInheritedTypes = MergeDiagram.findChildrenWithInheritedTypes(oldRootSegments);
         Map<String, List<String>> childrenWithDependencies = MergeDiagram.findChildrenWithDependencies(oldRootSegments);
-        List<Node> newDependencies = Iters.fromMap(childrenWithDependencies).fold(new ArrayList<Node>(), (current, entry) -> {
+        NodeList newDependencies = Iters.fromMap(childrenWithDependencies).fold(InlineNodeList.empty(), (current, entry) -> {
             String child = entry.left();
             List<String> currentDependencies = entry.right();
 
@@ -82,24 +82,25 @@ public class MergeDiagram implements AfterAll {
             List<String> list = new ArrayList<>(currentDependencies);
             list.removeAll(toRemove);
 
-            list.forEach(parent -> {
-                Node dependency = new MapNode("dependency").withString("parent", parent).withString("child", child);
-                current.add(dependency);
-            });
-            return current;
+            NodeList others = new InlineNodeList(Iters.fromList(list)
+                    .map(parent -> new MapNode("dependency").withString("parent", parent).withString("child", child))
+                    .collect(new ListCollector<>()));
+
+            return current.addAll(others);
         });
 
-        List<Node> copy = new ArrayList<Node>();
-        copy.add(new MapNode("start"));
-        copy.addAll(oldRootSegments.stream()
+        NodeList withoutDependencies = new InlineNodeList(oldRootSegments.iter()
                 .filter(child -> !child.is("dependency"))
-                .toList());
+                .collect(new ListCollector<>()));
 
-        copy.addAll(newDependencies);
-        copy.add(new MapNode("end"));
+        NodeList copy = InlineNodeList.empty()
+                .add(new MapNode("start"))
+                .addAll(withoutDependencies)
+                .addAll(newDependencies)
+                .add(new MapNode("end"));
 
         Node node = new MapNode();
-        Node root = node.withNodeList("children", new InlineNodeList(copy));
+        Node root = node.withNodeList("children", copy);
         Location location = new Location(Collections.emptyList(), "diagram");
         return Map.of(location, root);
     }

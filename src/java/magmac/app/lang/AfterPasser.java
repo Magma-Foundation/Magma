@@ -7,11 +7,10 @@ import magmac.api.iter.Iters;
 import magmac.app.compile.node.InlineNodeList;
 import magmac.app.compile.node.MapNode;
 import magmac.app.compile.node.Node;
+import magmac.app.compile.node.NodeList;
 import magmac.app.stage.Passer;
 import magmac.app.stage.parse.ParseState;
 
-import java.util.Collections;
-import java.util.List;
 import java.util.Optional;
 
 public class AfterPasser implements Passer {
@@ -39,11 +38,19 @@ public class AfterPasser implements Passer {
         return Iters.fromValues(child).concat(maybeExtends).concat(maybeImplemented);
     }
 
+    private static NodeList replaceRootChildren(Node node) {
+        return new InlineNodeList(node.findNodeList("children")
+                .orElse(InlineNodeList.empty())
+                .iter()
+                .flatMap(child -> AfterPasser.replaceRootChild(child))
+                .collect(new ListCollector<>()));
+    }
+
     @Override
     public Optional<Tuple2<ParseState, Node>> pass(ParseState state, Node node) {
         if (node.is("root")) {
-            List<Node> children = AfterPasser.replaceRootChildren(node);
-            return Optional.of(new Tuple2<>(state, node.withNodeList("children", new InlineNodeList(children))));
+            NodeList values = AfterPasser.replaceRootChildren(node);
+            return Optional.of(new Tuple2<>(state, node.withNodeList("children", values)));
         }
 
         if (node.is("import")) {
@@ -63,11 +70,4 @@ public class AfterPasser implements Passer {
         return Optional.empty();
     }
 
-    private static List<Node> replaceRootChildren(Node node) {
-        return node.findNodeList("children")
-                .orElse(InlineNodeList.empty())
-                .iter()
-                .flatMap(child -> AfterPasser.replaceRootChild(child))
-                .collect(new ListCollector<>());
-    }
 }

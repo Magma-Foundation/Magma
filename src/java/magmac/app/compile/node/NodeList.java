@@ -6,4 +6,8 @@ public interface NodeList {
     Iter<Node> iter();
 
     Node last();
+
+    NodeList add(Node element);
+
+    NodeList addAll(NodeList others);
 }

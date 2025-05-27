@@ -26,4 +26,16 @@ public final class InlineNodeList implements NodeList {
     public Node last() {
         return this.elements.getLast();
     }
+
+    @Override
+    public NodeList add(Node element) {
+        ArrayList<Node> copy = new ArrayList<>(this.elements);
+        copy.add(element);
+        return new InlineNodeList(copy);
+    }
+
+    @Override
+    public NodeList addAll(NodeList others) {
+        return others.iter().fold(this, NodeList::add);
+    }
 }

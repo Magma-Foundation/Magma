@@ -214,8 +214,7 @@ AfterPasser --> Iter
 AfterPasser --> Iters
 AfterPasser --> InlineNodeList
 AfterPasser --> MapNode
-AfterPasser --> Collections
-AfterPasser --> List
+AfterPasser --> NodeList
 PrefixRule --> CompileErrors
 Compiler --> Result
 Compiler --> CompileError
@@ -256,7 +255,6 @@ Lexer --> Roots
 Lexer --> Map
 TreeParser --> Tuple2
 TreeParser --> MapCollector
-TreeParser --> Iters
 TreeParser --> Ok
 TreeParser --> Result
 TreeParser --> CompileError
@@ -267,8 +265,6 @@ TreeParser --> Location
 TreeParser --> AfterAll
 TreeParser --> MapRoots
 TreeParser --> Passer
-TreeParser --> ArrayList
-TreeParser --> List
 TreeParser --> Map
 MapRoots --> Iters
 MapRoots --> Map
@@ -441,7 +437,7 @@ Main --> Paths
 Main --> Optional
 FlattenJava --> ListCollector
 FlattenJava --> InlineNodeList
-FlattenJava --> List
+FlattenJava --> NodeList
 RuleLexer --> Tuple2
 RuleLexer --> Iters
 RuleLexer --> MapCollector

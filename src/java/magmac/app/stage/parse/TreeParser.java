@@ -2,7 +2,6 @@ package magmac.app.stage.parse;
 
 import magmac.api.Tuple2;
 import magmac.api.collect.MapCollector;
-import magmac.api.iter.Iters;
 import magmac.api.result.Ok;
 import magmac.api.result.Result;
 import magmac.app.compile.error.CompileError;
@@ -15,8 +14,6 @@ import magmac.app.stage.MapRoots;
 import magmac.app.stage.Passer;
 import magmac.app.stage.Roots;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
 public class TreeParser implements Parser {
@@ -40,20 +37,19 @@ public class TreeParser implements Parser {
 
         String key = entry.left();
 
-        Tuple2<ParseState, List<Node>> initial = new Tuple2<>(currentState, new ArrayList<Node>());
-        Tuple2<ParseState, List<Node>> newTuple = entry.right().iter().fold(initial, (currentTuple, node) -> {
+        Tuple2<ParseState, NodeList> initial = new Tuple2<>(currentState, InlineNodeList.empty());
+        Tuple2<ParseState, NodeList> newTuple = entry.right().iter().fold(initial, (currentTuple, node) -> {
             ParseState currentState1 = currentTuple.left();
-            List<Node> currentElements = currentTuple.right();
+            NodeList currentElements = currentTuple.right();
 
             Tuple2<ParseState, Node> parsed = this.parseTree(currentState1, node);
             ParseState newState = parsed.left();
             Node newElement = parsed.right();
 
-            currentElements.add(newElement);
-            return new Tuple2<>(newState, currentElements);
+            return new Tuple2<>(newState, currentElements.add(newElement));
         });
 
-        return new Tuple2<>(newTuple.left(), currentNode.withNodeList(key, new InlineNodeList(newTuple.right())));
+        return new Tuple2<>(newTuple.left(), currentNode.withNodeList(key, newTuple.right()));
     }
 
     private Tuple2<Location, Node> parse(Location location, Node root) {
