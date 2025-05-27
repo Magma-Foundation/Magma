@@ -5,6 +5,7 @@ import magmac.api.collect.MapCollector;
 import magmac.api.collect.ResultCollector;
 import magmac.api.result.Result;
 import magmac.app.compile.error.CompileError;
+import magmac.app.compile.error.CompileResult;
 import magmac.app.compile.rule.Rule;
 import magmac.app.io.Location;
 import magmac.app.stage.Roots;
@@ -18,10 +19,14 @@ public class RuleGenerator implements Generator {
         this.rootRule = rootRule;
     }
 
-    @Override
-    public Result<Map<Location, String>, CompileError> apply(Roots roots) {
+    private Result<Map<Location, String>, CompileError> apply0(Roots roots) {
         return roots.iter()
                 .map(entry -> this.rootRule.generate(entry.right()).result().mapValue(generated -> new Tuple2<>(entry.left(), generated)))
                 .collect(new ResultCollector<>(new MapCollector<>()));
+    }
+
+    @Override
+    public CompileResult<Map<Location, String>> apply(Roots initial) {
+        return new CompileResult<>(this.apply0(initial));
     }
 }

@@ -336,8 +336,7 @@ DivideRule --> Optional
 Locator --> Optional
 ListCollector --> ArrayList
 ListCollector --> List
-Stage --> Result
-Stage --> CompileError
+Stage --> CompileResult
 Iter --> Collector
 Iter --> Result
 Iter --> Optional
@@ -402,6 +401,7 @@ TreeParser --> MapCollector
 TreeParser --> Ok
 TreeParser --> Result
 TreeParser --> CompileError
+TreeParser --> CompileResult
 TreeParser --> InlineNodeList
 TreeParser --> Node
 TreeParser --> NodeList
@@ -432,6 +432,7 @@ RuleGenerator --> MapCollector
 RuleGenerator --> ResultCollector
 RuleGenerator --> Result
 RuleGenerator --> CompileError
+RuleGenerator --> CompileResult
 RuleGenerator --> Rule
 Application --> Error
 Application --> Optional
@@ -589,6 +590,7 @@ RuleLexer --> MapCollector
 RuleLexer --> ResultCollector
 RuleLexer --> Result
 RuleLexer --> CompileError
+RuleLexer --> CompileResult
 RuleLexer --> Node
 RuleLexer --> Rule
 RuleLexer --> MapRoots

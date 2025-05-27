@@ -6,6 +6,7 @@ import magmac.api.collect.MapCollector;
 import magmac.api.collect.ResultCollector;
 import magmac.api.result.Result;
 import magmac.app.compile.error.CompileError;
+import magmac.app.compile.error.CompileResult;
 import magmac.app.compile.node.Node;
 import magmac.app.compile.rule.Rule;
 import magmac.app.io.Location;
@@ -29,11 +30,15 @@ public class RuleLexer implements Lexer {
                 .mapValue(root -> new Tuple2<>(location, root));
     }
 
-    @Override
-    public Result<Roots, CompileError> apply(Map<Location, String> values) {
+    private Result<Roots, CompileError> apply0(Map<Location, String> values) {
         return Iters.fromMap(values)
                 .map(entry -> this.foldEntry(entry))
                 .collect(new ResultCollector<>(new MapCollector<>()))
                 .mapValue(MapRoots::new);
+    }
+
+    @Override
+    public CompileResult<Roots> apply(Map<Location, String> initial) {
+        return new CompileResult<>(this.apply0(initial));
     }
 }

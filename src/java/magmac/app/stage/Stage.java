@@ -1,8 +1,7 @@
 package magmac.app.stage;
 
-import magmac.api.result.Result;
-import magmac.app.compile.error.CompileError;
+import magmac.app.compile.error.CompileResult;
 
 public interface Stage<T, R> {
-    Result<R, CompileError> apply(T initial);
+    CompileResult<R> apply(T initial);
 }

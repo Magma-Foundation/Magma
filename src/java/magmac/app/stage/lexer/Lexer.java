@@ -7,4 +7,5 @@ import magmac.app.stage.Stage;
 import java.util.Map;
 
 public interface Lexer extends Stage<Map<Location, String>, Roots> {
+
 }

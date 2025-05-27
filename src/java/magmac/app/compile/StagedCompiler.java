@@ -12,9 +12,9 @@ import java.util.Map;
 
 public record StagedCompiler(Lexer lexer, Parser parser, Generator generator) implements Compiler {
     private Result<Map<Location, String>, CompileError> compile0(Map<Location, String> units) {
-        return this.lexer.apply(units)
-                .flatMapValue(trees -> this.parser.apply(trees))
-                .flatMapValue(trees -> this.generator.apply(trees));
+        return this.lexer.apply(units).result()
+                .flatMapValue(trees -> this.parser.apply(trees).result())
+                .flatMapValue(trees -> this.generator.apply(trees).result());
     }
 
     @Override
