@@ -338,6 +338,7 @@ ExactRule --> CompileErrors
 ExactRule --> MapNode
 JavaRoots --> ContextRule
 JavaRoots --> DivideRule
+JavaRoots --> ExactRule
 JavaRoots --> InfixRule
 JavaRoots --> NodeRule
 JavaRoots --> OrRule

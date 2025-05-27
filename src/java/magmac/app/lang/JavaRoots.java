@@ -2,6 +2,7 @@ package magmac.app.lang;
 
 import magmac.app.compile.rule.ContextRule;
 import magmac.app.compile.rule.DivideRule;
+import magmac.app.compile.rule.ExactRule;
 import magmac.app.compile.rule.InfixRule;
 import magmac.app.compile.rule.NodeRule;
 import magmac.app.compile.rule.OrRule;
@@ -50,8 +51,16 @@ public final class JavaRoots {
                 new ContextRule("Without implements", withEnds)
         ));
 
-        Rule afterKeyword = new InfixRule(withImplements, "{", new StringRule("after-content"));
+        Rule afterKeyword = new InfixRule(withImplements, "{", new StripRule(new SuffixRule(DivideRule.Statements("children", JavaRoots.createStructureMemberRule()), "}")));
         return new TypeRule(keyword, new InfixRule(new StringRule("before-keyword"), keyword + " ", afterKeyword));
+    }
+
+    private static OrRule createStructureMemberRule() {
+        return new OrRule(List.of(
+                new StripRule(new ExactRule("")),
+                new StripRule(new SuffixRule(new StringRule("definition"), ";")),
+                new InfixRule(new StringRule("before-params"), "(", new StringRule("with-params"))
+        ));
     }
 
     private static OrRule createTypeRule() {
