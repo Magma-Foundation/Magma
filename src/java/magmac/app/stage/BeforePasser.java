@@ -35,9 +35,11 @@ public class BeforePasser implements Passer {
 
             return Optional.of(new Tuple2<ParseState, Node>(state, dependency));
         }
-        else {
-            return Optional.empty();
+
+        if(node.is("record")) {
+            return Optional.of(new Tuple2<>(state, node.retype("class")));
         }
 
+        return Optional.empty();
     }
 }
