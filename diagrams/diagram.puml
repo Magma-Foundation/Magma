@@ -202,6 +202,26 @@ DivideState --> Stream
 
 
 
+class CreateDiagram
+
+CreateDiagram --> MapNode
+CreateDiagram --> Node
+CreateDiagram --> Location
+CreateDiagram --> ArrayList
+CreateDiagram --> Collection
+CreateDiagram --> Collections
+CreateDiagram --> List
+CreateDiagram --> Map
+CreateDiagram --> Optional
+
+
+
+
+
+
+
+
+
 class RuleGenerator
 
 RuleGenerator --> Tuple2
@@ -713,26 +733,6 @@ Result --> Supplier
 
 
 
-class AfterAll
-
-AfterAll --> MapNode
-AfterAll --> Node
-AfterAll --> Location
-AfterAll --> ArrayList
-AfterAll --> Collection
-AfterAll --> Collections
-AfterAll --> List
-AfterAll --> Map
-AfterAll --> Optional
-
-
-
-
-
-
-
-
-
 class Main
 
 Main --> Application
@@ -744,7 +744,7 @@ Main --> PathSources
 Main --> PathTargets
 Main --> Sources
 Main --> Targets
-Main --> AfterAll
+Main --> CreateDiagram
 Main --> AfterPasser
 Main --> BeforePasser
 Main --> Lexer

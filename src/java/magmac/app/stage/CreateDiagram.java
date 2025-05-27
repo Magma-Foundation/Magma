@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-public class AfterAll implements All {
+public class CreateDiagram implements All {
     @Override
     public Map<Location, Node> afterAll(Map<Location, Node> roots) {
         List<Node> allChildren = roots.values()
@@ -21,13 +21,13 @@ public class AfterAll implements All {
                 .flatMap(Collection::stream)
                 .toList();
 
-        Location location = new Location(Collections.emptyList(), "diagram");
         List<Node> copy = new ArrayList<Node>();
         copy.add(new MapNode("start"));
         copy.addAll(allChildren);
         copy.add(new MapNode("end"));
 
         Node root = new MapNode().withNodeList("children", copy);
+        Location location = new Location(Collections.emptyList(), "diagram");
         return Map.of(location, root);
     }
 }

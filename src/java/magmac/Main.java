@@ -9,7 +9,7 @@ import magmac.app.io.PathSources;
 import magmac.app.io.PathTargets;
 import magmac.app.io.Sources;
 import magmac.app.io.Targets;
-import magmac.app.stage.AfterAll;
+import magmac.app.stage.CreateDiagram;
 import magmac.app.stage.AfterPasser;
 import magmac.app.stage.BeforePasser;
 import magmac.app.stage.Lexer;
@@ -25,7 +25,7 @@ public final class Main {
         Sources sources = new PathSources(Paths.get(".", "src", "java"));
         Targets targets = new PathTargets(Paths.get(".", "diagrams"));
         Lexer lexer = new RuleLexer(JavaRoots.createRule());
-        Parser parser = new TreeParser(new BeforePasser(), new AfterPasser(), new AfterAll());
+        Parser parser = new TreeParser(new BeforePasser(), new AfterPasser(), new CreateDiagram());
         Application application = new CompileApplication(sources, targets, lexer, parser, new RuleGenerator(PlantUMLRoots.createRule()));
         application.run().ifPresent(error -> Main.handleError(error));
     }
