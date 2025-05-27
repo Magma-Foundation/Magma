@@ -1,5 +1,7 @@
 @startuml
 skinparam linetype ortho
+class ListCollector
+Collector <|-- ListCollector
 class RangeHead
 Head <|-- RangeHead
 interface Source
@@ -149,18 +151,20 @@ Passer --> Optional
 Result --> Tuple2
 Result --> Function
 Result --> Supplier
-DivideRule --> Iters
 DivideRule --> Joiner
+DivideRule --> ListCollector
 DivideRule --> ResultCollector
-DivideRule --> Ok
+DivideRule --> Iter
+DivideRule --> Iters
+DivideRule --> CompileErrors
 DivideRule --> MapNode
 DivideRule --> DivideState
 DivideRule --> MutableDivideState
 DivideRule --> Folder
-DivideRule --> CompileErrors
-DivideRule --> ArrayList
 DivideRule --> List
 DivideRule --> Optional
+ListCollector --> ArrayList
+ListCollector --> List
 Stage --> Result
 Stage --> CompileError
 Iter --> Collector
