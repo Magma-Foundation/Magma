@@ -10,7 +10,7 @@ import magmac.app.compile.rule.Rule;
 import magmac.app.compile.rule.StringRule;
 import magmac.app.compile.rule.StripRule;
 import magmac.app.compile.rule.SuffixRule;
-import magmac.app.compile.rule.SymbolRule;
+import magmac.app.compile.rule.FilterRule;
 import magmac.app.compile.rule.TypeRule;
 import magmac.app.compile.rule.fold.DelimitedFolder;
 
@@ -30,7 +30,7 @@ public final class JavaLang {
     }
 
     private static Rule createStructureRule(String keyword) {
-        Rule name = new StripRule(new SymbolRule(new StringRule("name")));
+        Rule name = new StripRule(FilterRule.Symbol(new StringRule("name")));
         Rule beforeContent = new OrRule(List.of(
                 new StripRule(new SuffixRule(LocatingRule.First(name, "<", new StringRule("type-params")), ">")),
                 name
@@ -80,7 +80,7 @@ public final class JavaLang {
 
     private static Rule createValueRule() {
         return new OrRule(List.of(
-                new StripRule(new SymbolRule(new StringRule("value")))
+                new StripRule(FilterRule.Number(new StringRule("value")))
         ));
     }
 
@@ -104,7 +104,7 @@ public final class JavaLang {
     }
 
     private static TypeRule createSymbolTypeRule() {
-        return new TypeRule("symbol", new StripRule(new SymbolRule(new StringRule("value"))));
+        return new TypeRule("symbol", new StripRule(FilterRule.Symbol(new StringRule("value"))));
     }
 
     private static TypeRule createTemplateRule() {
