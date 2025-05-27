@@ -47,10 +47,32 @@ public record DivideRule(String key, Folder folder, Rule childRule) implements R
             current = maybePopped.get().left();
             char c = maybePopped.get().right();
 
-            current = this.folder.fold(current, c);
+            DivideState finalCurrent = current;
+            current = this.foldSingleQuotes(current, c)
+                    .orElseGet(() -> this.folder.fold(finalCurrent, c));
         }
 
         return Iters.fromList(current.advance().stream().toList());
+    }
+
+    private Optional<DivideState> foldSingleQuotes(DivideState current, char c) {
+        if ('\'' != c) {
+            return Optional.empty();
+        }
+
+        return current.append(c)
+                .popAndAppendToTuple()
+                .flatMap(tuple -> DivideRule.foldEscape(current, tuple.right()))
+                .flatMap(DivideState::popAndAppendToOption);
+    }
+
+    private static Optional<DivideState> foldEscape(DivideState current, char c) {
+        if ('\\' == c) {
+            return current.popAndAppendToOption();
+        }
+        else {
+            return Optional.of(current);
+        }
     }
 
     @Override

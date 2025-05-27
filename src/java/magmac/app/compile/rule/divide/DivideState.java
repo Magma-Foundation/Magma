@@ -21,4 +21,8 @@ public interface DivideState {
     boolean isShallow();
 
     Optional<Tuple2<DivideState, Character>> pop();
+
+    Optional<Tuple2<DivideState, Character>> popAndAppendToTuple();
+
+    Optional<DivideState> popAndAppendToOption();
 }
