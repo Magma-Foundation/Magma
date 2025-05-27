@@ -6,6 +6,7 @@ import magmac.api.result.Result;
 import magmac.app.compile.node.MapNode;
 import magmac.app.compile.node.Node;
 import magmac.app.error.CompileError;
+import magmac.app.error.ImmutableCompileError;
 
 public record NodeRule(String key, Rule childRule) implements Rule {
     @Override
@@ -23,6 +24,6 @@ public record NodeRule(String key, Rule childRule) implements Rule {
     private Result<Node, CompileError> findNode(Node node) {
         return node.findNode(this.key)
                 .<Result<Node, CompileError>>map(Ok::new)
-                .orElseGet(() -> new Err<>(new CompileError("Node '" + this.key + "' not present", new NodeContext(node))));
+                .orElseGet(() -> new Err<>(new ImmutableCompileError("Node '" + this.key + "' not present", new NodeContext(node))));
     }
 }

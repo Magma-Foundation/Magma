@@ -5,12 +5,13 @@ import magmac.api.result.Result;
 import magmac.app.error.CompileError;
 import magmac.app.compile.node.Node;
 import magmac.app.compile.rule.result.StringContext;
+import magmac.app.error.ImmutableCompileError;
 
 public record SuffixRule(Rule childRule, String suffix) implements Rule {
     @Override
     public Result<Node, CompileError> lex(String input) {
         if (!input.endsWith(this.suffix())) {
-            return new Err<>(new CompileError("Suffix '" + suffix + "' not present", new StringContext(input)));
+            return new Err<>(new ImmutableCompileError("Suffix '" + suffix + "' not present", new StringContext(input)));
         }
 
         String slice = input.substring(0, input.length() - this.suffix.length());

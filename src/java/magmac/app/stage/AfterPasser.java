@@ -16,21 +16,25 @@ public class AfterPasser implements Passer {
         if (node.is("root")) {
             List<Node> children = node.findNodeList("children").orElse(new ArrayList<>())
                     .stream()
-                    .flatMap(child -> {
-                        return child.findNode("implemented")
-                                .map(implemented -> {
-                                    Stream<Node> child1 = Stream.of(child, new MapNode("inherits")
-                                            .withString("child", child.findString("name").orElse(""))
-                                            .withString("parent", this.findValue(implemented)));
-                                    return child1;
-                                }).orElseGet(() -> Stream.of(child));
-                    })
+                    .flatMap(child -> this.expandInherits(child))
                     .toList();
 
             return Optional.of(new Tuple2<>(state, node.withNodeList("children", children)));
         }
 
         return Optional.empty();
+    }
+
+    private Stream<Node> expandInherits(Node child) {
+        Stream<Node> maybeExtends = this.createInherits(child, "extended").stream();
+        Stream<Node> maybeImplemented = this.createInherits(child, "implemented").stream();
+        return Stream.concat(Stream.of(child), Stream.concat(maybeExtends, maybeImplemented));
+    }
+
+    private Optional<Node> createInherits(Node child, String key) {
+        return child.findNode(key).map(implemented -> new MapNode("inherits")
+                .withString("child", child.findString("name").orElse(""))
+                .withString("parent", this.findValue(implemented)));
     }
 
     private String findValue(Node type) {

@@ -6,6 +6,7 @@ import magmac.api.result.Result;
 import magmac.app.error.CompileError;
 import magmac.app.compile.node.MapNode;
 import magmac.app.compile.node.Node;
+import magmac.app.error.ImmutableCompileError;
 
 public record StringRule(String key) implements Rule {
     @Override
@@ -17,6 +18,6 @@ public record StringRule(String key) implements Rule {
     public Result<String, CompileError> generate(Node node) {
         return node.findString(this.key)
                 .<Result<String, CompileError>>map(Ok::new)
-                .orElseGet(() -> new Err<>(new CompileError("String '" + this.key + "' not present", new NodeContext(node))));
+                .orElseGet(() -> new Err<>(new ImmutableCompileError("String '" + this.key + "' not present", new NodeContext(node))));
     }
 }

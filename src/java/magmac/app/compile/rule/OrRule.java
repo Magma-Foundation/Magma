@@ -7,6 +7,7 @@ import magmac.app.compile.Context;
 import magmac.app.compile.node.Node;
 import magmac.app.compile.rule.result.StringContext;
 import magmac.app.error.CompileError;
+import magmac.app.error.ImmutableCompileError;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,7 +30,7 @@ public record OrRule(List<Rule> rules) implements Rule {
         Result<T, CompileError> toResult(Context context) {
             return this.maybeValue
                     .<Result<T, CompileError>>map(value -> new Ok<>(value))
-                    .orElseGet(() -> new Err<>(new CompileError("Invalid combination", context, this.errors)));
+                    .orElseGet(() -> new Err<>(new ImmutableCompileError("Invalid combination", context, this.errors)));
         }
 
         public State<T> withError(CompileError error) {

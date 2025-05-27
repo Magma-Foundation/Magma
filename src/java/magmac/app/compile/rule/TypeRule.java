@@ -6,6 +6,7 @@ import magmac.app.compile.Context;
 import magmac.app.compile.node.Node;
 import magmac.app.compile.rule.result.StringContext;
 import magmac.app.error.CompileError;
+import magmac.app.error.ImmutableCompileError;
 
 import java.util.List;
 
@@ -23,10 +24,10 @@ public record TypeRule(String type, Rule childRule) implements Rule {
             return this.childRule.generate(node).mapErr(err -> this.createError(new NodeContext(node), err));
         }
 
-        return new Err<>(new CompileError("Type '" + this.type + "' not present", new NodeContext(node)));
+        return new Err<>(new ImmutableCompileError("Type '" + this.type + "' not present", new NodeContext(node)));
     }
 
     private CompileError createError(Context context, CompileError err) {
-        return new CompileError("Cannot use type '" + this.type + "'", context, List.of(err));
+        return new ImmutableCompileError("Cannot use type '" + this.type + "'", context, List.of(err));
     }
 }

@@ -5,12 +5,13 @@ import magmac.api.result.Result;
 import magmac.app.error.CompileError;
 import magmac.app.compile.node.Node;
 import magmac.app.compile.rule.result.StringContext;
+import magmac.app.error.ImmutableCompileError;
 
 public record PrefixRule(String prefix, Rule childRule) implements Rule {
     @Override
     public Result<Node, CompileError> lex(String input) {
         if (!input.startsWith(this.prefix())) {
-            return new Err<>(new CompileError("Prefix '" + this.prefix + "' not present", new StringContext(input)));
+            return new Err<>(new ImmutableCompileError("Prefix '" + this.prefix + "' not present", new StringContext(input)));
         }
 
         String sliced = input.substring(this.prefix.length());

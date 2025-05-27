@@ -5,6 +5,7 @@ import magmac.api.result.Result;
 import magmac.app.compile.node.Node;
 import magmac.app.compile.rule.result.StringContext;
 import magmac.app.error.CompileError;
+import magmac.app.error.ImmutableCompileError;
 
 public record SymbolRule(Rule childRule) implements Rule {
     private static boolean isSymbol(String input) {
@@ -25,7 +26,7 @@ public record SymbolRule(Rule childRule) implements Rule {
             return this.childRule.lex(input);
         }
         else {
-            return new Err<>(new CompileError("Not a symbol", new StringContext(input)));
+            return new Err<>(new ImmutableCompileError("Not a symbol", new StringContext(input)));
         }
     }
 

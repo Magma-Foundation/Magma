@@ -7,6 +7,7 @@ import magmac.app.error.CompileError;
 import magmac.app.compile.node.MapNode;
 import magmac.app.compile.node.Node;
 import magmac.app.compile.rule.result.StringContext;
+import magmac.app.error.ImmutableCompileError;
 
 public record ExactRule(String value) implements Rule {
     @Override
@@ -14,7 +15,7 @@ public record ExactRule(String value) implements Rule {
         if (input.equals(this.value)) {
             return new Ok<>(new MapNode());
         }
-        return new Err<>(new CompileError("Slice '" + value + "' not present", new StringContext(value)));
+        return new Err<>(new ImmutableCompileError("Slice '" + value + "' not present", new StringContext(value)));
     }
 
     @Override

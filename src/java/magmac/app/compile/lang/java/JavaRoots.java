@@ -39,20 +39,25 @@ public final class JavaRoots {
                 beforeContent
         ));
 
+        Rule withEnds = new OrRule(List.of(
+                new InfixRule(withParameters, " extends ", new NodeRule("extended", JavaRoots.createTypeRule())),
+                withParameters
+        ));
+
         Rule withImplements = new OrRule(List.of(
-                new ContextRule("With implements", new InfixRule(withParameters, " implements ", JavaRoots.createTypeRule())),
-                new ContextRule("Without implements", withParameters)
+                new ContextRule("With implements", new InfixRule(withEnds, " implements ", new NodeRule("implemented", JavaRoots.createTypeRule()))),
+                new ContextRule("Without implements", withEnds)
         ));
 
         Rule afterKeyword = new InfixRule(withImplements, "{", new StringRule("after-content"));
         return new TypeRule(keyword, new InfixRule(new StringRule("before-keyword"), keyword + " ", afterKeyword));
     }
 
-    private static Rule createTypeRule() {
-        return new NodeRule("implemented", new OrRule(List.of(
+    private static OrRule createTypeRule() {
+        return new OrRule(List.of(
                 JavaRoots.createTemplateRule(),
                 JavaRoots.createSymbolTypeRule()
-        )));
+        ));
     }
 
     private static TypeRule createSymbolTypeRule() {
