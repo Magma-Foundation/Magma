@@ -276,6 +276,7 @@ InlineNodeList --> ArrayList
 InlineNodeList --> List
 TypescriptRoots --> DivideRule
 TypescriptRoots --> ExactRule
+TypescriptRoots --> InfixRule
 TypescriptRoots --> OrRule
 TypescriptRoots --> PrefixRule
 TypescriptRoots --> Rule

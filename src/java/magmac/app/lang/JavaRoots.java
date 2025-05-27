@@ -71,7 +71,7 @@ public final class JavaRoots {
         return new InfixRule(new NodeRule("definition", JavaRoots.createDefinitionRule()), "(", new StringRule("with-params"));
     }
 
-    private static StringRule createDefinitionRule() {
+    private static Rule createDefinitionRule() {
         return new StringRule("definition");
     }
 
