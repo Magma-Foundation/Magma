@@ -1,5 +1,6 @@
 package magmac.app;
 
+import magmac.api.error.Error;
 import magmac.app.compile.Compiler;
 import magmac.app.error.ApplicationError;
 import magmac.app.error.ThrowableError;
@@ -22,7 +23,7 @@ public final class CompileApplication implements Application {
     }
 
     @Override
-    public Optional<Error> run() {
+    public Optional<magmac.api.error.Error> run() {
         return this.sources.readAll()
                 .mapErr(ThrowableError::new)
                 .mapErr(ApplicationError::new)

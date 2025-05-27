@@ -1,6 +1,6 @@
 package magmac.app.compile.error;
 
-import magmac.app.Error;
+import magmac.api.error.Error;
 
 public interface CompileError extends Error {
     int computeMaxDepth();

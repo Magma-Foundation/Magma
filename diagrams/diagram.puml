@@ -1,5 +1,7 @@
 @startuml
 skinparam linetype ortho
+interface Filter
+
 class ListCollector
 Collector <|-- ListCollector
 
@@ -17,9 +19,6 @@ interface Targets
 
 class FlatMapHead
 Head <|-- FlatMapHead
-
-class SymbolRule
-Rule <|-- SymbolRule
 
 interface TargetPlatform
 
@@ -96,10 +95,16 @@ Roots <|-- MapRoots
 interface CompileError
 Error <|-- CompileError
 
+class SymbolFilter
+Filter <|-- SymbolFilter
+
 class RuleGenerator
 Generator <|-- RuleGenerator
 
 interface Passer
+
+class NumberFilter
+Filter <|-- NumberFilter
 
 class PrefixRule
 Rule <|-- PrefixRule
@@ -151,6 +156,10 @@ class Iters
 
 interface Rule
 
+interface Error
+
+class ApplicationBuilder
+
 class DelimitedFolder
 Folder <|-- DelimitedFolder
 
@@ -169,8 +178,6 @@ Rule <|-- StripRule
 
 class MergeDiagram
 AfterAll <|-- MergeDiagram
-
-interface Error
 
 class Ok
 Result <|-- Ok
@@ -236,6 +243,9 @@ Node <|-- MapNode
 class ContextRule
 Rule <|-- ContextRule
 
+class FilterRule
+Rule <|-- FilterRule
+
 Iters --> Tuple2
 Iters --> EmptyHead
 Iters --> HeadedIter
@@ -264,6 +274,7 @@ Node --> Tuple2
 Node --> Iter
 Node --> Optional
 ParseState --> Location
+FilterRule --> CompileErrors
 FlatMapHead --> Iter
 FlatMapHead --> Function
 Passer --> Tuple2
@@ -273,6 +284,25 @@ Passer --> Optional
 Result --> Tuple2
 Result --> Function
 Result --> Supplier
+ApplicationBuilder --> Error
+ApplicationBuilder --> Compiler
+ApplicationBuilder --> StagedCompiler
+ApplicationBuilder --> TargetPlatform
+ApplicationBuilder --> Sources
+ApplicationBuilder --> PathTargets
+ApplicationBuilder --> Targets
+ApplicationBuilder --> FlattenJava
+ApplicationBuilder --> JavaLang
+ApplicationBuilder --> AfterAll
+ApplicationBuilder --> Passer
+ApplicationBuilder --> Generator
+ApplicationBuilder --> RuleGenerator
+ApplicationBuilder --> Lexer
+ApplicationBuilder --> RuleLexer
+ApplicationBuilder --> Parser
+ApplicationBuilder --> TreeParser
+ApplicationBuilder --> Path
+ApplicationBuilder --> Optional
 OrState --> Err
 OrState --> Ok
 OrState --> Result
@@ -393,6 +423,7 @@ RuleGenerator --> ResultCollector
 RuleGenerator --> Result
 RuleGenerator --> CompileError
 RuleGenerator --> Rule
+Application --> Error
 Application --> Optional
 Generator --> Location
 Generator --> Roots
@@ -497,7 +528,6 @@ SuffixRule --> Err
 SuffixRule --> CompileErrors
 SuffixRule --> StringContext
 SuffixRule --> ImmutableCompileError
-SymbolRule --> CompileErrors
 JavaLang --> ContextRule
 JavaLang --> DivideRule
 JavaLang --> LocatingRule
@@ -508,7 +538,7 @@ JavaLang --> Rule
 JavaLang --> StringRule
 JavaLang --> StripRule
 JavaLang --> SuffixRule
-JavaLang --> SymbolRule
+JavaLang --> FilterRule
 JavaLang --> TypeRule
 JavaLang --> DelimitedFolder
 JavaLang --> List
@@ -524,30 +554,13 @@ PlantUMLLang --> TypeRule
 PlantUMLLang --> StatementFolder
 PlantUMLLang --> List
 Main --> Iters
-Main --> CompileApplication
+Main --> ApplicationBuilder
 Main --> Error
-Main --> Compiler
-Main --> StagedCompiler
 Main --> PlantUMLTargetPlatform
 Main --> TypeScriptTargetPlatform
-Main --> TargetPlatform
 Main --> PathSources
 Main --> Sources
-Main --> PathTargets
-Main --> Targets
-Main --> FlattenJava
-Main --> JavaLang
-Main --> AfterAll
-Main --> Passer
-Main --> Generator
-Main --> RuleGenerator
-Main --> Lexer
-Main --> RuleLexer
-Main --> Parser
-Main --> TreeParser
-Main --> Path
 Main --> Paths
-Main --> Optional
 FlattenJava --> ListCollector
 FlattenJava --> InlineNodeList
 FlattenJava --> NodeList

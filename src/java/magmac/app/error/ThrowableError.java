@@ -1,6 +1,6 @@
 package magmac.app.error;
 
-import magmac.app.Error;
+import magmac.api.error.Error;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;

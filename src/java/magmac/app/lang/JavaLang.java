@@ -99,7 +99,8 @@ public final class JavaLang {
     private static OrRule createTypeRule() {
         return new OrRule(List.of(
                 JavaLang.createTemplateRule(),
-                JavaLang.createSymbolTypeRule()
+                JavaLang.createSymbolTypeRule(),
+                new StringRule("placeholder")
         ));
     }
 
