@@ -5,6 +5,7 @@ import magmac.api.collect.Iters;
 import magmac.api.collect.collect.MapCollector;
 import magmac.app.compile.node.Node;
 import magmac.app.io.Location;
+import magmac.app.stage.parse.ImmutableParseState;
 import magmac.app.stage.parse.ParseState;
 
 import java.util.ArrayList;
@@ -56,9 +57,9 @@ public class TreeParser implements Parser {
     }
 
     private Tuple2<Location, Node> parse(Location location, Node root) {
-        ParseState initial = new ParseState(location);
+        ParseState initial = new ImmutableParseState(location);
         Tuple2<ParseState, Node> parsed = this.parseTree(initial, root);
-        return new Tuple2<>(parsed.left().location(), parsed.right());
+        return new Tuple2<>(parsed.left().findLocation(), parsed.right());
     }
 
     private Tuple2<ParseState, Node> parseTree(ParseState state, Node root) {

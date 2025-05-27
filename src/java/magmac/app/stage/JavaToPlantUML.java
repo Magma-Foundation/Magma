@@ -3,6 +3,7 @@ package magmac.app.stage;
 import magmac.api.Tuple2;
 import magmac.app.compile.node.MapNode;
 import magmac.app.compile.node.Node;
+import magmac.app.stage.parse.ImmutableParseState;
 import magmac.app.stage.parse.ParseState;
 
 import java.util.ArrayList;
@@ -30,7 +31,7 @@ public class JavaToPlantUML implements Passer {
                     .orElse("");
 
             Node dependency = new MapNode("dependency")
-                    .withString("parent", state.location().name())
+                    .withString("parent", state.findLocation().name())
                     .withString("child", child);
 
             return Optional.of(new Tuple2<ParseState, Node>(state, dependency));

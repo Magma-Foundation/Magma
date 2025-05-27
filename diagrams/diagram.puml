@@ -71,7 +71,7 @@ Collector <|-- Joiner
 interface Node
 class OrRule
 Rule <|-- OrRule
-class ParseState
+interface ParseState
 class NodeRule
 Rule <|-- NodeRule
 interface CompileError
@@ -97,6 +97,8 @@ interface Iter
 class Ok
 Result <|-- Ok
 interface Application
+class ImmutableParseState
+ParseState <|-- ImmutableParseState
 class RangeHead
 Head <|-- RangeHead
 class DivideRule
@@ -220,6 +222,7 @@ TreeParser --> Iters
 TreeParser --> MapCollector
 TreeParser --> Node
 TreeParser --> Location
+TreeParser --> ImmutableParseState
 TreeParser --> ParseState
 TreeParser --> ArrayList
 TreeParser --> List
@@ -228,6 +231,7 @@ Rule --> Result
 Rule --> CompileError
 Rule --> Node
 JavaToPlantUML --> MapNode
+JavaToPlantUML --> ImmutableParseState
 JavaToPlantUML --> ArrayList
 JavaToPlantUML --> Collections
 JavaToPlantUML --> List
