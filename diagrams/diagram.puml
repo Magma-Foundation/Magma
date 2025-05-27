@@ -120,6 +120,8 @@ class SuffixRule
 Rule <|-- SuffixRule
 class AfterPasser
 Passer <|-- AfterPasser
+class TypeScriptPasser
+Passer <|-- TypeScriptPasser
 interface Result
 interface AfterAll
 class Main
@@ -353,6 +355,11 @@ TargetPlatform --> PathTargets
 TargetPlatform --> Targets
 TargetPlatform --> AfterAll
 TargetPlatform --> EmptyAfterAll
+TargetPlatform --> Passer
+TargetPlatform --> Generator
+TargetPlatform --> RuleGenerator
+TargetPlatform --> Parser
+TargetPlatform --> TreeParser
 TargetPlatform --> Path
 TargetPlatform --> Paths
 AfterAll --> Node
@@ -409,30 +416,19 @@ SuffixRule --> ImmutableCompileError
 SymbolRule --> Err
 SymbolRule --> StringContext
 SymbolRule --> ImmutableCompileError
-Main --> Tuple2
 Main --> Iters
-Main --> Application
 Main --> CompileApplication
 Main --> Config
 Main --> Error
 Main --> Compiler
 Main --> StagedCompiler
-Main --> Node
-Main --> Rule
 Main --> PathSources
 Main --> Sources
 Main --> Targets
-Main --> AfterPasser
-Main --> FlattenJava
 Main --> TargetPlatform
-Main --> AfterAll
-Main --> Passer
 Main --> Generator
-Main --> RuleGenerator
 Main --> Lexer
-Main --> ParseState
 Main --> Parser
-Main --> TreeParser
 Main --> Paths
 Main --> Optional
 FlattenJava --> ArrayList
