@@ -75,7 +75,8 @@ public final class JavaLang {
     }
 
     private static Rule createDefinitionRule() {
-        return new StripRule(LocatingRule.Last(new StringRule("before-name"), " ", new StringRule("name")));
+        Rule leftRule = LocatingRule.Last(new StringRule("before-type"), " ", new NodeRule("type", JavaLang.createTypeRule()));
+        return new StripRule(LocatingRule.Last(leftRule, " ", new StringRule("name")));
     }
 
     private static OrRule createTypeRule() {
