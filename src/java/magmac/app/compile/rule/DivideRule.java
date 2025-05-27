@@ -1,5 +1,6 @@
 package magmac.app.compile.rule;
 
+import magmac.api.Tuple2;
 import magmac.api.collect.Joiner;
 import magmac.api.collect.ListCollector;
 import magmac.api.collect.ResultCollector;
@@ -36,10 +37,16 @@ public record DivideRule(String key, Folder folder, Rule childRule) implements R
     }
 
     private Iter<String> divide(String input) {
-        DivideState current = new MutableDivideState();
-        int length = input.length();
-        for (int i = 0; i < length; i++) {
-            char c = input.charAt(i);
+        DivideState current = new MutableDivideState(input);
+        while (true) {
+            Optional<Tuple2<DivideState, Character>> maybePopped = current.pop();
+            if (maybePopped.isEmpty()) {
+                break;
+            }
+
+            current = maybePopped.get().left();
+            char c = maybePopped.get().right();
+
             current = this.folder.fold(current, c);
         }
 

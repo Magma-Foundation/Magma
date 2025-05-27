@@ -1,22 +1,28 @@
 package magmac.app.compile.rule.divide;
 
+import magmac.api.Tuple2;
+
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 public class MutableDivideState implements DivideState {
     private final List<String> segments;
+    private final String input;
     private StringBuilder buffer;
     private int depth;
+    private int index = 0;
 
-    private MutableDivideState(List<String> segments, StringBuilder buffer) {
+    private MutableDivideState(List<String> segments, StringBuilder buffer, String input) {
         this.segments = segments;
         this.buffer = buffer;
+        this.input = input;
         this.depth = 0;
     }
 
-    public MutableDivideState() {
-        this(new ArrayList<>(), new StringBuilder());
+    public MutableDivideState(String input) {
+        this(new ArrayList<>(), new StringBuilder(), input);
     }
 
     @Override
@@ -56,6 +62,18 @@ public class MutableDivideState implements DivideState {
 
     @Override
     public boolean isShallow() {
-        return 1 == depth;
+        return 1 == this.depth;
+    }
+
+    @Override
+    public Optional<Tuple2<DivideState, Character>> pop() {
+        if (this.index < this.input.length()) {
+            char c = this.input.charAt(this.index);
+            this.index++;
+            return Optional.of(new Tuple2<>(this, c));
+        }
+        else {
+            return Optional.empty();
+        }
     }
 }
