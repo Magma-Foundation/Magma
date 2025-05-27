@@ -1,7 +1,6 @@
 package magmac.app.lang;
 
 import magmac.api.Tuple2;
-import magmac.app.compile.node.InlineNodeList;
 import magmac.app.compile.node.MapNode;
 import magmac.app.compile.node.Node;
 import magmac.app.stage.Passer;
@@ -35,16 +34,16 @@ public class AfterPasser implements Passer {
     @Override
     public Optional<Tuple2<ParseState, Node>> pass(ParseState state, Node node) {
         if (node.is("root")) {
-            List<Node> children = node.findNodeList("children").map(list -> list.unwrap()).orElse(new ArrayList<>())
+            List<Node> children = node.findNodeList("children").orElse(new ArrayList<>())
                     .stream()
                     .flatMap(child -> AfterPasser.expandInherits(child))
                     .toList();
 
-            return Optional.of(new Tuple2<>(state, node.withNodeList("children", new InlineNodeList(children))));
+            return Optional.of(new Tuple2<>(state, node.withNodeList("children", children)));
         }
 
         if (node.is("import")) {
-            String child = node.findNodeList("segments").map(list -> list.unwrap())
+            String child = node.findNodeList("segments")
                     .orElse(Collections.emptyList())
                     .getLast()
                     .findString("value")

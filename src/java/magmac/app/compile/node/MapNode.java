@@ -130,12 +130,14 @@ public final class MapNode implements Node {
         return new MapNode(Optional.of(type), this.strings, this.nodes, this.nodeLists);
     }
 
-    private Node withNodeList0(String key, List<Node> values) {
+    @Override
+    public Node withNodeList(String key, List<Node> values) {
         this.nodeLists.put(key, values);
         return this;
     }
 
-    private Optional<List<Node>> findNodeList0(String key) {
+    @Override
+    public Optional<List<Node>> findNodeList(String key) {
         if (this.nodeLists.containsKey(key)) {
             return Optional.of(this.nodeLists.get(key));
         }
@@ -164,7 +166,7 @@ public final class MapNode implements Node {
     public Node merge(Node other) {
         var withStrings = MapNode.fold(this, other.iterStrings(), current -> current::withString);
         var withNodes = MapNode.fold(withStrings, other.iterNodes(), current -> current::withNode);
-        return MapNode.fold(withNodes, other.iterNodeLists().map(tuple -> new Tuple2<>(tuple.left(), tuple.right().unwrap())), current -> (key, values) -> current.withNodeList(key, new InlineNodeList(values)));
+        return MapNode.fold(withNodes, other.iterNodeLists().map(tuple -> new Tuple2<>(tuple.left(), tuple.right().elements())), current -> current::withNodeList);
     }
 
     @Override
@@ -174,16 +176,6 @@ public final class MapNode implements Node {
 
     @Override
     public Iter<Tuple2<String, NodeList>> iterNodeLists() {
-        return this.iterNodeLists0().map(tuple -> new Tuple2<>(tuple.left(), new InlineNodeList(tuple.right())));
-    }
-
-    @Override
-    public Node withNodeList(String key, NodeList values) {
-        return this.withNodeList0(key, values.unwrap());
-    }
-
-    @Override
-    public Optional<NodeList> findNodeList(String key) {
-        return this.findNodeList0(key).map(InlineNodeList::new);
+        return this.iterNodeLists0().map(tuple -> new Tuple2<>(tuple.left(), new NodeList(tuple.right())));
     }
 }

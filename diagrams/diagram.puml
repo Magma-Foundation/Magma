@@ -40,7 +40,6 @@ class ImmutableCompileError
 CompileError <|-- ImmutableCompileError
 class EmptyHead
 Head <|-- EmptyHead
-interface NodeList
 interface Stage
 enum TargetPlatform
 class MapCollector
@@ -78,8 +77,6 @@ class StringContext
 Context <|-- StringContext
 class TypeRule
 Rule <|-- TypeRule
-class InlineNodeList
-NodeList <|-- InlineNodeList
 class OrState
 interface Node
 class OrRule
@@ -147,7 +144,6 @@ Iters --> List
 Iters --> Map
 Iters --> Optional
 MergeDiagram --> Iters
-MergeDiagram --> InlineNodeList
 MergeDiagram --> MapNode
 MergeDiagram --> ArrayList
 MergeDiagram --> Collection
@@ -161,6 +157,7 @@ Roots --> Node
 Roots --> Location
 Node --> Tuple2
 Node --> Iter
+Node --> List
 Node --> Optional
 ParseState --> Location
 FlatMapHead --> Iter
@@ -187,7 +184,6 @@ DivideRule --> ResultCollector
 DivideRule --> Iter
 DivideRule --> Iters
 DivideRule --> CompileErrors
-DivideRule --> InlineNodeList
 DivideRule --> MapNode
 DivideRule --> DivideState
 DivideRule --> MutableDivideState
@@ -207,7 +203,6 @@ Iter --> Function
 Iter --> Predicate
 ResultCollector --> Ok
 ResultCollector --> Result
-AfterPasser --> InlineNodeList
 AfterPasser --> MapNode
 AfterPasser --> ArrayList
 AfterPasser --> Collections
@@ -230,7 +225,6 @@ OrRule --> StringContext
 OrRule --> List
 OrRule --> Function
 NodeContext --> Node
-NodeList --> List
 PathSource --> SafeFiles
 PathSource --> Path
 PathSource --> ArrayList
@@ -260,7 +254,6 @@ TreeParser --> Iters
 TreeParser --> Ok
 TreeParser --> Result
 TreeParser --> CompileError
-TreeParser --> InlineNodeList
 TreeParser --> Node
 TreeParser --> Location
 TreeParser --> AfterAll
@@ -321,7 +314,6 @@ Config --> RuleLexer
 Config --> TreeParser
 MapNode --> Iters
 MapNode --> HashMap
-MapNode --> List
 MapNode --> Map
 MapNode --> BiFunction
 MapNode --> Function
@@ -439,7 +431,6 @@ Main --> Lexer
 Main --> Parser
 Main --> Paths
 Main --> Optional
-FlattenJava --> InlineNodeList
 FlattenJava --> ArrayList
 FlattenJava --> List
 RuleLexer --> Tuple2

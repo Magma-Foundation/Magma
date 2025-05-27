@@ -1,7 +1,6 @@
 package magmac.app.lang;
 
 import magmac.api.Tuple2;
-import magmac.app.compile.node.InlineNodeList;
 import magmac.app.compile.node.Node;
 import magmac.app.stage.Passer;
 import magmac.app.stage.parse.ParseState;
@@ -14,12 +13,12 @@ public class FlattenJava implements Passer {
     @Override
     public Optional<Tuple2<ParseState, Node>> pass(ParseState state, Node node) {
         if (node.is("root")) {
-            List<Node> newChildren = node.findNodeList("children").map(list -> list.unwrap()).orElse(new ArrayList<>())
+            List<Node> newChildren = node.findNodeList("children").orElse(new ArrayList<>())
                     .stream()
                     .filter(child -> !child.is("package"))
                     .toList();
 
-            return Optional.of(new Tuple2<>(state, node.withNodeList("children", new InlineNodeList(newChildren))));
+            return Optional.of(new Tuple2<>(state, node.withNodeList("children", newChildren)));
         }
 
         if(node.is("record")) {

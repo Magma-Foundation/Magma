@@ -8,7 +8,6 @@ import magmac.api.iter.Iters;
 import magmac.api.result.Result;
 import magmac.app.compile.error.CompileError;
 import magmac.app.compile.error.CompileErrors;
-import magmac.app.compile.node.InlineNodeList;
 import magmac.app.compile.node.MapNode;
 import magmac.app.compile.node.Node;
 import magmac.app.compile.rule.divide.DivideState;
@@ -29,10 +28,7 @@ public record DivideRule(String key, Folder folder, Rule childRule) implements R
         return this.divide(input)
                 .map(segment -> this.childRule.lex(segment))
                 .collect(new ResultCollector<>(new ListCollector<>()))
-                .mapValue(children -> {
-                    Node node = new MapNode();
-                    return node.withNodeList(this.key(), new InlineNodeList(children));
-                });
+                .mapValue(children -> new MapNode().withNodeList(this.key(), children));
     }
 
     private Iter<String> divide(String input) {
@@ -48,7 +44,7 @@ public record DivideRule(String key, Folder folder, Rule childRule) implements R
 
     @Override
     public Result<String, CompileError> generate(Node node) {
-        return node.findNodeList(this.key).map(list1 -> list1.unwrap())
+        return node.findNodeList(this.key)
                 .map(list -> this.join(list))
                 .orElseGet(() -> CompileErrors.createNodeError(node, "Node list '" + this.key + "' not present"))
                 .mapValue(value -> value.orElse(""));
