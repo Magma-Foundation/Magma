@@ -71,6 +71,7 @@ class StringContext
 Context <|-- StringContext
 class TypeRule
 Rule <|-- TypeRule
+class OrState
 interface Node
 class OrRule
 Rule <|-- OrRule
@@ -151,6 +152,15 @@ Passer --> Optional
 Result --> Tuple2
 Result --> Function
 Result --> Supplier
+OrState --> Err
+OrState --> Ok
+OrState --> Result
+OrState --> CompileError
+OrState --> Context
+OrState --> ImmutableCompileError
+OrState --> ArrayList
+OrState --> List
+OrState --> Optional
 DivideRule --> Joiner
 DivideRule --> ListCollector
 DivideRule --> ResultCollector
@@ -190,15 +200,10 @@ Head --> Optional
 InfixRule --> Err
 InfixRule --> StringContext
 InfixRule --> ImmutableCompileError
-OrRule --> Err
-OrRule --> Ok
 OrRule --> Context
 OrRule --> NodeContext
 OrRule --> StringContext
-OrRule --> ImmutableCompileError
-OrRule --> ArrayList
 OrRule --> List
-OrRule --> Optional
 OrRule --> Function
 NodeContext --> Node
 PathSource --> SafeFiles
