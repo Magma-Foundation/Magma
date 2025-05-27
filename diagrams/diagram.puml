@@ -204,6 +204,8 @@ Parser <|-- TreeParser
 class Err
 Result <|-- Err
 
+class CompileResult
+
 class LocatingRule
 Rule <|-- LocatingRule
 
@@ -347,8 +349,6 @@ AfterPasser --> InlineNodeList
 AfterPasser --> MapNode
 AfterPasser --> NodeList
 PrefixRule --> CompileErrors
-Compiler --> Result
-Compiler --> CompileError
 Compiler --> Location
 Compiler --> Map
 Head --> Optional
@@ -492,6 +492,8 @@ Targets --> Location
 Targets --> IOException
 Targets --> Map
 Targets --> Optional
+StagedCompiler --> Result
+StagedCompiler --> CompileError
 StagedCompiler --> Generator
 StagedCompiler --> Lexer
 StagedCompiler --> Parser
@@ -542,6 +544,8 @@ JavaLang --> FilterRule
 JavaLang --> TypeRule
 JavaLang --> DelimitedFolder
 JavaLang --> List
+CompileResult --> Result
+CompileResult --> CompileError
 PlantUMLLang --> DivideRule
 PlantUMLLang --> ExactRule
 PlantUMLLang --> LocatingRule

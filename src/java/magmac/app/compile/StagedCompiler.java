@@ -10,10 +10,14 @@ import magmac.app.stage.parse.Parser;
 import java.util.Map;
 
 public record StagedCompiler(Lexer lexer, Parser parser, Generator generator) implements Compiler {
-    @Override
-    public Result<Map<Location, String>, CompileError> compile(Map<Location, String> units) {
+    private Result<Map<Location, String>, CompileError> compile0(Map<Location, String> units) {
         return this.lexer.apply(units)
                 .flatMapValue(trees -> this.parser.apply(trees))
                 .flatMapValue(trees -> this.generator.apply(trees));
+    }
+
+    @Override
+    public CompileResult<Map<Location, String>> compile(Map<Location, String> units) {
+        return new CompileResult<>(this.compile0(units));
     }
 }

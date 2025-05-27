@@ -31,7 +31,7 @@ public final class CompileApplication implements Application {
     }
 
     private Optional<Error> compileAndWrite(Map<Location, String> units) {
-        return this.compiler.compile(units)
+        return this.compiler.compile(units).result()
                 .mapErr(ApplicationError::new)
                 .match(outputs -> this.targets.writeAll(outputs).map(ThrowableError::new).map(ApplicationError::new), err -> Optional.of(err));
     }
