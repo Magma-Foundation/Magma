@@ -50,6 +50,7 @@ public final class JavaRoots {
 
     private static Rule createTypeRule() {
         return new NodeRule("implemented", new OrRule(List.of(
+                new StripRule(new SuffixRule(new InfixRule(new StripRule(new StringRule("base")), "<", new StringRule("arguments")), ">")),
                 new StripRule(new SymbolRule(new StringRule("value")))
         )));
     }
