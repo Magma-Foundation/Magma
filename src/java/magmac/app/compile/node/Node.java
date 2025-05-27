@@ -13,7 +13,7 @@ public interface Node {
 
     String format(int depth);
 
-    Iter<Tuple2<String, List<Node>>> iterNodeLists();
+    Iter<Tuple2<String, NodeList>> iterNodeLists();
 
     Node withString(String key, String value);
 

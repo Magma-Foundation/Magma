@@ -96,8 +96,7 @@ public final class MapNode implements Node {
         return "\n" + "\t".repeat(depth);
     }
 
-    @Override
-    public Iter<Tuple2<String, List<Node>>> iterNodeLists() {
+    private Iter<Tuple2<String, List<Node>>> iterNodeLists0() {
         return Iters.fromMap(this.nodeLists);
     }
 
@@ -167,11 +166,16 @@ public final class MapNode implements Node {
     public Node merge(Node other) {
         var withStrings = MapNode.fold(this, other.iterStrings(), current -> current::withString);
         var withNodes = MapNode.fold(withStrings, other.iterNodes(), current -> current::withNode);
-        return MapNode.fold(withNodes, other.iterNodeLists(), current -> current::withNodeList);
+        return MapNode.fold(withNodes, other.iterNodeLists().map(tuple -> new Tuple2<>(tuple.left(), tuple.right().elements())), current -> current::withNodeList);
     }
 
     @Override
     public Iter<Tuple2<String, String>> iterStrings() {
         return Iters.fromMap(this.strings());
+    }
+
+    @Override
+    public Iter<Tuple2<String, NodeList>> iterNodeLists() {
+        return this.iterNodeLists0().map(tuple -> new Tuple2<>(tuple.left(), new NodeList(tuple.right())));
     }
 }
