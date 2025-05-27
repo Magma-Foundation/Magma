@@ -58,9 +58,21 @@ public final class JavaRoots {
     private static OrRule createStructureMemberRule() {
         return new OrRule(List.of(
                 new StripRule(new ExactRule("")),
-                new StripRule(new SuffixRule(new StringRule("definition"), ";")),
-                new InfixRule(new StringRule("before-params"), "(", new StringRule("with-params"))
+                JavaRoots.createDefinitionStatementRule(),
+                JavaRoots.createMethodRule()
         ));
+    }
+
+    private static StripRule createDefinitionStatementRule() {
+        return new StripRule(new SuffixRule(new NodeRule("definition", JavaRoots.createDefinitionRule()), ";"));
+    }
+
+    private static InfixRule createMethodRule() {
+        return new InfixRule(new NodeRule("definition", JavaRoots.createDefinitionRule()), "(", new StringRule("with-params"));
+    }
+
+    private static StringRule createDefinitionRule() {
+        return new StringRule("definition");
     }
 
     private static OrRule createTypeRule() {
