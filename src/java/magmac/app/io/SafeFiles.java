@@ -4,7 +4,6 @@ import magmac.api.iter.Iter;
 import magmac.api.iter.Iters;
 import magmac.api.result.Err;
 import magmac.api.result.Ok;
-import magmac.api.result.Result;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -23,19 +22,19 @@ public final class SafeFiles {
         }
     }
 
-    public static Result<Iter<Path>, IOException> walk(Path sourceDirectory) {
+    public static IOResult<Iter<Path>> walk(Path sourceDirectory) {
         try (Stream<Path> stream = Files.walk(sourceDirectory)) {
-            return new Ok<>(Iters.fromList(stream.collect(Collectors.toList())));
+            return new IOResult<>(new Ok<>(Iters.fromList(stream.collect(Collectors.toList()))));
         } catch (IOException e) {
-            return new Err<>(e);
+            return new IOResult<>(new Err<>(e));
         }
     }
 
-    public static Result<String, IOException> readString(Path source) {
+    public static IOResult<String> readString(Path source) {
         try {
-            return new Ok<>(Files.readString(source));
+            return new IOResult<>(new Ok<>(Files.readString(source)));
         } catch (IOException e) {
-            return new Err<>(e);
+            return new IOResult<>(new Err<>(e));
         }
     }
 

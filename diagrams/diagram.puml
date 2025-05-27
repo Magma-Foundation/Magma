@@ -203,6 +203,8 @@ Parser <|-- TreeParser
 class Err
 Result <|-- Err
 
+class IOResult
+
 class LocatingRule
 Rule <|-- LocatingRule
 
@@ -307,7 +309,6 @@ ApplicationBuilder --> Path
 ApplicationBuilder --> Optional
 OrState --> Err
 OrState --> Ok
-OrState --> Result
 OrState --> CompileResult
 OrState --> CompileError
 OrState --> Context
@@ -333,6 +334,11 @@ DivideRule --> Optional
 Locator --> Optional
 ListCollector --> ArrayList
 ListCollector --> List
+IOResult --> Tuple2
+IOResult --> Result
+IOResult --> IOException
+IOResult --> Function
+IOResult --> Supplier
 Stage --> CompileResult
 Iter --> Collector
 Iter --> Result
@@ -353,11 +359,9 @@ Compiler --> CompileResult
 Compiler --> Location
 Compiler --> Map
 Head --> Optional
-OrRule --> Result
 OrRule --> Context
 OrRule --> NodeContext
 OrRule --> StringContext
-OrRule --> CompileError
 OrRule --> List
 OrRule --> Function
 NodeContext --> Node
@@ -380,9 +384,8 @@ CompileErrors --> NodeContext
 CompileErrors --> StringContext
 CompileErrors --> Node
 CompileErrors --> ImmutableCompileError
-Sources --> Result
+Sources --> IOResult
 Sources --> Location
-Sources --> IOException
 Sources --> Map
 Parser --> Roots
 HeadedIter --> Ok
@@ -430,8 +433,6 @@ Generator --> Location
 Generator --> Roots
 Generator --> Map
 StringRule --> Ok
-StringRule --> Result
-StringRule --> CompileError
 StringRule --> CompileErrors
 StringRule --> MapNode
 MapNode --> Joiner
@@ -443,12 +444,12 @@ MapNode --> Function
 MapNode --> Collectors
 MapNode --> Stream
 Folder --> DivideState
-Source --> Result
+Source --> IOResult
 Source --> Location
-Source --> IOException
 PathSources --> Tuple2
 PathSources --> MapCollector
 PathSources --> ResultCollector
+PathSources --> Iter
 PathSources --> SafeFiles
 PathSources --> Files
 PathSources --> Path
@@ -481,7 +482,6 @@ SafeFiles --> Iter
 SafeFiles --> Iters
 SafeFiles --> Err
 SafeFiles --> Ok
-SafeFiles --> Result
 SafeFiles --> IOException
 SafeFiles --> Files
 SafeFiles --> Path

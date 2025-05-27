@@ -1,10 +1,9 @@
 package magmac.app.io.sources;
 
-import magmac.api.result.Result;
+import magmac.app.io.IOResult;
 import magmac.app.io.Location;
 import magmac.app.io.SafeFiles;
 
-import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -19,7 +18,7 @@ public record PathSource(Path root, Path child) implements Source {
     }
 
     @Override
-    public Result<String, IOException> read() {
+    public IOResult<String> read() {
         return SafeFiles.readString(this.child);
     }
 

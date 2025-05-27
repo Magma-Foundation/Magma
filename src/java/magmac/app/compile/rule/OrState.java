@@ -2,7 +2,6 @@ package magmac.app.compile.rule;
 
 import magmac.api.result.Err;
 import magmac.api.result.Ok;
-import magmac.api.result.Result;
 import magmac.app.compile.error.CompileResult;
 import magmac.app.compile.error.error.CompileError;
 import magmac.app.compile.error.context.Context;

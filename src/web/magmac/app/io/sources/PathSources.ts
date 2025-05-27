@@ -11,4 +11,6 @@ import { ? } from ?;
 export class PathSources {
 	temp(){
 	}
+	temp(){
+	}
 }
