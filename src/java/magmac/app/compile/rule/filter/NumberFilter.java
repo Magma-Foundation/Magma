@@ -1,4 +1,4 @@
-package magmac.app.compile.rule;
+package magmac.app.compile.rule.filter;
 
 public class NumberFilter implements Filter {
     @Override

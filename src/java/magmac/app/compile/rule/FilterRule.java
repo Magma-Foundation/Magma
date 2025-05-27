@@ -3,6 +3,9 @@ package magmac.app.compile.rule;
 import magmac.app.compile.error.CompileResult;
 import magmac.app.compile.error.error.CompileErrors;
 import magmac.app.compile.node.Node;
+import magmac.app.compile.rule.filter.Filter;
+import magmac.app.compile.rule.filter.NumberFilter;
+import magmac.app.compile.rule.filter.SymbolFilter;
 
 public final class FilterRule implements Rule {
     private final Rule childRule;

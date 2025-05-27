@@ -1,7 +1,5 @@
 @startuml
 skinparam linetype ortho
-interface Filter
-
 class TypeScriptTargetPlatform
 TargetPlatform <|-- TypeScriptTargetPlatform
 
@@ -46,9 +44,6 @@ interface NodeList
 
 interface Folder
 
-class SymbolFilter
-Filter <|-- SymbolFilter
-
 class RuleGenerator
 Generator <|-- RuleGenerator
 
@@ -56,9 +51,6 @@ interface Passer
 
 class InlineCompileResult
 CompileResult <|-- InlineCompileResult
-
-class NumberFilter
-Filter <|-- NumberFilter
 
 class RuleLexer
 Lexer <|-- RuleLexer
@@ -153,6 +145,8 @@ class CommonLang
 
 class JavaLang
 
+interface Filter
+
 class StringRule
 Rule <|-- StringRule
 
@@ -186,6 +180,9 @@ interface CompileResult
 
 class EmptyHead
 Head <|-- EmptyHead
+
+class NumberFilter
+Filter <|-- NumberFilter
 
 interface Stage
 
@@ -222,6 +219,9 @@ Context <|-- StringContext
 
 class TypeRule
 Rule <|-- TypeRule
+
+class SymbolFilter
+Filter <|-- SymbolFilter
 
 class InlineNodeList
 NodeList <|-- InlineNodeList
@@ -508,12 +508,14 @@ FlattenJava --> ListCollector
 FlattenJava --> InlineNodeList
 FlattenJava --> NodeList
 FlattenJava --> InlinePassResult
-PassResult --> Option
 PassResult --> Tuple2
 PassResult --> Node
 PassResult --> ParseState
 PassResult --> Supplier
 FilterRule --> CompileErrors
+FilterRule --> Filter
+FilterRule --> NumberFilter
+FilterRule --> SymbolFilter
 Passer --> Node
 Passer --> ParseState
 Result --> Tuple2
@@ -605,6 +607,7 @@ StringRule --> InlineCompileResult
 StringRule --> CompileErrors
 StringRule --> MapNode
 InlinePassResult --> None
+InlinePassResult --> Option
 Source --> IOResult
 Source --> Location
 PathSources --> Tuple2

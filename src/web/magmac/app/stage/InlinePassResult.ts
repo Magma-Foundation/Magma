@@ -9,8 +9,4 @@ export class InlinePassResult {
 	}
 	temp(){
 	}
-	temp(){
-	}
-	temp(){
-	}
 }
