@@ -12,7 +12,7 @@ public final class LocatingRule implements Rule {
     private final Splitter splitter;
     private final Rule rightRule;
 
-    private LocatingRule(Rule leftRule, Splitter splitter, Rule rightRule) {
+    public LocatingRule(Rule leftRule, Splitter splitter, Rule rightRule) {
         this.leftRule = leftRule;
         this.rightRule = rightRule;
         this.splitter = splitter;
@@ -26,7 +26,7 @@ public final class LocatingRule implements Rule {
         return LocatingRule.createLocatingRule(leftRule, infix, rightRule, new LastLocator());
     }
 
-    private static Rule createLocatingRule(Rule leftRule, String infix, Rule rightRule, Locator locator) {
+    public static Rule createLocatingRule(Rule leftRule, String infix, Rule rightRule, Locator locator) {
         return new LocatingRule(leftRule, new LocatingSplitter(infix, locator), rightRule);
     }
 

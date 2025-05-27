@@ -3,17 +3,21 @@ package magmac.app.lang;
 import magmac.api.collect.list.Lists;
 import magmac.app.compile.rule.ContextRule;
 import magmac.app.compile.rule.DivideRule;
+import magmac.app.compile.rule.FilterRule;
 import magmac.app.compile.rule.LocatingRule;
 import magmac.app.compile.rule.NodeRule;
 import magmac.app.compile.rule.OrRule;
 import magmac.app.compile.rule.PrefixRule;
 import magmac.app.compile.rule.Rule;
+import magmac.app.compile.rule.Splitter;
 import magmac.app.compile.rule.StringRule;
 import magmac.app.compile.rule.StripRule;
 import magmac.app.compile.rule.SuffixRule;
-import magmac.app.compile.rule.FilterRule;
 import magmac.app.compile.rule.TypeRule;
+import magmac.app.compile.rule.divide.Divider;
+import magmac.app.compile.rule.divide.FoldingDivider;
 import magmac.app.compile.rule.fold.DelimitedFolder;
+import magmac.app.compile.rule.split.DividingSplitter;
 
 public final class JavaLang {
     public static Rule createRule() {
@@ -91,7 +95,11 @@ public final class JavaLang {
     }
 
     private static Rule createDefinitionRule() {
-        Rule leftRule = LocatingRule.Last(new StringRule("before-type"), " ", new NodeRule("type", JavaLang.createTypeRule()));
+        Rule leftRule1 = new StringRule("before-type");
+        Rule rightRule = new NodeRule("type", JavaLang.createTypeRule());
+        Divider divider = new FoldingDivider(new TypeSeparatorFolder());
+        Splitter splitter = new DividingSplitter(divider);
+        Rule leftRule = new LocatingRule(leftRule1, splitter, rightRule);
         return new StripRule(LocatingRule.Last(leftRule, " ", new StringRule("name")));
     }
 

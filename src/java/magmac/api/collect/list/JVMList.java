@@ -1,5 +1,9 @@
 package magmac.api.collect.list;
 
+import magmac.api.None;
+import magmac.api.Option;
+import magmac.api.Some;
+import magmac.api.Tuple2;
 import magmac.api.head.HeadedIter;
 import magmac.api.head.RangeHead;
 import magmac.api.iter.Iter;
@@ -59,4 +63,18 @@ public record JVMList<T>(java.util.List<T> elements) implements List<T> {
         return this.elements.contains(element);
     }
 
+    @Override
+    public int size() {
+        return this.elements.size();
+    }
+
+    @Override
+    public Option<Tuple2<List<T>, T>> popLast() {
+        if (this.elements.isEmpty()) {
+            return new None<>();
+        }
+
+        java.util.List<T> slice = this.elements.subList(0, this.elements.size() - 1);
+        return new Some<>(new Tuple2<>(new JVMList<>(slice), this.elements.getLast()));
+    }
 }

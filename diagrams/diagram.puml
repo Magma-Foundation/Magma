@@ -126,6 +126,9 @@ Error <|-- CompileError
 
 interface Locator
 
+class TypeSeparatorFolder
+Folder <|-- TypeSeparatorFolder
+
 class ContextRule
 Rule <|-- ContextRule
 
@@ -138,6 +141,9 @@ interface Roots
 
 class FlatMapHead
 Head <|-- FlatMapHead
+
+class FoldingDivider
+Divider <|-- FoldingDivider
 
 class Lists
 
@@ -177,6 +183,9 @@ class NodeContext
 Context <|-- NodeContext
 
 interface CompileResult
+
+class DividingSplitter
+Splitter <|-- DividingSplitter
 
 class EmptyHead
 Head <|-- EmptyHead
@@ -251,6 +260,9 @@ interface Collector
 class Some
 Option <|-- Some
 
+class LocatingSplitter
+Splitter <|-- LocatingSplitter
+
 interface Context
 
 class MergeDiagram
@@ -262,6 +274,8 @@ interface Application
 
 class ImmutableParseState
 ParseState <|-- ImmutableParseState
+
+interface Divider
 
 class TreeParser
 Parser <|-- TreeParser
@@ -276,6 +290,8 @@ class SafeFiles
 
 class HeadedIter
 Iter <|-- HeadedIter
+
+interface Splitter
 
 class MapNode
 Node <|-- MapNode
@@ -313,6 +329,8 @@ ParseState --> Location
 FlatMapHead --> None
 FlatMapHead --> Iter
 FlatMapHead --> Function
+JVMList --> None
+JVMList --> Some
 JVMList --> HeadedIter
 JVMList --> RangeHead
 JVMList --> ListCollector
@@ -329,23 +347,18 @@ OrState --> InlineCompileResult
 OrState --> Context
 OrState --> CompileError
 OrState --> ImmutableCompileError
-DivideRule --> None
-DivideRule --> Some
-DivideRule --> Tuple2
+DivideRule --> Option
 DivideRule --> Joiner
 DivideRule --> ListCollector
 DivideRule --> ResultCollector
-DivideRule --> Iter
 DivideRule --> InlineCompileResult
 DivideRule --> CompileErrors
 DivideRule --> InlineNodeList
 DivideRule --> MapNode
 DivideRule --> NodeList
-DivideRule --> DivideState
-DivideRule --> MutableDivideState
+DivideRule --> FoldingDivider
 DivideRule --> Folder
 DivideRule --> StatementFolder
-DivideRule --> Option
 Locator --> Option
 ListCollector --> List
 ListCollector --> Lists
@@ -417,6 +430,11 @@ MapNode --> Joiner
 MapNode --> BiFunction
 MapNode --> Function
 Folder --> DivideState
+FoldingDivider --> None
+FoldingDivider --> Option
+FoldingDivider --> Some
+FoldingDivider --> Tuple2
+FoldingDivider --> Folder
 TargetPlatform --> Rule
 TargetPlatform --> AfterAll
 TargetPlatform --> Passer
@@ -470,22 +488,25 @@ LocatingRule --> CompileErrors
 LocatingRule --> FirstLocator
 LocatingRule --> LastLocator
 LocatingRule --> Locator
-LocatingRule --> Option
 SuffixRule --> CompileErrors
 JavaLang --> Lists
 JavaLang --> ContextRule
 JavaLang --> DivideRule
+JavaLang --> FilterRule
 JavaLang --> LocatingRule
 JavaLang --> NodeRule
 JavaLang --> OrRule
 JavaLang --> PrefixRule
 JavaLang --> Rule
+JavaLang --> Splitter
 JavaLang --> StringRule
 JavaLang --> StripRule
 JavaLang --> SuffixRule
-JavaLang --> FilterRule
 JavaLang --> TypeRule
+JavaLang --> Divider
+JavaLang --> FoldingDivider
 JavaLang --> DelimitedFolder
+JavaLang --> DividingSplitter
 PlantUMLLang --> Lists
 PlantUMLLang --> DivideRule
 PlantUMLLang --> ExactRule
@@ -500,6 +521,7 @@ PlantUMLLang --> StatementFolder
 CompileResult --> Tuple2
 CompileResult --> Result
 CompileResult --> CompileError
+CompileResult --> BiFunction
 CompileResult --> Function
 CompileResult --> Supplier
 FlattenJava --> Some
@@ -541,6 +563,8 @@ ApplicationBuilder --> TreeParser
 ApplicationBuilder --> Path
 ApplicationBuilder --> Option
 Maps --> HashMap
+List --> Option
+List --> Tuple2
 List --> Iter
 List --> BiFunction
 ResultCollector --> Ok
@@ -624,6 +648,7 @@ ExactRule --> Ok
 ExactRule --> InlineCompileResult
 ExactRule --> CompileErrors
 ExactRule --> MapNode
+LocatingSplitter --> Locator
 FirstLocator --> None
 FirstLocator --> Some
 AfterAll --> Node
@@ -634,6 +659,8 @@ Joiner --> Option
 Joiner --> Some
 LastLocator --> None
 LastLocator --> Some
+Splitter --> Option
+Splitter --> Tuple2
 ImmutableCompileError --> List
 ImmutableCompileError --> Lists
 ImmutableCompileError --> Iter
@@ -648,6 +675,9 @@ NodeRule --> Ok
 NodeRule --> InlineCompileResult
 NodeRule --> CompileErrors
 NodeRule --> MapNode
+DividingSplitter --> Joiner
+DividingSplitter --> ListCollector
+DividingSplitter --> Divider
 Main --> Iters
 Main --> ApplicationBuilder
 Main --> Error
@@ -656,6 +686,7 @@ Main --> TypeScriptTargetPlatform
 Main --> PathSources
 Main --> Sources
 Main --> Paths
+Divider --> Iter
 RuleLexer --> Tuple2
 RuleLexer --> MapCollector
 RuleLexer --> ResultCollector

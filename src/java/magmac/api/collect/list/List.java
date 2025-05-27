@@ -1,5 +1,7 @@
 package magmac.api.collect.list;
 
+import magmac.api.Option;
+import magmac.api.Tuple2;
 import magmac.api.iter.Iter;
 
 import java.util.function.BiFunction;
@@ -20,4 +22,8 @@ public interface List<T> {
     T getLast();
 
     boolean contains(T element);
+
+    int size();
+
+    Option<Tuple2<List<T>, T>> popLast();
 }
