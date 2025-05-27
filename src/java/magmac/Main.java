@@ -40,7 +40,12 @@ final class Main {
 
     private static Optional<Error> getDiagrams(TargetPlatform platform, Sources sources) {
         Path targetPath = platform.createTargetPath();
-        Targets targets = new PathTargets(targetPath);
+        String extension = switch (platform) {
+            case PlantUML -> "puml";
+            case TypeScript -> "ts";
+        };
+
+        Targets targets = new PathTargets(targetPath, extension);
         Rule rule = PlantUMLRoots.createRule();
 
         Lexer lexer = Config.createLexer();

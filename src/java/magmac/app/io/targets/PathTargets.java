@@ -10,7 +10,7 @@ import java.nio.file.Path;
 import java.util.Map;
 import java.util.Optional;
 
-public record PathTargets(Path root) implements Targets {
+public record PathTargets(Path root, String extension) implements Targets {
     private Optional<IOException> write(Location location, String output) {
         Path targetParent = Iters.fromList(location.namespace())
                 .fold(this.root(), Path::resolve);
@@ -22,7 +22,7 @@ public record PathTargets(Path root) implements Targets {
             }
         }
 
-        Path target = targetParent.resolve(location.name() + ".puml");
+        Path target = targetParent.resolve(location.name() + "." + extension);
         return SafeFiles.writeString(target, output);
     }
 
