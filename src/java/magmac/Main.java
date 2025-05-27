@@ -12,12 +12,18 @@ import magmac.app.io.sources.PathSources;
 import magmac.app.io.sources.Sources;
 import magmac.app.io.targets.PathTargets;
 import magmac.app.io.targets.Targets;
+import magmac.app.lang.AfterPasser;
+import magmac.app.lang.JavaToPlantUML;
+import magmac.app.lang.MergeDiagram;
 import magmac.app.lang.PlantUMLRoots;
 import magmac.app.lang.TargetPlatform;
+import magmac.app.stage.AfterAll;
+import magmac.app.stage.EmptyAfterAll;
 import magmac.app.stage.generate.Generator;
 import magmac.app.stage.generate.RuleGenerator;
 import magmac.app.stage.lexer.Lexer;
 import magmac.app.stage.parse.Parser;
+import magmac.app.stage.parse.TreeParser;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -40,7 +46,12 @@ final class Main {
         Rule rule = PlantUMLRoots.createRule();
 
         Lexer lexer = Config.createLexer();
-        Parser parser = Config.createParser();
+        AfterAll afterAllChildren = switch (platform) {
+            case PlantUML -> new MergeDiagram();
+            case TypeScript -> new EmptyAfterAll();
+        };
+
+        Parser parser = new TreeParser(new JavaToPlantUML(), new AfterPasser(), afterAllChildren);
 
         Generator generator = new RuleGenerator(rule);
         Compiler compiler = new StagedCompiler(lexer, parser, generator);

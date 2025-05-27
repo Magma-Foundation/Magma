@@ -5,7 +5,7 @@ import magmac.app.compile.StagedCompiler;
 import magmac.app.compile.rule.Rule;
 import magmac.app.lang.JavaRoots;
 import magmac.app.lang.AfterPasser;
-import magmac.app.lang.CreateDiagram;
+import magmac.app.lang.MergeDiagram;
 import magmac.app.stage.generate.Generator;
 import magmac.app.lang.JavaToPlantUML;
 import magmac.app.stage.lexer.Lexer;
@@ -27,6 +27,6 @@ public final class Config {
     }
 
     public static Parser createParser() {
-        return new TreeParser(new JavaToPlantUML(), new AfterPasser(), new CreateDiagram());
+        return new TreeParser(new JavaToPlantUML(), new AfterPasser(), new MergeDiagram());
     }
 }

@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-public class CreateDiagram implements AfterAll {
+public class MergeDiagram implements AfterAll {
     private static List<String> findParentDependencies(String child, Map<String, List<String>> childToParents, Map<String, List<String>> dependencyMap) {
         return childToParents.getOrDefault(child, Collections.emptyList())
                 .stream()
@@ -32,13 +32,13 @@ public class CreateDiagram implements AfterAll {
                 .flatMap(Collection::stream)
                 .toList();
 
-        Map<String, List<String>> childrenWithInheritedTypes = CreateDiagram.findChildrenWithInheritedTypes(oldRootSegments);
-        Map<String, List<String>> childrenWithDependencies = CreateDiagram.findChildrenWithDependencies(oldRootSegments);
+        Map<String, List<String>> childrenWithInheritedTypes = MergeDiagram.findChildrenWithInheritedTypes(oldRootSegments);
+        Map<String, List<String>> childrenWithDependencies = MergeDiagram.findChildrenWithDependencies(oldRootSegments);
         List<Node> newDependencies = Iters.fromMap(childrenWithDependencies).fold(new ArrayList<Node>(), (current, entry) -> {
             String child = entry.left();
             List<String> currentDependencies = entry.right();
 
-            List<String> parentDependencies = CreateDiagram.findParentDependencies(child, childrenWithInheritedTypes, childrenWithDependencies);
+            List<String> parentDependencies = MergeDiagram.findParentDependencies(child, childrenWithInheritedTypes, childrenWithDependencies);
             List<String> toRemove = new ArrayList<>(parentDependencies);
             toRemove.addAll(childrenWithInheritedTypes.getOrDefault(child, new ArrayList<>()));
 

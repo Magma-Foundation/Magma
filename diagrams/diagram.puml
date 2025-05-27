@@ -61,6 +61,8 @@ class PrefixRule
 Rule <|-- PrefixRule
 class RuleLexer
 Lexer <|-- RuleLexer
+class EmptyAfterAll
+AfterAll <|-- EmptyAfterAll
 class CompileApplication
 Application <|-- CompileApplication
 class ExactRule
@@ -85,8 +87,6 @@ class Iters
 interface Rule
 class JavaToPlantUML
 Passer <|-- JavaToPlantUML
-class CreateDiagram
-AfterAll <|-- CreateDiagram
 class DelimitedFolder
 Folder <|-- DelimitedFolder
 class PathTargets
@@ -97,6 +97,8 @@ Head <|-- SingleHead
 interface Context
 class StripRule
 Rule <|-- StripRule
+class MergeDiagram
+AfterAll <|-- MergeDiagram
 interface Error
 class Ok
 Result <|-- Ok
@@ -139,6 +141,14 @@ Iters --> ArrayList
 Iters --> List
 Iters --> Map
 Iters --> Optional
+MergeDiagram --> Iters
+MergeDiagram --> MapNode
+MergeDiagram --> ArrayList
+MergeDiagram --> Collection
+MergeDiagram --> Collections
+MergeDiagram --> HashMap
+MergeDiagram --> List
+MergeDiagram --> Optional
 Roots --> Tuple2
 Roots --> Iter
 Roots --> Node
@@ -264,14 +274,6 @@ RuleGenerator --> Result
 RuleGenerator --> CompileError
 RuleGenerator --> Rule
 Application --> Optional
-CreateDiagram --> Iters
-CreateDiagram --> MapNode
-CreateDiagram --> ArrayList
-CreateDiagram --> Collection
-CreateDiagram --> Collections
-CreateDiagram --> HashMap
-CreateDiagram --> List
-CreateDiagram --> Optional
 Generator --> Location
 Generator --> Roots
 Generator --> Map
@@ -296,7 +298,7 @@ Config --> StagedCompiler
 Config --> Rule
 Config --> JavaRoots
 Config --> AfterPasser
-Config --> CreateDiagram
+Config --> MergeDiagram
 Config --> Generator
 Config --> JavaToPlantUML
 Config --> Lexer
@@ -409,12 +411,18 @@ Main --> PathSources
 Main --> Sources
 Main --> PathTargets
 Main --> Targets
+Main --> AfterPasser
+Main --> JavaToPlantUML
+Main --> MergeDiagram
 Main --> PlantUMLRoots
 Main --> TargetPlatform
+Main --> AfterAll
+Main --> EmptyAfterAll
 Main --> Generator
 Main --> RuleGenerator
 Main --> Lexer
 Main --> Parser
+Main --> TreeParser
 Main --> Path
 Main --> Paths
 Main --> Optional
