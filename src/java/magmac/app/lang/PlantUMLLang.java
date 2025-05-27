@@ -13,18 +13,19 @@ import magmac.app.compile.rule.fold.StatementFolder;
 
 import java.util.List;
 
-public final class PlantUMLRoots {
+public final class PlantUMLLang {
     public static Rule createRule() {
-        return new DivideRule("children", new StatementFolder(), PlantUMLRoots.createRootSegmentRule());
+        return new DivideRule("children", new StatementFolder(), PlantUMLLang.createRootSegmentRule());
     }
 
     private static SuffixRule createRootSegmentRule() {
         return new SuffixRule(new OrRule(List.of(
+                CommonLang.createWhitespaceRule(),
                 new TypeRule("start", new ExactRule("@startuml\nskinparam linetype ortho")),
                 new TypeRule("end", new ExactRule("@enduml")),
-                PlantUMLRoots.createStructureRule("class"),
-                PlantUMLRoots.createStructureRule("interface"),
-                PlantUMLRoots.createStructureRule("enum"),
+                PlantUMLLang.createStructureRule("class"),
+                PlantUMLLang.createStructureRule("interface"),
+                PlantUMLLang.createStructureRule("enum"),
                 new TypeRule("inherits", LocatingRule.First(new StringRule("parent"), " <|-- ", new StringRule("child"))),
                 new TypeRule("dependency", LocatingRule.First(new StringRule("child"), " --> ", new StringRule("parent")))
         )), "\n");

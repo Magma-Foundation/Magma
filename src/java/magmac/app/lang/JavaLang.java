@@ -2,7 +2,6 @@ package magmac.app.lang;
 
 import magmac.app.compile.rule.ContextRule;
 import magmac.app.compile.rule.DivideRule;
-import magmac.app.compile.rule.ExactRule;
 import magmac.app.compile.rule.LocatingRule;
 import magmac.app.compile.rule.NodeRule;
 import magmac.app.compile.rule.OrRule;
@@ -17,16 +16,16 @@ import magmac.app.compile.rule.fold.DelimitedFolder;
 
 import java.util.List;
 
-public final class JavaRoots {
+public final class JavaLang {
     public static Rule createRule() {
         return new TypeRule("root", DivideRule.Statements("children", new OrRule(List.of(
-                new StripRule(new ExactRule("")),
-                JavaRoots.createRule("package", "package "),
-                JavaRoots.createRule("import", "import "),
-                JavaRoots.createStructureRule("record"),
-                JavaRoots.createStructureRule("interface"),
-                JavaRoots.createStructureRule("class"),
-                JavaRoots.createStructureRule("enum")
+                CommonLang.createWhitespaceRule(),
+                JavaLang.createRule("package", "package "),
+                JavaLang.createRule("import", "import "),
+                JavaLang.createStructureRule("record"),
+                JavaLang.createStructureRule("interface"),
+                JavaLang.createStructureRule("class"),
+                JavaLang.createStructureRule("enum")
         ))));
     }
 
@@ -43,33 +42,36 @@ public final class JavaRoots {
         ));
 
         Rule withEnds = new OrRule(List.of(
-                LocatingRule.First(withParameters, " extends ", new NodeRule("extended", JavaRoots.createTypeRule())),
+                LocatingRule.First(withParameters, " extends ", new NodeRule("extended", JavaLang.createTypeRule())),
                 withParameters
         ));
 
         Rule withImplements = new OrRule(List.of(
-                new ContextRule("With implements", LocatingRule.First(withEnds, " implements ", new NodeRule("implemented", JavaRoots.createTypeRule()))),
+                new ContextRule("With implements", LocatingRule.First(withEnds, " implements ", new NodeRule("implemented", JavaLang.createTypeRule()))),
                 new ContextRule("Without implements", withEnds)
         ));
 
-        Rule afterKeyword = LocatingRule.First(withImplements, "{", new StripRule(new SuffixRule(DivideRule.Statements("children", JavaRoots.createStructureMemberRule()), "}")));
+        Rule afterKeyword = LocatingRule.First(withImplements, "{", new StripRule(new SuffixRule(DivideRule.Statements("children", JavaLang.createStructureMemberRule()), "}")));
         return new TypeRule(keyword, LocatingRule.First(new StringRule("before-keyword"), keyword + " ", afterKeyword));
     }
 
     private static OrRule createStructureMemberRule() {
         return new OrRule(List.of(
-                new StripRule(new ExactRule("")),
-                JavaRoots.createDefinitionStatementRule(),
-                JavaRoots.createMethodRule()
+                CommonLang.createWhitespaceRule(),
+                JavaLang.createDefinitionStatementRule(),
+                JavaLang.createMethodRule()
         ));
     }
 
     private static StripRule createDefinitionStatementRule() {
-        return new StripRule(new SuffixRule(new NodeRule("definition", JavaRoots.createDefinitionRule()), ";"));
+        return new StripRule(new SuffixRule(new NodeRule("definition", JavaLang.createDefinitionRule()), ";"));
     }
 
     private static Rule createMethodRule() {
-        return LocatingRule.First(new NodeRule("definition", JavaRoots.createDefinitionRule()), "(", new StringRule("with-params"));
+        return LocatingRule.First(new NodeRule("header", new OrRule(List.of(
+                JavaLang.createDefinitionRule(),
+                new StringRule("name")
+        ))), "(", new StringRule("with-params"));
     }
 
     private static Rule createDefinitionRule() {
@@ -78,8 +80,8 @@ public final class JavaRoots {
 
     private static OrRule createTypeRule() {
         return new OrRule(List.of(
-                JavaRoots.createTemplateRule(),
-                JavaRoots.createSymbolTypeRule()
+                JavaLang.createTemplateRule(),
+                JavaLang.createSymbolTypeRule()
         ));
     }
 

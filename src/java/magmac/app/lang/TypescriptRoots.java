@@ -15,6 +15,7 @@ import java.util.List;
 public class TypescriptRoots {
     public static Rule createRule() {
         return new TypeRule("root", DivideRule.Statements("children", new OrRule(List.of(
+                CommonLang.createWhitespaceRule(),
                 new TypeRule("import", new ExactRule("import { ? } from ?;\n")),
                 TypescriptRoots.createClassRule(),
                 new TypeRule("interface", new ExactRule("export interface ? {\n}\n")),
@@ -29,6 +30,7 @@ public class TypescriptRoots {
 
     private static Rule createStructureMemberRule() {
         return new OrRule(List.of(
+                CommonLang.createWhitespaceRule()
         ));
     }
 }

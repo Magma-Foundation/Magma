@@ -13,7 +13,7 @@ import magmac.app.io.sources.Sources;
 import magmac.app.io.targets.PathTargets;
 import magmac.app.io.targets.Targets;
 import magmac.app.lang.FlattenJava;
-import magmac.app.lang.JavaRoots;
+import magmac.app.lang.JavaLang;
 import magmac.app.stage.AfterAll;
 import magmac.app.stage.Passer;
 import magmac.app.stage.generate.Generator;
@@ -43,7 +43,7 @@ final class Main {
         String extension = platform.createExtension();
         Targets targets = new PathTargets(targetPath, extension);
 
-        Lexer lexer = new RuleLexer(JavaRoots.createRule());
+        Lexer lexer = new RuleLexer(JavaLang.createRule());
 
         AfterAll afterAllChildren = platform.createAfterAll();
         Passer afterChild = platform.createAfterChild();
