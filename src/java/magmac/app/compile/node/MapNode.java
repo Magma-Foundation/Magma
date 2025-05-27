@@ -1,19 +1,17 @@
 package magmac.app.compile.node;
 
 import magmac.api.None;
+import magmac.api.Option;
 import magmac.api.Some;
 import magmac.api.Tuple2;
 import magmac.api.collect.Joiner;
+import magmac.api.collect.Map;
+import magmac.api.collect.Maps;
 import magmac.api.iter.Iter;
 import magmac.api.iter.Iters;
 
-import java.util.HashMap;
-import java.util.Map;
-import magmac.api.Option;
 import java.util.function.BiFunction;
 import java.util.function.Function;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public final class MapNode implements Node {
     private final Option<String> maybeType;
@@ -22,7 +20,7 @@ public final class MapNode implements Node {
     private final Map<String, NodeList> nodeLists;
 
     public MapNode() {
-        this(new None<String>(), new HashMap<>(), new HashMap<>(), new HashMap<>());
+        this(new None<String>(), Maps.empty(), Maps.empty(), Maps.empty());
     }
 
     private MapNode(
@@ -38,7 +36,7 @@ public final class MapNode implements Node {
     }
 
     public MapNode(String type) {
-        this(new Some<String>(type), new HashMap<>(), new HashMap<>(), new HashMap<>());
+        this(new Some<String>(type), Maps.empty(), Maps.empty(), Maps.empty());
     }
 
     private static <T> Node fold(Node node, Iter<Tuple2<String, T>> iter, Function<Node, BiFunction<String, T, Node>> mapper) {
@@ -52,7 +50,7 @@ public final class MapNode implements Node {
 
     @Override
     public Iter<Tuple2<String, Node>> iterNodes() {
-        return Iters.fromMap(this.nodes);
+        return this.nodes.iterEntries();
     }
 
     @Override
@@ -66,25 +64,26 @@ public final class MapNode implements Node {
                 .map(type -> type + " ")
                 .orElse("");
 
-        Stream<String> stringsStream = this.toStream(depth, this.strings, value -> "\"" + value + "\"");
-        Stream<String> nodesStream = this.toStream(depth, this.nodes, value -> value.format(depth + 1));
-        Stream<String> nodeListsStream = this.toStream(depth, this.nodeLists, values -> "[" + this.formatNodeList(depth, values) + "]");
+        Iter<String> stringsStream = this.toStream(depth, this.strings, value -> "\"" + value + "\"");
+        Iter<String> nodesStream = this.toStream(depth, this.nodes, value -> value.format(depth + 1));
+        Iter<String> nodeListsStream = this.toStream(depth, this.nodeLists, values -> "[" + this.formatNodeList(depth, values) + "]");
 
-        String joined = Stream.of(stringsStream, nodesStream, nodeListsStream)
-                .flatMap(value -> value)
-                .collect(Collectors.joining(", "));
+        String joined = stringsStream.concat(nodesStream)
+                .concat(nodeListsStream)
+                .collect(new Joiner(", "))
+                .orElse("");
 
         return typeString + "{" + joined + this.createIndent(depth) + "}";
     }
 
-    private <T> Stream<String> toStream(int depth, Map<String, T> map, Function<T, String> mapper) {
+    private <T> Iter<String> toStream(int depth, Map<String, T> map, Function<T, String> mapper) {
         if (map.isEmpty()) {
-            return Stream.empty();
+            return Iters.empty();
         }
 
-        return map.entrySet().stream().map(entry -> {
-            String key = entry.getKey();
-            T value = entry.getValue();
+        return map.iterEntries().map(entry -> {
+            String key = entry.left();
+            T value = entry.right();
             return this.formatEntry(depth, key, mapper.apply(value));
         });
     }
@@ -159,12 +158,12 @@ public final class MapNode implements Node {
 
     @Override
     public Iter<Tuple2<String, String>> iterStrings() {
-        return Iters.fromMap(this.strings());
+        return this.strings().iterEntries();
     }
 
     @Override
     public Iter<Tuple2<String, NodeList>> iterNodeLists() {
-        return Iters.fromMap(this.nodeLists);
+        return this.nodeLists.iterEntries();
     }
 
     @Override

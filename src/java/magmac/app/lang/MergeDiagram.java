@@ -2,6 +2,8 @@ package magmac.app.lang;
 
 import magmac.api.Tuple2;
 import magmac.api.collect.ListCollector;
+import magmac.api.collect.Map;
+import magmac.api.collect.Maps;
 import magmac.api.iter.Iters;
 import magmac.app.compile.node.InlineNodeList;
 import magmac.app.compile.node.MapNode;
@@ -13,9 +15,7 @@ import magmac.app.stage.AfterAll;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class MergeDiagram implements AfterAll {
     private static List<String> findParentDependencies(String child, Map<String, List<String>> childToParents, Map<String, List<String>> dependencyMap) {
@@ -27,7 +27,7 @@ public class MergeDiagram implements AfterAll {
     }
 
     private static Map<String, List<String>> findChildrenWithDependencies(NodeList rootSegments) {
-        return rootSegments.iter().fold(new HashMap<String, List<String>>(), (current, node) -> {
+        return rootSegments.iter().fold(Maps.empty(), (current, node) -> {
             if (node.is("dependency")) {
                 String parent = node.findString("parent").orElse("");
                 String child = node.findString("child").orElse("");
@@ -43,7 +43,7 @@ public class MergeDiagram implements AfterAll {
     }
 
     private static Map<String, List<String>> findChildrenWithInheritedTypes(NodeList rootSegments) {
-        return rootSegments.iter().fold(new HashMap<String, List<String>>(), (current1, node1) -> {
+        return rootSegments.iter().fold(Maps.empty(), (current1, node1) -> {
             if (!node1.is("inherits")) {
                 return current1;
             }
@@ -62,7 +62,7 @@ public class MergeDiagram implements AfterAll {
 
     @Override
     public Map<Location, Node> afterAll(Map<Location, Node> roots) {
-        NodeList oldRootSegments = new InlineNodeList(Iters.fromMap(roots)
+        NodeList oldRootSegments = new InlineNodeList(roots.iterEntries()
                 .map(Tuple2::right)
                 .map(node -> node.findNodeList("children"))
                 .flatMap(Iters::fromOption)
@@ -71,7 +71,7 @@ public class MergeDiagram implements AfterAll {
 
         Map<String, List<String>> childrenWithInheritedTypes = MergeDiagram.findChildrenWithInheritedTypes(oldRootSegments);
         Map<String, List<String>> childrenWithDependencies = MergeDiagram.findChildrenWithDependencies(oldRootSegments);
-        NodeList newDependencies = Iters.fromMap(childrenWithDependencies).fold(InlineNodeList.empty(), (current, entry) -> {
+        NodeList newDependencies = childrenWithDependencies.iterEntries().fold(InlineNodeList.empty(), (current, entry) -> {
             String child = entry.left();
             List<String> currentDependencies = entry.right();
 
@@ -102,6 +102,6 @@ public class MergeDiagram implements AfterAll {
         Node node = new MapNode();
         Node root = node.withNodeList("children", copy);
         Location location = new Location(Collections.emptyList(), "diagram");
-        return Map.of(location, root);
+        return Maps.<Location, Node>empty().put(location, root);
     }
 }

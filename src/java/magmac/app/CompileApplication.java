@@ -9,7 +9,7 @@ import magmac.app.io.Location;
 import magmac.app.io.sources.Sources;
 import magmac.app.io.targets.Targets;
 
-import java.util.Map;
+import magmac.api.collect.Map;
 import magmac.api.Option;
 
 public final class CompileApplication implements Application {

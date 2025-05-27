@@ -9,7 +9,7 @@ import magmac.app.compile.rule.Rule;
 import magmac.app.io.Location;
 import magmac.app.stage.Roots;
 
-import java.util.Map;
+import magmac.api.collect.Map;
 
 public class RuleGenerator implements Generator {
     private final Rule rootRule;

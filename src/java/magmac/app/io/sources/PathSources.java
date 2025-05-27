@@ -11,7 +11,7 @@ import magmac.app.io.SafeFiles;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Map;
+import magmac.api.collect.Map;
 
 public record PathSources(Path root) implements Sources {
     @Override

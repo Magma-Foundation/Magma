@@ -15,7 +15,7 @@ import magmac.app.stage.MapRoots;
 import magmac.app.stage.Passer;
 import magmac.app.stage.Roots;
 
-import java.util.Map;
+import magmac.api.collect.Map;
 
 public class TreeParser implements Parser {
     private final Passer beforeChild;

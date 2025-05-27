@@ -3,7 +3,7 @@ package magmac.app.stage;
 import magmac.app.compile.node.Node;
 import magmac.app.io.Location;
 
-import java.util.Map;
+import magmac.api.collect.Map;
 
 public class EmptyAfterAll implements AfterAll {
     @Override

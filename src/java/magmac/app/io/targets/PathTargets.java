@@ -1,6 +1,7 @@
 package magmac.app.io.targets;
 
-import magmac.api.None;
+import magmac.api.Option;
+import magmac.api.collect.Map;
 import magmac.api.iter.Iters;
 import magmac.app.io.Location;
 import magmac.app.io.SafeFiles;
@@ -8,8 +9,6 @@ import magmac.app.io.SafeFiles;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Map;
-import magmac.api.Option;
 
 public record PathTargets(Path root, String extension) implements Targets {
     private Option<IOException> write(Location location, String output) {
@@ -23,18 +22,15 @@ public record PathTargets(Path root, String extension) implements Targets {
             }
         }
 
-        Path target = targetParent.resolve(location.name() + "." + extension);
+        Path target = targetParent.resolve(location.name() + "." + this.extension);
         return SafeFiles.writeString(target, output);
     }
 
     @Override
     public Option<IOException> writeAll(Map<Location, String> outputs) {
-        for (Map.Entry<Location, String> tuple : outputs.entrySet()) {
-            Option<IOException> maybeError = this.write(tuple.getKey(), tuple.getValue());
-            if (maybeError.isPresent()) {
-                return maybeError;
-            }
-        }
-        return new None<>();
+        return outputs.iterEntries()
+                .map(entry -> this.write(entry.left(), entry.right()))
+                .flatMap(Iters::fromOption)
+                .next();
     }
 }
