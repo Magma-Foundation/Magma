@@ -20,8 +20,8 @@ public class AfterPasser implements Passer {
                         return child.findNode("implemented")
                                 .map(implemented -> {
                                     Stream<Node> child1 = Stream.of(child, new MapNode("inherits")
-                                            .withString("parent", child.findString("name").orElse(""))
-                                            .withString("child", this.findValue(implemented)));
+                                            .withString("child", child.findString("name").orElse(""))
+                                            .withString("parent", this.findValue(implemented)));
                                     return child1;
                                 }).orElseGet(() -> Stream.of(child));
                     })
