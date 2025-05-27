@@ -1,6 +1,5 @@
 @startuml
 skinparam linetype ortho
-
 HeadedIter --> Collector
 HeadedIter --> EmptyHead
 HeadedIter --> FlatMapHead
@@ -11,59 +10,53 @@ HeadedIter --> Optional
 HeadedIter --> BiFunction
 HeadedIter --> Function
 HeadedIter --> Predicate
-
-
+class HeadedIter<T>(Head<T> head)
 Roots --> Node
 Roots --> Location
 Roots --> Map
-
-
+class Roots
 All --> Node
 All --> Location
 All --> Map
-
-
+interface All 
 EmptyHead --> Head
 EmptyHead --> Optional
-
-
+class EmptyHead<T>
 JavaRoots --> Namespaced
 JavaRoots --> DivideRule
 JavaRoots --> InfixRule
 JavaRoots --> OrRule
 JavaRoots --> Rule
 JavaRoots --> StringRule
+JavaRoots --> StripRule
+JavaRoots --> SuffixRule
 JavaRoots --> TypeRule
 JavaRoots --> StatementFolder
 JavaRoots --> List
-
-
+class JavaRoots 
 Sources --> Result
 Sources --> IOException
 Sources --> Map
-
-
+interface Sources 
 Iters --> Tuple2
 Iters --> RangeHead
 Iters --> ArrayList
 Iters --> List
 Iters --> Map
 Iters --> Set
-
-
+class Iters 
 PlantUMLRoots --> DivideRule
 PlantUMLRoots --> ExactRule
 PlantUMLRoots --> InfixRule
 PlantUMLRoots --> OrRule
 PlantUMLRoots --> PrefixRule
 PlantUMLRoots --> Rule
-PlantUMLRoots --> StatementFolder
 PlantUMLRoots --> StringRule
 PlantUMLRoots --> SuffixRule
 PlantUMLRoots --> TypeRule
+PlantUMLRoots --> StatementFolder
 PlantUMLRoots --> List
-
-
+class PlantUMLRoots 
 SafeFiles --> Iter
 SafeFiles --> Iters
 SafeFiles --> Err
@@ -75,32 +68,26 @@ SafeFiles --> Path
 SafeFiles --> Optional
 SafeFiles --> Collectors
 SafeFiles --> Stream
-
-
+class SafeFiles 
 Lexer --> Result
 Lexer --> CompileError
 Lexer --> Location
 Lexer --> Map
-
-
+interface Lexer 
 StringRule --> Err
 StringRule --> Ok
 StringRule --> Result
 StringRule --> CompileError
 StringRule --> MapNode
 StringRule --> Node
-
-
+class StringRule(String key)
 ThrowableError --> Error
 ThrowableError --> PrintWriter
 ThrowableError --> StringWriter
-
-
-
-
+class ThrowableError(Throwable throwable)
+class Tuple2<A, B>
 ApplicationError --> Error
-
-
+class ApplicationError(magmac.app.Error error)
 PathSources --> SafeFiles
 PathSources --> Tuple2
 PathSources --> MapCollector
@@ -110,36 +97,30 @@ PathSources --> IOException
 PathSources --> Files
 PathSources --> Path
 PathSources --> Map
-
-
+class PathSources(Path root)
 BeforePasser --> Tuple2
 BeforePasser --> MapNode
 BeforePasser --> Node
 BeforePasser --> ParseState
+BeforePasser --> ArrayList
 BeforePasser --> Collections
 BeforePasser --> List
 BeforePasser --> Optional
-
-
+class BeforePasser
 StatementFolder --> DivideState
-
-
+class StatementFolder
 AfterPasser --> Tuple2
 AfterPasser --> Node
 AfterPasser --> ParseState
 AfterPasser --> Optional
-
-
+class AfterPasser
 Source --> Result
 Source --> IOException
-
-
+interface Source 
 Folder --> DivideState
-
-
+interface Folder 
 DivideState --> Stream
-
-
+interface DivideState 
 CreateDiagram --> MapNode
 CreateDiagram --> Node
 CreateDiagram --> Location
@@ -149,8 +130,7 @@ CreateDiagram --> Collections
 CreateDiagram --> List
 CreateDiagram --> Map
 CreateDiagram --> Optional
-
-
+class CreateDiagram
 RuleGenerator --> Tuple2
 RuleGenerator --> Iters
 RuleGenerator --> MapCollector
@@ -160,53 +140,46 @@ RuleGenerator --> CompileError
 RuleGenerator --> Rule
 RuleGenerator --> Location
 RuleGenerator --> Map
-
-
+class RuleGenerator
 Generator --> Result
 Generator --> CompileError
 Generator --> Location
 Generator --> Map
-
-
+interface Generator 
 FlatMapHead --> Head
 FlatMapHead --> Iter
 FlatMapHead --> Optional
 FlatMapHead --> Function
-
-
+class FlatMapHead<T, R>
 Passer --> Tuple2
 Passer --> Node
 Passer --> ParseState
 Passer --> Optional
-
-
+interface Passer 
 ResultCollector --> Ok
 ResultCollector --> Result
-
-
+class ResultCollector<T, C, X>(
+        Collector<T, C> collector
+)
 InfixRule --> Err
 InfixRule --> Result
 InfixRule --> Node
 InfixRule --> StringContext
 InfixRule --> CompileError
-
-
+class InfixRule(Rule leftRule, String infix, Rule rightRule)
 PrefixRule --> Err
 PrefixRule --> Result
 PrefixRule --> CompileError
 PrefixRule --> Node
 PrefixRule --> StringContext
-
-
+class PrefixRule(String prefix, Rule childRule)
 MapCollector --> Tuple2
 MapCollector --> HashMap
 MapCollector --> Map
-
-
+class MapCollector<K, V>()
 NodeContext --> Context
 NodeContext --> Node
-
-
+class NodeContext(Node node)
 CompileApplication --> ApplicationError
 CompileApplication --> ThrowableError
 CompileApplication --> Location
@@ -218,8 +191,7 @@ CompileApplication --> Parser
 CompileApplication --> Roots
 CompileApplication --> Map
 CompileApplication --> Optional
-
-
+class CompileApplication
 ExactRule --> Err
 ExactRule --> Ok
 ExactRule --> Result
@@ -227,40 +199,34 @@ ExactRule --> CompileError
 ExactRule --> MapNode
 ExactRule --> Node
 ExactRule --> StringContext
-
-
+class ExactRule(String value)
 PathSource --> SafeFiles
 PathSource --> Result
 PathSource --> IOException
 PathSource --> Path
 PathSource --> ArrayList
 PathSource --> List
-
-
-
-
+class PathSource(Path root, Path child)
+interface Collector<T, C> 
 Head --> Optional
-
-
+interface Head<T> 
 TypeRule --> Err
 TypeRule --> Result
+TypeRule --> Context
 TypeRule --> Node
 TypeRule --> StringContext
 TypeRule --> CompileError
 TypeRule --> List
-
-
+class TypeRule(String type, Rule childRule)
 Joiner --> Collector
 Joiner --> Optional
-
-
+class Joiner()
 Node --> Tuple2
 Node --> Iter
 Node --> List
 Node --> Map
 Node --> Optional
-
-
+interface Node 
 OrRule --> Err
 OrRule --> Ok
 OrRule --> Result
@@ -272,23 +238,20 @@ OrRule --> ArrayList
 OrRule --> List
 OrRule --> Optional
 OrRule --> Function
-
-
+class OrRule(List<Rule> rules)
 ParseState --> Location
-
-
+class ParseState
 CompileError --> Error
 CompileError --> Context
 CompileError --> ArrayList
+CompileError --> Comparator
 CompileError --> List
 CompileError --> Collectors
-
-
+class CompileError(String message, Context context, List<CompileError> errors)
 Rule --> Result
 Rule --> CompileError
 Rule --> Node
-
-
+interface Rule 
 Namespaced --> DelimitedFolder
 Namespaced --> DivideRule
 Namespaced --> PrefixRule
@@ -297,11 +260,9 @@ Namespaced --> StringRule
 Namespaced --> StripRule
 Namespaced --> SuffixRule
 Namespaced --> TypeRule
-
-
+class Namespaced 
 DelimitedFolder --> DivideState
-
-
+class DelimitedFolder
 TreeParser --> Tuple2
 TreeParser --> Iters
 TreeParser --> MapCollector
@@ -311,16 +272,12 @@ TreeParser --> ParseState
 TreeParser --> ArrayList
 TreeParser --> List
 TreeParser --> Map
-
-
+class TreeParser
 Location --> List
-
-
-
-
+class Location
+interface Parser 
 StringContext --> Context
-
-
+class StringContext(String value)
 PathTargets --> SafeFiles
 PathTargets --> Iters
 PathTargets --> IOException
@@ -328,40 +285,32 @@ PathTargets --> Files
 PathTargets --> Path
 PathTargets --> Map
 PathTargets --> Optional
-
-
+class PathTargets(Path root)
 SingleHead --> Head
 SingleHead --> Optional
-
-
+class SingleHead<T>
 StripRule --> Result
 StripRule --> CompileError
 StripRule --> Node
-
-
-
-
+class StripRule(Rule rule)
+interface Error 
 Iter --> Collector
 Iter --> Result
 Iter --> Optional
 Iter --> BiFunction
 Iter --> Function
 Iter --> Predicate
-
-
+interface Iter<T> 
 Ok --> Tuple2
 Ok --> Optional
 Ok --> Function
 Ok --> Supplier
-
-
+class Ok<T, X>(T value)
 Application --> Optional
-
-
+interface Application 
 RangeHead --> Head
 RangeHead --> Optional
-
-
+class RangeHead
 DivideRule --> Iters
 DivideRule --> ResultCollector
 DivideRule --> Err
@@ -376,14 +325,12 @@ DivideRule --> CompileError
 DivideRule --> ArrayList
 DivideRule --> List
 DivideRule --> Optional
-
-
+class DivideRule(String key, Folder folder, Rule childRule)
 Err --> Tuple2
 Err --> Optional
 Err --> Function
 Err --> Supplier
-
-
+class Err<T, X>(X error)
 RuleLexer --> Tuple2
 RuleLexer --> Iters
 RuleLexer --> MapCollector
@@ -394,23 +341,19 @@ RuleLexer --> Node
 RuleLexer --> Rule
 RuleLexer --> Location
 RuleLexer --> Map
-
-
-
-
+class RuleLexer
+interface Context 
 SuffixRule --> Err
 SuffixRule --> Result
 SuffixRule --> CompileError
 SuffixRule --> Node
 SuffixRule --> StringContext
-
-
+class SuffixRule(Rule childRule, String suffix)
 Result --> Tuple2
 Result --> Optional
 Result --> Function
 Result --> Supplier
-
-
+interface Result<T, X> 
 Main --> Application
 Main --> CompileApplication
 Main --> JavaRoots
@@ -429,13 +372,11 @@ Main --> RuleGenerator
 Main --> RuleLexer
 Main --> TreeParser
 Main --> Paths
-
-
+class Main 
 MutableDivideState --> ArrayList
 MutableDivideState --> List
 MutableDivideState --> Stream
-
-
+class MutableDivideState
 MapNode --> Tuple2
 MapNode --> Iter
 MapNode --> Iters
@@ -443,10 +384,9 @@ MapNode --> HashMap
 MapNode --> List
 MapNode --> Map
 MapNode --> Optional
-
-
+class MapNode
 Targets --> IOException
 Targets --> Map
 Targets --> Optional
-
+interface Targets 
 @enduml

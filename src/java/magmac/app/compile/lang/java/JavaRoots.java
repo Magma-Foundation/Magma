@@ -6,6 +6,8 @@ import magmac.app.compile.rule.InfixRule;
 import magmac.app.compile.rule.OrRule;
 import magmac.app.compile.rule.Rule;
 import magmac.app.compile.rule.StringRule;
+import magmac.app.compile.rule.StripRule;
+import magmac.app.compile.rule.SuffixRule;
 import magmac.app.compile.rule.TypeRule;
 import magmac.app.compile.rule.fold.StatementFolder;
 
@@ -23,13 +25,18 @@ public final class JavaRoots {
     }
 
     private static Rule createStructureRule(String keyword) {
-        Rule beforeContent = new StringRule("before-content");
-        Rule leftRule = new OrRule(List.of(
+        Rule beforeContent = new StringRule("name");
+        Rule withImplements = new OrRule(List.of(
                 new InfixRule(beforeContent, " implements ", new StringRule("implemented")),
                 beforeContent
         ));
 
-        Rule afterKeyword = new InfixRule(leftRule, "{", new StringRule("after-content"));
+        Rule withParameters = new OrRule(List.of(
+                new StripRule(new SuffixRule(new InfixRule(beforeContent, "(", new StringRule("parameters")), ")")),
+                withImplements
+        ));
+
+        Rule afterKeyword = new InfixRule(withParameters, "{", new StringRule("after-content"));
         return new TypeRule(keyword, new InfixRule(new StringRule("before-keyword"), keyword + " ", afterKeyword));
     }
 }
