@@ -7,8 +7,6 @@ import magmac.app.compile.rule.locate.FirstLocator;
 import magmac.app.compile.rule.locate.LastLocator;
 import magmac.app.compile.rule.locate.Locator;
 
-import magmac.api.Option;
-
 public final class LocatingRule implements Rule {
     private final Rule leftRule;
     private final String infix;
@@ -32,23 +30,19 @@ public final class LocatingRule implements Rule {
 
     @Override
     public CompileResult<Node> lex(String input) {
-        Option<Integer> maybeSeparator = this.locator.locate(input, this.infix);
-        if (maybeSeparator.isEmpty()) {
+        return this.locator.locate(input, this.infix).map(separator -> {
+            String left = input.substring(0, separator);
+            String right = input.substring(separator + this.infix.length());
+            return this.leftRule.lex(left).merge(() -> this.rightRule.lex(right), Node::merge);
+        }).orElseGet(() -> {
             return CompileErrors.createStringError("Infix '" + this.infix + "' not present", input);
-        }
-
-        int separator = maybeSeparator.orElse(null);
-        String left = input.substring(0, separator);
-        String right = input.substring(separator + this.infix.length());
-        return this.leftRule.lex(left)
-                .and(() -> this.rightRule.lex(right))
-                .mapValue(tuple -> tuple.left().merge(tuple.right()));
+        });
     }
 
     @Override
     public CompileResult<String> generate(Node node) {
-        return this.leftRule.generate(node)
-                .and(() -> this.rightRule.generate(node))
-                .mapValue(tuple -> tuple.left() + this.infix + tuple.right());
+        return this.leftRule.generate(node).merge(
+                () -> this.rightRule.generate(node),
+                (leftString, rightString) -> leftString + this.infix + rightString);
     }
 }

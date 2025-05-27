@@ -4,6 +4,7 @@ import magmac.api.Tuple2;
 import magmac.api.result.Result;
 import magmac.app.compile.error.error.CompileError;
 
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -46,5 +47,14 @@ public final class InlineCompileResult<T> implements CompileResult<T> {
     @Override
     public Result<T, CompileError> result() {
         return this.result;
+    }
+
+    @Override
+    public CompileResult<T> merge(Supplier<CompileResult<T>> other, BiFunction<T, T, T> merger) {
+        return this.and(other).mapValue(tuple -> {
+            T left0 = tuple.left();
+            T right0 = tuple.right();
+            return merger.apply(left0, right0);
+        });
     }
 }
