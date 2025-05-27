@@ -1,8 +1,8 @@
 package magmac.app.config;
 
 import magmac.app.compile.rule.Rule;
-import magmac.app.lang.TypeScriptPasser;
-import magmac.app.lang.TypescriptRoots;
+import magmac.app.lang.TypeScriptAfterPasser;
+import magmac.app.lang.TypescriptLang;
 import magmac.app.stage.AfterAll;
 import magmac.app.stage.EmptyAfterAll;
 import magmac.app.stage.Passer;
@@ -13,7 +13,7 @@ import java.nio.file.Paths;
 public final class TypeScriptTargetPlatform implements TargetPlatform {
     @Override
     public Passer createAfterChild() {
-        return new TypeScriptPasser();
+        return new TypeScriptAfterPasser();
     }
 
     @Override
@@ -33,6 +33,6 @@ public final class TypeScriptTargetPlatform implements TargetPlatform {
 
     @Override
     public Rule createRule() {
-        return TypescriptRoots.createRule();
+        return TypescriptLang.createRule();
     }
 }

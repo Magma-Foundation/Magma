@@ -23,8 +23,8 @@ public final class JavaLang {
     public static Rule createRule() {
         return new TypeRule("root", DivideRule.Statements("children", new OrRule(Lists.of(
                 CommonLang.createWhitespaceRule(),
-                JavaLang.createRule("package", "package "),
-                JavaLang.createRule("import", "import "),
+                JavaLang.createNamespacedRule("package"),
+                JavaLang.createNamespacedRule("import"),
                 JavaLang.createStructureRule("record"),
                 JavaLang.createStructureRule("interface"),
                 JavaLang.createStructureRule("class"),
@@ -118,9 +118,8 @@ public final class JavaLang {
         return new TypeRule("template", new StripRule(new SuffixRule(LocatingRule.First(new StripRule(new StringRule("base")), "<", new StringRule("arguments")), ">")));
     }
 
-    public static Rule createRule(String type, String prefix) {
+    private static Rule createNamespacedRule(String type) {
         Rule childRule = new DivideRule("segments", new DelimitedFolder('.'), new StringRule("value"));
-        Rule stripRule = new StripRule(new SuffixRule(new PrefixRule(prefix, childRule), ";"));
-        return new TypeRule(type, stripRule);
+        return new TypeRule(type, new StripRule(new SuffixRule(new PrefixRule(type + " ", childRule), ";")));
     }
 }

@@ -1,3 +1,3 @@
-import { ? } from ?;
+import { Error } from ?;
 export interface ? {
 }

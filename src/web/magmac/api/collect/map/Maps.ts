@@ -1,4 +1,4 @@
-import { ? } from ?;
+import { HashMap } from ?;
 export class Maps {
 	temp(){
 	}

@@ -11,19 +11,23 @@ import magmac.app.compile.rule.StringRule;
 import magmac.app.compile.rule.SuffixRule;
 import magmac.app.compile.rule.TypeRule;
 
-public final class TypescriptRoots {
+public final class TypescriptLang {
     public static Rule createRule() {
         return new TypeRule("root", DivideRule.Statements("children", new OrRule(Lists.of(
                 CommonLang.createWhitespaceRule(),
-                new TypeRule("import", new ExactRule("import { ? } from ?;\n")),
-                TypescriptRoots.createClassRule(),
+                TypescriptLang.createImportRule(),
+                TypescriptLang.createClassRule(),
                 new TypeRule("interface", new ExactRule("export interface ? {\n}\n")),
                 new TypeRule("enum", new ExactRule("export enum ? {\n}\n"))
         ))));
     }
 
+    private static TypeRule createImportRule() {
+        return new TypeRule("import", new PrefixRule("import { ", new SuffixRule(new StringRule("child"), " } from ?;\n")));
+    }
+
     private static Rule createClassRule() {
-        DivideRule children = DivideRule.Statements("children", TypescriptRoots.createStructureMemberRule());
+        DivideRule children = DivideRule.Statements("children", TypescriptLang.createStructureMemberRule());
         Rule name = LocatingRule.First(new StringRule("name"), " {", new SuffixRule(children, "\n}\n"));
         return new TypeRule("class", new PrefixRule("export class ", name));
     }

@@ -1,3 +1,3 @@
-import { ? } from ?;
+import { DivideState } from ?;
 export interface ? {
 }

@@ -1,11 +1,12 @@
 package magmac.app.compile.node;
 
+import magmac.api.Option;
 import magmac.api.iter.Iter;
 
 public interface NodeList {
     Iter<Node> iter();
 
-    Node last();
+    Option<Node> findLast();
 
     NodeList add(Node element);
 

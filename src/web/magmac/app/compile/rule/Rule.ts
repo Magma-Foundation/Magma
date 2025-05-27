@@ -1,4 +1,4 @@
-import { ? } from ?;
-import { ? } from ?;
+import { CompileResult } from ?;
+import { Node } from ?;
 export interface ? {
 }

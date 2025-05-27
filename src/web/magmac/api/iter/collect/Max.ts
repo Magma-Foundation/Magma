@@ -1,4 +1,4 @@
-import { ? } from ?;
+import { Optional } from ?;
 export class Max {
 	temp(){
 	}

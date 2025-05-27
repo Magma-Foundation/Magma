@@ -1,7 +1,7 @@
-import { ? } from ?;
-import { ? } from ?;
-import { ? } from ?;
-import { ? } from ?;
+import { Consumer } from ?;
+import { Function } from ?;
+import { Predicate } from ?;
+import { Supplier } from ?;
 export class None {
 	temp(){
 	}

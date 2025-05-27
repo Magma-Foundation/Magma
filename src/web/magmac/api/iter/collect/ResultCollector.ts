@@ -1,5 +1,5 @@
-import { ? } from ?;
-import { ? } from ?;
+import { Ok } from ?;
+import { Result } from ?;
 export class ResultCollector {
 	temp(){
 	}

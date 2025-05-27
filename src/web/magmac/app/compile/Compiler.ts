@@ -1,5 +1,5 @@
-import { ? } from ?;
-import { ? } from ?;
-import { ? } from ?;
+import { CompileResult } from ?;
+import { Location } from ?;
+import { Map } from ?;
 export interface ? {
 }

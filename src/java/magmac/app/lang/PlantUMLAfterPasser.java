@@ -14,11 +14,11 @@ import magmac.app.stage.InlinePassResult;
 import magmac.app.stage.Passer;
 import magmac.app.stage.parse.ParseState;
 
-public class AfterPasser implements Passer {
+public class PlantUMLAfterPasser implements Passer {
     private static Option<Node> createInherits(Node child, String key) {
         return child.findNode(key).map(implemented -> new MapNode("inherits")
                 .withString("child", child.findString("name").orElse(""))
-                .withString("parent", AfterPasser.findValue(implemented)));
+                .withString("parent", PlantUMLAfterPasser.findValue(implemented)));
     }
 
     private static String findValue(Node type) {
@@ -34,8 +34,8 @@ public class AfterPasser implements Passer {
     }
 
     private static Iter<Node> replaceRootChild(Node child) {
-        Option<Node> extended = AfterPasser.createInherits(child, "extended");
-        Option<Node> implemented = AfterPasser.createInherits(child, "implemented");
+        Option<Node> extended = PlantUMLAfterPasser.createInherits(child, "extended");
+        Option<Node> implemented = PlantUMLAfterPasser.createInherits(child, "implemented");
         return Iters.fromValues(child)
                 .concat(Iters.fromOption(extended))
                 .concat(Iters.fromOption(implemented));
@@ -45,21 +45,20 @@ public class AfterPasser implements Passer {
         return new InlineNodeList(node.findNodeList("children")
                 .orElse(InlineNodeList.empty())
                 .iter()
-                .flatMap(child -> AfterPasser.replaceRootChild(child))
+                .flatMap(child -> PlantUMLAfterPasser.replaceRootChild(child))
                 .collect(new ListCollector<>()));
     }
 
     @Override
     public magmac.app.stage.PassResult pass(ParseState state, Node node) {
         if (node.is("root")) {
-            NodeList values = AfterPasser.replaceRootChildren(node);
+            NodeList values = PlantUMLAfterPasser.replaceRootChildren(node);
             return new InlinePassResult(new Some<>(new Tuple2<ParseState, Node>(state, node.withNodeList("children", values))));
         }
 
         if (node.is("import")) {
             String child = node.findNodeList("segments")
-                    .orElse(InlineNodeList.empty())
-                    .last()
+                    .orElse(InlineNodeList.empty()).findLast().orElse(null)
                     .findString("value")
                     .orElse("");
 

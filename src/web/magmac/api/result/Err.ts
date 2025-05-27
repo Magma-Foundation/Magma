@@ -1,6 +1,6 @@
-import { ? } from ?;
-import { ? } from ?;
-import { ? } from ?;
+import { Tuple2 } from ?;
+import { Function } from ?;
+import { Supplier } from ?;
 export class Err {
 	temp(){
 	}

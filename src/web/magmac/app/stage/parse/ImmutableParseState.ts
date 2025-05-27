@@ -1,4 +1,4 @@
-import { ? } from ?;
+import { Location } from ?;
 export class ImmutableParseState {
 	temp(){
 	}

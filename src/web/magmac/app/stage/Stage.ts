@@ -1,3 +1,3 @@
-import { ? } from ?;
+import { CompileResult } from ?;
 export interface ? {
 }

@@ -1,5 +1,7 @@
 @startuml
 skinparam linetype ortho
+class TypescriptLang
+
 class TypeScriptTargetPlatform
 TargetPlatform <|-- TypeScriptTargetPlatform
 
@@ -34,8 +36,6 @@ interface Compiler
 
 class MapCollector
 Collector <|-- MapCollector
-
-class TypescriptRoots
 
 class ImmutableCompileError
 CompileError <|-- ImmutableCompileError
@@ -103,9 +103,6 @@ Rule <|-- LocatingRule
 
 class SuffixRule
 Rule <|-- SuffixRule
-
-class TypeScriptPasser
-Passer <|-- TypeScriptPasser
 
 interface Result
 
@@ -255,6 +252,9 @@ class ApplicationBuilder
 class DelimitedFolder
 Folder <|-- DelimitedFolder
 
+class TypeScriptAfterPasser
+Passer <|-- TypeScriptAfterPasser
+
 interface Collector
 
 class Some
@@ -283,8 +283,8 @@ Parser <|-- TreeParser
 class Err
 Result <|-- Err
 
-class AfterPasser
-Passer <|-- AfterPasser
+class PlantUMLAfterPasser
+Passer <|-- PlantUMLAfterPasser
 
 class SafeFiles
 
@@ -377,6 +377,7 @@ Iter --> Predicate
 PrefixRule --> CompileErrors
 Head --> Option
 NodeContext --> Node
+NodeList --> Option
 NodeList --> Iter
 SingleHead --> None
 SingleHead --> Some
@@ -399,6 +400,7 @@ TreeParser --> MapRoots
 TreeParser --> Passer
 TreeParser --> Map
 MapRoots --> Map
+InlineNodeList --> Some
 InlineNodeList --> List
 InlineNodeList --> Lists
 Rule --> CompileResult
@@ -421,6 +423,16 @@ Generator --> Location
 Generator --> Roots
 Generator --> Map
 Max --> Optional
+TypescriptLang --> Lists
+TypescriptLang --> DivideRule
+TypescriptLang --> ExactRule
+TypescriptLang --> LocatingRule
+TypescriptLang --> OrRule
+TypescriptLang --> PrefixRule
+TypescriptLang --> Rule
+TypescriptLang --> StringRule
+TypescriptLang --> SuffixRule
+TypescriptLang --> TypeRule
 MapNode --> None
 MapNode --> Some
 MapNode --> Map
@@ -440,8 +452,8 @@ TargetPlatform --> AfterAll
 TargetPlatform --> Passer
 TargetPlatform --> Path
 MapCollector --> Tuple2
-TypeScriptTargetPlatform --> TypeScriptPasser
-TypeScriptTargetPlatform --> TypescriptRoots
+TypeScriptTargetPlatform --> TypeScriptAfterPasser
+TypeScriptTargetPlatform --> TypescriptLang
 TypeScriptTargetPlatform --> EmptyAfterAll
 TypeScriptTargetPlatform --> Paths
 EmptyHead --> None
@@ -480,7 +492,7 @@ ContextRule --> Lists
 ContextRule --> NodeContext
 ContextRule --> StringContext
 ContextRule --> ImmutableCompileError
-PlantUMLTargetPlatform --> AfterPasser
+PlantUMLTargetPlatform --> PlantUMLAfterPasser
 PlantUMLTargetPlatform --> MergeDiagram
 PlantUMLTargetPlatform --> PlantUMLLang
 PlantUMLTargetPlatform --> Paths
@@ -569,21 +581,9 @@ List --> Iter
 List --> BiFunction
 ResultCollector --> Ok
 ResultCollector --> Result
-AfterPasser --> Option
-AfterPasser --> Some
-AfterPasser --> Tuple2
-AfterPasser --> ListCollector
-AfterPasser --> Iter
-AfterPasser --> Iters
-AfterPasser --> InlineNodeList
-AfterPasser --> MapNode
-AfterPasser --> NodeList
-AfterPasser --> InlinePassResult
 Compiler --> CompileResult
 Compiler --> Location
 Compiler --> Map
-TypeScriptPasser --> InlinePassResult
-TypeScriptPasser --> PassResult
 OrRule --> Iter
 OrRule --> Context
 OrRule --> NodeContext
@@ -616,16 +616,6 @@ Option --> Consumer
 Option --> Function
 Option --> Predicate
 Option --> Supplier
-TypescriptRoots --> Lists
-TypescriptRoots --> DivideRule
-TypescriptRoots --> ExactRule
-TypescriptRoots --> LocatingRule
-TypescriptRoots --> OrRule
-TypescriptRoots --> PrefixRule
-TypescriptRoots --> Rule
-TypescriptRoots --> StringRule
-TypescriptRoots --> SuffixRule
-TypescriptRoots --> TypeRule
 StringRule --> Ok
 StringRule --> InlineCompileResult
 StringRule --> CompileErrors
@@ -671,6 +661,14 @@ CommonLang --> ExactRule
 CommonLang --> Rule
 CommonLang --> StripRule
 CommonLang --> TypeRule
+TypeScriptAfterPasser --> None
+TypeScriptAfterPasser --> Option
+TypeScriptAfterPasser --> Some
+TypeScriptAfterPasser --> Tuple2
+TypeScriptAfterPasser --> InlineNodeList
+TypeScriptAfterPasser --> NodeList
+TypeScriptAfterPasser --> InlinePassResult
+TypeScriptAfterPasser --> PassResult
 NodeRule --> Ok
 NodeRule --> InlineCompileResult
 NodeRule --> CompileErrors
@@ -704,4 +702,14 @@ TypeRule --> StringContext
 TypeRule --> CompileError
 TypeRule --> CompileErrors
 TypeRule --> ImmutableCompileError
+PlantUMLAfterPasser --> Option
+PlantUMLAfterPasser --> Some
+PlantUMLAfterPasser --> Tuple2
+PlantUMLAfterPasser --> ListCollector
+PlantUMLAfterPasser --> Iter
+PlantUMLAfterPasser --> Iters
+PlantUMLAfterPasser --> InlineNodeList
+PlantUMLAfterPasser --> MapNode
+PlantUMLAfterPasser --> NodeList
+PlantUMLAfterPasser --> InlinePassResult
 @enduml

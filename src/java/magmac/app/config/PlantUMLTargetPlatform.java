@@ -1,7 +1,7 @@
 package magmac.app.config;
 
 import magmac.app.compile.rule.Rule;
-import magmac.app.lang.AfterPasser;
+import magmac.app.lang.PlantUMLAfterPasser;
 import magmac.app.lang.MergeDiagram;
 import magmac.app.lang.PlantUMLLang;
 import magmac.app.stage.AfterAll;
@@ -13,7 +13,7 @@ import java.nio.file.Paths;
 public final class PlantUMLTargetPlatform implements TargetPlatform {
     @Override
     public Passer createAfterChild() {
-        return new AfterPasser();
+        return new PlantUMLAfterPasser();
     }
 
     @Override

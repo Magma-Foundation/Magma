@@ -1,3 +1,3 @@
-import { ? } from ?;
+import { Location } from ?;
 export interface ? {
 }

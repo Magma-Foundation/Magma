@@ -1,5 +1,7 @@
 package magmac.app.compile.node;
 
+import magmac.api.Option;
+import magmac.api.Some;
 import magmac.api.collect.list.List;
 import magmac.api.collect.list.Lists;
 import magmac.api.iter.Iter;
@@ -20,8 +22,7 @@ public final class InlineNodeList implements NodeList {
         return this.elements.iter();
     }
 
-    @Override
-    public Node last() {
+    private Node last() {
         return this.elements.getLast();
     }
 
@@ -33,5 +34,10 @@ public final class InlineNodeList implements NodeList {
     @Override
     public NodeList addAll(NodeList others) {
         return others.iter().fold(this, NodeList::add);
+    }
+
+    @Override
+    public Option<Node> findLast() {
+        return new Some<>(this.last());
     }
 }

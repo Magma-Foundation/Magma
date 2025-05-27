@@ -1,4 +1,4 @@
-import { ? } from ?;
+import { DivideState } from ?;
 export class StatementFolder {
 	temp(){
 	}
