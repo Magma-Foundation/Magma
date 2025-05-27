@@ -17,5 +17,4 @@ public record InlinePassResult(Option<Tuple2<ParseState, Node>> option) implemen
     public Tuple2<ParseState, Node> orElseGet(Supplier<Tuple2<ParseState, Node>> other) {
         return this.option.orElseGet(other);
     }
-
 }
