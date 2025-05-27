@@ -22,7 +22,8 @@ public final class JavaRoots {
         ))));
     }
 
-    private static InfixRule createStructureRule(String infix) {
-        return new InfixRule(new StringRule("left"), infix, new StringRule("right"));
+    private static Rule createStructureRule(String keyword) {
+        Rule afterKeyword = new InfixRule(new StringRule("before-content"), "{", new StringRule("after-content"));
+        return new InfixRule(new StringRule("before-keyword"), keyword, afterKeyword);
     }
 }
