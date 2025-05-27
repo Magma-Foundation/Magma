@@ -96,6 +96,7 @@ interface Error
 interface Iter
 class Ok
 Result <|-- Ok
+class CompileErrors
 interface Application
 class ImmutableParseState
 ParseState <|-- ImmutableParseState
@@ -154,13 +155,12 @@ Namespaced --> SuffixRule
 Namespaced --> TypeRule
 DivideRule --> Iters
 DivideRule --> ResultCollector
-DivideRule --> Err
 DivideRule --> Ok
 DivideRule --> MapNode
 DivideRule --> DivideState
 DivideRule --> MutableDivideState
 DivideRule --> Folder
-DivideRule --> ImmutableCompileError
+DivideRule --> CompileErrors
 DivideRule --> ArrayList
 DivideRule --> List
 DivideRule --> Optional
@@ -209,6 +209,10 @@ PathTargets --> SafeFiles
 PathTargets --> Iters
 PathTargets --> Files
 PathTargets --> Path
+CompileErrors --> Err
+CompileErrors --> Result
+CompileErrors --> Node
+CompileErrors --> NodeContext
 HeadedIter --> EmptyHead
 HeadedIter --> FlatMapHead
 HeadedIter --> SingleHead

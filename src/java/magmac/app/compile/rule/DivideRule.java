@@ -2,7 +2,6 @@ package magmac.app.compile.rule;
 
 import magmac.api.collect.Iters;
 import magmac.api.collect.collect.ResultCollector;
-import magmac.api.result.Err;
 import magmac.api.result.Ok;
 import magmac.api.result.Result;
 import magmac.app.compile.node.MapNode;
@@ -11,7 +10,7 @@ import magmac.app.compile.rule.divide.DivideState;
 import magmac.app.compile.rule.divide.MutableDivideState;
 import magmac.app.compile.rule.fold.Folder;
 import magmac.app.error.CompileError;
-import magmac.app.error.ImmutableCompileError;
+import magmac.app.error.CompileErrors;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -48,7 +47,7 @@ public record DivideRule(String key, Folder folder, Rule childRule) implements R
     public Result<String, CompileError> generate(Node node) {
         return node.findNodeList(this.key)
                 .map(list -> this.join(list))
-                .orElseGet(() -> new Err<>(new ImmutableCompileError("Node list '" + this.key + "' not present", new NodeContext(node))))
+                .orElseGet(() -> CompileErrors.createNodeError(node, "Node list '" + this.key + "' not present"))
                 .mapValue(value -> value.orElse(""));
     }
 
