@@ -1,0 +1,38 @@
+package magmac.app.config;
+
+import magmac.app.compile.rule.Rule;
+import magmac.app.lang.AfterPasser;
+import magmac.app.lang.MergeDiagram;
+import magmac.app.lang.PlantUMLRoots;
+import magmac.app.stage.AfterAll;
+import magmac.app.stage.Passer;
+
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
+public final class PlantUMLTargetPlatform implements TargetPlatform {
+    @Override
+    public Passer createAfterChild() {
+        return new AfterPasser();
+    }
+
+    @Override
+    public Path createTargetPath() {
+        return Paths.get(".", "diagrams");
+    }
+
+    @Override
+    public AfterAll createAfterAll() {
+        return new MergeDiagram();
+    }
+
+    @Override
+    public String createExtension() {
+        return "puml";
+    }
+
+    @Override
+    public Rule createRule() {
+        return PlantUMLRoots.createRule();
+    }
+}

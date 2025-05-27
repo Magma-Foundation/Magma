@@ -1,13 +1,19 @@
 package magmac.app.config;
 
-import magmac.app.io.targets.Targets;
-import magmac.app.stage.generate.Generator;
-import magmac.app.stage.parse.Parser;
+import magmac.app.compile.rule.Rule;
+import magmac.app.stage.AfterAll;
+import magmac.app.stage.Passer;
+
+import java.nio.file.Path;
 
 public interface TargetPlatform {
-    Generator createGenerator();
+    Passer createAfterChild();
 
-    Parser createParser();
+    Path createTargetPath();
 
-    Targets createTargets();
+    AfterAll createAfterAll();
+
+    String createExtension();
+
+    Rule createRule();
 }

@@ -12,7 +12,7 @@ class FlatMapHead
 Head <|-- FlatMapHead
 class SymbolRule
 Rule <|-- SymbolRule
-enum TargetPlatform
+interface TargetPlatform
 class JavaRoots
 class Joiner
 Collector <|-- Joiner
@@ -51,6 +51,8 @@ Sources <|-- PathSources
 class ResultCollector
 Collector <|-- ResultCollector
 interface DivideState
+class PlantUMLTargetPlatform
+TargetPlatform <|-- PlantUMLTargetPlatform
 class MapRoots
 Roots <|-- MapRoots
 interface CompileError
@@ -78,6 +80,8 @@ class StringContext
 Context <|-- StringContext
 class TypeRule
 Rule <|-- TypeRule
+class TSTargetPlatform
+TargetPlatform <|-- TSTargetPlatform
 class InlineNodeList
 NodeList <|-- InlineNodeList
 class OrState
@@ -207,6 +211,10 @@ Iter --> Optional
 Iter --> BiFunction
 Iter --> Function
 Iter --> Predicate
+TSTargetPlatform --> TypeScriptPasser
+TSTargetPlatform --> TypescriptRoots
+TSTargetPlatform --> EmptyAfterAll
+TSTargetPlatform --> Paths
 ResultCollector --> Ok
 ResultCollector --> Result
 AfterPasser --> ListCollector
@@ -358,23 +366,9 @@ JavaRoots --> TypeRule
 JavaRoots --> DelimitedFolder
 JavaRoots --> List
 TargetPlatform --> Rule
-TargetPlatform --> PathTargets
-TargetPlatform --> Targets
-TargetPlatform --> AfterPasser
-TargetPlatform --> FlattenJava
-TargetPlatform --> MergeDiagram
-TargetPlatform --> PlantUMLRoots
-TargetPlatform --> TypeScriptPasser
-TargetPlatform --> TypescriptRoots
 TargetPlatform --> AfterAll
-TargetPlatform --> EmptyAfterAll
 TargetPlatform --> Passer
-TargetPlatform --> Generator
-TargetPlatform --> RuleGenerator
-TargetPlatform --> Parser
-TargetPlatform --> TreeParser
 TargetPlatform --> Path
-TargetPlatform --> Paths
 AfterAll --> Node
 AfterAll --> Location
 AfterAll --> Map
@@ -418,6 +412,10 @@ ContextRule --> NodeContext
 ContextRule --> StringContext
 ContextRule --> ImmutableCompileError
 ContextRule --> List
+PlantUMLTargetPlatform --> AfterPasser
+PlantUMLTargetPlatform --> MergeDiagram
+PlantUMLTargetPlatform --> PlantUMLRoots
+PlantUMLTargetPlatform --> Paths
 NodeRule --> Ok
 NodeRule --> CompileErrors
 NodeRule --> MapNode
@@ -432,13 +430,22 @@ Main --> Config
 Main --> Error
 Main --> Compiler
 Main --> StagedCompiler
+Main --> PlantUMLTargetPlatform
+Main --> TSTargetPlatform
+Main --> TargetPlatform
 Main --> PathSources
 Main --> Sources
+Main --> PathTargets
 Main --> Targets
-Main --> TargetPlatform
+Main --> FlattenJava
+Main --> AfterAll
+Main --> Passer
 Main --> Generator
+Main --> RuleGenerator
 Main --> Lexer
 Main --> Parser
+Main --> TreeParser
+Main --> Path
 Main --> Paths
 Main --> Optional
 FlattenJava --> ListCollector
