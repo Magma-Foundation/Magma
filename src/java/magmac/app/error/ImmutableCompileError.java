@@ -26,7 +26,7 @@ public record ImmutableCompileError(String message, Context context,
 
         String joined = copy.stream()
                 .map(compileError -> compileError.format(depth + 1))
-                .map(display -> "\n" + "\t".repeat(depth) + display)
+                .map(display -> "\n" + "\t".repeat(depth + 1) + display)
                 .collect(Collectors.joining());
 
         return this.message + ": " + this.context.display() + joined;

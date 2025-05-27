@@ -49,8 +49,8 @@ public final class MapNode implements Node {
     }
 
     @Override
-    public String toString() {
-        return this.format(0);
+    public String display() {
+        return format(0);
     }
 
     @Override
