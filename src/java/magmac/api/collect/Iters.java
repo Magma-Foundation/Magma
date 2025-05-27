@@ -6,13 +6,8 @@ import magmac.api.collect.head.RangeHead;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 public final class Iters {
-    public static <T> Iter<T> fromSet(Set<T> set) {
-        return Iters.fromList(new ArrayList<>(set));
-    }
-
     public static <T> Iter<T> fromList(List<T> list) {
         return new HeadedIter<>(new RangeHead(list.size())).map(list::get);
     }
