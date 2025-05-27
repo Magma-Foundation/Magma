@@ -7,7 +7,7 @@ import magmac.app.lang.JavaRoots;
 import magmac.app.lang.AfterPasser;
 import magmac.app.lang.MergeDiagram;
 import magmac.app.stage.generate.Generator;
-import magmac.app.lang.JavaToPlantUML;
+import magmac.app.lang.FlattenJava;
 import magmac.app.stage.lexer.Lexer;
 import magmac.app.stage.parse.Parser;
 import magmac.app.stage.generate.RuleGenerator;
@@ -27,6 +27,6 @@ public final class Config {
     }
 
     public static Parser createParser() {
-        return new TreeParser(new JavaToPlantUML(), new AfterPasser(), new MergeDiagram());
+        return new TreeParser(new FlattenJava(), new AfterPasser(), new MergeDiagram());
     }
 }

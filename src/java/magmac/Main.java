@@ -14,7 +14,7 @@ import magmac.app.io.sources.PathSources;
 import magmac.app.io.sources.Sources;
 import magmac.app.io.targets.Targets;
 import magmac.app.lang.AfterPasser;
-import magmac.app.lang.JavaToPlantUML;
+import magmac.app.lang.FlattenJava;
 import magmac.app.lang.TargetPlatform;
 import magmac.app.stage.AfterAll;
 import magmac.app.stage.Passer;
@@ -58,7 +58,7 @@ final class Main {
             case TypeScript -> new MyPasser();
         };
 
-        Parser parser = new TreeParser(new JavaToPlantUML(), afterChild, afterAllChildren);
+        Parser parser = new TreeParser(new FlattenJava(), afterChild, afterAllChildren);
 
         Generator generator = new RuleGenerator(rule);
         Compiler compiler = new StagedCompiler(lexer, parser, generator);

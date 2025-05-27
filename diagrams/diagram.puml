@@ -15,6 +15,8 @@ Rule <|-- SymbolRule
 class JavaRoots
 class Joiner
 Collector <|-- Joiner
+class FlattenJava
+Passer <|-- FlattenJava
 class StringRule
 Rule <|-- StringRule
 class ThrowableError
@@ -85,8 +87,6 @@ class NodeRule
 Rule <|-- NodeRule
 class Iters
 interface Rule
-class JavaToPlantUML
-Passer <|-- JavaToPlantUML
 class DelimitedFolder
 Folder <|-- DelimitedFolder
 class PathTargets
@@ -271,10 +271,6 @@ TypescriptRoots --> List
 Rule --> Result
 Rule --> CompileError
 Rule --> Node
-JavaToPlantUML --> MapNode
-JavaToPlantUML --> ArrayList
-JavaToPlantUML --> Collections
-JavaToPlantUML --> List
 RuleGenerator --> Tuple2
 RuleGenerator --> MapCollector
 RuleGenerator --> ResultCollector
@@ -308,7 +304,7 @@ Config --> JavaRoots
 Config --> AfterPasser
 Config --> MergeDiagram
 Config --> Generator
-Config --> JavaToPlantUML
+Config --> FlattenJava
 Config --> Lexer
 Config --> Parser
 Config --> RuleGenerator
@@ -427,7 +423,7 @@ Main --> PathSources
 Main --> Sources
 Main --> Targets
 Main --> AfterPasser
-Main --> JavaToPlantUML
+Main --> FlattenJava
 Main --> TargetPlatform
 Main --> AfterAll
 Main --> Passer
@@ -439,6 +435,8 @@ Main --> Parser
 Main --> TreeParser
 Main --> Paths
 Main --> Optional
+FlattenJava --> ArrayList
+FlattenJava --> List
 RuleLexer --> Tuple2
 RuleLexer --> Iters
 RuleLexer --> MapCollector

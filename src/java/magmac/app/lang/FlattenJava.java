@@ -1,17 +1,15 @@
 package magmac.app.lang;
 
 import magmac.api.Tuple2;
-import magmac.app.compile.node.MapNode;
 import magmac.app.compile.node.Node;
 import magmac.app.stage.Passer;
 import magmac.app.stage.parse.ParseState;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-public class JavaToPlantUML implements Passer {
+public class FlattenJava implements Passer {
     @Override
     public Optional<Tuple2<ParseState, Node>> pass(ParseState state, Node node) {
         if (node.is("root")) {
