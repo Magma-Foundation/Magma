@@ -116,6 +116,8 @@ interface Roots
 
 class FlatMapHead
 
+class Lists
+
 class CommonLang
 
 class JavaLang
