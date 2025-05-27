@@ -2,4 +2,7 @@ import { ? } from ?;
 import { ? } from ?;
 import { ? } from ?;
 import { ? } from ?;
-export class CommonLang {}
+export class CommonLang {
+	temp(){
+	}
+}

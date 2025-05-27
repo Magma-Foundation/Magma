@@ -1,2 +1,5 @@
 import { ? } from ?;
-export class FirstLocator {}
+export class FirstLocator {
+	temp(){
+	}
+}

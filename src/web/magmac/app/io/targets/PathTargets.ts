@@ -6,4 +6,9 @@ import { ? } from ?;
 import { ? } from ?;
 import { ? } from ?;
 import { ? } from ?;
-export class PathTargets {}
+export class PathTargets {
+	temp(){
+	}
+	temp(){
+	}
+}

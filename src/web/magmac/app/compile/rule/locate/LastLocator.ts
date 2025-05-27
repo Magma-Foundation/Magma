@@ -1,2 +1,5 @@
 import { ? } from ?;
-export class LastLocator {}
+export class LastLocator {
+	temp(){
+	}
+}

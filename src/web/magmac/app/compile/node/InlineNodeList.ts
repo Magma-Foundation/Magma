@@ -2,4 +2,18 @@ import { ? } from ?;
 import { ? } from ?;
 import { ? } from ?;
 import { ? } from ?;
-export class InlineNodeList {}
+export class InlineNodeList {
+	temp : ?;
+	temp(){
+	}
+	temp(){
+	}
+	temp(){
+	}
+	temp(){
+	}
+	temp(){
+	}
+	temp(){
+	}
+}

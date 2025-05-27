@@ -3,4 +3,7 @@ import { ? } from ?;
 import { ? } from ?;
 import { ? } from ?;
 import { ? } from ?;
-export class TypeScriptPasser {}
+export class TypeScriptPasser {
+	temp(){
+	}
+}

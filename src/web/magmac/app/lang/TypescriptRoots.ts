@@ -8,4 +8,11 @@ import { ? } from ?;
 import { ? } from ?;
 import { ? } from ?;
 import { ? } from ?;
-export class TypescriptRoots {}
+export class TypescriptRoots {
+	temp(){
+	}
+	temp(){
+	}
+	temp(){
+	}
+}

@@ -23,4 +23,11 @@ import { ? } from ?;
 import { ? } from ?;
 import { ? } from ?;
 import { ? } from ?;
-export class Main {}
+export class Main {
+	temp(){
+	}
+	temp(){
+	}
+	temp(){
+	}
+}

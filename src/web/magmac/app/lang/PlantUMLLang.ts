@@ -9,4 +9,11 @@ import { ? } from ?;
 import { ? } from ?;
 import { ? } from ?;
 import { ? } from ?;
-export class PlantUMLLang {}
+export class PlantUMLLang {
+	temp(){
+	}
+	temp(){
+	}
+	temp(){
+	}
+}

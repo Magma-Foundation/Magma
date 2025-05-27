@@ -1,2 +1,8 @@
 import { ? } from ?;
-export class DelimitedFolder {}
+export class DelimitedFolder {
+	temp : ?;
+	temp(){
+	}
+	temp(){
+	}
+}

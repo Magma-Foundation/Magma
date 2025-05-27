@@ -1,2 +1,5 @@
 import { ? } from ?;
-export class StatementFolder {}
+export class StatementFolder {
+	temp(){
+	}
+}

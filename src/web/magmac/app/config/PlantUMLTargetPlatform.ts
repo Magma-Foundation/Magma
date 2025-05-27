@@ -6,4 +6,15 @@ import { ? } from ?;
 import { ? } from ?;
 import { ? } from ?;
 import { ? } from ?;
-export class PlantUMLTargetPlatform {}
+export class PlantUMLTargetPlatform {
+	temp(){
+	}
+	temp(){
+	}
+	temp(){
+	}
+	temp(){
+	}
+	temp(){
+	}
+}

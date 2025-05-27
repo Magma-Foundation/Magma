@@ -12,7 +12,7 @@ import magmac.app.compile.rule.TypeRule;
 
 import java.util.List;
 
-public class TypescriptRoots {
+public final class TypescriptRoots {
     public static Rule createRule() {
         return new TypeRule("root", DivideRule.Statements("children", new OrRule(List.of(
                 CommonLang.createWhitespaceRule(),
@@ -24,15 +24,16 @@ public class TypescriptRoots {
     }
 
     private static TypeRule createClassRule() {
-        Rule name = LocatingRule.First(new StringRule("name"), " {", new SuffixRule(DivideRule.Statements("children", TypescriptRoots.createStructureMemberRule()), "}\n"));
+        DivideRule children = DivideRule.Statements("children", TypescriptRoots.createStructureMemberRule());
+        Rule name = LocatingRule.First(new StringRule("name"), " {", new SuffixRule(children, "\n}\n"));
         return new TypeRule("class", new PrefixRule("export class ", name));
     }
 
     private static Rule createStructureMemberRule() {
         return new OrRule(List.of(
                 CommonLang.createWhitespaceRule(),
-                new TypeRule("method", new ExactRule("")),
-                new TypeRule("definition-statement", new ExactRule(""))
+                new TypeRule("method", new ExactRule("\n\ttemp(){\n\t}")),
+                new TypeRule("definition-statement", new ExactRule("\n\ttemp : ?;"))
         ));
     }
 }

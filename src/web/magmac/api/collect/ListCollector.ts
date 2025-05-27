@@ -1,3 +1,8 @@
 import { ? } from ?;
 import { ? } from ?;
-export class ListCollector {}
+export class ListCollector {
+	temp(){
+	}
+	temp(){
+	}
+}

@@ -1,2 +1,5 @@
 import { ? } from ?;
-export class ApplicationError {}
+export class ApplicationError {
+	temp(){
+	}
+}

@@ -1,2 +1,9 @@
 import { ? } from ?;
-export class RangeHead {}
+export class RangeHead {
+	temp : ?;
+	temp : ?;
+	temp(){
+	}
+	temp(){
+	}
+}

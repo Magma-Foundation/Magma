@@ -1,2 +1,5 @@
 import { ? } from ?;
-export class EmptyHead {}
+export class EmptyHead {
+	temp(){
+	}
+}

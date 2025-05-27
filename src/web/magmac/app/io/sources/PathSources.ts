@@ -8,4 +8,7 @@ import { ? } from ?;
 import { ? } from ?;
 import { ? } from ?;
 import { ? } from ?;
-export class PathSources {}
+export class PathSources {
+	temp(){
+	}
+}

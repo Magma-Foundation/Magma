@@ -1,1 +1,2 @@
-export class Tuple2 {}
+export class Tuple2 {
+}

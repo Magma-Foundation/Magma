@@ -1,2 +1,9 @@
 import { ? } from ?;
-export class SingleHead {}
+export class SingleHead {
+	temp : ?;
+	temp : ?;
+	temp(){
+	}
+	temp(){
+	}
+}

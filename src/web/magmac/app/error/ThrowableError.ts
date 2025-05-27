@@ -1,4 +1,7 @@
 import { ? } from ?;
 import { ? } from ?;
 import { ? } from ?;
-export class ThrowableError {}
+export class ThrowableError {
+	temp(){
+	}
+}
