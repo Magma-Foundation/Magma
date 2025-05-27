@@ -56,8 +56,11 @@ public class CreateDiagram implements All {
             List<String> currentDependencies = entry.right();
 
             List<String> parentDependencies = this.findParentDependencies(parent, inheritances, dependencies);
+            List<String> toRemove = new ArrayList<>(parentDependencies);
+            toRemove.addAll(inheritances.getOrDefault(parent, new ArrayList<>()));
+
             List<String> list = new ArrayList<>(currentDependencies);
-            list.removeAll(parentDependencies);
+            list.removeAll(toRemove);
 
             list.forEach(child -> current.add(new MapNode("dependency").withString("parent", parent).withString("child", child)));
             return current;
