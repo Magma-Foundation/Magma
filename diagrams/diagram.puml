@@ -7,7 +7,6 @@ Head <|-- RangeHead
 interface Source
 class TypeScriptTargetPlatform
 TargetPlatform <|-- TypeScriptTargetPlatform
-class Config
 interface Roots
 interface Targets
 class FlatMapHead
@@ -311,19 +310,6 @@ PlantUMLRoots --> SuffixRule
 PlantUMLRoots --> TypeRule
 PlantUMLRoots --> StatementFolder
 PlantUMLRoots --> List
-Config --> Compiler
-Config --> StagedCompiler
-Config --> Rule
-Config --> JavaRoots
-Config --> AfterPasser
-Config --> MergeDiagram
-Config --> Generator
-Config --> FlattenJava
-Config --> Lexer
-Config --> Parser
-Config --> RuleGenerator
-Config --> RuleLexer
-Config --> TreeParser
 MapNode --> Joiner
 MapNode --> Iters
 MapNode --> HashMap
@@ -426,7 +412,6 @@ SuffixRule --> ImmutableCompileError
 SymbolRule --> CompileErrors
 Main --> Iters
 Main --> CompileApplication
-Main --> Config
 Main --> Error
 Main --> Compiler
 Main --> StagedCompiler
@@ -438,11 +423,13 @@ Main --> Sources
 Main --> PathTargets
 Main --> Targets
 Main --> FlattenJava
+Main --> JavaRoots
 Main --> AfterAll
 Main --> Passer
 Main --> Generator
 Main --> RuleGenerator
 Main --> Lexer
+Main --> RuleLexer
 Main --> Parser
 Main --> TreeParser
 Main --> Path
