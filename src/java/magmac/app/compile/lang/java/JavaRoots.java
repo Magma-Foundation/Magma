@@ -25,7 +25,7 @@ public final class JavaRoots {
     private static Rule createStructureRule(String keyword) {
         Rule beforeContent = new StringRule("before-content");
         Rule leftRule = new OrRule(List.of(
-                new InfixRule(beforeContent, " implements ", new StringRule("implemeted")),
+                new InfixRule(beforeContent, " implements ", new StringRule("implemented")),
                 beforeContent
         ));
 

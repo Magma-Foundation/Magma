@@ -23,8 +23,7 @@ public final class PlantUMLRoots {
                 new TypeRule("start", new ExactRule("@startuml\nskinparam linetype ortho")),
                 new TypeRule("end", new ExactRule("@enduml")),
                 new TypeRule("class", new PrefixRule("class ", new StringRule("name"))),
-                new TypeRule("dependency", new InfixRule(new StringRule("parent"), " --> ", new StringRule("child"))),
-                new ExactRule("")
+                new TypeRule("dependency", new InfixRule(new StringRule("parent"), " --> ", new StringRule("child")))
         )), "\n");
     }
 
