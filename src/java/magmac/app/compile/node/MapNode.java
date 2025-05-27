@@ -50,15 +50,49 @@ public final class MapNode implements Node {
 
     @Override
     public String toString() {
-        Stream<String> typeString = this.maybeType.map(inner -> "maybeType=" + inner).stream();
-        Stream<String> stringsString = this.strings.isEmpty() ? Stream.empty() : Stream.of("strings=" + this.strings);
+        return this.format(0);
+    }
+
+    private String format(int depth) {
+        String typeString = this.maybeType
+                .map(type -> type + " ")
+                .orElse("");
+
+        Stream<String> stringsString;
+        if (this.strings.isEmpty()) {
+            stringsString = Stream.empty();
+        }
+        else {
+            stringsString = this.strings.entrySet()
+                    .stream()
+                    .map(entry -> this.formatEntry(depth, entry.getKey(), "\"" + entry.getValue() + "\""));
+        }
+
         Stream<String> nodesString = this.nodes.isEmpty() ? Stream.empty() : Stream.of("nodes=" + this.nodes);
-        Stream<String> nodeListsString = this.nodeLists.isEmpty() ? Stream.empty() : Stream.of("nodeLists=" + this.nodeLists);
-        String joined = Stream.of(typeString, stringsString, nodesString, nodeListsString)
+
+        Stream<String> nodeListsStream;
+        if (this.nodeLists.isEmpty()) {
+            nodeListsStream = Stream.empty();
+        }
+        else {
+            nodeListsStream = this.nodeLists.entrySet()
+                    .stream()
+                    .map(entry -> this.formatEntry(depth, entry.getKey(), "[" + entry.getValue() + "]"));
+        }
+
+        String joined = Stream.of(stringsString, nodesString, nodeListsStream)
                 .flatMap(value -> value)
                 .collect(Collectors.joining(", "));
 
-        return "MapNode {" + joined + '}';
+        return typeString + "{" + joined + this.createIndent(depth) + "}";
+    }
+
+    private String formatEntry(int depth, String key, String value) {
+        return this.createIndent(depth + 1) + key + ": " + value;
+    }
+
+    private String createIndent(int depth) {
+        return "\n" + "\t".repeat(depth);
     }
 
     @Override
