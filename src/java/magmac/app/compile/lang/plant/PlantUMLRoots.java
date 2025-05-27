@@ -6,6 +6,7 @@ import magmac.app.compile.rule.InfixRule;
 import magmac.app.compile.rule.OrRule;
 import magmac.app.compile.rule.PrefixRule;
 import magmac.app.compile.rule.Rule;
+import magmac.app.compile.rule.fold.StatementFolder;
 import magmac.app.compile.rule.StringRule;
 import magmac.app.compile.rule.SuffixRule;
 import magmac.app.compile.rule.TypeRule;
@@ -14,7 +15,7 @@ import java.util.List;
 
 public final class PlantUMLRoots {
     public static Rule createRule() {
-        return new DivideRule("children", PlantUMLRoots.createRootSegmentRule());
+        return new DivideRule("children", new StatementFolder(), PlantUMLRoots.createRootSegmentRule());
     }
 
     private static SuffixRule createRootSegmentRule() {

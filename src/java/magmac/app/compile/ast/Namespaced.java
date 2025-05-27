@@ -1,6 +1,7 @@
 package magmac.app.compile.ast;
 
-import magmac.app.compile.rule.InfixRule;
+import magmac.app.compile.rule.fold.DelimitedFolder;
+import magmac.app.compile.rule.DivideRule;
 import magmac.app.compile.rule.PrefixRule;
 import magmac.app.compile.rule.Rule;
 import magmac.app.compile.rule.StringRule;
@@ -10,7 +11,7 @@ import magmac.app.compile.rule.TypeRule;
 
 public final class Namespaced {
     public static Rule createRule(String type, String prefix) {
-        Rule childRule = new InfixRule(new StringRule("namespace"), ".", new StringRule("child"));
+        Rule childRule = new DivideRule("segments", new DelimitedFolder('.'), new StringRule("value"));
         Rule stripRule = new StripRule(new SuffixRule(new PrefixRule(prefix, childRule), ";"));
         return new TypeRule(type, stripRule);
     }

@@ -9,41 +9,28 @@ import magmac.app.compile.node.MapNode;
 import magmac.app.compile.node.Node;
 import magmac.app.compile.rule.divide.DivideState;
 import magmac.app.compile.rule.divide.MutableDivideState;
+import magmac.app.compile.rule.fold.Folder;
 import magmac.app.error.CompileError;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-public record DivideRule(String key, Rule childRule) implements Rule {
-    private static List<String> divide(String input) {
+public record DivideRule(String key, Folder folder, Rule childRule) implements Rule {
+    private List<String> divide(String input) {
         DivideState current = new MutableDivideState();
         int length = input.length();
         for (int i = 0; i < length; i++) {
             char c = input.charAt(i);
-            current = DivideRule.fold(current, c);
+            current = this.folder.fold(current, c);
         }
 
         return current.advance().stream().toList();
     }
 
-    private static DivideState fold(DivideState state, char c) {
-        DivideState appended = state.append(c);
-        if (';' == c && appended.isLevel()) {
-            return appended.advance();
-        }
-        if ('{' == c) {
-            return appended.enter();
-        }
-        if ('}' == c) {
-            return appended.exit();
-        }
-        return appended;
-    }
-
     @Override
     public Result<Node, CompileError> lex(String input) {
-        List<String> segments = DivideRule.divide(input);
+        List<String> segments = this.divide(input);
         var result = (Result<List<Node>, CompileError>) new Ok<List<Node>, CompileError>(new ArrayList<Node>());
         for (String segment : segments) {
             String stripped = segment.strip();

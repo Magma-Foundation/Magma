@@ -13,17 +13,6 @@ HeadedIter --> BiFunction
 HeadedIter --> Function
 HeadedIter --> Predicate
 
-
-
-
-
-
-
-
-
-
-
-
 class Roots
 
 Roots --> Node
@@ -36,30 +25,28 @@ All --> Node
 All --> Location
 All --> Map
 
-
 class EmptyHead
 
 EmptyHead --> Head
 EmptyHead --> Optional
 
-
 class JavaRoots
 
 JavaRoots --> Namespaced
 JavaRoots --> DivideRule
+JavaRoots --> InfixRule
 JavaRoots --> OrRule
 JavaRoots --> Rule
+JavaRoots --> StatementFolder
 JavaRoots --> StringRule
 JavaRoots --> TypeRule
 JavaRoots --> List
-
 
 class Sources
 
 Sources --> Result
 Sources --> IOException
 Sources --> Map
-
 
 class Iters
 
@@ -70,9 +57,6 @@ Iters --> List
 Iters --> Map
 Iters --> Set
 
-
-
-
 class PlantUMLRoots
 
 PlantUMLRoots --> DivideRule
@@ -81,12 +65,11 @@ PlantUMLRoots --> InfixRule
 PlantUMLRoots --> OrRule
 PlantUMLRoots --> PrefixRule
 PlantUMLRoots --> Rule
+PlantUMLRoots --> StatementFolder
 PlantUMLRoots --> StringRule
 PlantUMLRoots --> SuffixRule
 PlantUMLRoots --> TypeRule
 PlantUMLRoots --> List
-
-
 
 class SafeFiles
 
@@ -102,23 +85,12 @@ SafeFiles --> Optional
 SafeFiles --> Collectors
 SafeFiles --> Stream
 
-
-
-
-
-
-
-
-
-
-
 class Lexer
 
 Lexer --> Result
 Lexer --> CompileError
 Lexer --> Location
 Lexer --> Map
-
 
 class StringRule
 
@@ -129,16 +101,11 @@ StringRule --> CompileError
 StringRule --> MapNode
 StringRule --> Node
 
-
-
 class ThrowableError
 
 ThrowableError --> Error
 ThrowableError --> PrintWriter
 ThrowableError --> StringWriter
-
-
-
 
 class Tuple2
 
@@ -146,7 +113,6 @@ class Tuple2
 class ApplicationError
 
 ApplicationError --> Error
-
 
 class PathSources
 
@@ -160,17 +126,19 @@ PathSources --> Files
 PathSources --> Path
 PathSources --> Map
 
-
 class BeforePasser
 
 BeforePasser --> Tuple2
 BeforePasser --> MapNode
 BeforePasser --> Node
 BeforePasser --> ParseState
+BeforePasser --> Collections
+BeforePasser --> List
 BeforePasser --> Optional
 
+class StatementFolder
 
-
+StatementFolder --> DivideState
 
 class AfterPasser
 
@@ -182,25 +150,18 @@ AfterPasser --> ArrayList
 AfterPasser --> List
 AfterPasser --> Optional
 
-
-
-
-
-
 class Source
 
 Source --> Result
 Source --> IOException
 
+class Folder
 
-
+Folder --> DivideState
 
 class DivideState
 
 DivideState --> Stream
-
-
-
 
 class CreateDiagram
 
@@ -214,14 +175,6 @@ CreateDiagram --> List
 CreateDiagram --> Map
 CreateDiagram --> Optional
 
-
-
-
-
-
-
-
-
 class RuleGenerator
 
 RuleGenerator --> Tuple2
@@ -234,18 +187,12 @@ RuleGenerator --> Rule
 RuleGenerator --> Location
 RuleGenerator --> Map
 
-
-
-
-
-
 class Generator
 
 Generator --> Result
 Generator --> CompileError
 Generator --> Location
 Generator --> Map
-
 
 class FlatMapHead
 
@@ -254,17 +201,6 @@ FlatMapHead --> Iter
 FlatMapHead --> Optional
 FlatMapHead --> Function
 
-
-
-
-
-
-
-
-
-
-
-
 class Passer
 
 Passer --> Tuple2
@@ -272,27 +208,18 @@ Passer --> Node
 Passer --> ParseState
 Passer --> Optional
 
-
 class ResultCollector
 
 ResultCollector --> Ok
 ResultCollector --> Result
 
-
-
 class InfixRule
 
 InfixRule --> Err
 InfixRule --> Result
-InfixRule --> CompileError
 InfixRule --> Node
 InfixRule --> StringContext
-
-
-
-
-
-
+InfixRule --> CompileError
 
 class PrefixRule
 
@@ -302,24 +229,16 @@ PrefixRule --> CompileError
 PrefixRule --> Node
 PrefixRule --> StringContext
 
-
-
-
-
 class MapCollector
 
 MapCollector --> Tuple2
 MapCollector --> HashMap
 MapCollector --> Map
 
-
-
-
 class NodeContext
 
 NodeContext --> Context
 NodeContext --> Node
-
 
 class CompileApplication
 
@@ -335,20 +254,6 @@ CompileApplication --> Roots
 CompileApplication --> Map
 CompileApplication --> Optional
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 class ExactRule
 
 ExactRule --> Err
@@ -359,9 +264,6 @@ ExactRule --> MapNode
 ExactRule --> Node
 ExactRule --> StringContext
 
-
-
-
 class PathSource
 
 PathSource --> SafeFiles
@@ -371,44 +273,26 @@ PathSource --> Path
 PathSource --> ArrayList
 PathSource --> List
 
-
-
-
-
-
-
-
-
-
-
-
-
 class Collector
-
-
 
 
 class Head
 
 Head --> Optional
 
-
 class TypeRule
 
 TypeRule --> Err
 TypeRule --> Result
-TypeRule --> CompileError
 TypeRule --> Node
-
-
-
+TypeRule --> StringContext
+TypeRule --> CompileError
+TypeRule --> List
 
 class Joiner
 
 Joiner --> Collector
 Joiner --> Optional
-
-
 
 class Node
 
@@ -417,15 +301,6 @@ Node --> Iter
 Node --> List
 Node --> Map
 Node --> Optional
-
-
-
-
-
-
-
-
-
 
 class OrRule
 
@@ -441,16 +316,6 @@ OrRule --> List
 OrRule --> Optional
 OrRule --> Function
 
-
-
-
-
-
-
-
-
-
-
 class ParseState
 
 ParseState --> Location
@@ -463,20 +328,16 @@ CompileError --> ArrayList
 CompileError --> List
 CompileError --> Collectors
 
-
-
-
 class Rule
 
 Rule --> Result
 Rule --> CompileError
 Rule --> Node
 
-
-
 class Namespaced
 
-Namespaced --> InfixRule
+Namespaced --> DelimitedFolder
+Namespaced --> DivideRule
 Namespaced --> PrefixRule
 Namespaced --> Rule
 Namespaced --> StringRule
@@ -484,9 +345,9 @@ Namespaced --> StripRule
 Namespaced --> SuffixRule
 Namespaced --> TypeRule
 
+class DelimitedFolder
 
-
-
+DelimitedFolder --> DivideState
 
 class TreeParser
 
@@ -500,38 +361,6 @@ TreeParser --> ArrayList
 TreeParser --> List
 TreeParser --> Map
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 class Location
 
 Location --> List
@@ -539,11 +368,9 @@ Location --> List
 class Parser
 
 
-
 class StringContext
 
 StringContext --> Context
-
 
 class PathTargets
 
@@ -555,25 +382,10 @@ PathTargets --> Path
 PathTargets --> Map
 PathTargets --> Optional
 
-
-
-
-
-
-
-
-
 class SingleHead
 
 SingleHead --> Head
 SingleHead --> Optional
-
-
-
-
-
-
-
 
 class StripRule
 
@@ -581,10 +393,7 @@ StripRule --> Result
 StripRule --> CompileError
 StripRule --> Node
 
-
-
 class Error
-
 
 
 class Iter
@@ -596,12 +405,6 @@ Iter --> BiFunction
 Iter --> Function
 Iter --> Predicate
 
-
-
-
-
-
-
 class Ok
 
 Ok --> Tuple2
@@ -609,29 +412,14 @@ Ok --> Optional
 Ok --> Function
 Ok --> Supplier
 
-
-
-
-
-
-
 class Application
 
 Application --> Optional
-
 
 class RangeHead
 
 RangeHead --> Head
 RangeHead --> Optional
-
-
-
-
-
-
-
-
 
 class DivideRule
 
@@ -640,34 +428,15 @@ DivideRule --> ResultCollector
 DivideRule --> Err
 DivideRule --> Ok
 DivideRule --> Result
-DivideRule --> CompileError
 DivideRule --> MapNode
 DivideRule --> Node
 DivideRule --> DivideState
 DivideRule --> MutableDivideState
+DivideRule --> Folder
+DivideRule --> CompileError
 DivideRule --> ArrayList
 DivideRule --> List
 DivideRule --> Optional
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 class Err
 
@@ -675,12 +444,6 @@ Err --> Tuple2
 Err --> Optional
 Err --> Function
 Err --> Supplier
-
-
-
-
-
-
 
 class RuleLexer
 
@@ -695,15 +458,7 @@ RuleLexer --> Rule
 RuleLexer --> Location
 RuleLexer --> Map
 
-
-
-
-
-
-
-
 class Context
-
 
 
 class SuffixRule
@@ -714,22 +469,12 @@ SuffixRule --> CompileError
 SuffixRule --> Node
 SuffixRule --> StringContext
 
-
-
-
-
 class Result
 
 Result --> Tuple2
 Result --> Optional
 Result --> Function
 Result --> Supplier
-
-
-
-
-
-
 
 class Main
 
@@ -752,29 +497,11 @@ Main --> RuleLexer
 Main --> TreeParser
 Main --> Paths
 
-
-
-
-
-
-
-
 class MutableDivideState
 
 MutableDivideState --> ArrayList
 MutableDivideState --> List
 MutableDivideState --> Stream
-
-
-
-
-
-
-
-
-
-
-
 
 class MapNode
 
@@ -786,34 +513,10 @@ MapNode --> List
 MapNode --> Map
 MapNode --> Optional
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 class Targets
 
 Targets --> IOException
 Targets --> Map
 Targets --> Optional
-
 
 @enduml

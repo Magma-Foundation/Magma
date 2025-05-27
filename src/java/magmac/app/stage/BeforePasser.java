@@ -5,6 +5,8 @@ import magmac.app.compile.node.MapNode;
 import magmac.app.compile.node.Node;
 import magmac.app.stage.parse.ParseState;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 public class BeforePasser implements Passer {
@@ -14,11 +16,16 @@ public class BeforePasser implements Passer {
             return Optional.empty();
         }
 
+        String child = node.findNodeList("segments")
+                .orElse(Collections.emptyList())
+                .getLast()
+                .findString("value")
+                .orElse("");
+
         Node dependency = new MapNode("dependency")
                 .withString("parent", state.location().name())
-                .withString("child", node.findString("child").orElse(""));
+                .withString("child", child);
 
         return Optional.of(new Tuple2<ParseState, Node>(state, dependency));
-
     }
 }
