@@ -1,0 +1,816 @@
+@startuml
+skinparam linetype ortho
+class ThrowableError
+
+ThrowableError --> PrintWriter
+ThrowableError --> StringWriter
+
+
+
+
+class HeadedIter
+
+HeadedIter --> Collector
+HeadedIter --> EmptyHead
+HeadedIter --> FlatMapHead
+HeadedIter --> SingleHead
+HeadedIter --> Ok
+HeadedIter --> Result
+HeadedIter --> Optional
+HeadedIter --> BiFunction
+HeadedIter --> Function
+HeadedIter --> Predicate
+
+
+
+
+
+
+
+
+
+
+
+
+class Roots
+
+Roots --> Node
+Roots --> Location
+Roots --> Map
+
+class CompileError
+
+CompileError --> Error
+CompileError --> ArrayList
+CompileError --> List
+CompileError --> Collectors
+
+
+
+
+class All
+
+All --> Node
+All --> Location
+All --> Map
+
+
+class EmptyHead
+
+EmptyHead --> Head
+EmptyHead --> Optional
+
+
+class JavaRoots
+
+JavaRoots --> Namespaced
+JavaRoots --> DivideRule
+JavaRoots --> OrRule
+JavaRoots --> Rule
+JavaRoots --> StringRule
+JavaRoots --> TypeRule
+JavaRoots --> List
+
+
+class Sources
+
+Sources --> Result
+Sources --> IOException
+Sources --> Map
+
+
+class Iters
+
+Iters --> Tuple2
+Iters --> RangeHead
+Iters --> ArrayList
+Iters --> List
+Iters --> Map
+Iters --> Set
+
+
+
+
+class PlantUMLRoots
+
+PlantUMLRoots --> DivideRule
+PlantUMLRoots --> ExactRule
+PlantUMLRoots --> InfixRule
+PlantUMLRoots --> OrRule
+PlantUMLRoots --> PrefixRule
+PlantUMLRoots --> Rule
+PlantUMLRoots --> StringRule
+PlantUMLRoots --> SuffixRule
+PlantUMLRoots --> TypeRule
+PlantUMLRoots --> List
+
+
+
+class SafeFiles
+
+SafeFiles --> Iter
+SafeFiles --> Iters
+SafeFiles --> Err
+SafeFiles --> Ok
+SafeFiles --> Result
+SafeFiles --> IOException
+SafeFiles --> Files
+SafeFiles --> Path
+SafeFiles --> Optional
+SafeFiles --> Collectors
+SafeFiles --> Stream
+
+
+
+
+
+
+
+
+
+
+
+class Lexer
+
+Lexer --> Result
+Lexer --> CompileError
+Lexer --> Location
+Lexer --> Map
+
+
+class StringRule
+
+StringRule --> Err
+StringRule --> Ok
+StringRule --> Result
+StringRule --> CompileError
+StringRule --> MapNode
+StringRule --> Node
+
+
+
+class Tuple2
+
+
+class PathSources
+
+PathSources --> SafeFiles
+PathSources --> Tuple2
+PathSources --> MapCollector
+PathSources --> ResultCollector
+PathSources --> Result
+PathSources --> IOException
+PathSources --> Files
+PathSources --> Path
+PathSources --> Map
+
+
+class BeforePasser
+
+BeforePasser --> Tuple2
+BeforePasser --> MapNode
+BeforePasser --> Node
+BeforePasser --> ParseState
+BeforePasser --> Optional
+
+
+
+
+class AfterPasser
+
+AfterPasser --> Tuple2
+AfterPasser --> MapNode
+AfterPasser --> Node
+AfterPasser --> ParseState
+AfterPasser --> ArrayList
+AfterPasser --> List
+AfterPasser --> Optional
+
+
+
+
+
+
+class ApplicationError
+
+
+
+class Source
+
+Source --> Result
+Source --> IOException
+
+
+
+
+class DivideState
+
+DivideState --> Stream
+
+
+
+
+class RuleGenerator
+
+RuleGenerator --> Tuple2
+RuleGenerator --> Iters
+RuleGenerator --> MapCollector
+RuleGenerator --> ResultCollector
+RuleGenerator --> Result
+RuleGenerator --> CompileError
+RuleGenerator --> Node
+RuleGenerator --> Rule
+RuleGenerator --> Location
+RuleGenerator --> Map
+
+
+
+
+
+
+
+class Generator
+
+Generator --> Result
+Generator --> CompileError
+Generator --> Location
+Generator --> Map
+
+
+class FlatMapHead
+
+FlatMapHead --> Head
+FlatMapHead --> Iter
+FlatMapHead --> Optional
+FlatMapHead --> Function
+
+
+
+
+
+
+
+
+
+
+
+
+class Passer
+
+Passer --> Tuple2
+Passer --> Node
+Passer --> ParseState
+Passer --> Optional
+
+
+class ResultCollector
+
+ResultCollector --> Ok
+ResultCollector --> Result
+
+
+
+class InfixRule
+
+InfixRule --> Err
+InfixRule --> Result
+InfixRule --> CompileError
+InfixRule --> Node
+InfixRule --> StringContext
+
+
+
+
+
+
+
+class PrefixRule
+
+PrefixRule --> Err
+PrefixRule --> Result
+PrefixRule --> CompileError
+PrefixRule --> Node
+PrefixRule --> StringContext
+
+
+
+
+
+class MapCollector
+
+MapCollector --> Tuple2
+MapCollector --> HashMap
+MapCollector --> Map
+
+
+
+
+class NodeContext
+
+NodeContext --> Context
+NodeContext --> Node
+
+
+class CompileApplication
+
+CompileApplication --> Location
+CompileApplication --> Sources
+CompileApplication --> Targets
+CompileApplication --> Generator
+CompileApplication --> Lexer
+CompileApplication --> Parser
+CompileApplication --> Roots
+CompileApplication --> Map
+CompileApplication --> Optional
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+class ExactRule
+
+ExactRule --> Err
+ExactRule --> Ok
+ExactRule --> Result
+ExactRule --> CompileError
+ExactRule --> MapNode
+ExactRule --> Node
+ExactRule --> StringContext
+
+
+
+
+class PathSource
+
+PathSource --> SafeFiles
+PathSource --> Result
+PathSource --> IOException
+PathSource --> Path
+PathSource --> ArrayList
+PathSource --> List
+
+
+
+
+
+
+
+
+
+
+
+
+
+class Collector
+
+
+
+
+class Head
+
+Head --> Optional
+
+
+class TypeRule
+
+TypeRule --> Err
+TypeRule --> Result
+TypeRule --> CompileError
+TypeRule --> Node
+
+
+
+
+class Joiner
+
+Joiner --> Collector
+Joiner --> Optional
+
+
+
+class Node
+
+Node --> Tuple2
+Node --> Iter
+Node --> List
+Node --> Map
+Node --> Optional
+
+
+
+
+
+
+
+
+
+
+class OrRule
+
+OrRule --> Err
+OrRule --> Ok
+OrRule --> Result
+OrRule --> CompileError
+OrRule --> Context
+OrRule --> Node
+OrRule --> StringContext
+OrRule --> ArrayList
+OrRule --> List
+OrRule --> Optional
+OrRule --> Function
+
+
+
+
+
+
+
+
+
+
+
+class ParseState
+
+ParseState --> Location
+
+class Rule
+
+Rule --> Result
+Rule --> CompileError
+Rule --> Node
+
+
+
+class Namespaced
+
+Namespaced --> InfixRule
+Namespaced --> PrefixRule
+Namespaced --> Rule
+Namespaced --> StringRule
+Namespaced --> StripRule
+Namespaced --> SuffixRule
+Namespaced --> TypeRule
+
+
+
+
+
+class TreeParser
+
+TreeParser --> Tuple2
+TreeParser --> Iters
+TreeParser --> MapCollector
+TreeParser --> Node
+TreeParser --> Location
+TreeParser --> ParseState
+TreeParser --> ArrayList
+TreeParser --> List
+TreeParser --> Map
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+class Location
+
+Location --> List
+
+class Parser
+
+
+
+class StringContext
+
+StringContext --> Context
+
+
+class PathTargets
+
+PathTargets --> SafeFiles
+PathTargets --> Iters
+PathTargets --> IOException
+PathTargets --> Files
+PathTargets --> Path
+PathTargets --> Map
+PathTargets --> Optional
+
+
+
+
+
+
+
+
+
+class SingleHead
+
+SingleHead --> Head
+SingleHead --> Optional
+
+
+
+
+
+
+
+
+class StripRule
+
+StripRule --> Result
+StripRule --> CompileError
+StripRule --> Node
+
+
+
+class Error
+
+
+
+class Iter
+
+Iter --> Collector
+Iter --> Result
+Iter --> Optional
+Iter --> BiFunction
+Iter --> Function
+Iter --> Predicate
+
+
+
+
+
+
+
+class Ok
+
+Ok --> Tuple2
+Ok --> Optional
+Ok --> Function
+Ok --> Supplier
+
+
+
+
+
+
+
+class Application
+
+Application --> Optional
+
+
+class RangeHead
+
+RangeHead --> Head
+RangeHead --> Optional
+
+
+
+
+
+
+
+
+
+class DivideRule
+
+DivideRule --> Iters
+DivideRule --> ResultCollector
+DivideRule --> Err
+DivideRule --> Ok
+DivideRule --> Result
+DivideRule --> CompileError
+DivideRule --> MapNode
+DivideRule --> Node
+DivideRule --> DivideState
+DivideRule --> MutableDivideState
+DivideRule --> ArrayList
+DivideRule --> List
+DivideRule --> Optional
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+class Err
+
+Err --> Tuple2
+Err --> Optional
+Err --> Function
+Err --> Supplier
+
+
+
+
+
+
+
+class RuleLexer
+
+RuleLexer --> Tuple2
+RuleLexer --> Iters
+RuleLexer --> MapCollector
+RuleLexer --> ResultCollector
+RuleLexer --> Result
+RuleLexer --> CompileError
+RuleLexer --> Node
+RuleLexer --> Rule
+RuleLexer --> Location
+RuleLexer --> Map
+
+
+
+
+
+
+
+
+class Context
+
+
+
+class SuffixRule
+
+SuffixRule --> Err
+SuffixRule --> Result
+SuffixRule --> CompileError
+SuffixRule --> Node
+SuffixRule --> StringContext
+
+
+
+
+
+class Result
+
+Result --> Tuple2
+Result --> Optional
+Result --> Function
+Result --> Supplier
+
+
+
+
+
+
+
+class AfterAll
+
+AfterAll --> MapNode
+AfterAll --> Node
+AfterAll --> Location
+AfterAll --> ArrayList
+AfterAll --> Collection
+AfterAll --> Collections
+AfterAll --> List
+AfterAll --> Map
+AfterAll --> Optional
+
+
+
+
+
+
+
+
+
+class Main
+
+Main --> Application
+Main --> ApplicationError
+Main --> CompileApplication
+Main --> JavaRoots
+Main --> PlantUMLRoots
+Main --> PathSources
+Main --> PathTargets
+Main --> Sources
+Main --> Targets
+Main --> AfterAll
+Main --> AfterPasser
+Main --> BeforePasser
+Main --> Lexer
+Main --> Parser
+Main --> RuleGenerator
+Main --> RuleLexer
+Main --> TreeParser
+Main --> Paths
+
+
+
+
+
+
+
+
+class MutableDivideState
+
+MutableDivideState --> ArrayList
+MutableDivideState --> List
+MutableDivideState --> Stream
+
+
+
+
+
+
+
+
+
+
+
+
+class MapNode
+
+MapNode --> Tuple2
+MapNode --> Iter
+MapNode --> Iters
+MapNode --> HashMap
+MapNode --> List
+MapNode --> Map
+MapNode --> Optional
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+class Targets
+
+Targets --> IOException
+Targets --> Map
+Targets --> Optional
+
+
+@enduml

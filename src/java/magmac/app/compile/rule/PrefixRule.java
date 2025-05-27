@@ -10,7 +10,7 @@ public record PrefixRule(String prefix, Rule childRule) implements Rule {
     @Override
     public Result<Node, CompileError> lex(String input) {
         if (!input.startsWith(this.prefix())) {
-            return new Err<>(new CompileError("?", new StringContext("?")));
+            return new Err<>(new CompileError("Prefix '" + this.prefix + "' not present", new StringContext(input)));
         }
 
         String sliced = input.substring(this.prefix.length());

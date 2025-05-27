@@ -31,14 +31,15 @@ public final class CompileApplication implements Application {
         return this.sources.readAll()
                 .mapErr(ThrowableError::new)
                 .mapErr(ApplicationError::new)
-                .match(units -> compileAndWrite(units), Optional::of);
+                .match(units -> this.compileAndWrite(units), Optional::of);
     }
 
     private Optional<ApplicationError> compileAndWrite(Map<Location, String> units) {
-        Roots lex = this.lexer.lexAll(units);
-        Roots parsed = this.parser.parseAll(lex);
-        return this.generator.generateAll(parsed)
-                .mapErr(ApplicationError::new)
-                .match(outputs -> this.targets.writeAll(outputs).map(ThrowableError::new).map(ApplicationError::new), err -> Optional.of(err));
+        return this.lexer.lexAll(units).mapErr(ApplicationError::new).match(lex -> {
+            Roots parsed = this.parser.parseAll(lex);
+            return this.generator.generateAll(parsed)
+                    .mapErr(ApplicationError::new)
+                    .match(outputs -> this.targets.writeAll(outputs).map(ThrowableError::new).map(ApplicationError::new), err -> Optional.of(err));
+        }, Optional::of);
     }
 }

@@ -8,10 +8,10 @@ import magmac.app.compile.rule.StripRule;
 import magmac.app.compile.rule.SuffixRule;
 import magmac.app.compile.rule.TypeRule;
 
-public final class Imports {
-    public static Rule createImportRule() {
+public final class Namespaced {
+    public static Rule createRule(String type, String prefix) {
         Rule childRule = new InfixRule(new StringRule("namespace"), ".", new StringRule("child"));
-        Rule stripRule = new StripRule(new SuffixRule(new PrefixRule("import ", childRule), ";"));
-        return new TypeRule("import", stripRule);
+        Rule stripRule = new StripRule(new SuffixRule(new PrefixRule(prefix, childRule), ";"));
+        return new TypeRule(type, stripRule);
     }
 }
