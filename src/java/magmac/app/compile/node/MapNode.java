@@ -12,20 +12,22 @@ import java.util.Optional;
 public final class MapNode implements Node {
     private final Optional<String> maybeType;
     private final Map<String, String> strings;
+    private final Map<String, Node> nodes;
     private final Map<String, List<Node>> nodeLists;
 
     public MapNode() {
-        this(Optional.empty(), new HashMap<>(), new HashMap<>());
+        this(Optional.empty(), new HashMap<>(), new HashMap<>(), new HashMap<>());
     }
 
-    public MapNode(Optional<String> maybeType, Map<String, String> strings, Map<String, List<Node>> nodeLists) {
+    public MapNode(Optional<String> maybeType, Map<String, String> strings, Map<String, Node> nodes, Map<String, List<Node>> nodeLists) {
         this.strings = strings;
         this.maybeType = maybeType;
+        this.nodes = nodes;
         this.nodeLists = nodeLists;
     }
 
     public MapNode(String type) {
-        this(Optional.of(type), new HashMap<>(), new HashMap<>());
+        this(Optional.of(type), new HashMap<>(), new HashMap<>(), new HashMap<>());
     }
 
     @Override
@@ -70,7 +72,7 @@ public final class MapNode implements Node {
 
     @Override
     public Node retype(String type) {
-        return new MapNode(Optional.of(type), this.strings, this.nodeLists);
+        return new MapNode(Optional.of(type), this.strings, this.nodes, this.nodeLists);
     }
 
     @Override
@@ -83,6 +85,22 @@ public final class MapNode implements Node {
     public Optional<List<Node>> findNodeList(String key) {
         if (this.nodeLists.containsKey(key)) {
             return Optional.of(this.nodeLists.get(key));
+        }
+        else {
+            return Optional.empty();
+        }
+    }
+
+    @Override
+    public Node withNode(String key, Node value) {
+        this.nodes.put(key, value);
+        return this;
+    }
+
+    @Override
+    public Optional<Node> findNode(String key) {
+        if (this.nodes.containsKey(key)) {
+            return Optional.of(this.nodes.get(key));
         }
         else {
             return Optional.empty();

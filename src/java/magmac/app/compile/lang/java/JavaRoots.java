@@ -3,6 +3,7 @@ package magmac.app.compile.lang.java;
 import magmac.app.compile.ast.Namespaced;
 import magmac.app.compile.rule.DivideRule;
 import magmac.app.compile.rule.InfixRule;
+import magmac.app.compile.rule.NodeRule;
 import magmac.app.compile.rule.OrRule;
 import magmac.app.compile.rule.Rule;
 import magmac.app.compile.rule.StringRule;
@@ -38,11 +39,17 @@ public final class JavaRoots {
         ));
 
         Rule withImplements = new OrRule(List.of(
-                new InfixRule(withParameters, " implements ", new StringRule("implemented")),
+                new InfixRule(withParameters, " implements ", createTypeRule()),
                 withParameters
         ));
 
         Rule afterKeyword = new InfixRule(withImplements, "{", new StringRule("after-content"));
         return new TypeRule(keyword, new InfixRule(new StringRule("before-keyword"), keyword + " ", afterKeyword));
+    }
+
+    private static Rule createTypeRule() {
+        return new NodeRule("implemented", new OrRule(List.of(
+
+        )));
     }
 }
