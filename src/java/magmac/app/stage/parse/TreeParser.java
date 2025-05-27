@@ -6,6 +6,7 @@ import magmac.api.iter.Iters;
 import magmac.api.result.Ok;
 import magmac.api.result.Result;
 import magmac.app.compile.error.CompileError;
+import magmac.app.compile.node.InlineNodeList;
 import magmac.app.compile.node.Node;
 import magmac.app.io.Location;
 import magmac.app.stage.AfterAll;
@@ -29,7 +30,7 @@ public class TreeParser implements Parser {
     }
 
     private Tuple2<ParseState, Node> parseNodeLists(ParseState state, Node root) {
-        return root.iterNodeLists().map(tuple -> new Tuple2<>(tuple.left(), tuple.right().elements())).fold(new Tuple2<>(state, root), (current, entry) -> this.parseNodeList(current, entry));
+        return root.iterNodeLists().map(tuple -> new Tuple2<>(tuple.left(), tuple.right().unwrap())).fold(new Tuple2<>(state, root), (current, entry) -> this.parseNodeList(current, entry));
     }
 
     private Tuple2<ParseState, Node> parseNodeList(Tuple2<ParseState, Node> current, Tuple2<String, List<Node>> entry) {
@@ -52,7 +53,7 @@ public class TreeParser implements Parser {
             return new Tuple2<>(newState, currentElements);
         });
 
-        return new Tuple2<>(newTuple.left(), currentNode.withNodeList(key, newTuple.right()));
+        return new Tuple2<>(newTuple.left(), currentNode.withNodeList(key, new InlineNodeList(newTuple.right())));
     }
 
     private Tuple2<Location, Node> parse(Location location, Node root) {

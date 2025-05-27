@@ -3,7 +3,6 @@ package magmac.app.compile.node;
 import magmac.api.Tuple2;
 import magmac.api.iter.Iter;
 
-import java.util.List;
 import java.util.Optional;
 
 public interface Node {
@@ -25,9 +24,9 @@ public interface Node {
 
     Node retype(String type);
 
-    Node withNodeList(String key, List<Node> values);
+    Node withNodeList(String key, NodeList values);
 
-    Optional<List<Node>> findNodeList(String key);
+    Optional<NodeList> findNodeList(String key);
 
     Node withNode(String key, Node value);
 
