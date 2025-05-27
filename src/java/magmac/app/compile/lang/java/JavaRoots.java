@@ -50,8 +50,16 @@ public final class JavaRoots {
 
     private static Rule createTypeRule() {
         return new NodeRule("implemented", new OrRule(List.of(
-                new StripRule(new SuffixRule(new InfixRule(new StripRule(new StringRule("base")), "<", new StringRule("arguments")), ">")),
-                new StripRule(new SymbolRule(new StringRule("value")))
+                JavaRoots.createTemplateRule(),
+                JavaRoots.createSymbolTypeRule()
         )));
+    }
+
+    private static TypeRule createSymbolTypeRule() {
+        return new TypeRule("symbol", new StripRule(new SymbolRule(new StringRule("value"))));
+    }
+
+    private static TypeRule createTemplateRule() {
+        return new TypeRule("template", new StripRule(new SuffixRule(new InfixRule(new StripRule(new StringRule("base")), "<", new StringRule("arguments")), ">")));
     }
 }

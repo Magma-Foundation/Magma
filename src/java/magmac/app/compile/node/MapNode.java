@@ -35,6 +35,7 @@ public final class MapNode implements Node {
         return "MapNode{" +
                 "maybeType=" + this.maybeType +
                 ", strings=" + this.strings +
+                ", nodes=" + this.nodes +
                 ", nodeLists=" + this.nodeLists +
                 '}';
     }
@@ -108,8 +109,20 @@ public final class MapNode implements Node {
     }
 
     @Override
+    public Map<String, Node> nodes() {
+        return this.nodes;
+    }
+
+    @Override
+    public Map<String, List<Node>> nodeLists() {
+        return this.nodeLists;
+    }
+
+    @Override
     public Node merge(Node other) {
         this.strings.putAll(other.strings());
+        this.nodes.putAll(other.nodes());
+        this.nodeLists.putAll(other.nodeLists());
         return this;
     }
 }

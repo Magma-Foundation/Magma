@@ -17,10 +17,13 @@ public class AfterPasser implements Passer {
             List<Node> children = node.findNodeList("children").orElse(new ArrayList<>())
                     .stream()
                     .flatMap(child -> {
-                        return child.findString("implemented")
-                                .map(s -> Stream.of(child, new MapNode("inherits")
-                                .withString("parent", child.findString("name").orElse(""))
-                                .withString("child", s))).orElseGet(() -> Stream.of(child));
+                        return child.findNode("implemented")
+                                .map(implemented -> {
+                                    Stream<Node> child1 = Stream.of(child, new MapNode("inherits")
+                                            .withString("parent", child.findString("name").orElse(""))
+                                            .withString("child", this.findValue(implemented)));
+                                    return child1;
+                                }).orElseGet(() -> Stream.of(child));
                     })
                     .toList();
 
@@ -28,5 +31,17 @@ public class AfterPasser implements Passer {
         }
 
         return Optional.empty();
+    }
+
+    private String findValue(Node type) {
+        if (type.is("template")) {
+            return type.findString("base").orElse("?");
+        }
+
+        if (type.is("symbol")) {
+            return type.findString("value").orElse("?");
+        }
+
+        return "?";
     }
 }

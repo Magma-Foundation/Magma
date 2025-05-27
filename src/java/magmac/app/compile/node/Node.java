@@ -14,6 +14,10 @@ public interface Node {
 
     Optional<String> findString(String key);
 
+    Map<String, Node> nodes();
+
+    Map<String, List<Node>> nodeLists();
+
     Node merge(Node other);
 
     Map<String, String> strings();
