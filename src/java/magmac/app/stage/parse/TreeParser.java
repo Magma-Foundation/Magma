@@ -3,8 +3,7 @@ package magmac.app.stage.parse;
 import magmac.api.Tuple2;
 import magmac.api.collect.MapCollector;
 import magmac.api.result.Ok;
-import magmac.api.result.Result;
-import magmac.app.compile.error.CompileError;
+import magmac.app.compile.error.error.CompileError;
 import magmac.app.compile.error.CompileResult;
 import magmac.app.compile.node.InlineNodeList;
 import magmac.app.compile.node.Node;
@@ -67,16 +66,12 @@ public class TreeParser implements Parser {
         return this.afterChild.pass(state1, node).orElseGet(() -> new Tuple2<>(state1, node));
     }
 
-    private Result<Roots, CompileError> apply0(Roots roots) {
-        Map<Location, Node> parsed = roots.iter()
+    @Override
+    public CompileResult<Roots> apply(Roots initial) {
+        Map<Location, Node> parsed = initial.iter()
                 .map(tuple -> this.parse(tuple.left(), tuple.right()))
                 .collect(new MapCollector<>());
 
-        return new Ok<>(new MapRoots(this.afterAllChildren.afterAll(parsed)));
-    }
-
-    @Override
-    public CompileResult<Roots> apply(Roots initial) {
-        return new CompileResult<>(this.apply0(initial));
+        return new CompileResult<>(new Ok<Roots, CompileError>(new MapRoots(this.afterAllChildren.afterAll(parsed))));
     }
 }

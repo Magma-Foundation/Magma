@@ -16,8 +16,4 @@ export class OrRule {
 	}
 	temp(){
 	}
-	temp(){
-	}
-	temp(){
-	}
 }

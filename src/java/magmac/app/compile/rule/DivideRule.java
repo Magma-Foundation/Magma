@@ -6,10 +6,8 @@ import magmac.api.collect.ListCollector;
 import magmac.api.collect.ResultCollector;
 import magmac.api.iter.Iter;
 import magmac.api.iter.Iters;
-import magmac.api.result.Result;
 import magmac.app.compile.error.CompileResult;
-import magmac.app.compile.error.CompileError;
-import magmac.app.compile.error.CompileErrors;
+import magmac.app.compile.error.error.CompileErrors;
 import magmac.app.compile.node.InlineNodeList;
 import magmac.app.compile.node.MapNode;
 import magmac.app.compile.node.Node;
@@ -26,14 +24,13 @@ public record DivideRule(String key, Folder folder, Rule childRule) implements R
         return new DivideRule(key, new StatementFolder(), childRule);
     }
 
-    private Result<Node, CompileError> lex0(String input) {
-        return this.divide(input)
-                .map(segment -> this.childRule.lex(segment).result())
-                .collect(new ResultCollector<>(new ListCollector<>()))
-                .mapValue(children -> {
-                    Node node = new MapNode();
-                    return node.withNodeList(this.key(), new InlineNodeList(children));
-                });
+    private static Optional<DivideState> foldEscape(DivideState current, char c) {
+        if ('\\' == c) {
+            return current.popAndAppendToOption();
+        }
+        else {
+            return Optional.of(current);
+        }
     }
 
     private Iter<String> divide(String input) {
@@ -66,35 +63,28 @@ public record DivideRule(String key, Folder folder, Rule childRule) implements R
                 .flatMap(DivideState::popAndAppendToOption);
     }
 
-    private static Optional<DivideState> foldEscape(DivideState current, char c) {
-        if ('\\' == c) {
-            return current.popAndAppendToOption();
-        }
-        else {
-            return Optional.of(current);
-        }
-    }
-
-    private Result<String, CompileError> generate0(Node node) {
-        return node.findNodeList(this.key)
-                .map(list -> this.join(list))
-                .orElseGet(() -> CompileErrors.createNodeError("Node list '" + this.key + "' not present", node))
-                .mapValue(value -> value.orElse(""));
-    }
-
-    private Result<Optional<String>, CompileError> join(NodeList list) {
-        return list.iter()
+    private CompileResult<Optional<String>> join(NodeList list) {
+        return new CompileResult<>(list.iter()
                 .map(node -> this.childRule.generate(node).result())
-                .collect(new ResultCollector<>(new Joiner()));
+                .collect(new ResultCollector<>(new Joiner())));
     }
 
     @Override
     public CompileResult<Node> lex(String input) {
-        return new CompileResult<>(this.lex0(input));
+        return new CompileResult<>(this.divide(input)
+                .map(segment -> this.childRule.lex(segment).result())
+                .collect(new ResultCollector<>(new ListCollector<>()))
+                .mapValue(children -> {
+                    Node node = new MapNode();
+                    return node.withNodeList(this.key(), new InlineNodeList(children));
+                }));
     }
 
     @Override
     public CompileResult<String> generate(Node node) {
-        return new CompileResult<>(this.generate0(node));
+        return node.findNodeList(this.key)
+                .map(list -> this.join(list))
+                .orElseGet(() -> CompileErrors.createNodeError("Node list '" + this.key + "' not present", node))
+                .mapValue(value -> value.orElse(""));
     }
 }

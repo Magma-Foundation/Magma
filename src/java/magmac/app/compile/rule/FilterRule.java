@@ -1,9 +1,7 @@
 package magmac.app.compile.rule;
 
-import magmac.api.result.Result;
 import magmac.app.compile.error.CompileResult;
-import magmac.app.compile.error.CompileError;
-import magmac.app.compile.error.CompileErrors;
+import magmac.app.compile.error.error.CompileErrors;
 import magmac.app.compile.node.Node;
 
 public final class FilterRule implements Rule {
@@ -23,26 +21,18 @@ public final class FilterRule implements Rule {
         return new FilterRule(new NumberFilter(), childRule);
     }
 
-    private Result<Node, CompileError> lex0(String input) {
-        if (this.filter.test(input)) {
-            return this.childRule.lex(input).result();
-        }
-        else {
-            return CompileErrors.createStringError(filter.createMessage(), input);
-        }
-    }
-
-    private Result<String, CompileError> generate0(Node node) {
-        return this.childRule.generate(node).result();
-    }
-
     @Override
     public CompileResult<Node> lex(String input) {
-        return new CompileResult<>(this.lex0(input));
+        if (this.filter.test(input)) {
+            return this.childRule.lex(input);
+        }
+        else {
+            return CompileErrors.createStringError(this.filter.createMessage(), input);
+        }
     }
 
     @Override
     public CompileResult<String> generate(Node node) {
-        return new CompileResult<>(this.generate0(node));
+        return this.childRule.generate(node);
     }
 }

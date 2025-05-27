@@ -10,8 +10,4 @@ export class StringRule {
 	}
 	temp(){
 	}
-	temp(){
-	}
-	temp(){
-	}
 }

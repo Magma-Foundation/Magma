@@ -51,8 +51,6 @@ interface Head
 class StatementFolder
 Folder <|-- StatementFolder
 
-class CompileErrors
-
 interface Generator
 Stage <|-- Generator
 
@@ -93,9 +91,6 @@ TargetPlatform <|-- PlantUMLTargetPlatform
 
 class MapRoots
 Roots <|-- MapRoots
-
-interface CompileError
-Error <|-- CompileError
 
 class SymbolFilter
 Filter <|-- SymbolFilter
@@ -178,6 +173,8 @@ interface Context
 class StripRule
 Rule <|-- StripRule
 
+class CompileErrors
+
 class MergeDiagram
 AfterAll <|-- MergeDiagram
 
@@ -237,6 +234,9 @@ Iter <|-- HeadedIter
 class MutableDivideState
 DivideState <|-- MutableDivideState
 
+interface CompileError
+Error <|-- CompileError
+
 interface Locator
 
 class MapNode
@@ -276,8 +276,6 @@ Node --> Tuple2
 Node --> Iter
 Node --> Optional
 ParseState --> Location
-FilterRule --> Result
-FilterRule --> CompileError
 FilterRule --> CompileErrors
 FlatMapHead --> Iter
 FlatMapHead --> Function
@@ -310,6 +308,7 @@ ApplicationBuilder --> Optional
 OrState --> Err
 OrState --> Ok
 OrState --> Result
+OrState --> CompileResult
 OrState --> CompileError
 OrState --> Context
 OrState --> ImmutableCompileError
@@ -322,8 +321,6 @@ DivideRule --> ListCollector
 DivideRule --> ResultCollector
 DivideRule --> Iter
 DivideRule --> Iters
-DivideRule --> Result
-DivideRule --> CompileError
 DivideRule --> CompileErrors
 DivideRule --> InlineNodeList
 DivideRule --> MapNode
@@ -351,8 +348,6 @@ AfterPasser --> Iters
 AfterPasser --> InlineNodeList
 AfterPasser --> MapNode
 AfterPasser --> NodeList
-PrefixRule --> Result
-PrefixRule --> CompileError
 PrefixRule --> CompileErrors
 Compiler --> CompileResult
 Compiler --> Location
@@ -372,14 +367,6 @@ PathSource --> Path
 PathSource --> ArrayList
 PathSource --> Collections
 PathSource --> List
-StripRule --> Result
-StripRule --> CompileError
-CompileErrors --> Err
-CompileErrors --> Result
-CompileErrors --> NodeContext
-CompileErrors --> StringContext
-CompileErrors --> Node
-CompileErrors --> ImmutableCompileError
 DivideState --> Tuple2
 DivideState --> Optional
 DivideState --> Stream
@@ -387,6 +374,12 @@ PathTargets --> Iters
 PathTargets --> SafeFiles
 PathTargets --> Files
 PathTargets --> Path
+CompileErrors --> Err
+CompileErrors --> CompileResult
+CompileErrors --> NodeContext
+CompileErrors --> StringContext
+CompileErrors --> Node
+CompileErrors --> ImmutableCompileError
 Sources --> Result
 Sources --> Location
 Sources --> IOException
@@ -399,7 +392,6 @@ Lexer --> Map
 TreeParser --> Tuple2
 TreeParser --> MapCollector
 TreeParser --> Ok
-TreeParser --> Result
 TreeParser --> CompileError
 TreeParser --> CompileResult
 TreeParser --> InlineNodeList
@@ -430,8 +422,6 @@ Rule --> Node
 RuleGenerator --> Tuple2
 RuleGenerator --> MapCollector
 RuleGenerator --> ResultCollector
-RuleGenerator --> Result
-RuleGenerator --> CompileError
 RuleGenerator --> CompileResult
 RuleGenerator --> Rule
 Application --> Error
@@ -465,8 +455,6 @@ PathSources --> Path
 ThrowableError --> PrintWriter
 ThrowableError --> StringWriter
 ExactRule --> Ok
-ExactRule --> Result
-ExactRule --> CompileError
 ExactRule --> CompileErrors
 ExactRule --> MapNode
 TargetPlatform --> Rule
@@ -504,8 +492,6 @@ Targets --> Location
 Targets --> IOException
 Targets --> Map
 Targets --> Optional
-StagedCompiler --> Result
-StagedCompiler --> CompileError
 StagedCompiler --> Generator
 StagedCompiler --> Lexer
 StagedCompiler --> Parser
@@ -518,10 +504,8 @@ CompileApplication --> Location
 CompileApplication --> Sources
 CompileApplication --> Targets
 CompileApplication --> Map
-ContextRule --> Result
 ContextRule --> NodeContext
 ContextRule --> StringContext
-ContextRule --> CompileError
 ContextRule --> ImmutableCompileError
 ContextRule --> List
 PlantUMLTargetPlatform --> AfterPasser
@@ -532,20 +516,14 @@ CommonLang --> ExactRule
 CommonLang --> Rule
 CommonLang --> StripRule
 CommonLang --> TypeRule
-LocatingRule --> Result
-LocatingRule --> CompileError
 LocatingRule --> CompileErrors
 LocatingRule --> FirstLocator
 LocatingRule --> LastLocator
 LocatingRule --> Locator
 LocatingRule --> Optional
 NodeRule --> Ok
-NodeRule --> Result
-NodeRule --> CompileError
 NodeRule --> CompileErrors
 NodeRule --> MapNode
-SuffixRule --> Result
-SuffixRule --> CompileError
 SuffixRule --> CompileErrors
 JavaLang --> ContextRule
 JavaLang --> DivideRule
@@ -561,7 +539,11 @@ JavaLang --> FilterRule
 JavaLang --> TypeRule
 JavaLang --> DelimitedFolder
 JavaLang --> List
+CompileResult --> Tuple2
 CompileResult --> Result
+CompileResult --> CompileError
+CompileResult --> Function
+CompileResult --> Supplier
 PlantUMLLang --> DivideRule
 PlantUMLLang --> ExactRule
 PlantUMLLang --> LocatingRule
@@ -585,21 +567,18 @@ FlattenJava --> ListCollector
 FlattenJava --> InlineNodeList
 FlattenJava --> NodeList
 RuleLexer --> Tuple2
-RuleLexer --> Iters
 RuleLexer --> MapCollector
 RuleLexer --> ResultCollector
-RuleLexer --> Result
-RuleLexer --> CompileError
+RuleLexer --> Iters
 RuleLexer --> CompileResult
 RuleLexer --> Node
 RuleLexer --> Rule
 RuleLexer --> MapRoots
-TypeRule --> Result
-TypeRule --> CompileError
-TypeRule --> CompileErrors
 TypeRule --> Context
 TypeRule --> NodeContext
 TypeRule --> StringContext
+TypeRule --> CompileError
+TypeRule --> CompileErrors
 TypeRule --> ImmutableCompileError
 TypeRule --> List
 Location --> List
