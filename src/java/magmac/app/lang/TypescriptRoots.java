@@ -30,7 +30,9 @@ public class TypescriptRoots {
 
     private static Rule createStructureMemberRule() {
         return new OrRule(List.of(
-                CommonLang.createWhitespaceRule()
+                CommonLang.createWhitespaceRule(),
+                new TypeRule("method", new ExactRule("")),
+                new TypeRule("definition-statement", new ExactRule(""))
         ));
     }
 }

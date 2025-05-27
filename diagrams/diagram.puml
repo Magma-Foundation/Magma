@@ -119,8 +119,6 @@ Rule <|-- ExactRule
 class PathSource
 Source <|-- PathSource
 
-class PlantUMLRoots
-
 interface Collector
 
 class StringContext
@@ -214,6 +212,8 @@ Passer <|-- TypeScriptPasser
 interface Result
 
 interface AfterAll
+
+class PlantUMLLang
 
 class Main
 
@@ -403,17 +403,6 @@ StringRule --> CompileErrors
 StringRule --> NodeContext
 StringRule --> MapNode
 StringRule --> ImmutableCompileError
-PlantUMLRoots --> DivideRule
-PlantUMLRoots --> ExactRule
-PlantUMLRoots --> LocatingRule
-PlantUMLRoots --> OrRule
-PlantUMLRoots --> PrefixRule
-PlantUMLRoots --> Rule
-PlantUMLRoots --> StringRule
-PlantUMLRoots --> SuffixRule
-PlantUMLRoots --> TypeRule
-PlantUMLRoots --> StatementFolder
-PlantUMLRoots --> List
 MapNode --> Joiner
 MapNode --> Iters
 MapNode --> HashMap
@@ -490,7 +479,7 @@ ContextRule --> ImmutableCompileError
 ContextRule --> List
 PlantUMLTargetPlatform --> AfterPasser
 PlantUMLTargetPlatform --> MergeDiagram
-PlantUMLTargetPlatform --> PlantUMLRoots
+PlantUMLTargetPlatform --> PlantUMLLang
 PlantUMLTargetPlatform --> Paths
 CommonLang --> ExactRule
 CommonLang --> Rule
@@ -523,6 +512,17 @@ JavaLang --> SymbolRule
 JavaLang --> TypeRule
 JavaLang --> DelimitedFolder
 JavaLang --> List
+PlantUMLLang --> DivideRule
+PlantUMLLang --> ExactRule
+PlantUMLLang --> LocatingRule
+PlantUMLLang --> OrRule
+PlantUMLLang --> PrefixRule
+PlantUMLLang --> Rule
+PlantUMLLang --> StringRule
+PlantUMLLang --> SuffixRule
+PlantUMLLang --> TypeRule
+PlantUMLLang --> StatementFolder
+PlantUMLLang --> List
 Main --> Iters
 Main --> CompileApplication
 Main --> Error

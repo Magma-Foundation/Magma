@@ -63,15 +63,15 @@ public final class JavaLang {
         ));
     }
 
-    private static StripRule createDefinitionStatementRule() {
-        return new StripRule(new SuffixRule(new NodeRule("definition", JavaLang.createDefinitionRule()), ";"));
+    private static Rule createDefinitionStatementRule() {
+        return new TypeRule("definition-statement", new StripRule(new SuffixRule(new NodeRule("definition", JavaLang.createDefinitionRule()), ";")));
     }
 
     private static Rule createMethodRule() {
-        return LocatingRule.First(new NodeRule("header", new OrRule(List.of(
+        return new TypeRule("method", LocatingRule.First(new NodeRule("header", new OrRule(List.of(
                 JavaLang.createDefinitionRule(),
                 new StringRule("name")
-        ))), "(", new StringRule("with-params"));
+        ))), "(", new StringRule("with-params")));
     }
 
     private static Rule createDefinitionRule() {
