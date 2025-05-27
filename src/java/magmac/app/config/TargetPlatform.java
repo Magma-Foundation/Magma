@@ -1,8 +1,14 @@
-package magmac.app.lang;
+package magmac.app.config;
 
 import magmac.app.compile.rule.Rule;
 import magmac.app.io.targets.PathTargets;
 import magmac.app.io.targets.Targets;
+import magmac.app.lang.AfterPasser;
+import magmac.app.lang.FlattenJava;
+import magmac.app.lang.MergeDiagram;
+import magmac.app.lang.PlantUMLRoots;
+import magmac.app.lang.TypeScriptPasser;
+import magmac.app.lang.TypescriptRoots;
 import magmac.app.stage.AfterAll;
 import magmac.app.stage.EmptyAfterAll;
 import magmac.app.stage.Passer;

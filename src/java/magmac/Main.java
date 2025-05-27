@@ -9,7 +9,7 @@ import magmac.app.compile.StagedCompiler;
 import magmac.app.io.sources.PathSources;
 import magmac.app.io.sources.Sources;
 import magmac.app.io.targets.Targets;
-import magmac.app.lang.TargetPlatform;
+import magmac.app.config.TargetPlatform;
 import magmac.app.stage.generate.Generator;
 import magmac.app.stage.lexer.Lexer;
 import magmac.app.stage.parse.Parser;

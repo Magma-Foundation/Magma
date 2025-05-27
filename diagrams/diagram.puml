@@ -12,6 +12,7 @@ class FlatMapHead
 Head <|-- FlatMapHead
 class SymbolRule
 Rule <|-- SymbolRule
+enum TargetPlatform
 class JavaRoots
 class Joiner
 Collector <|-- Joiner
@@ -42,7 +43,6 @@ class EmptyHead
 Head <|-- EmptyHead
 interface NodeList
 interface Stage
-enum TargetPlatform
 class MapCollector
 Collector <|-- MapCollector
 interface Folder
@@ -360,6 +360,12 @@ JavaRoots --> List
 TargetPlatform --> Rule
 TargetPlatform --> PathTargets
 TargetPlatform --> Targets
+TargetPlatform --> AfterPasser
+TargetPlatform --> FlattenJava
+TargetPlatform --> MergeDiagram
+TargetPlatform --> PlantUMLRoots
+TargetPlatform --> TypeScriptPasser
+TargetPlatform --> TypescriptRoots
 TargetPlatform --> AfterAll
 TargetPlatform --> EmptyAfterAll
 TargetPlatform --> Passer
