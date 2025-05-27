@@ -14,7 +14,7 @@ public record CompileError(String message, Context context, List<CompileError> e
 
     @Override
     public String display() {
-        return format(0);
+        return this.format(0);
     }
 
     private String format(int depth) {
