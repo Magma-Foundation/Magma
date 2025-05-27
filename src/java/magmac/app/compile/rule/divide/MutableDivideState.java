@@ -7,10 +7,12 @@ import java.util.stream.Stream;
 public class MutableDivideState implements DivideState {
     private final List<String> segments;
     private StringBuilder buffer;
+    private int depth;
 
     public MutableDivideState(List<String> segments, StringBuilder buffer) {
         this.segments = segments;
         this.buffer = buffer;
+        this.depth = 0;
     }
 
     public MutableDivideState() {
@@ -33,5 +35,22 @@ public class MutableDivideState implements DivideState {
     @Override
     public Stream<String> stream() {
         return this.segments.stream();
+    }
+
+    @Override
+    public boolean isLevel() {
+        return 0 == depth;
+    }
+
+    @Override
+    public DivideState enter() {
+        this.depth++;
+        return this;
+    }
+
+    @Override
+    public DivideState exit() {
+        this.depth--;
+        return this;
     }
 }

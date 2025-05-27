@@ -13,8 +13,7 @@ public final class JavaRoots {
     public static Rule createRule() {
         return new TypeRule("root", new DivideRule("children", new OrRule(List.of(
                 Namespaced.createRule("package", "package "),
-                Namespaced.createRule("import", "import "),
-                new StringRule("value")
+                Namespaced.createRule("import", "import ")
         ))));
     }
 }

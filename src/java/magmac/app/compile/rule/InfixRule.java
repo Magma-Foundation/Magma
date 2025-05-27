@@ -2,16 +2,16 @@ package magmac.app.compile.rule;
 
 import magmac.api.result.Err;
 import magmac.api.result.Result;
-import magmac.app.error.CompileError;
 import magmac.app.compile.node.Node;
 import magmac.app.compile.rule.result.StringContext;
+import magmac.app.error.CompileError;
 
 public record InfixRule(Rule leftRule, String infix, Rule rightRule) implements Rule {
     @Override
     public Result<Node, CompileError> lex(String input) {
         int separator = input.lastIndexOf(this.infix());
         if (0 > separator) {
-            return new Err<>(new CompileError("?", new StringContext("?")));
+            return new Err<>(new CompileError("Infix '" + this.infix + "' not present", new StringContext(input)));
         }
 
         String left = input.substring(0, separator);

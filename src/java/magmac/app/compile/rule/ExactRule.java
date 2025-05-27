@@ -14,7 +14,7 @@ public record ExactRule(String value) implements Rule {
         if (input.equals(this.value)) {
             return new Ok<>(new MapNode());
         }
-        return new Err<>(new CompileError("?", new StringContext("?")));
+        return new Err<>(new CompileError("Slice '" + value + "' not present", new StringContext(value)));
     }
 
     @Override

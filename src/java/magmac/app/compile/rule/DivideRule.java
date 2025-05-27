@@ -5,11 +5,11 @@ import magmac.api.collect.collect.ResultCollector;
 import magmac.api.result.Err;
 import magmac.api.result.Ok;
 import magmac.api.result.Result;
-import magmac.app.error.CompileError;
 import magmac.app.compile.node.MapNode;
 import magmac.app.compile.node.Node;
 import magmac.app.compile.rule.divide.DivideState;
 import magmac.app.compile.rule.divide.MutableDivideState;
+import magmac.app.error.CompileError;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,12 +29,16 @@ public record DivideRule(String key, Rule childRule) implements Rule {
 
     private static DivideState fold(DivideState state, char c) {
         DivideState appended = state.append(c);
-        if (';' == c) {
+        if (';' == c && appended.isLevel()) {
             return appended.advance();
         }
-        else {
-            return appended;
+        if ('{' == c) {
+            return appended.enter();
         }
+        if ('}' == c) {
+            return appended.exit();
+        }
+        return appended;
     }
 
     @Override
