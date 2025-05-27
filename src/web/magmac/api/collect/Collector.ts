@@ -1,2 +1,2 @@
-interface ? {
+export interface ? {
 }

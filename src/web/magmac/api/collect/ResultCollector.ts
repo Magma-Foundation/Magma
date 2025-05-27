@@ -1,4 +1,4 @@
 import { ? } from ?;
 import { ? } from ?;
-class ? {
+export class ResultCollector {
 }

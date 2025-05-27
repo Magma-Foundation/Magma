@@ -4,5 +4,8 @@ import { ? } from ?;
 import { ? } from ?;
 import { ? } from ?;
 import { ? } from ?;
-class ? {
+import { ? } from ?;
+import { ? } from ?;
+import { ? } from ?;
+export class TypescriptRoots {
 }

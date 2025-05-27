@@ -277,7 +277,10 @@ InlineNodeList --> List
 TypescriptRoots --> DivideRule
 TypescriptRoots --> ExactRule
 TypescriptRoots --> OrRule
+TypescriptRoots --> PrefixRule
 TypescriptRoots --> Rule
+TypescriptRoots --> StringRule
+TypescriptRoots --> SuffixRule
 TypescriptRoots --> TypeRule
 TypescriptRoots --> List
 Rule --> Result
