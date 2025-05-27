@@ -1,6 +1,7 @@
 package magmac;
 
 import magmac.app.Application;
+import magmac.app.ApplicationError;
 import magmac.app.CompileApplication;
 import magmac.app.compile.lang.java.JavaRoots;
 import magmac.app.compile.lang.plant.PlantUMLRoots;
@@ -17,7 +18,6 @@ import magmac.app.stage.RuleGenerator;
 import magmac.app.stage.RuleLexer;
 import magmac.app.stage.TreeParser;
 
-import java.io.IOException;
 import java.nio.file.Paths;
 
 public final class Main {
@@ -30,8 +30,8 @@ public final class Main {
         application.run().ifPresent(error -> Main.handleError(error));
     }
 
-    private static void handleError(IOException error) {
+    private static void handleError(ApplicationError error) {
         //noinspection CallToPrintStackTrace
-        error.printStackTrace();
+        System.err.println(error.display());
     }
 }

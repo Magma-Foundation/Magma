@@ -8,7 +8,6 @@ import magmac.app.stage.Lexer;
 import magmac.app.stage.Parser;
 import magmac.app.stage.Roots;
 
-import java.io.IOException;
 import java.util.Map;
 import java.util.Optional;
 
@@ -28,13 +27,18 @@ public final class CompileApplication implements Application {
     }
 
     @Override
-    public Optional<IOException> run() {
-        return this.sources.readAll().match(units -> {
-            Roots lex = this.lexer.lexAll(units);
-            Roots parsed = this.parser.parseAll(lex);
-            Map<Location, String> outputs = this.generator.generateAll(parsed);
-            return this.targets.writeAll(outputs);
-        }, Optional::of);
+    public Optional<ApplicationError> run() {
+        return this.sources.readAll()
+                .mapErr(ThrowableError::new)
+                .mapErr(ApplicationError::new)
+                .match(units -> compileAndWrite(units), Optional::of);
     }
 
+    private Optional<ApplicationError> compileAndWrite(Map<Location, String> units) {
+        Roots lex = this.lexer.lexAll(units);
+        Roots parsed = this.parser.parseAll(lex);
+        return this.generator.generateAll(parsed)
+                .mapErr(ApplicationError::new)
+                .match(outputs -> this.targets.writeAll(outputs).map(ThrowableError::new).map(ApplicationError::new), err -> Optional.of(err));
+    }
 }
