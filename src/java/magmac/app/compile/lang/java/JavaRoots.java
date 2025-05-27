@@ -1,6 +1,7 @@
 package magmac.app.compile.lang.java;
 
 import magmac.app.compile.ast.Namespaced;
+import magmac.app.compile.rule.ContextRule;
 import magmac.app.compile.rule.DivideRule;
 import magmac.app.compile.rule.InfixRule;
 import magmac.app.compile.rule.NodeRule;
@@ -39,8 +40,8 @@ public final class JavaRoots {
         ));
 
         Rule withImplements = new OrRule(List.of(
-                new InfixRule(withParameters, " implements ", createTypeRule()),
-                withParameters
+                new ContextRule("With implements", new InfixRule(withParameters, " implements ", JavaRoots.createTypeRule())),
+                new ContextRule("Without implements", withParameters)
         ));
 
         Rule afterKeyword = new InfixRule(withImplements, "{", new StringRule("after-content"));
