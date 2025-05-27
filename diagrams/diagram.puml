@@ -16,6 +16,8 @@ class FlattenJava
 
 class Tuple2
 
+interface PassResult
+
 class ApplicationError
 
 class StagedCompiler
@@ -49,6 +51,8 @@ class CompileApplication
 interface Collector
 
 class OrState
+
+class InlinePassResult
 
 interface ParseState
 
@@ -243,14 +247,20 @@ Roots --> Location
 Node --> Tuple2
 Node --> Iter
 Node --> Option
+PassResult --> Option
+PassResult --> Tuple2
+PassResult --> Node
+PassResult --> ParseState
+PassResult --> Consumer
+PassResult --> Function
+PassResult --> Predicate
+PassResult --> Supplier
 ParseState --> Location
 FilterRule --> CompileResult
 FilterRule --> CompileErrors
 FilterRule --> Node
-Passer --> Tuple2
 Passer --> Node
 Passer --> ParseState
-Passer --> Option
 FlatMapHead --> None
 FlatMapHead --> Iter
 FlatMapHead --> Option
@@ -326,6 +336,7 @@ Iter --> Predicate
 ResultCollector --> Ok
 ResultCollector --> Result
 AfterPasser --> None
+AfterPasser --> Option
 AfterPasser --> Some
 AfterPasser --> Tuple2
 AfterPasser --> ListCollector
@@ -335,9 +346,9 @@ AfterPasser --> InlineNodeList
 AfterPasser --> MapNode
 AfterPasser --> Node
 AfterPasser --> NodeList
+AfterPasser --> InlinePassResult
 AfterPasser --> Passer
 AfterPasser --> ParseState
-AfterPasser --> Option
 PrefixRule --> CompileResult
 PrefixRule --> CompileErrors
 PrefixRule --> Node
@@ -347,6 +358,8 @@ Compiler --> Map
 TypeScriptPasser --> None
 TypeScriptPasser --> Tuple2
 TypeScriptPasser --> Node
+TypeScriptPasser --> InlinePassResult
+TypeScriptPasser --> PassResult
 TypeScriptPasser --> Passer
 TypeScriptPasser --> ParseState
 TypeScriptPasser --> Option
@@ -477,6 +490,14 @@ StringRule --> InlineCompileResult
 StringRule --> CompileErrors
 StringRule --> MapNode
 StringRule --> Node
+InlinePassResult --> Option
+InlinePassResult --> Tuple2
+InlinePassResult --> Node
+InlinePassResult --> ParseState
+InlinePassResult --> Consumer
+InlinePassResult --> Function
+InlinePassResult --> Predicate
+InlinePassResult --> Supplier
 Err --> Tuple2
 Err --> Function
 Err --> Supplier
@@ -681,9 +702,9 @@ FlattenJava --> ListCollector
 FlattenJava --> InlineNodeList
 FlattenJava --> Node
 FlattenJava --> NodeList
+FlattenJava --> InlinePassResult
 FlattenJava --> Passer
 FlattenJava --> ParseState
-FlattenJava --> Option
 RuleLexer --> Tuple2
 RuleLexer --> MapCollector
 RuleLexer --> ResultCollector

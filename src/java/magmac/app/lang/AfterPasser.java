@@ -1,6 +1,7 @@
 package magmac.app.lang;
 
 import magmac.api.None;
+import magmac.api.Option;
 import magmac.api.Some;
 import magmac.api.Tuple2;
 import magmac.api.collect.ListCollector;
@@ -10,10 +11,9 @@ import magmac.app.compile.node.InlineNodeList;
 import magmac.app.compile.node.MapNode;
 import magmac.app.compile.node.Node;
 import magmac.app.compile.node.NodeList;
+import magmac.app.stage.InlinePassResult;
 import magmac.app.stage.Passer;
 import magmac.app.stage.parse.ParseState;
-
-import magmac.api.Option;
 
 public class AfterPasser implements Passer {
     private static Option<Node> createInherits(Node child, String key) {
@@ -49,10 +49,10 @@ public class AfterPasser implements Passer {
     }
 
     @Override
-    public Option<Tuple2<ParseState, Node>> pass(ParseState state, Node node) {
+    public magmac.app.stage.PassResult pass(ParseState state, Node node) {
         if (node.is("root")) {
             NodeList values = AfterPasser.replaceRootChildren(node);
-            return new Some<>(new Tuple2<ParseState, Node>(state, node.withNodeList("children", values)));
+            return new InlinePassResult(new Some<>(new Tuple2<ParseState, Node>(state, node.withNodeList("children", values))));
         }
 
         if (node.is("import")) {
@@ -66,10 +66,9 @@ public class AfterPasser implements Passer {
                     .withString("parent", state.findLocation().name())
                     .withString("child", child);
 
-            return new Some<>(new Tuple2<ParseState, Node>(state, dependency));
+            return new InlinePassResult(new Some<>(new Tuple2<ParseState, Node>(state, dependency)));
         }
 
-        return new None<>();
+        return new InlinePassResult(new None<>());
     }
-
 }

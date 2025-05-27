@@ -11,4 +11,6 @@ import { ? } from ?;
 export class FlattenJava {
 	temp(){
 	}
+	temp(){
+	}
 }
