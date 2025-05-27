@@ -1,12 +1,12 @@
 package magmac.app.compile.rule;
 
-import magmac.api.result.Err;
 import magmac.api.result.Result;
+import magmac.app.compile.error.CompileError;
+import magmac.app.compile.error.CompileErrors;
 import magmac.app.compile.error.context.Context;
 import magmac.app.compile.error.context.NodeContext;
-import magmac.app.compile.node.Node;
 import magmac.app.compile.error.context.StringContext;
-import magmac.app.compile.error.CompileError;
+import magmac.app.compile.node.Node;
 import magmac.app.error.ImmutableCompileError;
 
 import java.util.List;
@@ -25,7 +25,7 @@ public record TypeRule(String type, Rule childRule) implements Rule {
             return this.childRule.generate(node).mapErr(err -> this.createError(new NodeContext(node), err));
         }
 
-        return new Err<>(new ImmutableCompileError("Type '" + this.type + "' not present", new NodeContext(node)));
+        return CompileErrors.createNodeError("Type '" + this.type + "' not present", node);
     }
 
     private CompileError createError(Context context, CompileError err) {

@@ -1,13 +1,11 @@
 package magmac.app.compile.rule;
 
-import magmac.api.result.Err;
 import magmac.api.result.Ok;
 import magmac.api.result.Result;
 import magmac.app.compile.error.CompileError;
+import magmac.app.compile.error.CompileErrors;
 import magmac.app.compile.node.MapNode;
 import magmac.app.compile.node.Node;
-import magmac.app.compile.error.context.StringContext;
-import magmac.app.error.ImmutableCompileError;
 
 public record ExactRule(String value) implements Rule {
     @Override
@@ -15,7 +13,8 @@ public record ExactRule(String value) implements Rule {
         if (input.equals(this.value)) {
             return new Ok<>(new MapNode());
         }
-        return new Err<>(new ImmutableCompileError("Slice '" + this.value + "' not present", new StringContext(this.value)));
+
+        return CompileErrors.createStringError("Slice '" + this.value + "' not present", input);
     }
 
     @Override

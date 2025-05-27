@@ -50,7 +50,7 @@ public record DivideRule(String key, Folder folder, Rule childRule) implements R
     public Result<String, CompileError> generate(Node node) {
         return node.findNodeList(this.key)
                 .map(list -> this.join(list))
-                .orElseGet(() -> CompileErrors.createNodeError(node, "Node list '" + this.key + "' not present"))
+                .orElseGet(() -> CompileErrors.createNodeError("Node list '" + this.key + "' not present", node))
                 .mapValue(value -> value.orElse(""));
     }
 
