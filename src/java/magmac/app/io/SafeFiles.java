@@ -1,7 +1,7 @@
 package magmac.app.io;
 
-import magmac.api.collect.Iter;
-import magmac.api.collect.Iters;
+import magmac.api.iter.Iter;
+import magmac.api.iter.Iters;
 import magmac.api.result.Err;
 import magmac.api.result.Ok;
 import magmac.api.result.Result;

@@ -1,7 +1,6 @@
-package magmac.api.collect.head;
+package magmac.api.head;
 
-import magmac.api.collect.Head;
-import magmac.api.collect.Iter;
+import magmac.api.iter.Iter;
 
 import java.util.Optional;
 import java.util.function.Function;

@@ -6,6 +6,6 @@ import magmac.app.stage.parse.ParseState;
 
 import java.util.Optional;
 
-interface Passer {
+public interface Passer {
     Optional<Tuple2<ParseState, Node>> pass(ParseState state, Node node);
 }

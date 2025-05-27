@@ -1,4 +1,4 @@
-package magmac.api.collect.collect;
+package magmac.api.collect;
 
 import magmac.api.result.Ok;
 import magmac.api.result.Result;

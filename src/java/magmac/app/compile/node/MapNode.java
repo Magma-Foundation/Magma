@@ -1,8 +1,8 @@
 package magmac.app.compile.node;
 
 import magmac.api.Tuple2;
-import magmac.api.collect.Iter;
-import magmac.api.collect.Iters;
+import magmac.api.iter.Iter;
+import magmac.api.iter.Iters;
 
 import java.util.HashMap;
 import java.util.List;

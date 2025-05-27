@@ -3,8 +3,8 @@ package magmac.app.compile;
 import magmac.api.result.Result;
 import magmac.app.compile.error.CompileError;
 import magmac.app.io.Location;
-import magmac.app.stage.Generator;
-import magmac.app.stage.Lexer;
+import magmac.app.stage.generate.Generator;
+import magmac.app.stage.lexer.Lexer;
 import magmac.app.stage.Parser;
 import magmac.app.stage.Roots;
 

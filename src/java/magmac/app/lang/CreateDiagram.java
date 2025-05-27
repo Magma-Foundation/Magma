@@ -1,9 +1,10 @@
-package magmac.app.stage;
+package magmac.app.lang;
 
-import magmac.api.collect.Iters;
+import magmac.api.iter.Iters;
 import magmac.app.compile.node.MapNode;
 import magmac.app.compile.node.Node;
 import magmac.app.io.Location;
+import magmac.app.stage.AfterAll;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -13,7 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-public class CreateDiagram implements All {
+public class CreateDiagram implements AfterAll {
     private static List<String> findParentDependencies(String child, Map<String, List<String>> childToParents, Map<String, List<String>> dependencyMap) {
         return childToParents.getOrDefault(child, Collections.emptyList())
                 .stream()

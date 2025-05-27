@@ -1,17 +1,18 @@
-package magmac.app.compile.lang.java;
+package magmac.app.lang;
 
-import magmac.app.compile.ast.Namespaced;
 import magmac.app.compile.rule.ContextRule;
 import magmac.app.compile.rule.DivideRule;
 import magmac.app.compile.rule.InfixRule;
 import magmac.app.compile.rule.NodeRule;
 import magmac.app.compile.rule.OrRule;
+import magmac.app.compile.rule.PrefixRule;
 import magmac.app.compile.rule.Rule;
 import magmac.app.compile.rule.StringRule;
 import magmac.app.compile.rule.StripRule;
 import magmac.app.compile.rule.SuffixRule;
 import magmac.app.compile.rule.SymbolRule;
 import magmac.app.compile.rule.TypeRule;
+import magmac.app.compile.rule.fold.DelimitedFolder;
 import magmac.app.compile.rule.fold.StatementFolder;
 
 import java.util.List;
@@ -19,8 +20,8 @@ import java.util.List;
 public final class JavaRoots {
     public static Rule createRule() {
         return new TypeRule("root", new DivideRule("children", new StatementFolder(), new OrRule(List.of(
-                Namespaced.createRule("package", "package "),
-                Namespaced.createRule("import", "import "),
+                JavaRoots.createRule("package", "package "),
+                JavaRoots.createRule("import", "import "),
                 JavaRoots.createStructureRule("record"),
                 JavaRoots.createStructureRule("interface"),
                 JavaRoots.createStructureRule("class")
@@ -66,5 +67,11 @@ public final class JavaRoots {
 
     private static TypeRule createTemplateRule() {
         return new TypeRule("template", new StripRule(new SuffixRule(new InfixRule(new StripRule(new StringRule("base")), "<", new StringRule("arguments")), ">")));
+    }
+
+    public static Rule createRule(String type, String prefix) {
+        Rule childRule = new DivideRule("segments", new DelimitedFolder('.'), new StringRule("value"));
+        Rule stripRule = new StripRule(new SuffixRule(new PrefixRule(prefix, childRule), ";"));
+        return new TypeRule(type, stripRule);
     }
 }

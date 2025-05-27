@@ -1,7 +1,8 @@
-package magmac.api.collect;
+package magmac.api.iter;
 
 import magmac.api.Tuple2;
-import magmac.api.collect.head.RangeHead;
+import magmac.api.head.HeadedIter;
+import magmac.api.head.RangeHead;
 
 import java.util.ArrayList;
 import java.util.List;

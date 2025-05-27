@@ -1,4 +1,4 @@
-package magmac.api.collect.collect;
+package magmac.api.collect;
 
 public interface Collector<T, C> {
     C createInitial();

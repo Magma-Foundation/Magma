@@ -5,6 +5,6 @@ import magmac.app.io.Location;
 
 import java.util.Map;
 
-interface All {
+public interface AfterAll {
     Map<Location, Node> afterAll(Map<Location, Node> roots);
 }

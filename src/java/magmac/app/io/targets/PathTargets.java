@@ -1,6 +1,6 @@
 package magmac.app.io.targets;
 
-import magmac.api.collect.Iters;
+import magmac.api.iter.Iters;
 import magmac.app.io.Location;
 import magmac.app.io.SafeFiles;
 

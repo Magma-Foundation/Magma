@@ -1,6 +1,4 @@
-package magmac.api.collect.head;
-
-import magmac.api.collect.Head;
+package magmac.api.head;
 
 import java.util.Optional;
 

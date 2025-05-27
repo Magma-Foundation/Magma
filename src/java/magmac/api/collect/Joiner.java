@@ -1,6 +1,4 @@
-package magmac.app.compile.rule;
-
-import magmac.api.collect.collect.Collector;
+package magmac.api.collect;
 
 import java.util.Optional;
 

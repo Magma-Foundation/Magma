@@ -1,14 +1,15 @@
-package magmac.app.stage;
+package magmac.app.stage.lexer;
 
 import magmac.api.Tuple2;
-import magmac.api.collect.Iters;
-import magmac.api.collect.collect.MapCollector;
-import magmac.api.collect.collect.ResultCollector;
+import magmac.api.iter.Iters;
+import magmac.api.collect.MapCollector;
+import magmac.api.collect.ResultCollector;
 import magmac.api.result.Result;
 import magmac.app.compile.error.CompileError;
 import magmac.app.compile.node.Node;
 import magmac.app.compile.rule.Rule;
 import magmac.app.io.Location;
+import magmac.app.stage.Roots;
 
 import java.util.Map;
 

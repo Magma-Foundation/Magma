@@ -1,9 +1,9 @@
-package magmac.app.stage;
+package magmac.app.lang;
 
 import magmac.api.Tuple2;
 import magmac.app.compile.node.MapNode;
 import magmac.app.compile.node.Node;
-import magmac.app.stage.parse.ImmutableParseState;
+import magmac.app.stage.Passer;
 import magmac.app.stage.parse.ParseState;
 
 import java.util.ArrayList;

@@ -1,26 +1,28 @@
-package magmac.app.stage;
+package magmac.app.stage.parse;
 
 import magmac.api.Tuple2;
-import magmac.api.collect.Iters;
-import magmac.api.collect.collect.MapCollector;
+import magmac.api.iter.Iters;
+import magmac.api.collect.MapCollector;
 import magmac.app.compile.node.Node;
 import magmac.app.io.Location;
-import magmac.app.stage.parse.ImmutableParseState;
-import magmac.app.stage.parse.ParseState;
+import magmac.app.stage.AfterAll;
+import magmac.app.stage.Parser;
+import magmac.app.stage.Passer;
+import magmac.app.stage.Roots;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 public class TreeParser implements Parser {
-    private final Passer beforePasser;
-    private final Passer afterPasser;
-    private final All all;
+    private final Passer beforeChild;
+    private final Passer afterChild;
+    private final AfterAll afterAllChildren;
 
-    public TreeParser(Passer beforePasser, Passer afterPasser, All all) {
-        this.beforePasser = beforePasser;
-        this.afterPasser = afterPasser;
-        this.all = all;
+    public TreeParser(Passer beforeChild, Passer afterChild, AfterAll afterAllChildren) {
+        this.beforeChild = beforeChild;
+        this.afterChild = afterChild;
+        this.afterAllChildren = afterAllChildren;
     }
 
     private Tuple2<ParseState, Node> parseNodeLists(ParseState state, Node root) {
@@ -63,15 +65,15 @@ public class TreeParser implements Parser {
     }
 
     private Tuple2<ParseState, Node> parseTree(ParseState state, Node root) {
-        Tuple2<ParseState, Node> beforeTuple = this.beforePasser.pass(state, root).orElseGet(() -> new Tuple2<>(state, root));
+        Tuple2<ParseState, Node> beforeTuple = this.beforeChild.pass(state, root).orElseGet(() -> new Tuple2<>(state, root));
         Tuple2<ParseState, Node> nodeListsTuple = this.parseNodeLists(beforeTuple.left(), beforeTuple.right());
         ParseState state1 = nodeListsTuple.left();
         Node node = nodeListsTuple.right();
-        return this.afterPasser.pass(state1, node).orElseGet(() -> new Tuple2<>(state1, node));
+        return this.afterChild.pass(state1, node).orElseGet(() -> new Tuple2<>(state1, node));
     }
 
     private Map<Location, Node> parseAll0(Map<Location, Node> roots) {
-        return this.all.afterAll(this.parseAllRaw(roots));
+        return this.afterAllChildren.afterAll(this.parseAllRaw(roots));
     }
 
     @Override

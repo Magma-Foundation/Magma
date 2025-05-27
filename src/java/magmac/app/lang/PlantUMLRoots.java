@@ -1,4 +1,4 @@
-package magmac.app.compile.lang.plant;
+package magmac.app.lang;
 
 import magmac.app.compile.rule.DivideRule;
 import magmac.app.compile.rule.ExactRule;

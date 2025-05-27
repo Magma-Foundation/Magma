@@ -2,17 +2,17 @@ package magmac.app;
 
 import magmac.app.compile.Compiler;
 import magmac.app.compile.StagedCompiler;
-import magmac.app.compile.lang.java.JavaRoots;
-import magmac.app.compile.lang.plant.PlantUMLRoots;
-import magmac.app.stage.AfterPasser;
-import magmac.app.stage.CreateDiagram;
-import magmac.app.stage.Generator;
-import magmac.app.stage.JavaToPlantUML;
-import magmac.app.stage.Lexer;
+import magmac.app.lang.JavaRoots;
+import magmac.app.lang.PlantUMLRoots;
+import magmac.app.lang.AfterPasser;
+import magmac.app.lang.CreateDiagram;
+import magmac.app.stage.generate.Generator;
+import magmac.app.lang.JavaToPlantUML;
+import magmac.app.stage.lexer.Lexer;
 import magmac.app.stage.Parser;
-import magmac.app.stage.RuleGenerator;
-import magmac.app.stage.RuleLexer;
-import magmac.app.stage.TreeParser;
+import magmac.app.stage.generate.RuleGenerator;
+import magmac.app.stage.lexer.RuleLexer;
+import magmac.app.stage.parse.TreeParser;
 
 public final class Config {
     public static Compiler createCompiler() {

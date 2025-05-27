@@ -1,8 +1,8 @@
 package magmac.app.io.sources;
 
 import magmac.api.Tuple2;
-import magmac.api.collect.collect.MapCollector;
-import magmac.api.collect.collect.ResultCollector;
+import magmac.api.collect.MapCollector;
+import magmac.api.collect.ResultCollector;
 import magmac.api.result.Result;
 import magmac.app.io.Location;
 import magmac.app.io.SafeFiles;

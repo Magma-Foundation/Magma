@@ -1,20 +1,18 @@
 @startuml
 skinparam linetype ortho
+class RangeHead
+Head <|-- RangeHead
 interface Source
-class HeadedIter
-Iter <|-- HeadedIter
 class Config
 class Roots
 interface Targets
-interface All
+class FlatMapHead
+Head <|-- FlatMapHead
 class SymbolRule
 Rule <|-- SymbolRule
-class EmptyHead
-Head <|-- EmptyHead
 class JavaRoots
-class Iters
-class PlantUMLRoots
-interface Lexer
+class Joiner
+Collector <|-- Joiner
 class StringRule
 Rule <|-- StringRule
 class ThrowableError
@@ -24,68 +22,66 @@ class ApplicationError
 Error <|-- ApplicationError
 class StagedCompiler
 Compiler <|-- StagedCompiler
+interface Head
 class StatementFolder
 Folder <|-- StatementFolder
 class CompileErrors
-class AfterPasser
-Passer <|-- AfterPasser
+interface Generator
 interface Compiler
 class NodeContext
 Context <|-- NodeContext
 class ImmutableCompileError
 CompileError <|-- ImmutableCompileError
+class EmptyHead
+Head <|-- EmptyHead
+class MapCollector
+Collector <|-- MapCollector
 interface Folder
 class PathSources
 Sources <|-- PathSources
-interface DivideState
-class JavaToPlantUML
-Passer <|-- JavaToPlantUML
-interface CompileError
-Error <|-- CompileError
-class CreateDiagram
-All <|-- CreateDiagram
-class RuleGenerator
-Generator <|-- RuleGenerator
-interface Generator
-class FlatMapHead
-Head <|-- FlatMapHead
-interface Passer
 class ResultCollector
 Collector <|-- ResultCollector
+interface DivideState
+interface CompileError
+Error <|-- CompileError
+class RuleGenerator
+Generator <|-- RuleGenerator
+interface Passer
 class InfixRule
 Rule <|-- InfixRule
 class PrefixRule
 Rule <|-- PrefixRule
-class MapCollector
-Collector <|-- MapCollector
+class RuleLexer
+Lexer <|-- RuleLexer
 class CompileApplication
 Application <|-- CompileApplication
 class ExactRule
 Rule <|-- ExactRule
 class PathSource
 Source <|-- PathSource
+class PlantUMLRoots
+interface Collector
 class StringContext
 Context <|-- StringContext
-interface Collector
-interface Head
 class TypeRule
 Rule <|-- TypeRule
-class Joiner
-Collector <|-- Joiner
 interface Node
 class OrRule
 Rule <|-- OrRule
 interface ParseState
+interface Iter
 class NodeRule
 Rule <|-- NodeRule
+class Iters
 interface Rule
-class Namespaced
+class JavaToPlantUML
+Passer <|-- JavaToPlantUML
+class CreateDiagram
+AfterAll <|-- CreateDiagram
 class DelimitedFolder
 Folder <|-- DelimitedFolder
 class PathTargets
 Targets <|-- PathTargets
-class TreeParser
-Parser <|-- TreeParser
 class Location
 interface Parser
 class SingleHead
@@ -94,36 +90,37 @@ interface Context
 class StripRule
 Rule <|-- StripRule
 interface Error
-interface Iter
 class Ok
 Result <|-- Ok
 interface Sources
 interface Application
 class ImmutableParseState
 ParseState <|-- ImmutableParseState
-class RangeHead
-Head <|-- RangeHead
+interface Lexer
 class DivideRule
 Rule <|-- DivideRule
+class TreeParser
+Parser <|-- TreeParser
 class Err
 Result <|-- Err
-class RuleLexer
-Lexer <|-- RuleLexer
 class SuffixRule
 Rule <|-- SuffixRule
+class AfterPasser
+Passer <|-- AfterPasser
 interface Result
+interface AfterAll
 class Main
 class SafeFiles
+class HeadedIter
+Iter <|-- HeadedIter
 class MutableDivideState
 DivideState <|-- MutableDivideState
 class MapNode
 Node <|-- MapNode
 class ContextRule
 Rule <|-- ContextRule
-All --> Node
-All --> Location
-All --> Map
 Iters --> Tuple2
+Iters --> HeadedIter
 Iters --> RangeHead
 Iters --> ArrayList
 Iters --> List
@@ -145,15 +142,8 @@ Passer --> Optional
 Result --> Tuple2
 Result --> Function
 Result --> Supplier
-Namespaced --> DelimitedFolder
-Namespaced --> DivideRule
-Namespaced --> PrefixRule
-Namespaced --> Rule
-Namespaced --> StringRule
-Namespaced --> StripRule
-Namespaced --> SuffixRule
-Namespaced --> TypeRule
 DivideRule --> Iters
+DivideRule --> Joiner
 DivideRule --> ResultCollector
 DivideRule --> Ok
 DivideRule --> MapNode
@@ -216,21 +206,20 @@ Sources --> Result
 Sources --> Location
 Sources --> IOException
 Sources --> Map
-HeadedIter --> EmptyHead
-HeadedIter --> FlatMapHead
-HeadedIter --> SingleHead
 HeadedIter --> Ok
 Lexer --> Result
 Lexer --> CompileError
 Lexer --> Location
+Lexer --> Roots
 Lexer --> Map
 TreeParser --> Tuple2
 TreeParser --> Iters
 TreeParser --> MapCollector
 TreeParser --> Node
 TreeParser --> Location
-TreeParser --> ImmutableParseState
-TreeParser --> ParseState
+TreeParser --> AfterAll
+TreeParser --> Passer
+TreeParser --> Roots
 TreeParser --> ArrayList
 TreeParser --> List
 TreeParser --> Map
@@ -238,7 +227,6 @@ Rule --> Result
 Rule --> CompileError
 Rule --> Node
 JavaToPlantUML --> MapNode
-JavaToPlantUML --> ImmutableParseState
 JavaToPlantUML --> ArrayList
 JavaToPlantUML --> Collections
 JavaToPlantUML --> List
@@ -259,7 +247,13 @@ CreateDiagram --> Optional
 Generator --> Result
 Generator --> CompileError
 Generator --> Location
+Generator --> Roots
 Generator --> Map
+StringRule --> Err
+StringRule --> Ok
+StringRule --> NodeContext
+StringRule --> MapNode
+StringRule --> ImmutableCompileError
 PlantUMLRoots --> DivideRule
 PlantUMLRoots --> ExactRule
 PlantUMLRoots --> InfixRule
@@ -271,11 +265,6 @@ PlantUMLRoots --> SuffixRule
 PlantUMLRoots --> TypeRule
 PlantUMLRoots --> StatementFolder
 PlantUMLRoots --> List
-StringRule --> Err
-StringRule --> Ok
-StringRule --> NodeContext
-StringRule --> MapNode
-StringRule --> ImmutableCompileError
 Config --> Compiler
 Config --> StagedCompiler
 Config --> JavaRoots
@@ -311,20 +300,24 @@ ExactRule --> Ok
 ExactRule --> MapNode
 ExactRule --> StringContext
 ExactRule --> ImmutableCompileError
-JavaRoots --> Namespaced
 JavaRoots --> ContextRule
 JavaRoots --> DivideRule
 JavaRoots --> InfixRule
 JavaRoots --> NodeRule
 JavaRoots --> OrRule
+JavaRoots --> PrefixRule
 JavaRoots --> Rule
 JavaRoots --> StringRule
 JavaRoots --> StripRule
 JavaRoots --> SuffixRule
 JavaRoots --> SymbolRule
 JavaRoots --> TypeRule
+JavaRoots --> DelimitedFolder
 JavaRoots --> StatementFolder
 JavaRoots --> List
+AfterAll --> Node
+AfterAll --> Location
+AfterAll --> Map
 MapCollector --> Tuple2
 MapCollector --> HashMap
 MapCollector --> Map

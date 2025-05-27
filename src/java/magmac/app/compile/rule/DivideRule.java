@@ -1,7 +1,8 @@
 package magmac.app.compile.rule;
 
-import magmac.api.collect.Iters;
-import magmac.api.collect.collect.ResultCollector;
+import magmac.api.iter.Iters;
+import magmac.api.collect.Joiner;
+import magmac.api.collect.ResultCollector;
 import magmac.api.result.Ok;
 import magmac.api.result.Result;
 import magmac.app.compile.node.MapNode;
