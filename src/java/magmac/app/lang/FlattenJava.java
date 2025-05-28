@@ -3,6 +3,8 @@ package magmac.app.lang;
 import magmac.api.Some;
 import magmac.api.Tuple2;
 import magmac.api.iter.collect.ListCollector;
+import magmac.api.result.Ok;
+import magmac.app.compile.error.InlineCompileResult;
 import magmac.app.compile.node.InlineNodeList;
 import magmac.app.compile.node.Node;
 import magmac.app.compile.node.NodeList;
@@ -13,7 +15,8 @@ import magmac.app.stage.parse.ParseState;
 
 public class FlattenJava implements Passer {
     private static InlinePassResult getChildren(ParseState state, Node node) {
-        return new InlinePassResult(new Some<>(new Tuple2<ParseState, Node>(state, node)));
+        Tuple2<ParseState, Node> parseStateNodeTuple2 = new Tuple2<>(state, node);
+        return new InlinePassResult(new Some<>(InlineCompileResult.fromOk(parseStateNodeTuple2)));
     }
 
     @Override

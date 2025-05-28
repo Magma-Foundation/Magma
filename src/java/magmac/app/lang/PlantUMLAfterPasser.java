@@ -6,6 +6,7 @@ import magmac.api.Tuple2;
 import magmac.api.iter.Iter;
 import magmac.api.iter.Iters;
 import magmac.api.iter.collect.ListCollector;
+import magmac.app.compile.error.InlineCompileResult;
 import magmac.app.compile.node.InlineNodeList;
 import magmac.app.compile.node.MapNode;
 import magmac.app.compile.node.Node;
@@ -54,7 +55,8 @@ public class PlantUMLAfterPasser implements Passer {
     public PassResult pass(ParseState state, Node node) {
         if (node.is("root")) {
             NodeList values = PlantUMLAfterPasser.replaceRootChildren(node);
-            return new InlinePassResult(new Some<>(new Tuple2<ParseState, Node>(state, node.withNodeList("children", values))));
+            Tuple2<ParseState, Node> tuple = new Tuple2<>(state, node.withNodeList("children", values));
+            return new InlinePassResult(new Some<>(InlineCompileResult.fromOk(tuple)));
         }
 
         if (node.is("import")) {
@@ -67,7 +69,8 @@ public class PlantUMLAfterPasser implements Passer {
                     .withString("parent", state.findLocation().name())
                     .withString("child", child);
 
-            return new InlinePassResult(new Some<>(new Tuple2<ParseState, Node>(state, dependency)));
+            Tuple2<ParseState, Node> tuple = new Tuple2<>(state, dependency);
+            return new InlinePassResult(new Some<>(InlineCompileResult.fromOk(tuple)));
         }
 
         return InlinePassResult.empty();

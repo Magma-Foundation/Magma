@@ -5,6 +5,8 @@ import magmac.api.Option;
 import magmac.api.Some;
 import magmac.api.Tuple2;
 import magmac.api.collect.list.Lists;
+import magmac.app.compile.error.CompileResult;
+import magmac.app.compile.error.InlineCompileResult;
 import magmac.app.compile.node.InlineNodeList;
 import magmac.app.compile.node.MapNode;
 import magmac.app.compile.node.Node;
@@ -29,21 +31,14 @@ public class TypeScriptAfterPasser implements Passer {
         NodeList segments = node.findNodeList("segments")
                 .orElse(InlineNodeList.empty());
 
-        Option<Tuple2<ParseState, Node>> map = segments.findLast().map((Node last) -> {
+        Option<CompileResult<Tuple2<ParseState, Node>>> map = segments.findLast().map((Node last) -> {
             String value = last.findString("value").orElse("");
             NodeList values = copy.addAll(segments);
             Node node1 = node.withString("child", value).withNodeList("segments", values);
-            return new Tuple2<>(state, node1);
+            return InlineCompileResult.fromOk(new Tuple2<>(state, node1));
         });
 
         return new Some<>(new InlinePassResult(map));
-    }
-
-    @Override
-    public PassResult pass(ParseState state, Node node) {
-        return TypeScriptAfterPasser.passImport(state, node)
-                .or(() -> TypeScriptAfterPasser.passMethod(state, node))
-                .orElseGet(() -> InlinePassResult.empty());
     }
 
     private static Option<PassResult> passMethod(ParseState state, Node node) {
@@ -51,9 +46,16 @@ public class TypeScriptAfterPasser implements Passer {
             Node header = node.findNode("header").orElse(new MapNode());
             NodeList parameters = node.findNodeList("parameters").orElse(InlineNodeList.empty());
             Node withParameters = header.withNodeList("parameters", parameters);
-            return new Some<>(new InlinePassResult(new Some<>(new Tuple2<>(state, node.withNode("header", withParameters)))));
+            return new Some<>(new InlinePassResult(new Some<>(InlineCompileResult.fromOk(new Tuple2<>(state, node.withNode("header", withParameters))))));
         }
 
         return new None<>();
+    }
+
+    @Override
+    public PassResult pass(ParseState state, Node node) {
+        return TypeScriptAfterPasser.passImport(state, node)
+                .or(() -> TypeScriptAfterPasser.passMethod(state, node))
+                .orElseGet(() -> InlinePassResult.empty());
     }
 }

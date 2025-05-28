@@ -1,6 +1,8 @@
 import { Some } from "../../../magmac/api/Some";
 import { Tuple2 } from "../../../magmac/api/Tuple2";
 import { ListCollector } from "../../../magmac/api/iter/collect/ListCollector";
+import { Ok } from "../../../magmac/api/result/Ok";
+import { InlineCompileResult } from "../../../magmac/app/compile/error/InlineCompileResult";
 import { InlineNodeList } from "../../../magmac/app/compile/node/InlineNodeList";
 import { Node } from "../../../magmac/app/compile/node/Node";
 import { NodeList } from "../../../magmac/app/compile/node/NodeList";

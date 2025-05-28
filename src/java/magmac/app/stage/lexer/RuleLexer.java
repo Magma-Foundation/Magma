@@ -1,6 +1,7 @@
 package magmac.app.stage.lexer;
 
 import magmac.api.Tuple2;
+import magmac.api.collect.map.Map;
 import magmac.api.collect.map.MapCollector;
 import magmac.api.iter.collect.ResultCollector;
 import magmac.app.compile.error.CompileResult;
@@ -10,8 +11,6 @@ import magmac.app.compile.rule.Rule;
 import magmac.app.io.Location;
 import magmac.app.stage.MapRoots;
 import magmac.app.stage.Roots;
-
-import magmac.api.collect.map.Map;
 
 public class RuleLexer implements Lexer {
     private final Rule rootRule;
@@ -24,6 +23,7 @@ public class RuleLexer implements Lexer {
         Location location = tuple.left();
         String input = tuple.right();
 
+        System.out.println("Lexing: " + location);
         return this.rootRule.lex(input).mapValue((Node root) -> new Tuple2<>(location, root));
     }
 

@@ -332,6 +332,7 @@ class InlineIOResult
 IOResult <|-- InlineIOResult
 
 CompileError --> Error
+InlineCompileResult --> Ok
 Iters --> Option
 Iters --> EmptyHead
 Iters --> HeadedIter
@@ -414,8 +415,11 @@ ValueFolder --> DivideState
 ValueFolder --> Folder
 Stage --> CompileResult
 Iter --> Option
+Iter --> Tuple2
 Iter --> Collector
 Iter --> Result
+Iter --> NodeList
+Iter --> ParseState
 Iter --> BiFunction
 Iter --> Function
 Iter --> Predicate
@@ -441,11 +445,13 @@ EmptyAfterAll --> Node
 EmptyAfterAll --> Location
 EmptyAfterAll --> Map
 TreeParser --> Tuple2
+TreeParser --> Map
 TreeParser --> MapCollector
 TreeParser --> Ok
+TreeParser --> CompileResult
+TreeParser --> CompileResultCollector
 TreeParser --> InlineCompileResult
 TreeParser --> CompileError
-TreeParser --> CompileResult
 TreeParser --> InlineNodeList
 TreeParser --> Node
 TreeParser --> NodeList
@@ -454,7 +460,6 @@ TreeParser --> AfterAll
 TreeParser --> MapRoots
 TreeParser --> Passer
 TreeParser --> Roots
-TreeParser --> Map
 MapRoots --> Tuple2
 MapRoots --> Iter
 MapRoots --> Node
@@ -643,6 +648,8 @@ CompileResult --> Supplier
 FlattenJava --> Some
 FlattenJava --> Tuple2
 FlattenJava --> ListCollector
+FlattenJava --> Ok
+FlattenJava --> InlineCompileResult
 FlattenJava --> InlineNodeList
 FlattenJava --> Node
 FlattenJava --> NodeList
@@ -652,6 +659,7 @@ FlattenJava --> Passer
 FlattenJava --> ParseState
 StatementFolder --> DivideState
 PassResult --> Tuple2
+PassResult --> CompileResult
 PassResult --> Node
 PassResult --> ParseState
 PassResult --> Supplier
@@ -735,9 +743,9 @@ DivideState --> Tuple2
 DivideState --> Option
 DivideState --> Iter
 HeadedIter --> Ok
+Lexer --> Map
 Lexer --> Location
 Lexer --> Roots
-Lexer --> Map
 Option --> Consumer
 Option --> Function
 Option --> Predicate
@@ -751,6 +759,9 @@ StringRule --> Node
 InlinePassResult --> None
 InlinePassResult --> Option
 InlinePassResult --> Tuple2
+InlinePassResult --> Ok
+InlinePassResult --> CompileResult
+InlinePassResult --> InlineCompileResult
 InlinePassResult --> Node
 InlinePassResult --> ParseState
 InlinePassResult --> Supplier
@@ -828,6 +839,8 @@ TypeScriptAfterPasser --> Option
 TypeScriptAfterPasser --> Some
 TypeScriptAfterPasser --> Tuple2
 TypeScriptAfterPasser --> Lists
+TypeScriptAfterPasser --> CompileResult
+TypeScriptAfterPasser --> InlineCompileResult
 TypeScriptAfterPasser --> InlineNodeList
 TypeScriptAfterPasser --> MapNode
 TypeScriptAfterPasser --> Node
@@ -861,6 +874,7 @@ Main --> Sources
 Main --> Paths
 Divider --> Iter
 RuleLexer --> Tuple2
+RuleLexer --> Map
 RuleLexer --> MapCollector
 RuleLexer --> ResultCollector
 RuleLexer --> CompileResult
@@ -870,8 +884,8 @@ RuleLexer --> Rule
 RuleLexer --> Location
 RuleLexer --> MapRoots
 RuleLexer --> Roots
-RuleLexer --> Map
 Location --> List
+Location --> Joiner
 TypeRule --> Lists
 TypeRule --> CompileResult
 TypeRule --> InlineCompileResult
@@ -888,6 +902,7 @@ PlantUMLAfterPasser --> Tuple2
 PlantUMLAfterPasser --> Iter
 PlantUMLAfterPasser --> Iters
 PlantUMLAfterPasser --> ListCollector
+PlantUMLAfterPasser --> InlineCompileResult
 PlantUMLAfterPasser --> InlineNodeList
 PlantUMLAfterPasser --> MapNode
 PlantUMLAfterPasser --> Node

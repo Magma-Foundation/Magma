@@ -3,6 +3,8 @@ import { Option } from "../../../magmac/api/Option";
 import { Some } from "../../../magmac/api/Some";
 import { Tuple2 } from "../../../magmac/api/Tuple2";
 import { Lists } from "../../../magmac/api/collect/list/Lists";
+import { CompileResult } from "../../../magmac/app/compile/error/CompileResult";
+import { InlineCompileResult } from "../../../magmac/app/compile/error/InlineCompileResult";
 import { InlineNodeList } from "../../../magmac/app/compile/node/InlineNodeList";
 import { MapNode } from "../../../magmac/app/compile/node/MapNode";
 import { Node } from "../../../magmac/app/compile/node/Node";
@@ -15,8 +17,8 @@ import { ParseState } from "../../../magmac/app/stage/parse/ParseState";
 export class TypeScriptAfterPasser {
 	passImport(state : ParseState, node : Node) : Option<PassResult> {
 	}
-	pass(state : ParseState, node : Node) : PassResult {
-	}
 	passMethod(state : ParseState, node : Node) : Option<PassResult> {
+	}
+	pass(state : ParseState, node : Node) : PassResult {
 	}
 }

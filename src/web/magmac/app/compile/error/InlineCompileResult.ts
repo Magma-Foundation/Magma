@@ -1,4 +1,5 @@
 import { Tuple2 } from "../../../../magmac/api/Tuple2";
+import { Ok } from "../../../../magmac/api/result/Ok";
 import { Result } from "../../../../magmac/api/result/Result";
 import { CompileError } from "../../../../magmac/app/compile/error/error/CompileError";
 import { BiFunction } from "../../../../java/util/function/BiFunction";
@@ -9,6 +10,8 @@ export class InlineCompileResult {
 	InlineCompileResult(result : Result<T, CompileError>) : private {
 	}
 	fromResult(result : Result<T, CompileError>) : CompileResult<T> {
+	}
+	fromOk(value : T) : CompileResult<T> {
 	}
 	mapValue(mapper : Function<T, R>) : CompileResult<R> {
 	}

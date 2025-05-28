@@ -4,6 +4,7 @@ import { Tuple2 } from "../../../magmac/api/Tuple2";
 import { Iter } from "../../../magmac/api/iter/Iter";
 import { Iters } from "../../../magmac/api/iter/Iters";
 import { ListCollector } from "../../../magmac/api/iter/collect/ListCollector";
+import { InlineCompileResult } from "../../../magmac/app/compile/error/InlineCompileResult";
 import { InlineNodeList } from "../../../magmac/app/compile/node/InlineNodeList";
 import { MapNode } from "../../../magmac/app/compile/node/MapNode";
 import { Node } from "../../../magmac/app/compile/node/Node";
