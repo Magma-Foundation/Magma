@@ -15,7 +15,7 @@ import magmac.app.compile.node.NodeList;
 import magmac.app.io.Location;
 import magmac.app.stage.AfterAll;
 import magmac.app.stage.MapUnitSet;
-import magmac.app.stage.Unit;
+import magmac.app.stage.SimpleUnit;
 import magmac.app.stage.UnitSet;
 
 public class MergeDiagram implements AfterAll {
@@ -57,8 +57,7 @@ public class MergeDiagram implements AfterAll {
 
     @Override
     public UnitSet<Node> afterAll(UnitSet<Node> roots) {
-        NodeList oldRootSegments = new InlineNodeList(roots.iter()
-                .map((Unit<Node> locationNodeTuple2) -> locationNodeTuple2.right())
+        NodeList oldRootSegments = new InlineNodeList(roots.iterValues()
                 .map((Node node) -> node.findNodeList("children"))
                 .flatMap((Option<NodeList> option) -> Iters.fromOption(option))
                 .flatMap((NodeList nodeList) -> nodeList.iter())
@@ -66,7 +65,7 @@ public class MergeDiagram implements AfterAll {
 
         Map<String, List<String>> childrenWithInheritedTypes = MergeDiagram.findChildrenWithInheritedTypes(oldRootSegments);
         Map<String, List<String>> childrenWithDependencies = MergeDiagram.findChildrenWithDependencies(oldRootSegments);
-        NodeList newDependencies = childrenWithDependencies.iterEntries().fold(InlineNodeList.empty(), (NodeList current, Tuple2<String, List<String>> entry) -> {
+        NodeList newDependencies = childrenWithDependencies.iter().fold(InlineNodeList.empty(), (NodeList current, Tuple2<String, List<String>> entry) -> {
             String child = entry.left();
             List<String> currentDependencies = entry.right();
 
@@ -95,6 +94,6 @@ public class MergeDiagram implements AfterAll {
         Node node = new MapNode();
         Node root = node.withNodeList("children", copy);
         Location location = new Location(Lists.empty(), "diagram");
-        return MergeDiagram.createInitial().add(new Unit<>(location, root));
+        return MergeDiagram.createInitial().add(new SimpleUnit<>(location, root));
     }
 }

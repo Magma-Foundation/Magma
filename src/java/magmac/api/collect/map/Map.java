@@ -9,7 +9,7 @@ import java.util.function.Supplier;
 public interface Map<K, V> {
     V getOrDefault(K key, V other);
 
-    Iter<Tuple2<K, V>> iterEntries();
+    Iter<Tuple2<K, V>> iter();
 
     Map<K, V> put(K key, V value);
 

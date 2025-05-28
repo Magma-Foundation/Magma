@@ -66,7 +66,7 @@ public final class MapNode implements Node {
 
     @Override
     public Iter<Tuple2<String, Node>> iterNodes() {
-        return this.nodes.iterEntries();
+        return this.nodes.iter();
     }
 
     @Override
@@ -97,7 +97,7 @@ public final class MapNode implements Node {
             return Iters.empty();
         }
 
-        return map.iterEntries().map((Tuple2<String, T> entry) -> {
+        return map.iter().map((Tuple2<String, T> entry) -> {
             String key = entry.left();
             T value = entry.right();
             return MapNode.formatEntry(depth, key, mapper.apply(value));
@@ -159,7 +159,7 @@ public final class MapNode implements Node {
 
     @Override
     public Iter<Tuple2<String, String>> iterStrings() {
-        return this.strings().iterEntries();
+        return this.strings().iter();
     }
 
     @Override
@@ -169,7 +169,7 @@ public final class MapNode implements Node {
 
     @Override
     public Iter<Tuple2<String, NodeList>> iterNodeLists() {
-        return this.nodeLists.iterEntries();
+        return this.nodeLists.iter();
     }
 
     @Override

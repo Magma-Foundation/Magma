@@ -1,5 +1,6 @@
 package magmac.app.stage;
 
+import magmac.api.Tuple2;
 import magmac.api.collect.map.Map;
 import magmac.api.collect.map.Maps;
 import magmac.api.iter.Iter;
@@ -12,11 +13,16 @@ public record MapUnitSet<T>(Map<Location, T> roots) implements UnitSet<T> {
 
     @Override
     public Iter<Unit<T>> iter() {
-        return this.roots.iterEntries().map(tuple -> new Unit<>(tuple));
+        return this.roots.iter().map((Tuple2<Location, T> entry) -> new SimpleUnit<>(entry.left(), entry.right()));
     }
 
     @Override
     public UnitSet<T> add(Unit<T> element) {
-        return new MapUnitSet<>(this.roots.put(element.left(), element.right()));
+        return new MapUnitSet<>(element.merge((Location key, T value) -> this.roots.put(key, value)));
+    }
+
+    @Override
+    public Iter<T> iterValues() {
+        return this.roots.iter().map((Tuple2<Location, T> entry) -> entry.right());
     }
 }

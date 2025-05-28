@@ -1,18 +1,13 @@
 package magmac.app.stage;
 
-import magmac.api.Tuple2;
+import magmac.app.compile.error.CompileResult;
 import magmac.app.io.Location;
 
-public record Unit<T>(Tuple2<Location, T> tuple) {
-    public Unit(Location location, T value) {
-        this(new Tuple2<>(location, value));
-    }
+import java.util.function.BiFunction;
+import java.util.function.Function;
 
-    public Location left() {
-        return this.tuple.left();
-    }
+public interface Unit<T> {
+    <R> R merge(BiFunction<Location, T, R> merger);
 
-    public T right() {
-        return this.tuple.right();
-    }
+    <R> CompileResult<Unit<R>> mapValue(Function<T, CompileResult<R>> mapper);
 }

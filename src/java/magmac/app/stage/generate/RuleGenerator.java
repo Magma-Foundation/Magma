@@ -18,12 +18,7 @@ public class RuleGenerator implements Generator {
     @Override
     public CompileResult<UnitSet<String>> apply(UnitSet<Node> initial) {
         return initial.iter()
-                .map((Unit<Node> entry) -> this.getUnitCompileErrorResult(entry))
+                .map((Unit<Node> entry) -> entry.mapValue((Node node) -> this.rootRule.generate(node)))
                 .collect(new CompileResultCollector<>(new UnitSetCollector<>()));
-    }
-
-    private CompileResult<Unit<String>> getUnitCompileErrorResult(Unit<Node> entry) {
-        return this.rootRule.generate(entry.right())
-                .mapValue((String generated) -> new Unit<>(entry.left(), generated));
     }
 }

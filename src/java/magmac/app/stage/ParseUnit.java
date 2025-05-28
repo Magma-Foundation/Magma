@@ -16,7 +16,7 @@ public final class ParseUnit<T> {
     }
 
     public Unit<T> toLocationUnit() {
-        return this.merge((state, node) -> new Unit<>(state.findLocation(), node));
+        return this.merge((state, node) -> new SimpleUnit<>(state.findLocation(), node));
     }
 
     public <R> R merge(BiFunction<ParseState, T, R> merge) {

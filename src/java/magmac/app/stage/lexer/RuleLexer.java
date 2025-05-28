@@ -5,7 +5,6 @@ import magmac.app.compile.error.CompileResult;
 import magmac.app.compile.error.CompileResults;
 import magmac.app.compile.node.Node;
 import magmac.app.compile.rule.Rule;
-import magmac.app.io.Location;
 import magmac.app.io.sources.UnitSetCollector;
 import magmac.app.stage.Unit;
 import magmac.app.stage.UnitSet;
@@ -17,12 +16,8 @@ public class RuleLexer implements Lexer {
         this.rootRule = rootRule;
     }
 
-    private CompileResult<Unit<Node>> foldEntry(Unit<String> tuple) {
-        Location location = tuple.left();
-        String input = tuple.right();
-
-        System.out.println("Lexing: " + location);
-        return this.rootRule.lex(input).mapValue((Node root) -> new Unit<>(location, root));
+    private CompileResult<Unit<Node>> foldEntry(Unit<String> unit) {
+        return unit.mapValue((String input) -> this.rootRule.lex(input));
     }
 
     @Override
