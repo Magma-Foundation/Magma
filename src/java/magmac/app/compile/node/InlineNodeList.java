@@ -5,6 +5,11 @@ import magmac.api.Some;
 import magmac.api.collect.list.List;
 import magmac.api.collect.list.Lists;
 import magmac.api.iter.Iter;
+import magmac.api.iter.collect.Joiner;
+import magmac.app.compile.error.CompileResult;
+import magmac.app.compile.error.CompileResultCollector;
+
+import java.util.function.Function;
 
 public final class InlineNodeList implements NodeList {
     private final List<Node> elements;
@@ -43,5 +48,12 @@ public final class InlineNodeList implements NodeList {
     @Override
     public Option<Node> findLast() {
         return new Some<>(this.last());
+    }
+
+    @Override
+    public CompileResult<Option<String>> join(String delimiter, Function<Node, CompileResult<String>> generator) {
+        return this.iter()
+                .map(generator)
+                .collect(new CompileResultCollector<>(new Joiner(delimiter)));
     }
 }

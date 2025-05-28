@@ -390,7 +390,6 @@ OrState --> CompileError
 OrState --> ImmutableCompileError
 DivideRule --> Option
 DivideRule --> List
-DivideRule --> Joiner
 DivideRule --> ListCollector
 DivideRule --> CompileResultCollector
 DivideRule --> CompileErrors
@@ -422,6 +421,8 @@ Head --> Option
 NodeContext --> Node
 NodeList --> Option
 NodeList --> Iter
+NodeList --> CompileResult
+NodeList --> Function
 SingleHead --> None
 SingleHead --> Some
 Sources --> IOResult
@@ -446,6 +447,8 @@ TreeParser --> Passer
 InlineNodeList --> Some
 InlineNodeList --> List
 InlineNodeList --> Lists
+InlineNodeList --> Joiner
+InlineNodeList --> CompileResultCollector
 UnitSet --> Iter
 Rule --> CompileResult
 Rule --> Node

@@ -2,7 +2,6 @@ package magmac.app.compile.rule;
 
 import magmac.api.Option;
 import magmac.api.collect.list.List;
-import magmac.api.iter.collect.Joiner;
 import magmac.api.iter.collect.ListCollector;
 import magmac.app.compile.error.CompileResult;
 import magmac.app.compile.error.CompileResultCollector;
@@ -15,12 +14,6 @@ import magmac.app.compile.rule.divide.FoldingDivider;
 import magmac.app.compile.rule.fold.Folder;
 
 public record DivideRule(String key, Folder folder, Rule childRule) implements Rule {
-    private CompileResult<Option<String>> join(NodeList list) {
-        return list.iter()
-                .map((Node node) -> this.childRule.generate(node))
-                .collect(new CompileResultCollector<>(new Joiner(this.folder.createDelimiter())));
-    }
-
     @Override
     public CompileResult<Node> lex(String input) {
         return new FoldingDivider(this.folder).divide(input)
@@ -32,7 +25,7 @@ public record DivideRule(String key, Folder folder, Rule childRule) implements R
     @Override
     public CompileResult<String> generate(Node node) {
         return node.findNodeList(this.key)
-                .map((NodeList list) -> this.join(list))
+                .map((NodeList list) -> list.join(this.folder.createDelimiter(), (Node child) -> this.childRule.generate(child)))
                 .orElseGet(() -> CompileErrors.createNodeError("Node list '" + this.key + "' not present", node))
                 .mapValue((Option<String> value) -> value.orElse(""));
     }
