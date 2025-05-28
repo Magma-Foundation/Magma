@@ -138,7 +138,7 @@ final class CommonLang {
 
         NodeListRule arguments = CommonLang.createArgumentsRule(value);
         Splitter splitter = DividingSplitter.Last(new FoldingDivider(new InvocationFolder()), "");
-        return new TypeRule("invocation", new StripRule(new SuffixRule(new LocatingRule(caller, splitter, arguments), ")")));
+        return new TypeRule("invokable", new StripRule(new SuffixRule(new LocatingRule(caller, splitter, arguments), ")")));
     }
 
     public static NodeListRule createArgumentsRule(Rule value) {
