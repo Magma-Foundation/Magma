@@ -33,12 +33,8 @@ export class JavaLang {
 		functionSegmentRule : LazyRule=new MutableLazyRule( );
 		valueLazy : LazyRule=new MutableLazyRule( );
 		value : LazyRule=CommonLang.initValueRule( functionSegmentRule, valueLazy, "->", JavaLang.createDefinitionRule( ));
-		functionSegment : Rule=CommonLang.initFunctionSegmentRule( functionSegmentRule, value, createDefinitionRule( ));
-		return new OrRule( Lists.of( CommonLang.createWhitespaceRule( ), JavaLang.createStructureStatementRule( value), JavaLang.createMethodRule( functionSegment)));
-	}
-	createStructureStatementRule(value1 : LazyRule) : Rule {
-		definition : Rule=new OrRule( Lists.of( new NodeRule( "value", new TypeRule( "definition", JavaLang.createDefinitionRule( ))), CommonLang.createAssignmentRule( value1, createDefinitionRule( ))));
-		return new TypeRule( "statement", new StripRule( new SuffixRule( definition, ";")));
+		functionSegment : Rule=CommonLang.initFunctionSegmentRule( functionSegmentRule, value, JavaLang.createDefinitionRule( ));
+		return new OrRule( Lists.of( CommonLang.createWhitespaceRule( ), CommonLang.createStructureStatementRule( new TypeRule( "definition", JavaLang.createDefinitionRule( )), value), JavaLang.createMethodRule( functionSegment)));
 	}
 	createMethodRule(childRule : Rule) : Rule {
 		header : NodeRule=new NodeRule( "header", new OrRule( Lists.of( JavaLang.createDefinitionRule( ), new TypeRule( "constructor", new StripRule( FilterRule.Symbol( new StringRule( "name")))))));

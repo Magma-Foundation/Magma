@@ -1,4 +1,3 @@
 import { Option } from "../../../../../magmac/api/Option";
-export interface Locator {
-	temp : ?;
+export interface Locator {infix) : String;
 }

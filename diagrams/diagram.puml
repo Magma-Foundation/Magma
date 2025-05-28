@@ -497,7 +497,6 @@ CompileResultCollector --> Ok
 Max --> Optional
 TypescriptLang --> Lists
 TypescriptLang --> DivideRule
-TypescriptLang --> ExactRule
 TypescriptLang --> LocatingRule
 TypescriptLang --> NodeRule
 TypescriptLang --> OrRule

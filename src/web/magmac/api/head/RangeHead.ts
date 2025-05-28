@@ -1,9 +1,7 @@
 import { None } from "../../../magmac/api/None";
 import { Option } from "../../../magmac/api/Option";
 import { Some } from "../../../magmac/api/Some";
-export class RangeHead {
-	temp : ?;
-	temp : ?;
+export class RangeHead {length : int;counter : int;
 	RangeHead(length : int) : public {
 		this.length=length;
 		this.counter=0;

@@ -9,8 +9,7 @@ import { Rule } from "../../../../magmac/app/compile/rule/Rule";
 import { Location } from "../../../../magmac/app/io/Location";
 import { MapRoots } from "../../../../magmac/app/stage/MapRoots";
 import { Roots } from "../../../../magmac/app/stage/Roots";
-export class RuleLexer {
-	temp : ?;
+export class RuleLexer {rootRule : Rule;
 	RuleLexer(rootRule : Rule) : public {
 		this.rootRule=rootRule;
 	}

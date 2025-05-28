@@ -10,10 +10,7 @@ import { Targets } from "../../magmac/app/io/targets/Targets";
 import { Map } from "../../magmac/api/collect/map/Map";
 import { Option } from "../../magmac/api/Option";
 import { IOException } from "../../java/io/IOException";
-export class CompileApplication {
-	temp : ?;
-	temp : ?;
-	temp : ?;
+export class CompileApplication {sources : Sources;targets : Targets;compiler : Compiler;
 	CompileApplication(sources : Sources, compiler : Compiler, targets : Targets) : public {
 		this.sources=sources;
 		this.targets=targets;

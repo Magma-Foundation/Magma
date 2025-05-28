@@ -5,10 +5,7 @@ import { Node } from "../../../../magmac/app/compile/node/Node";
 import { FirstLocator } from "../../../../magmac/app/compile/rule/locate/FirstLocator";
 import { LastLocator } from "../../../../magmac/app/compile/rule/locate/LastLocator";
 import { Locator } from "../../../../magmac/app/compile/rule/locate/Locator";
-export class LocatingRule {
-	temp : ?;
-	temp : ?;
-	temp : ?;
+export class LocatingRule {leftRule : Rule;splitter : Splitter;rightRule : Rule;
 	LocatingRule(leftRule : Rule, splitter : Splitter, rightRule : Rule) : public {
 		this.leftRule=leftRule;
 		this.rightRule=rightRule;

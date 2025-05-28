@@ -1,6 +1,5 @@
 import { Lists } from "../../../magmac/api/collect/list/Lists";
 import { DivideRule } from "../../../magmac/app/compile/rule/DivideRule";
-import { ExactRule } from "../../../magmac/app/compile/rule/ExactRule";
 import { LocatingRule } from "../../../magmac/app/compile/rule/LocatingRule";
 import { NodeRule } from "../../../magmac/app/compile/rule/NodeRule";
 import { OrRule } from "../../../magmac/app/compile/rule/OrRule";
@@ -26,23 +25,24 @@ export class TypescriptLang {
 		return new TypeRule( type, new PrefixRule( "export " + type + " ", name));
 	}
 	createStructureMemberRule() : Rule {
-		return new OrRule( Lists.of( CommonLang.createWhitespaceRule( ), TypescriptLang.createMethodRule( ), new TypeRule( "statement", new ExactRule( "\n\ttemp : ?;"))));
+		definitionRule : Rule=TypescriptLang.createDefinitionRule( );
+		valueLazy : MutableLazyRule=new MutableLazyRule( );
+		return new OrRule( Lists.of( CommonLang.createWhitespaceRule( ), TypescriptLang.createMethodRule( definitionRule, valueLazy), CommonLang.createStructureStatementRule( definitionRule, valueLazy)));
 	}
-	createMethodRule() : TypeRule {
-		header : Rule=new OrRule( Lists.of( TypescriptLang.createDefinitionRule( ), TypescriptLang.createConstructorRule( )));
+	createMethodRule(definition : Rule, valueLazy : LazyRule) : TypeRule {
+		header : Rule=new OrRule( Lists.of( definition, TypescriptLang.createConstructorRule( definition)));
 		header1 : PrefixRule=new PrefixRule( "\n\t", new NodeRule( "header", header));
-		children : DivideRule=CommonLang.Statements( "children", TypescriptLang.createFunctionSegmentRule( ));
+		functionSegmentRule : LazyRule=new MutableLazyRule( );
+		value : LazyRule=CommonLang.initValueRule( functionSegmentRule, valueLazy, " => ", definition);
+		children : DivideRule=CommonLang.Statements( "children", TypescriptLang.createFunctionSegmentRule( definition, value, functionSegmentRule));
 		childRule : SuffixRule=new SuffixRule( LocatingRule.First( header1, " {", new StripRule( "", children, "after-children")), "}");
 		return new TypeRule( "method", new OptionNodeListRule( "children", childRule, new SuffixRule( header1, ";")));
 	}
-	createFunctionSegmentRule() : Rule {
-		functionSegmentRule : LazyRule=new MutableLazyRule( );
-		valueLazy : LazyRule=new MutableLazyRule( );
-		value : LazyRule=CommonLang.initValueRule( functionSegmentRule, valueLazy, " => ", TypescriptLang.createDefinitionRule( ));
-		return CommonLang.initFunctionSegmentRule( functionSegmentRule, value, TypescriptLang.createDefinitionRule( ));
+	createFunctionSegmentRule(definition : Rule, value : LazyRule, functionSegmentRule : LazyRule) : Rule {
+		return CommonLang.initFunctionSegmentRule( functionSegmentRule, value, definition);
 	}
-	createConstructorRule() : TypeRule {
-		parametersRule : DivideRule=CommonLang.createParametersRule( TypescriptLang.createDefinitionRule( ));
+	createConstructorRule(definition : Rule) : TypeRule {
+		parametersRule : DivideRule=CommonLang.createParametersRule( definition);
 		return new TypeRule( "constructor", new PrefixRule( "constructor(", new SuffixRule( parametersRule, ")")));
 	}
 	createDefinitionRule() : Rule {

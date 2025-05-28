@@ -32,7 +32,7 @@ export class CommonLang {
 	Statements(key : String, childRule : Rule) : DivideRule {
 		return new DivideRule( key, new StatementFolder( ), childRule);
 	}
-	createAssignmentRule(value : Rule, definition : Rule) : Rule {
+	createAssignmentRule(definition : Rule, value : Rule) : Rule {
 		before : Rule=new OrRule( Lists.of( new NodeRule( "definition", definition), new NodeRule( "destination", value)));
 		source : Rule=new NodeRule( "source", value);
 		return new TypeRule( "assignment", LocatingRule.First( before, "=", source));
@@ -95,7 +95,7 @@ export class CommonLang {
 		return new StripRule( new PrefixRule( prefix, new StripRule( new PrefixRule( "(", new SuffixRule( new NodeRule( "condition", value), ")")))));
 	}
 	createFunctionSegmentValueRule(value : Rule, definition : Rule) : Rule {
-		return new OrRule( Lists.of( CommonLang.createInvokableRule( value), CommonLang.createAssignmentRule( value, definition), CommonLang.createReturnRule( value), CommonLang.createPostRule( "post-increment", "++", value), CommonLang.createPostRule( "post-decrement", "--", value), new TypeRule( "break", new ExactRule( "break")), new TypeRule( "continue", new ExactRule( "continue"))));
+		return new OrRule( Lists.of( CommonLang.createInvokableRule( value), CommonLang.createAssignmentRule( definition, value), CommonLang.createReturnRule( value), CommonLang.createPostRule( "post-increment", "++", value), CommonLang.createPostRule( "post-decrement", "--", value), new TypeRule( "break", new ExactRule( "break")), new TypeRule( "continue", new ExactRule( "continue"))));
 	}
 	createPostRule(type : String, suffix : String, value : Rule) : TypeRule {
 		return new TypeRule( type, new StripRule( new SuffixRule( new NodeRule( "child", value), suffix)));
@@ -114,5 +114,9 @@ export class CommonLang {
 	createVariadicRule(rule : Rule) : TypeRule {
 		child : NodeRule=new NodeRule( "child", rule);
 		return new TypeRule( "variadic", new StripRule( new SuffixRule( child, "...")));
+	}
+	createStructureStatementRule(definition1 : Rule, value : LazyRule) : Rule {
+		definition : Rule=new NodeRule( "value", new OrRule( Lists.of( definition1, CommonLang.createAssignmentRule( definition1, value))));
+		return new TypeRule( "statement", new StripRule( new SuffixRule( definition, ";")));
 	}
 }

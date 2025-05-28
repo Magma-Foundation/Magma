@@ -3,8 +3,7 @@ import { Some } from "../../../../magmac/api/Some";
 import { List } from "../../../../magmac/api/collect/list/List";
 import { Lists } from "../../../../magmac/api/collect/list/Lists";
 import { Iter } from "../../../../magmac/api/iter/Iter";
-export class InlineNodeList {
-	temp : ?;
+export class InlineNodeList {elements : List<Node>;
 	InlineNodeList(elements : List<Node>) : public {
 		this.elements=elements;
 	}

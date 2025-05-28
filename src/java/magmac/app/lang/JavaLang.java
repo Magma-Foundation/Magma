@@ -62,21 +62,12 @@ public final class JavaLang {
         LazyRule functionSegmentRule = new MutableLazyRule();
         LazyRule valueLazy = new MutableLazyRule();
         LazyRule value = CommonLang.initValueRule(functionSegmentRule, valueLazy, "->", JavaLang.createDefinitionRule());
-        Rule functionSegment = CommonLang.initFunctionSegmentRule(functionSegmentRule, value, createDefinitionRule());
+        Rule functionSegment = CommonLang.initFunctionSegmentRule(functionSegmentRule, value, JavaLang.createDefinitionRule());
         return new OrRule(Lists.of(
                 CommonLang.createWhitespaceRule(),
-                JavaLang.createStructureStatementRule(value),
+                CommonLang.createStructureStatementRule(new TypeRule("definition", JavaLang.createDefinitionRule()), value),
                 JavaLang.createMethodRule(functionSegment)
         ));
-    }
-
-    private static Rule createStructureStatementRule(LazyRule value1) {
-        Rule definition = new OrRule(Lists.of(
-                new NodeRule("value", new TypeRule("definition", JavaLang.createDefinitionRule())),
-                CommonLang.createAssignmentRule(value1, createDefinitionRule()))
-        );
-
-        return new TypeRule("statement", new StripRule(new SuffixRule(definition, ";")));
     }
 
     private static Rule createMethodRule(Rule childRule) {

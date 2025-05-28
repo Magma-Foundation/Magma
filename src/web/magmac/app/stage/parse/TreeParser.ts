@@ -14,10 +14,7 @@ import { AfterAll } from "../../../../magmac/app/stage/AfterAll";
 import { MapRoots } from "../../../../magmac/app/stage/MapRoots";
 import { Passer } from "../../../../magmac/app/stage/Passer";
 import { Roots } from "../../../../magmac/app/stage/Roots";
-export class TreeParser {
-	temp : ?;
-	temp : ?;
-	temp : ?;
+export class TreeParser {beforeChild : Passer;afterChild : Passer;afterAllChildren : AfterAll;
 	TreeParser(beforeChild : Passer, afterChild : Passer, afterAllChildren : AfterAll) : public {
 		this.beforeChild=beforeChild;
 		this.afterChild=afterChild;

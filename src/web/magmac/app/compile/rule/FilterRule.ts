@@ -4,9 +4,7 @@ import { Node } from "../../../../magmac/app/compile/node/Node";
 import { Filter } from "../../../../magmac/app/compile/rule/filter/Filter";
 import { NumberFilter } from "../../../../magmac/app/compile/rule/filter/NumberFilter";
 import { SymbolFilter } from "../../../../magmac/app/compile/rule/filter/SymbolFilter";
-export class FilterRule {
-	temp : ?;
-	temp : ?;
+export class FilterRule {childRule : Rule;filter : Filter;
 	FilterRule(filter : Filter, childRule : Rule) : private {
 		this.childRule=childRule;
 		this.filter=filter;

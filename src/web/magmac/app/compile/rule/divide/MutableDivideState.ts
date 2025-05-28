@@ -5,12 +5,7 @@ import { Tuple2 } from "../../../../../magmac/api/Tuple2";
 import { List } from "../../../../../magmac/api/collect/list/List";
 import { Lists } from "../../../../../magmac/api/collect/list/Lists";
 import { Iter } from "../../../../../magmac/api/iter/Iter";
-export class MutableDivideState {
-	temp : ?;
-	temp : ?;
-	temp : ?;
-	temp : ?;
-	temp : ?;
+export class MutableDivideState {input : String;segments : List<String>;buffer : StringBuilder;depth : int;index : int=0;
 	MutableDivideState(segments : List<String>, buffer : StringBuilder, input : String) : private {
 		this.segments=segments;
 		this.buffer=buffer;

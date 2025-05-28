@@ -1,5 +1,4 @@
 import { Error } from "../../../../../magmac/api/error/Error";
-export interface CompileError {
-	temp : ?;
+export interface CompileError {computeMaxDepth() : int;
 	format(depth : int) : String;
 }

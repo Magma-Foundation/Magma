@@ -2,10 +2,7 @@ import { None } from "../../../magmac/api/None";
 import { Iter } from "../../../magmac/api/iter/Iter";
 import { Option } from "../../../magmac/api/Option";
 import { Function } from "../../../java/util/function/Function";
-export class FlatMapHead {
-	temp : ?;
-	temp : ?;
-	temp : ?;
+export class FlatMapHead {head : Head<T>;mapper : Function<T, Iter<R>>;current : Iter<R>;
 	FlatMapHead(head : Head<T>, mapper : Function<T, Iter<R>>, initial : Iter<R>) : public {
 		this.mapper=mapper;
 		this.head=head;

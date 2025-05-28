@@ -4,12 +4,5 @@ import { CompileError } from "../../../../magmac/app/compile/error/error/Compile
 import { BiFunction } from "../../../../java/util/function/BiFunction";
 import { Function } from "../../../../java/util/function/Function";
 import { Supplier } from "../../../../java/util/function/Supplier";
-export interface CompileResult {
-	temp : ?;
-	temp : ?;
-	temp : ?;
-	temp : ?;
-	temp : ?;
-	temp : ?;
-	temp : ?;
+export interface CompileResult {merger) : BiFunction<T, T, T>;mapper) : mapValue(Function<T, R>;whenErr) : Function<CompileError, R>;mapper) : mapErr(Function<CompileError, CompileError>;mapper) : flatMapValue(Function<T, CompileResult<R>>;supplier) : and(Supplier<CompileResult<R>>;result() : Result<T, CompileError>;
 }

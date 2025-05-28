@@ -1,6 +1,5 @@
 import { DivideState } from "../../../../../magmac/app/compile/rule/divide/DivideState";
-export class DelimitedFolder {
-	temp : ?;
+export class DelimitedFolder {delimter : char;
 	DelimitedFolder(delimter : char) : public {
 		this.delimter=delimter;
 	}

@@ -9,11 +9,7 @@ import { Iters } from "../../../../magmac/api/iter/Iters";
 import { Joiner } from "../../../../magmac/api/iter/collect/Joiner";
 import { BiFunction } from "../../../../java/util/function/BiFunction";
 import { Function } from "../../../../java/util/function/Function";
-export class MapNode {
-	temp : ?;
-	temp : ?;
-	temp : ?;
-	temp : ?;
+export class MapNode {maybeType : Option<String>;nodeLists : Map<String, NodeList>;nodes : Map<String, Node>;strings : Map<String, String>;
 	MapNode() : public {
 		this( new None<String>( ), Maps.empty( ), Maps.empty( ), Maps.empty( ));
 	}

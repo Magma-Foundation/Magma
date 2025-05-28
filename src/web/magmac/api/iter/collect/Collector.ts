@@ -1,4 +1,2 @@
-export interface Collector {
-	temp : ?;
-	temp : ?;
+export interface Collector {createInitial() : C;element) : T;
 }

@@ -5,8 +5,7 @@ import { CompileResult } from "../../../magmac/app/compile/error/CompileResult";
 import { CompileErrors } from "../../../magmac/app/compile/error/error/CompileErrors";
 import { Node } from "../../../magmac/app/compile/node/Node";
 import { Rule } from "../../../magmac/app/compile/rule/Rule";
-export class MutableLazyRule {
-	temp : ?;
+export class MutableLazyRule {None<>() : new;
 	lex(input : String) : CompileResult<Node> {
 		return this.maybeRule.map( (rule : Rule) => rule.lex( input)).orElseGet( ( )->CompileErrors.createStringError( "Rule not set", input));
 	}

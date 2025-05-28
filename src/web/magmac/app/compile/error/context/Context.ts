@@ -1,3 +1,2 @@
-export interface Context {
-	temp : ?;
+export interface Context {display() : String;
 }

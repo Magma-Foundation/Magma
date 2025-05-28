@@ -1,10 +1,5 @@
 import { Tuple2 } from "../../../magmac/api/Tuple2";
 import { Function } from "../../../java/util/function/Function";
 import { Supplier } from "../../../java/util/function/Supplier";
-export interface Result {
-	temp : ?;
-	temp : ?;
-	temp : ?;
-	temp : ?;
-	temp : ?;
+export interface Result {mapper) : mapValue(Function<T, R>;supplier) : and(Supplier<Result<R, X>>;whenErr) : Function<X, R>;mapper) : flatMapValue(Function<T, Result<R, X>>;mapper) : mapErr(Function<X, R>;
 }

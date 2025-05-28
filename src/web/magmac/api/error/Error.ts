@@ -1,3 +1,2 @@
-export interface Error {
-	temp : ?;
+export interface Error {display() : String;
 }

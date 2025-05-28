@@ -43,7 +43,7 @@ final class CommonLang {
         return new DivideRule(key, new StatementFolder(), childRule);
     }
 
-    static Rule createAssignmentRule(Rule value, Rule definition) {
+    static Rule createAssignmentRule(Rule definition, Rule value) {
         Rule before = new OrRule(Lists.of(
                 new NodeRule("definition", definition),
                 new NodeRule("destination", value)
@@ -170,7 +170,7 @@ final class CommonLang {
     private static Rule createFunctionSegmentValueRule(Rule value, Rule definition) {
         return new OrRule(Lists.of(
                 CommonLang.createInvokableRule(value),
-                CommonLang.createAssignmentRule(value, definition),
+                CommonLang.createAssignmentRule(definition, value),
                 CommonLang.createReturnRule(value),
                 CommonLang.createPostRule("post-increment", "++", value),
                 CommonLang.createPostRule("post-decrement", "--", value),
@@ -205,5 +205,14 @@ final class CommonLang {
     private static TypeRule createVariadicRule(Rule rule) {
         NodeRule child = new NodeRule("child", rule);
         return new TypeRule("variadic", new StripRule(new SuffixRule(child, "...")));
+    }
+
+    static Rule createStructureStatementRule(Rule definition1, LazyRule value) {
+        Rule definition = new NodeRule("value", new OrRule(Lists.of(
+                definition1,
+                CommonLang.createAssignmentRule(definition1, value))
+        ));
+
+        return new TypeRule("statement", new StripRule(new SuffixRule(definition, ";")));
     }
 }
