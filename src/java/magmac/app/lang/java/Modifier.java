@@ -6,7 +6,7 @@ import magmac.app.compile.node.Node;
 record Modifier(String value) {
     public static CompileResult<Modifier> deserialize(Node node) {
         return node.deserialize()
-                .string("value")
+                .withString("value")
                 .complete(Modifier::new);
     }
 }

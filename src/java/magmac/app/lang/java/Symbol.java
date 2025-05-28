@@ -6,10 +6,8 @@ import magmac.app.compile.node.Node;
 
 record Symbol(String value) implements Type {
     public static Option<CompileResult<Type>> deserialize(Node node) {
-        return node.deserializeWithType("symbol-type").map(deserializer -> {
-            return deserializer.string("value")
-                    .complete(Symbol::new)
-                    .mapValue(type -> type);
-        });
+        return node.deserializeWithType("symbol-type").map(deserializer -> deserializer.withString("value")
+                .complete(Symbol::new)
+                .mapValue(type -> type));
     }
 }

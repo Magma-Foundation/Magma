@@ -6,10 +6,8 @@ import magmac.app.compile.node.Node;
 
 record StatementNode(FunctionSegmentValue value) implements FunctionSegment {
     public static Option<CompileResult<FunctionSegment>> deserialize(Node node) {
-        return node.deserializeWithType("statement").map(deserializer -> {
-            return deserializer.node("child", FunctionSegmentValues::deserialize)
-                    .complete(StatementNode::new)
-                    .mapValue(value -> value);
-        });
+        return node.deserializeWithType("statement").map(deserializer -> deserializer.withNode("child", FunctionSegmentValues::deserialize)
+                .complete(StatementNode::new)
+                .mapValue(value -> value));
     }
 }

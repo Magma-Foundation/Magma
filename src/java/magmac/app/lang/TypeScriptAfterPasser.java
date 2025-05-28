@@ -96,14 +96,14 @@ public class TypeScriptAfterPasser implements Passer {
     private CompileResult<ParseUnit<Node>> getObjectCompileResult(ParseState state, Node value) {
         if (value.is("assignment")) {
             return value.findNodeOrError("destination")
-                    .mapValue((Node destination) -> this.getNode(destination))
+                    .mapValue((Node destination) -> TypeScriptAfterPasser.getNode(destination))
                     .mapValue((Node result) -> new ParseUnitImpl<>(state, result));
         }
 
         return CompileResults.Ok(new ParseUnitImpl<>(state, value));
     }
 
-    private Node getNode(Node destination) {
+    private static Node getNode(Node destination) {
         if (destination.is("definition")) {
             NodeList modifiers = destination.findNodeList("modifiers").orElse(InlineNodeList.empty());
             NodeList newModifiers = modifiers.add(new MapNode().withString("value", "let"));

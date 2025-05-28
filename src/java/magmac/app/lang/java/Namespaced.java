@@ -11,7 +11,7 @@ import magmac.app.lang.java.root.JavaRootSegment;
 record Namespaced(NamespacedType type, List<Segment> segments) implements JavaRootSegment {
     private static Option<CompileResult<JavaRootSegment>> deserialize(NamespacedType type, Node node) {
         return node.deserializeWithType(type.type()).map((InitialDeserializer deserializer) -> deserializer
-                .nodeList("segments", (Node node1) -> Segment.deserialize(node1))
+                .withNodeList("segments", (Node node1) -> Segment.deserialize(node1))
                 .complete((List<Segment> segments1) -> new Namespaced(type, segments1)));
     }
 

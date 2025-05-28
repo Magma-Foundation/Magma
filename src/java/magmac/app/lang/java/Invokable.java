@@ -7,10 +7,8 @@ import magmac.app.compile.node.Node;
 
 record Invokable(Caller left, List<Value> right) implements Value {
     public static Option<CompileResult<Value>> deserialize(Node node) {
-        return node.deserializeWithType("invokable").map(deserializer -> {
-            return deserializer.node("caller", Caller::deserialize)
-                    .nodeList("arguments", Values::deserializeError)
-                    .complete(tuple -> new Invokable(tuple.left(), tuple.right()));
-        });
+        return node.deserializeWithType("invokable").map(deserializer -> deserializer.withNode("caller", Caller::deserialize)
+                .nodeList("arguments", Values::deserializeError)
+                .complete(tuple -> new Invokable(tuple.left(), tuple.right())));
     }
 }

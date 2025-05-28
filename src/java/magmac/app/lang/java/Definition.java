@@ -7,7 +7,7 @@ import magmac.app.compile.node.Node;
 record Definition(String name, Type type, List<Modifier> modifiers) {
     public static CompileResult<Definition> deserialize(Node node) {
         return node.deserialize()
-                .string("name")
+                .withString("name")
                 .node("type", Type::deserialize)
                 .nodeList("modifiers", Modifier::deserialize)
                 .complete(result -> new Definition(result.left().left(), result.left().right(), result.right()));

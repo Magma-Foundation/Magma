@@ -16,7 +16,7 @@ public class InitialDeserializerImpl implements InitialDeserializer {
     }
 
     @Override
-    public <T> CompoundDeserializer<List<T>> nodeList(String key, Function<Node, CompileResult<T>> deserializer) {
+    public <T> CompoundDeserializer<List<T>> withNodeList(String key, Function<Node, CompileResult<T>> deserializer) {
         return new CompoundDeserializerImpl<>(this.node.removeNodeList(key).flatMapValue((Tuple2<Node, NodeList> tuple) -> tuple.right()
                 .iter()
                 .map(deserializer)
@@ -25,12 +25,12 @@ public class InitialDeserializerImpl implements InitialDeserializer {
     }
 
     @Override
-    public CompoundDeserializer<String> string(String key) {
+    public CompoundDeserializer<String> withString(String key) {
         return new CompoundDeserializerImpl<>(this.node.removeString(key));
     }
 
     @Override
-    public <T> CompoundDeserializer<T> node(String key, Function<Node, CompileResult<T>> deserializer) {
+    public <T> CompoundDeserializer<T> withNode(String key, Function<Node, CompileResult<T>> deserializer) {
         return new CompoundDeserializerImpl<>(this.node.removeNode(key).flatMapValue((Tuple2<Node, Node> tuple) -> deserializer.apply(tuple.right()).mapValue((T deserialized) -> new Tuple2<>(tuple.left(), deserialized))));
     }
 }
