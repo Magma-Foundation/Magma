@@ -15,7 +15,7 @@ record Namespaced(NamespacedType type, List<Segment> segments) implements JavaRo
                 .complete((List<Segment> segments1) -> new Namespaced(type, segments1)));
     }
 
-    static Option<CompileResult<JavaRootSegment>> deserializeNamespaces(Node node) {
+    static Option<CompileResult<JavaRootSegment>> deserialize(Node node) {
         return Iters.fromValues(NamespacedType.values())
                 .map((NamespacedType type) -> Namespaced.deserialize(type, node))
                 .flatMap((Option<CompileResult<JavaRootSegment>> option) -> Iters.fromOption(option))
