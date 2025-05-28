@@ -14,6 +14,7 @@ import magmac.app.compile.node.NodeListCollector;
 import magmac.app.stage.InlinePassResult;
 import magmac.app.stage.ParseResult;
 import magmac.app.stage.ParseUnit;
+import magmac.app.stage.ParseUnitImpl;
 import magmac.app.stage.Passer;
 import magmac.app.stage.parse.ParseState;
 
@@ -35,7 +36,7 @@ public class TypeScriptAfterPasser implements Passer {
             String value = last.findString("value").orElse("");
             NodeList values = copy.addAll(segments);
             Node node1 = node.withString("child", value).withNodeList("segments", values);
-            return CompileResults.fromOk(new ParseUnit<Node>(state, node1));
+            return CompileResults.fromOk(new ParseUnitImpl<Node>(state, node1));
         });
 
         return new Some<>(new InlinePassResult(map));

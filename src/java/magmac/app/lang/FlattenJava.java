@@ -9,12 +9,13 @@ import magmac.app.compile.node.NodeList;
 import magmac.app.stage.InlinePassResult;
 import magmac.app.stage.ParseResult;
 import magmac.app.stage.ParseUnit;
+import magmac.app.stage.ParseUnitImpl;
 import magmac.app.stage.Passer;
 import magmac.app.stage.parse.ParseState;
 
 public class FlattenJava implements Passer {
     private static InlinePassResult getChildren(ParseState state, Node node) {
-        ParseUnit<Node> parseStateNodeTuple2 = new ParseUnit<Node>(state, node);
+        ParseUnit<Node> parseStateNodeTuple2 = new ParseUnitImpl<Node>(state, node);
         return new InlinePassResult(new Some<>(CompileResults.fromOk(parseStateNodeTuple2)));
     }
 

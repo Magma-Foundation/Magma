@@ -16,6 +16,7 @@ import magmac.app.compile.rule.StringRule;
 import magmac.app.stage.InlinePassResult;
 import magmac.app.stage.ParseResult;
 import magmac.app.stage.ParseUnit;
+import magmac.app.stage.ParseUnitImpl;
 import magmac.app.stage.Passer;
 import magmac.app.stage.parse.ParseState;
 
@@ -93,7 +94,7 @@ public class PlantUMLAfterPasser implements Passer {
                     .withString("parent", state.findLocation().name())
                     .withString("child", child);
 
-            ParseUnit<Node> tuple = new ParseUnit<Node>(state, dependency);
+            ParseUnit<Node> tuple = new ParseUnitImpl<Node>(state, dependency);
             return new InlinePassResult(new Some<>(CompileResults.fromOk(tuple)));
         }
 
@@ -101,6 +102,6 @@ public class PlantUMLAfterPasser implements Passer {
     }
 
     private static CompileResult<ParseUnit<Node>> getTuple2CompileResult(ParseState state, Node node, NodeList values) {
-        return CompileResults.fromOk(new ParseUnit<Node>(state, node.withNodeList("children", values)));
+        return CompileResults.fromOk(new ParseUnitImpl<Node>(state, node.withNodeList("children", values)));
     }
 }

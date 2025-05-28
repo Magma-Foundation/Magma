@@ -13,7 +13,7 @@ interface List
 
 interface TargetPlatform
 
-class ParseUnit
+interface ParseUnit
 
 class Joiner
 Collector <|-- Joiner
@@ -161,6 +161,9 @@ class RangeHead
 Head <|-- RangeHead
 
 interface Source
+
+class ParseUnitImpl
+ParseUnit <|-- ParseUnitImpl
 
 class FlatMapHead
 Head <|-- FlatMapHead
@@ -374,6 +377,7 @@ Node --> Option
 Node --> Tuple2
 Node --> Iter
 ParseState --> Location
+ParseUnitImpl --> InlineNodeList
 FlatMapHead --> None
 FlatMapHead --> Iter
 FlatMapHead --> Function
@@ -448,6 +452,7 @@ TreeParser --> Location
 TreeParser --> UnitSetCollector
 TreeParser --> AfterAll
 TreeParser --> ParseUnit
+TreeParser --> ParseUnitImpl
 TreeParser --> Passer
 TreeParser --> Unit
 InlineNodeList --> Some
@@ -604,6 +609,7 @@ FlattenJava --> NodeList
 FlattenJava --> InlinePassResult
 FlattenJava --> ParseResult
 FlattenJava --> ParseUnit
+FlattenJava --> ParseUnitImpl
 FilterRule --> CompileErrors
 FilterRule --> Filter
 FilterRule --> NumberFilter
@@ -637,7 +643,6 @@ ApplicationBuilder --> Parser
 ApplicationBuilder --> TreeParser
 ApplicationBuilder --> Path
 Maps --> HashMap
-ParseUnit --> InlineNodeList
 ParseUnit --> NodeList
 ParseUnit --> ParseState
 ParseUnit --> BiFunction
@@ -775,6 +780,7 @@ TypeScriptAfterPasser --> NodeListCollector
 TypeScriptAfterPasser --> InlinePassResult
 TypeScriptAfterPasser --> ParseResult
 TypeScriptAfterPasser --> ParseUnit
+TypeScriptAfterPasser --> ParseUnitImpl
 NodeRule --> Ok
 NodeRule --> CompileResults
 NodeRule --> CompileErrors
@@ -827,4 +833,5 @@ PlantUMLAfterPasser --> StringRule
 PlantUMLAfterPasser --> InlinePassResult
 PlantUMLAfterPasser --> ParseResult
 PlantUMLAfterPasser --> ParseUnit
+PlantUMLAfterPasser --> ParseUnitImpl
 @enduml

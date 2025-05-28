@@ -17,7 +17,7 @@ public record InlinePassResult(Option<CompileResult<ParseUnit<Node>>> option) im
     }
 
     public static ParseResult from(ParseState state, Node node) {
-        return new InlinePassResult(new Some<>(CompileResults.fromOk(new ParseUnit<Node>(state, node))));
+        return new InlinePassResult(new Some<>(CompileResults.fromOk(new ParseUnitImpl<Node>(state, node))));
     }
 
     @Override

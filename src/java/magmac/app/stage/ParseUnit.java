@@ -1,37 +1,20 @@
 package magmac.app.stage;
 
-import magmac.app.compile.node.InlineNodeList;
 import magmac.app.compile.node.NodeList;
 import magmac.app.stage.parse.ParseState;
 
 import java.util.function.BiFunction;
 
-public final class ParseUnit<T> {
-    private final ParseState state;
-    private final T node;
+public interface ParseUnit<T> {
+    Unit<T> toLocationUnit();
 
-    public ParseUnit(ParseState state, T node) {
-        this.state = state;
-        this.node = node;
-    }
+    <R> R merge(BiFunction<ParseState, T, R> merge);
 
-    public Unit<T> toLocationUnit() {
-        return this.merge((state, node) -> new SimpleUnit<>(state.findLocation(), node));
-    }
+    ParseUnit<NodeList> retainWithList();
 
-    public <R> R merge(BiFunction<ParseState, T, R> merge) {
-        return merge.apply(this.state, this.node);
-    }
+    @Deprecated
+    ParseState left();
 
-    public ParseUnit<NodeList> retainWithList() {
-        return new ParseUnit<>(this.state, InlineNodeList.empty());
-    }
-
-    public ParseState left() {
-        return this.state;
-    }
-
-    public T right() {
-        return this.node;
-    }
+    @Deprecated
+    T right();
 }
