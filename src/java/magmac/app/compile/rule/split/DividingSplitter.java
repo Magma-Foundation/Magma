@@ -20,8 +20,8 @@ public final class DividingSplitter implements Splitter {
         return new DividingSplitter(divider, new LastSelector(delimiter));
     }
 
-    public static Splitter First(Divider divider) {
-        return new DividingSplitter(divider, new FirstSelector());
+    public static Splitter First(Divider divider, String delimiter) {
+        return new DividingSplitter(divider, new FirstSelector(delimiter));
     }
 
     @Override

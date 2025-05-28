@@ -1,13 +1,15 @@
-import { Collector } from "../../../magmac/api/iter/collect/Collector";
+import { Option } from "../../../magmac/api/Option";
 import { Iter } from "../../../magmac/api/iter/Iter";
+import { Collector } from "../../../magmac/api/iter/collect/Collector";
 import { Ok } from "../../../magmac/api/result/Ok";
 import { Result } from "../../../magmac/api/result/Result";
-import { Option } from "../../../magmac/api/Option";
 import { BiFunction } from "../../../java/util/function/BiFunction";
 import { Function } from "../../../java/util/function/Function";
 import { Predicate } from "../../../java/util/function/Predicate";
 export class HeadedIter {
 	foldToResult(initial : R, folder : BiFunction<R, T, Result<R, X>>) : Result<R, X> {
+	}
+	createInitial(initial : R) : Result<R, X> {
 	}
 	map(mapper : Function<T, R>) : Iter<R> {
 	}

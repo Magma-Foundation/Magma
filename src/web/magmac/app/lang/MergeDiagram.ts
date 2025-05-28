@@ -1,4 +1,3 @@
-import { Tuple2 } from "../../../magmac/api/Tuple2";
 import { List } from "../../../magmac/api/collect/list/List";
 import { Lists } from "../../../magmac/api/collect/list/Lists";
 import { Map } from "../../../magmac/api/collect/map/Map";
@@ -19,5 +18,7 @@ export class MergeDiagram {
 	findChildrenWithInheritedTypes(rootSegments : NodeList) : Map<String, List<String>> {
 	}
 	afterAll(roots : Map<Location, Node>) : Map<Location, Node> {
+	}
+	createInitial() : Map<Location, Node> {
 	}
 }

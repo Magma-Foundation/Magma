@@ -13,4 +13,5 @@ export interface DivideState {
 	temp : ?;
 	temp : ?;
 	temp : ?;
+	temp : ?;
 }

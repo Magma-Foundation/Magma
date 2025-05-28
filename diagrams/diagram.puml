@@ -47,6 +47,9 @@ interface NodeList
 
 interface Folder
 
+class LastSelector
+? <|-- LastSelector
+
 class RuleGenerator
 ? <|-- RuleGenerator
 
@@ -135,6 +138,8 @@ class TypeSeparatorFolder
 class ContextRule
 ? <|-- ContextRule
 
+interface Selector
+
 class RangeHead
 Head <|-- RangeHead
 
@@ -151,6 +156,9 @@ class FoldingDivider
 class Lists
 
 class CommonLang
+
+class InvocationFolder
+? <|-- InvocationFolder
 
 class JavaLang
 
@@ -223,6 +231,9 @@ class PrefixRule
 class EmptyAfterAll
 ? <|-- EmptyAfterAll
 
+class FirstSelector
+? <|-- FirstSelector
+
 class ExactRule
 ? <|-- ExactRule
 
@@ -255,6 +266,9 @@ class NodeRule
 ? <|-- NodeRule
 
 class Iters
+
+class BlockFolder
+? <|-- BlockFolder
 
 class ApplicationBuilder
 
@@ -322,7 +336,6 @@ Iters --> RangeHead
 Iters --> SingleHead
 RangeHead --> None
 RangeHead --> Some
-MergeDiagram --> Tuple2
 MergeDiagram --> List
 MergeDiagram --> Lists
 MergeDiagram --> Map
@@ -376,7 +389,6 @@ DivideRule --> Node
 DivideRule --> NodeList
 DivideRule --> FoldingDivider
 DivideRule --> Folder
-DivideRule --> StatementFolder
 Locator --> Option
 ListCollector --> List
 ListCollector --> Lists
@@ -394,6 +406,9 @@ Iter --> Result
 Iter --> BiFunction
 Iter --> Function
 Iter --> Predicate
+Selector --> Option
+Selector --> Tuple2
+Selector --> List
 PrefixRule --> CompileResult
 PrefixRule --> CompileErrors
 PrefixRule --> Node
@@ -573,6 +588,7 @@ SuffixRule --> Node
 JavaLang --> Lists
 JavaLang --> ContextRule
 JavaLang --> DivideRule
+JavaLang --> ExactRule
 JavaLang --> FilterRule
 JavaLang --> LocatingRule
 JavaLang --> NodeRule
@@ -652,6 +668,8 @@ ApplicationBuilder --> Parser
 ApplicationBuilder --> TreeParser
 ApplicationBuilder --> Path
 Maps --> HashMap
+BlockFolder --> DivideState
+BlockFolder --> Folder
 List --> Option
 List --> Tuple2
 List --> Iter
@@ -722,6 +740,8 @@ InlinePassResult --> ParseState
 InlinePassResult --> Supplier
 Source --> IOResult
 Source --> Location
+InvocationFolder --> DivideState
+InvocationFolder --> Folder
 PathSources --> Tuple2
 PathSources --> MapCollector
 PathSources --> ResultCollector
@@ -767,6 +787,14 @@ ImmutableCompileError --> Joiner
 ImmutableCompileError --> Max
 ImmutableCompileError --> Context
 ImmutableCompileError --> CompileError
+FirstSelector --> Option
+FirstSelector --> Tuple2
+FirstSelector --> List
+FirstSelector --> Joiner
+LastSelector --> Option
+LastSelector --> Tuple2
+LastSelector --> List
+LastSelector --> Joiner
 CommonLang --> Lists
 CommonLang --> DivideRule
 CommonLang --> ExactRule
@@ -778,6 +806,7 @@ CommonLang --> StringRule
 CommonLang --> StripRule
 CommonLang --> SuffixRule
 CommonLang --> TypeRule
+CommonLang --> StatementFolder
 TypeScriptAfterPasser --> None
 TypeScriptAfterPasser --> Option
 TypeScriptAfterPasser --> Some
@@ -800,7 +829,7 @@ NodeRule --> MapNode
 NodeRule --> Node
 DividingSplitter --> Option
 DividingSplitter --> Tuple2
-DividingSplitter --> Joiner
+DividingSplitter --> List
 DividingSplitter --> ListCollector
 DividingSplitter --> Splitter
 DividingSplitter --> Divider

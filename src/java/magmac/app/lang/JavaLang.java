@@ -3,6 +3,7 @@ package magmac.app.lang;
 import magmac.api.collect.list.Lists;
 import magmac.app.compile.rule.ContextRule;
 import magmac.app.compile.rule.DivideRule;
+import magmac.app.compile.rule.ExactRule;
 import magmac.app.compile.rule.FilterRule;
 import magmac.app.compile.rule.LocatingRule;
 import magmac.app.compile.rule.NodeRule;
@@ -97,9 +98,20 @@ public final class JavaLang {
                 JavaLang.createAccessRule(value),
                 JavaLang.createSymbolValueRule(),
                 JavaLang.createOperationRule(value, "add", "+"),
-                JavaLang.createOperationRule(value, "subtract", "-")
+                JavaLang.createOperationRule(value, "subtract", "-"),
+                JavaLang.createOperationRule(value, "equals", "=="),
+                JavaLang.createOperationRule(value, "less-than", "<"),
+                JavaLang.createOperationRule(value, "and", "&&"),
+                JavaLang.createOperationRule(value, "or", "||"),
+                JavaLang.createOperationRule(value, "not-equals", "!="),
+                JavaLang.createOperationRule(value, "greater-than", ">"),
+                JavaLang.createIndexRule(value)
         )));
         return value;
+    }
+
+    private static TypeRule createIndexRule(LazyRule value) {
+        return new TypeRule("index", new StripRule(new SuffixRule(LocatingRule.First(new NodeRule("parent", value), "[", new NodeRule("argument", value)), "]")));
     }
 
     private static TypeRule createLambdaRule(LazyRule value, Rule functionSegment) {
@@ -173,24 +185,52 @@ public final class JavaLang {
         functionSegmentRule.set(new OrRule(Lists.of(
                 CommonLang.createWhitespaceRule(),
                 new TypeRule("statement", new StripRule(new SuffixRule(JavaLang.createFunctionSegmentValueRule(functionSegmentRule), ";"))),
-                new StripRule(new SuffixRule(LocatingRule.First(new NodeRule("header", JavaLang.createBlockHeaderRule(functionSegmentRule)), "{", CommonLang.Statements("children", functionSegmentRule)), "}"))
+                JavaLang.createBlockRule(functionSegmentRule)
         )));
 
         return functionSegmentRule;
     }
 
+    private static Rule createBlockRule(LazyRule functionSegmentRule) {
+        Rule header = new NodeRule("header", JavaLang.createBlockHeaderRule(functionSegmentRule));
+        Rule children = CommonLang.Statements("children", functionSegmentRule);
+        Splitter first = DividingSplitter.First(new FoldingDivider(new BlockFolder()), "");
+        Rule childRule = new LocatingRule(new SuffixRule(header, "{"), first, children);
+        return new StripRule(new SuffixRule(childRule, "}"));
+    }
+
     private static Rule createBlockHeaderRule(Rule functionSegment) {
         return new OrRule(Lists.of(
-                new StripRule(new PrefixRule("if", new StripRule(new PrefixRule("(", new SuffixRule(new NodeRule("condition", JavaLang.createValueRule(functionSegment)), ")")))))
+                new TypeRule("else", new StripRule(new ExactRule("else"))),
+                new TypeRule("try", new StripRule(new ExactRule("try"))),
+                JavaLang.createConditionalRule(functionSegment, "if"),
+                JavaLang.createConditionalRule(functionSegment, "while"),
+                new StripRule(new PrefixRule("catch", new StripRule(new PrefixRule("(", new SuffixRule(new NodeRule("definition", JavaLang.createDefinitionRule()), ")")))))
         ));
+    }
+
+    private static StripRule createConditionalRule(Rule functionSegment, String prefix) {
+        return new StripRule(new PrefixRule(prefix, new StripRule(new PrefixRule("(", new SuffixRule(new NodeRule("condition", JavaLang.createValueRule(functionSegment)), ")")))));
     }
 
     private static Rule createFunctionSegmentValueRule(Rule functionSegment) {
         return new OrRule(Lists.of(
                 JavaLang.createInvokableRule(JavaLang.createValueRule(functionSegment)),
                 JavaLang.createAssignmentRule(functionSegment),
-                new TypeRule("return", new StripRule(new PrefixRule("return ", new NodeRule("value", JavaLang.createValueRule(functionSegment)))))
+                JavaLang.createReturnRule(functionSegment),
+                JavaLang.createPostRule("post-increment", "++", functionSegment),
+                JavaLang.createPostRule("post-decrement", "--", functionSegment),
+                new ExactRule("break"),
+                new ExactRule("continue")
         ));
+    }
+
+    private static TypeRule createPostRule(String type, String suffix, Rule functionSegment) {
+        return new TypeRule(type, new StripRule(new SuffixRule(new NodeRule("child", JavaLang.createValueRule(functionSegment)), suffix)));
+    }
+
+    private static TypeRule createReturnRule(Rule functionSegment) {
+        return new TypeRule("return", new StripRule(new PrefixRule("return ", new NodeRule("value", JavaLang.createValueRule(functionSegment)))));
     }
 
     private static Rule createDefinitionRule() {

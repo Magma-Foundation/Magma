@@ -10,10 +10,7 @@ import { Node } from "../../../../magmac/app/compile/node/Node";
 import { NodeList } from "../../../../magmac/app/compile/node/NodeList";
 import { FoldingDivider } from "../../../../magmac/app/compile/rule/divide/FoldingDivider";
 import { Folder } from "../../../../magmac/app/compile/rule/fold/Folder";
-import { StatementFolder } from "../../../../magmac/app/compile/rule/fold/StatementFolder";
 export class DivideRule {
-	Statements(key : String, childRule : Rule) : DivideRule {
-	}
 	join(list : NodeList) : CompileResult<Option<String>> {
 	}
 	lex(input : String) : CompileResult<Node> {

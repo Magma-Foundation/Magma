@@ -31,7 +31,11 @@ public record JVMList<T>(java.util.List<T> elements) implements List<T> {
 
     @Override
     public List<T> addAll(List<T> others) {
-        return others.iter().<List<T>>fold(this, (tList, element) -> tList.add(element));
+        return others.iter().fold(this.createInitial(), (tList, element) -> tList.add(element));
+    }
+
+    private List<T> createInitial() {
+        return this;
     }
 
     @Override

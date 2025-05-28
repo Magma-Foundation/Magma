@@ -4,9 +4,11 @@ public class NumberFilter implements Filter {
     @Override
     public boolean test(String input) {
         int length = input.length();
-        for (int i = 0; i < length; i++) {
+        int i = 0;
+        while (i < length) {
             char c = input.charAt(i);
             if (Character.isDigit(c)) {
+                i++;
                 continue;
             }
             return false;

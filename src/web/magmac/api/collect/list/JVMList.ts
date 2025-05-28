@@ -17,6 +17,8 @@ export class JVMList {
 	}
 	addAll(others : List<T>) : List<T> {
 	}
+	createInitial() : List<T> {
+	}
 	removeAll(others : List<T>) : List<T> {
 	}
 	get(index : int) : T {
@@ -30,5 +32,7 @@ export class JVMList {
 	size() : int {
 	}
 	popLast() : Option<Tuple2<List<T>, T>> {
+	}
+	popFirst() : Option<Tuple2<T, List<T>>> {
 	}
 }

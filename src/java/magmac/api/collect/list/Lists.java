@@ -14,8 +14,10 @@ public final class Lists {
 
     public static <T> List<T> repeat(T element, int size) {
         List<T> copy = Lists.empty();
-        for (int i = 0; i < size; i++) {
+        int i = 0;
+        while (i < size) {
             copy = copy.add(element);
+            i++;
         }
         return copy;
     }

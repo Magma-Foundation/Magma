@@ -22,6 +22,10 @@ export class MapNode {
 	}
 	fold(node : Node, iter : Iter<Tuple2<String, T>>, mapper : Function<Node, BiFunction<String, T, Node>>) : Node {
 	}
+	formatNodeList(depth : int, nodeList : NodeList) : String {
+	}
+	createIndent(depth : int) : String {
+	}
 	iterNodes() : Iter<Tuple2<String, Node>> {
 	}
 	display() : String {
@@ -30,11 +34,7 @@ export class MapNode {
 	}
 	toStream(depth : int, map : Map<String, T>, mapper : Function<T, String>) : Iter<String> {
 	}
-	formatNodeList(depth : int, nodeList : NodeList) : String {
-	}
 	formatEntry(depth : int, key : String, value : String) : String {
-	}
-	createIndent(depth : int) : String {
 	}
 	withString(key : String, value : String) : Node {
 	}

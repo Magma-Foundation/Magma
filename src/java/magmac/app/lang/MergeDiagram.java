@@ -86,6 +86,10 @@ public class MergeDiagram implements AfterAll {
         Node node = new MapNode();
         Node root = node.withNodeList("children", copy);
         Location location = new Location(Lists.empty(), "diagram");
-        return Maps.<Location, Node>empty().put(location, root);
+        return this.createInitial().put(location, root);
+    }
+
+    private Map<Location, Node> createInitial() {
+        return Maps.empty();
     }
 }

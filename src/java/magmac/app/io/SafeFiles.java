@@ -25,7 +25,8 @@ public final class SafeFiles {
     }
 
     public static IOResult<Iter<Path>> walk(Path sourceDirectory) {
-        try (Stream<Path> stream = Files.walk(sourceDirectory)) {
+        try {
+            Stream<Path> stream = Files.walk(sourceDirectory);
             return new InlineIOResult<>(new Ok<>(new JVMList<>(stream.collect(Collectors.toList())).iter()));
         } catch (IOException e) {
             return new InlineIOResult<>(new Err<>(e));

@@ -20,20 +20,16 @@ public class FlatMapHead<T, R> implements Head<R> {
     @Override
     public Option<R> next() {
         while (true) {
-            // 1) Try to pull from the current inner
             Option<R> maybeInner = this.current.next();
             if (maybeInner.isPresent()) {
                 return maybeInner;
             }
 
-            // 2) Current inner is exhausted, pull the next T
             Option<T> maybeOuter = this.head.next();
             if (maybeOuter.isEmpty()) {
-                // No more Ts ⇒ done
                 return new None<>();
             }
 
-            // 3) Map T to Iter<R> and switch to its head
             this.current = this.mapper.apply(maybeOuter.orElse(null));
         }
     }

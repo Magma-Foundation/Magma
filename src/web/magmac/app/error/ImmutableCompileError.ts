@@ -8,9 +8,13 @@ import { CompileError } from "../../../magmac/app/compile/error/error/CompileErr
 export class ImmutableCompileError {
 	ImmutableCompileError(message : String, context : Context) : public {
 	}
+	formatEntry(depth : int, display : String) : String {
+	}
 	display() : String {
 	}
 	format(depth : int) : String {
+	}
+	joinSorted(depth : int, copy : List<CompileError>) : String {
 	}
 	computeMaxDepth() : int {
 	}

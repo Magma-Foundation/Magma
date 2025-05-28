@@ -1,6 +1,7 @@
 import { Lists } from "../../../magmac/api/collect/list/Lists";
 import { ContextRule } from "../../../magmac/app/compile/rule/ContextRule";
 import { DivideRule } from "../../../magmac/app/compile/rule/DivideRule";
+import { ExactRule } from "../../../magmac/app/compile/rule/ExactRule";
 import { FilterRule } from "../../../magmac/app/compile/rule/FilterRule";
 import { LocatingRule } from "../../../magmac/app/compile/rule/LocatingRule";
 import { NodeRule } from "../../../magmac/app/compile/rule/NodeRule";
@@ -23,13 +24,45 @@ export class JavaLang {
 	}
 	createStructureMemberRule() : OrRule {
 	}
-	createStatementRule() : Rule {
+	createStructureStatementRule() : Rule {
 	}
-	createAssignmentRule() : Rule {
+	createAssignmentRule(functionSegment : Rule) : Rule {
 	}
-	createValueRule() : Rule {
+	createValueRule(functionSegment : Rule) : Rule {
+	}
+	createIndexRule(value : LazyRule) : TypeRule {
+	}
+	createLambdaRule(value : LazyRule, functionSegment : Rule) : TypeRule {
+	}
+	createOperationRule(value : Rule, type : String, infix : String) : TypeRule {
+	}
+	createSymbolValueRule() : StripRule {
+	}
+	createAccessRule(value : LazyRule) : Rule {
+	}
+	createNumberRule() : Rule {
+	}
+	createStringRule() : TypeRule {
+	}
+	createCharRule() : TypeRule {
+	}
+	createInvokableRule(value : Rule) : Rule {
 	}
 	createMethodRule() : Rule {
+	}
+	createFunctionSegmentRule() : Rule {
+	}
+	createBlockRule(functionSegmentRule : LazyRule) : Rule {
+	}
+	createBlockHeaderRule(functionSegment : Rule) : Rule {
+	}
+	createConditionalRule(functionSegment : Rule, prefix : String) : StripRule {
+	}
+	createFunctionSegmentValueRule(functionSegment : Rule) : Rule {
+	}
+	createPostRule(type : String, suffix : String, functionSegment : Rule) : TypeRule {
+	}
+	createReturnRule(functionSegment : Rule) : TypeRule {
 	}
 	createDefinitionRule() : Rule {
 	}

@@ -35,4 +35,6 @@ export class MutableDivideState {
 	}
 	popAndAppendToOption() : Option<DivideState> {
 	}
+	peek() : char {
+	}
 }

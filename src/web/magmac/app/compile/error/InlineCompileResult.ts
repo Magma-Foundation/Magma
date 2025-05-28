@@ -24,4 +24,6 @@ export class InlineCompileResult {
 	}
 	merge(other : Supplier<CompileResult<T>>, merger : BiFunction<T, T, T>) : CompileResult<T> {
 	}
+	merge(merger : BiFunction<T, T, T>, tuple : Tuple2<T, T>) : T {
+	}
 }

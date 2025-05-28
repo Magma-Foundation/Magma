@@ -1,11 +1,11 @@
 package magmac.api.head;
 
-import magmac.api.iter.collect.Collector;
+import magmac.api.Option;
 import magmac.api.iter.Iter;
+import magmac.api.iter.collect.Collector;
 import magmac.api.result.Ok;
 import magmac.api.result.Result;
 
-import magmac.api.Option;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -13,9 +13,13 @@ import java.util.function.Predicate;
 public record HeadedIter<T>(Head<T> head) implements Iter<T> {
     @Override
     public <R, X> Result<R, X> foldToResult(R initial, BiFunction<R, T, Result<R, X>> folder) {
-        return this.<Result<R, X>>fold(new Ok<>(initial),
+        return this.fold(this.createInitial(initial),
                 (rxResult, t) -> rxResult.flatMapValue(
                         r -> folder.apply(r, t)));
+    }
+
+    private <R, X> Result<R, X> createInitial(R initial) {
+        return new Ok<>(initial);
     }
 
     @Override
