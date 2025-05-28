@@ -1,6 +1,7 @@
 package magmac.app.lang;
 
 import magmac.api.collect.list.Lists;
+import magmac.app.compile.node.Node;
 import magmac.app.compile.rule.ContextRule;
 import magmac.app.compile.rule.DivideRule;
 import magmac.app.compile.rule.FilterRule;
@@ -88,6 +89,7 @@ public final class JavaLang {
     private static Rule createValueRule() {
         LazyRule value = new LazyRule();
         value.set(new OrRule(Lists.of(
+                new TypeRule("lambda", LocatingRule.First(new StringRule("before-arrow"), "->", new NodeRule("value", value))),
                 new StripRule(new PrefixRule("!", new NodeRule("child", value))),
                 JavaLang.createCharRule(),
                 JavaLang.createStringRule(),
