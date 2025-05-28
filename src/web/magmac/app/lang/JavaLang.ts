@@ -49,7 +49,11 @@ export class JavaLang {
 		return new TypeRule( type, new StripRule( new SuffixRule( new PrefixRule( type+" ", childRule), ";")));
 	}
 	createDefinitionRule() : Rule {
-		leftRule1 : Rule=new StringRule( "before-type");
+		modifiers : Rule=new StripRule( new DivideRule( "modifiers", new DelimitedFolder( ' '), new StringRule( "value")));
+		annotations : Rule=new DivideRule( "annotations", new DelimitedFolder( '\n'), new StripRule( new PrefixRule( "@", new StringRule( "value"))));
+		beforeTypeParams : Rule=new OrRule( Lists.of( LocatingRule.Last( annotations, "\n", modifiers), modifiers));
+		typeParams : DivideRule=new DivideRule( "type-parameters", new ValueFolder( ), new StringRule( "value"));
+		leftRule1 : Rule=new OrRule( Lists.of( new StripRule( new SuffixRule( LocatingRule.First( beforeTypeParams, "<", typeParams), ">")), beforeTypeParams));
 		rightRule : Rule=new NodeRule( "type", CommonLang.createTypeRule( ));
 		divider : Divider=new FoldingDivider( new TypeSeparatorFolder( ));
 		splitter : Splitter=DividingSplitter.Last( divider, " ");
