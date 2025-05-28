@@ -84,14 +84,19 @@ public final class JavaLang {
     private static Rule createValueRule() {
         LazyRule value = new LazyRule();
         value.set(new OrRule(Lists.of(
+                new StripRule(new PrefixRule("\"", new SuffixRule(new StringRule("value"), "\""))),
                 JavaLang.createInvocationRule(value),
                 new StripRule(FilterRule.Number(new StringRule("value")))
         )));
         return value;
     }
 
-    private static StripRule createInvocationRule(LazyRule value) {
-        NodeRule caller = new NodeRule("caller", value);
+    private static StripRule createInvocationRule(Rule value) {
+        Rule caller = new OrRule(Lists.of(
+                new StripRule(new PrefixRule("new ", new NodeRule("type", JavaLang.createTypeRule()))),
+                new NodeRule("caller", value)
+        ));
+
         DivideRule arguments = new DivideRule("arguments", new ValueFolder(), new OrRule(Lists.of(
                 CommonLang.createWhitespaceRule(),
                 value
