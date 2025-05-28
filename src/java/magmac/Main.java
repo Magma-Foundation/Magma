@@ -1,5 +1,6 @@
 package magmac;
 
+import jvm.io.Console;
 import magmac.api.Option;
 import magmac.api.iter.Iters;
 import magmac.app.ApplicationBuilder;
@@ -20,10 +21,6 @@ final class Main {
                 .map((TargetPlatform platform) -> ApplicationBuilder.run(platform, sources))
                 .flatMap((Option<Error> option) -> Iters.fromOption(option))
                 .next()
-                .ifPresent((Error error) -> Main.handleError(error));
-    }
-
-    private static void handleError(Error error) {
-        System.err.println(error.display());
+                .ifPresent((Error error) -> Console.handleError(error.display()));
     }
 }

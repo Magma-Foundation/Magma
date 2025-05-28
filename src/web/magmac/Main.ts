@@ -1,3 +1,4 @@
+import { Console } from "../jvm/io/Console";
 import { Option } from "../magmac/api/Option";
 import { Iters } from "../magmac/api/iter/Iters";
 import { ApplicationBuilder } from "../magmac/app/ApplicationBuilder";
@@ -11,9 +12,6 @@ import { Paths } from "../java/nio/file/Paths";
 export class Main {
 	main() : void {
 		sources : Sources=new PathSources( Paths.get( ".", "src", "java"));
-		Iters.fromValues( new PlantUMLTargetPlatform( ), new TypeScriptTargetPlatform( )).map( (platform : TargetPlatform) => ApplicationBuilder.run( platform, sources)).flatMap( (option : Option<Error>) => Iters.fromOption( option)).next( ).ifPresent( (error : Error) => Main.handleError( error));
-	}
-	handleError(error : Error) : void {
-		System.err.println( error.display( ));
+		Iters.fromValues( new PlantUMLTargetPlatform( ), new TypeScriptTargetPlatform( )).map( (platform : TargetPlatform) => ApplicationBuilder.run( platform, sources)).flatMap( (option : Option<Error>) => Iters.fromOption( option)).next( ).ifPresent( (error : Error) => Console.handleError( error.display( )));
 	}
 }
