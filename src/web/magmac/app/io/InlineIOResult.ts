@@ -6,7 +6,7 @@ export class InlineIOResult {
 		return new InlineIOResult<>( this.result.mapValue( mapper));
 	}
 	flatMapValue(mapper : Function<T, IOResult<R>>) : IOResult<R> {
-		return new InlineIOResult<>( this.result.flatMapValue( (T value)  => mapper.apply( value).result( )));
+		return new InlineIOResult<>( this.result.flatMapValue( (value : T) => mapper.apply( value).result( )));
 	}
 	mapErr(mapper : Function<IOException, R>) : Result<T, R> {
 		return this.result.mapErr( mapper);

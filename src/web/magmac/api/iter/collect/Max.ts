@@ -4,6 +4,6 @@ export class Max {
 		return Optional.empty( );
 	}
 	fold(current : Optional<Integer>, element : Integer) : Optional<Integer> {
-		return Optional.of( current.filter( (Integer inner)  => inner>element).orElse( element));
+		return Optional.of( current.filter( (inner : Integer) => inner>element).orElse( element));
 	}
 }

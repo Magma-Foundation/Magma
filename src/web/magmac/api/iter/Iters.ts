@@ -5,10 +5,10 @@ import { RangeHead } from "../../../magmac/api/head/RangeHead";
 import { SingleHead } from "../../../magmac/api/head/SingleHead";
 export class Iters {
 	fromArray : Iter<T> {
-		return new HeadedIter<>( new RangeHead( array.length)).map( (Integer index)  => array[index]);
+		return new HeadedIter<>( new RangeHead( array.length)).map( (index : Integer) => array[index]);
 	}
 	fromOption(option : Option<T>) : Iter<T> {
-		return option.<Iter<T>>map( (T t)  => new HeadedIter<>( new SingleHead<>( t))).orElseGet( ()  => new HeadedIter<>( new EmptyHead<>( )));
+		return option.<Iter<T>>map( (t : T) => new HeadedIter<>( new SingleHead<>( t))).orElseGet( ( )->new HeadedIter<>( new EmptyHead<>( )));
 	}
 	fromValues : Iter<T> {
 		return Iters.fromArray( values);

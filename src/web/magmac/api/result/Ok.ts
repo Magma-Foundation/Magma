@@ -6,7 +6,7 @@ export class Ok {
 		return new Ok<>( mapper.apply( this.value));
 	}
 	and(supplier : Supplier<Result<R, X>>) : Result<Tuple2<T, R>, X> {
-		return supplier.get( ).mapValue( (R otherValue)  => new Tuple2<>( this.value, otherValue));
+		return supplier.get( ).mapValue( (otherValue : R) => new Tuple2<>( this.value, otherValue));
 	}
 	match(whenOk : Function<T, R>, whenErr : Function<X, R>) : R {
 		return whenOk.apply( this.value);

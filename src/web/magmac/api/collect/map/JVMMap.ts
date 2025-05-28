@@ -9,7 +9,7 @@ export class JVMMap {
 		return this.map.getOrDefault( key, other);
 	}
 	iterEntries() : Iter<Tuple2<K, V>> {
-		return new JVMList<>( new ArrayList<>( this.map.entrySet( ))).iter( ).map( (java.util.Map.Entry<K, V> entry)  => new Tuple2<>( entry.getKey( ), entry.getValue( )));
+		return new JVMList<>( new ArrayList<>( this.map.entrySet( ))).iter( ).map( (entry : java.util.Map.Entry<K, V>) => new Tuple2<>( entry.getKey( ), entry.getValue( )));
 	}
 	put(key : K, value : V) : Map<K, V> {
 		this.map.put( key, value);

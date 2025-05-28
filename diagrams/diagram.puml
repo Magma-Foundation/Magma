@@ -418,11 +418,8 @@ ValueFolder --> DivideState
 ValueFolder --> Folder
 Stage --> CompileResult
 Iter --> Option
-Iter --> Tuple2
 Iter --> Collector
 Iter --> Result
-Iter --> NodeList
-Iter --> ParseState
 Iter --> BiFunction
 Iter --> Function
 Iter --> Predicate
@@ -622,11 +619,15 @@ JavaLang --> NodeRule
 JavaLang --> OrRule
 JavaLang --> PrefixRule
 JavaLang --> Rule
+JavaLang --> Splitter
 JavaLang --> StringRule
 JavaLang --> StripRule
 JavaLang --> SuffixRule
 JavaLang --> TypeRule
+JavaLang --> Divider
+JavaLang --> FoldingDivider
 JavaLang --> DelimitedFolder
+JavaLang --> DividingSplitter
 PlantUMLLang --> Lists
 PlantUMLLang --> DivideRule
 PlantUMLLang --> ExactRule
@@ -647,7 +648,6 @@ CompileResult --> Supplier
 FlattenJava --> Some
 FlattenJava --> Tuple2
 FlattenJava --> ListCollector
-FlattenJava --> Ok
 FlattenJava --> InlineCompileResult
 FlattenJava --> InlineNodeList
 FlattenJava --> Node
@@ -841,7 +841,6 @@ CommonLang --> StringRule
 CommonLang --> StripRule
 CommonLang --> SuffixRule
 CommonLang --> TypeRule
-CommonLang --> Divider
 CommonLang --> FoldingDivider
 CommonLang --> StatementFolder
 CommonLang --> DividingSplitter

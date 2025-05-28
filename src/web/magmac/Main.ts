@@ -11,7 +11,7 @@ import { Paths } from "../java/nio/file/Paths";
 export class Main {
 	main() : void {
 		 Sources sources=new PathSources( Paths.get( ".", "src", "java"));
-		Iters.fromValues( new PlantUMLTargetPlatform( ), new TypeScriptTargetPlatform( )).map( (TargetPlatform platform)  => ApplicationBuilder.run( platform, sources)).flatMap( (Option<Error> option)  => Iters.fromOption( option)).next( ).ifPresent( (Error error)  => Main.handleError( error));
+		Iters.fromValues( new PlantUMLTargetPlatform( ), new TypeScriptTargetPlatform( )).map( (platform : TargetPlatform) => ApplicationBuilder.run( platform, sources)).flatMap( (option : Option<Error>) => Iters.fromOption( option)).next( ).ifPresent( (error : Error) => Main.handleError( error));
 	}
 	handleError(error : Error) : void {
 		System.err.println( error.display( ));

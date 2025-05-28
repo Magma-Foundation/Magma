@@ -20,11 +20,9 @@ export class CompileApplication {
 		this.compiler=compiler;
 	}
 	run() : Option<Error> {
-		return this.sources.readAll( ).mapErr( (IOException throwable)  => new ThrowableError( throwable)).mapErr( (ThrowableError error)  => new ApplicationError( error)).match( (Map<Location, String> units)  => this.compileAndWrite( units),  (ApplicationError value)  => new Some<>( value));
+		return this.sources.readAll( ).mapErr( (throwable : IOException) => new ThrowableError( throwable)).mapErr( (error : ThrowableError) => new ApplicationError( error)).match( (units : Map<Location, String>) => this.compileAndWrite( units), (value : ApplicationError) => new Some<>( value));
 	}
 	compileAndWrite(units : Map<Location, String>) : Option<Error> {
-		return this.compiler.compile(units).result()
-                .mapErr((CompileError error1)  =>  new ApplicationError(error1))
-                .match((Map<Location, String> outputs)  =>  this.targets.writeAll(outputs).map((IOException throwable)  =>  new ThrowableError(throwable)).map((ThrowableError error)  => new ApplicationError( error)), (ApplicationError err)  => new Some<>( err));
+		return this.compiler.compile( units).result( ).mapErr( (error1 : CompileError) => new ApplicationError( error1)).match( (outputs : Map<Location, String>) => this.targets.writeAll( outputs).map( (throwable : IOException) => new ThrowableError( throwable)).map( (error : ThrowableError) => new ApplicationError( error)), (err : ApplicationError) => new Some<>( err));
 	}
 }

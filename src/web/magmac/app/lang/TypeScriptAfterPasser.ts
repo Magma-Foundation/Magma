@@ -19,9 +19,9 @@ export class TypeScriptAfterPasser {
 		if(!node.is( "import")){ 
 		return new None<>( );}
 		 int namespaceSize=state.findLocation( ).namespace( ).size( );
-		 NodeList copy=Lists.repeat( "..", namespaceSize).iter( ).map( (String value)  => new MapNode( ).withString( "value", value)).collect( new NodeListCollector( ));
+		 NodeList copy=Lists.repeat( "..", namespaceSize).iter( ).map( (value : String) => new MapNode( ).withString( "value", value)).collect( new NodeListCollector( ));
 		 NodeList segments=node.findNodeList( "segments").orElse( InlineNodeList.empty( ));
-		 Option<CompileResult<Tuple2<ParseState, Node>>> map=segments.findLast( ).map( (Node last)  => { String value=last.findString( "value").orElse( ""); NodeList values=copy.addAll( segments); Node node1=node.withString( "child", value).withNodeList( "segments", values);return InlineCompileResult.fromOk( new Tuple2<>( state, node1));});
+		 Option<CompileResult<Tuple2<ParseState, Node>>> map=segments.findLast( ).map( (last : Node) => { String value=last.findString( "value").orElse( ""); NodeList values=copy.addAll( segments); Node node1=node.withString( "child", value).withNodeList( "segments", values);return InlineCompileResult.fromOk( new Tuple2<>( state, node1));});
 		return new Some<>( new InlinePassResult( map));
 	}
 	passMethod(state : ParseState, node : Node) : Option<PassResult> {
@@ -33,7 +33,7 @@ export class TypeScriptAfterPasser {
 		return new None<>( );
 	}
 	pass(state : ParseState, node : Node) : PassResult {
-		return TypeScriptAfterPasser.passImport( state, node).or( ()  => TypeScriptAfterPasser.passMethod( state, node)).or( ()  => this.format( state, node)).orElseGet( ()  => InlinePassResult.empty( ));
+		return TypeScriptAfterPasser.passImport( state, node).or( ( )->TypeScriptAfterPasser.passMethod( state, node)).or( ( )->this.format( state, node)).orElseGet( ( )->InlinePassResult.empty( ));
 	}
 	format(state : ParseState, node : Node) : Option<PassResult> {
 		if(node.is( "statement")||node.is( "block")){ 

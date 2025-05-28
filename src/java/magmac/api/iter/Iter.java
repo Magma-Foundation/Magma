@@ -1,11 +1,8 @@
 package magmac.api.iter;
 
 import magmac.api.Option;
-import magmac.api.Tuple2;
 import magmac.api.iter.collect.Collector;
 import magmac.api.result.Result;
-import magmac.app.compile.node.NodeList;
-import magmac.app.stage.parse.ParseState;
 
 import java.util.function.BiFunction;
 import java.util.function.Function;

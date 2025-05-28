@@ -62,7 +62,7 @@ public final class TypescriptLang {
     private static Rule createFunctionSegmentRule() {
         LazyRule functionSegmentRule = new MutableLazyRule();
         LazyRule valueLazy = new MutableLazyRule();
-        LazyRule value = CommonLang.initValueRule(functionSegmentRule, valueLazy, " => ");
+        LazyRule value = CommonLang.initValueRule(functionSegmentRule, valueLazy, " => ", TypescriptLang.createDefinitionRule());
         return CommonLang.initFunctionSegmentRule(functionSegmentRule, value);
     }
 

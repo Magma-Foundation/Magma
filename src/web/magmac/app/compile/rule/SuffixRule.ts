@@ -9,6 +9,6 @@ export class SuffixRule {
 		return this.childRule.lex( slice);
 	}
 	generate(node : Node) : CompileResult<String> {
-		return this.childRule.generate( node).mapValue( (String result)  => result+this.suffix);
+		return this.childRule.generate( node).mapValue( (result : String) => result+this.suffix);
 	}
 }

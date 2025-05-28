@@ -18,9 +18,9 @@ export class RuleLexer {
 		 Location location=tuple.left( );
 		 String input=tuple.right( );
 		System.out.println( "Lexing: "+location);
-		return this.rootRule.lex( input).mapValue( (Node root)  => new Tuple2<>( location, root));
+		return this.rootRule.lex( input).mapValue( (root : Node) => new Tuple2<>( location, root));
 	}
 	apply(initial : Map<Location, String>) : CompileResult<Roots> {
-		return InlineCompileResult.fromResult( initial.iterEntries( ).map( (Tuple2<Location, String> entry)  => this.foldEntry( entry)).map( (CompileResult<Tuple2<Location, Node>> tuple2CompileResult)  => tuple2CompileResult.result( )).collect( new ResultCollector<>( new MapCollector<>( ))).mapValue( (Map<Location, Node> roots)  => new MapRoots( roots)));
+		return InlineCompileResult.fromResult( initial.iterEntries( ).map( (entry : Tuple2<Location, String>) => this.foldEntry( entry)).map( (tuple2CompileResult : CompileResult<Tuple2<Location, Node>>) => tuple2CompileResult.result( )).collect( new ResultCollector<>( new MapCollector<>( ))).mapValue( (roots : Map<Location, Node>) => new MapRoots( roots)));
 	}
 }

@@ -10,6 +10,6 @@ export class StripRule {
 	generate(node : Node) : CompileResult<String> {
 		 String before=node.findString( this.beforeKey).orElse( "");
 		 String after=node.findString( this.afterKey).orElse( "");
-		return this.rule.generate( node).mapValue( result  => before+result+after);
+		return this.rule.generate( node).mapValue( (result : String) => before+result+after);
 	}
 }

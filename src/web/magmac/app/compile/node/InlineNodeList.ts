@@ -21,7 +21,7 @@ export class InlineNodeList {
 		return new InlineNodeList( this.elements.add( element));
 	}
 	addAll(others : NodeList) : NodeList {
-		return others.iter( ).fold( this,  (NodeList nodeList, Node element)  => nodeList.add( element));
+		return others.iter( ).fold( this, (nodeList : NodeList, element : Node) => nodeList.add( element));
 	}
 	findLast() : Option<Node> {
 		return new Some<>( this.last( ));

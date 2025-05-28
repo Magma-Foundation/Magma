@@ -15,7 +15,6 @@ import magmac.app.compile.rule.StringRule;
 import magmac.app.compile.rule.StripRule;
 import magmac.app.compile.rule.SuffixRule;
 import magmac.app.compile.rule.TypeRule;
-import magmac.app.compile.rule.divide.Divider;
 import magmac.app.compile.rule.divide.FoldingDivider;
 import magmac.app.compile.rule.fold.StatementFolder;
 import magmac.app.compile.rule.split.DividingSplitter;
@@ -46,7 +45,7 @@ final class CommonLang {
 
     static Rule createAssignmentRule(Rule value) {
         Rule definition = new OrRule(Lists.of(
-                new NodeRule("definition", CommonLang.createDefinitionRule()),
+                new NodeRule("definition", JavaLang.createDefinitionRule()),
                 new NodeRule("destination", value)
         ));
 
@@ -54,9 +53,9 @@ final class CommonLang {
         return new TypeRule("assignment", LocatingRule.First(definition, "=", source));
     }
 
-    static LazyRule initValueRule(Rule segment, LazyRule value, String lambdaInfix) {
+    static LazyRule initValueRule(Rule segment, LazyRule value, String lambdaInfix, Rule definition) {
         return value.set(new OrRule(Lists.of(
-                CommonLang.createLambdaRule(value, segment, lambdaInfix),
+                CommonLang.createLambdaRule(value, segment, lambdaInfix, definition),
                 new StripRule(new PrefixRule("!", new NodeRule("child", value))),
                 CommonLang.createCharRule(),
                 CommonLang.createStringRule(),
@@ -80,13 +79,13 @@ final class CommonLang {
         return new TypeRule("index", new StripRule(new SuffixRule(LocatingRule.First(new NodeRule("parent", value), "[", new NodeRule("argument", value)), "]")));
     }
 
-    private static TypeRule createLambdaRule(LazyRule value, Rule functionSegment, String infix) {
+    private static TypeRule createLambdaRule(LazyRule value, Rule functionSegment, String infix, Rule definition) {
         Rule value1 = new OrRule(Lists.of(
                 new StripRule(new PrefixRule("{", new SuffixRule(CommonLang.Statements("children", functionSegment), "}"))),
                 new NodeRule("value", value)
         ));
 
-        return new TypeRule("lambda", LocatingRule.First(new StringRule("before-arrow"), infix, value1));
+        return new TypeRule("lambda", LocatingRule.First(new StripRule(new PrefixRule("(", new SuffixRule(new DivideRule("parameters", new ValueFolder(), definition), ")"))), infix, value1));
     }
 
     private static TypeRule createOperationRule(Rule value, String type, String infix) {
@@ -114,7 +113,7 @@ final class CommonLang {
         return new TypeRule("char", new StripRule(new PrefixRule("'", new SuffixRule(new StringRule("value"), "'"))));
     }
 
-    static Rule createInvokableRule(Rule value) {
+    private static Rule createInvokableRule(Rule value) {
         Rule caller = new ContextRule("With caller", new SuffixRule(new OrRule(Lists.of(
                 new ContextRule("As construction", new StripRule(new PrefixRule("new ", new NodeRule("type", CommonLang.createTypeRule())))),
                 new ContextRule("As invocation", new NodeRule("caller", value))
@@ -160,7 +159,7 @@ final class CommonLang {
                 new TypeRule("try", new StripRule(new ExactRule("try"))),
                 CommonLang.createConditionalRule("if", value),
                 CommonLang.createConditionalRule("while", value),
-                new StripRule(new PrefixRule("catch", new StripRule(new PrefixRule("(", new SuffixRule(new NodeRule("definition", CommonLang.createDefinitionRule()), ")")))))
+                new StripRule(new PrefixRule("catch", new StripRule(new PrefixRule("(", new SuffixRule(new NodeRule("definition", JavaLang.createDefinitionRule()), ")")))))
         ));
     }
 
@@ -186,15 +185,6 @@ final class CommonLang {
 
     private static TypeRule createReturnRule(Rule value) {
         return new TypeRule("return", new StripRule(new PrefixRule("return ", new NodeRule("value", value))));
-    }
-
-    static Rule createDefinitionRule() {
-        Rule leftRule1 = new StringRule("before-type");
-        Rule rightRule = new NodeRule("type", CommonLang.createTypeRule());
-        Divider divider = new FoldingDivider(new TypeSeparatorFolder());
-        Splitter splitter = DividingSplitter.Last(divider, " ");
-        Rule leftRule = new LocatingRule(leftRule1, splitter, rightRule);
-        return new StripRule(LocatingRule.Last(leftRule, " ", new StringRule("name")));
     }
 
     static Rule createTypeRule() {

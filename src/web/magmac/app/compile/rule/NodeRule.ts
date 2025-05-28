@@ -6,12 +6,12 @@ import { MapNode } from "../../../../magmac/app/compile/node/MapNode";
 import { Node } from "../../../../magmac/app/compile/node/Node";
 export class NodeRule {
 	findNode(node : Node) : CompileResult<Node> {
-		return node.findNode( this.key).map( (Node node1)  => InlineCompileResult.fromResult( new Ok<>( node1))).orElseGet( ()  => CompileErrors.createNodeError( "Node '" + this.key + "' not present", node));
+		return node.findNode( this.key).map( (node1 : Node) => InlineCompileResult.fromResult( new Ok<>( node1))).orElseGet( ( )->CompileErrors.createNodeError( "Node '" + this.key + "' not present", node));
 	}
 	lex(input : String) : CompileResult<Node> {
-		return this.childRule.lex( input).mapValue( (Node lexed)  => new MapNode( ).withNode( this.key, lexed));
+		return this.childRule.lex( input).mapValue( (lexed : Node) => new MapNode( ).withNode( this.key, lexed));
 	}
 	generate(node : Node) : CompileResult<String> {
-		return this.findNode( node).flatMapValue( (Node child)  => this.childRule.generate( child));
+		return this.findNode( node).flatMapValue( (child : Node) => this.childRule.generate( child));
 	}
 }

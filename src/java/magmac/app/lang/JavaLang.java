@@ -9,11 +9,15 @@ import magmac.app.compile.rule.NodeRule;
 import magmac.app.compile.rule.OrRule;
 import magmac.app.compile.rule.PrefixRule;
 import magmac.app.compile.rule.Rule;
+import magmac.app.compile.rule.Splitter;
 import magmac.app.compile.rule.StringRule;
 import magmac.app.compile.rule.StripRule;
 import magmac.app.compile.rule.SuffixRule;
 import magmac.app.compile.rule.TypeRule;
+import magmac.app.compile.rule.divide.Divider;
+import magmac.app.compile.rule.divide.FoldingDivider;
 import magmac.app.compile.rule.fold.DelimitedFolder;
+import magmac.app.compile.rule.split.DividingSplitter;
 
 public final class JavaLang {
     public static Rule createRule() {
@@ -57,7 +61,7 @@ public final class JavaLang {
     private static OrRule createStructureMemberRule() {
         LazyRule functionSegmentRule = new MutableLazyRule();
         LazyRule valueLazy = new MutableLazyRule();
-        LazyRule value = CommonLang.initValueRule(functionSegmentRule, valueLazy, "->");
+        LazyRule value = CommonLang.initValueRule(functionSegmentRule, valueLazy, "->", JavaLang.createDefinitionRule());
         Rule functionSegment = CommonLang.initFunctionSegmentRule(functionSegmentRule, value);
         return new OrRule(Lists.of(
                 CommonLang.createWhitespaceRule(),
@@ -68,7 +72,7 @@ public final class JavaLang {
 
     private static Rule createStructureStatementRule(LazyRule value1) {
         Rule definition = new OrRule(Lists.of(
-                new NodeRule("value", new TypeRule("definition", CommonLang.createDefinitionRule())),
+                new NodeRule("value", new TypeRule("definition", JavaLang.createDefinitionRule())),
                 CommonLang.createAssignmentRule(value1))
         );
 
@@ -77,11 +81,11 @@ public final class JavaLang {
 
     private static Rule createMethodRule(Rule childRule) {
         NodeRule header = new NodeRule("header", new OrRule(Lists.of(
-                CommonLang.createDefinitionRule(),
+                JavaLang.createDefinitionRule(),
                 new TypeRule("constructor", new StripRule(FilterRule.Symbol(new StringRule("name"))))
         )));
 
-        Rule parameters = CommonLang.createParametersRule(CommonLang.createDefinitionRule());
+        Rule parameters = CommonLang.createParametersRule(JavaLang.createDefinitionRule());
         Rule content = CommonLang.Statements("children", childRule);
         Rule rightRule = new StripRule(new PrefixRule("{", new SuffixRule(new StripRule("", content, "after-children"), "}")));
         Rule withParams = new OrRule(Lists.of(
@@ -95,5 +99,14 @@ public final class JavaLang {
     private static Rule createNamespacedRule(String type) {
         Rule childRule = new DivideRule("segments", new DelimitedFolder('.'), new StringRule("value"));
         return new TypeRule(type, new StripRule(new SuffixRule(new PrefixRule(type + " ", childRule), ";")));
+    }
+
+    static Rule createDefinitionRule() {
+        Rule leftRule1 = new StringRule("before-type");
+        Rule rightRule = new NodeRule("type", CommonLang.createTypeRule());
+        Divider divider = new FoldingDivider(new TypeSeparatorFolder());
+        Splitter splitter = DividingSplitter.Last(divider, " ");
+        Rule leftRule = new LocatingRule(leftRule1, splitter, rightRule);
+        return new StripRule(LocatingRule.Last(leftRule, " ", new StringRule("name")));
     }
 }

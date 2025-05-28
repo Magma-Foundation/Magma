@@ -27,10 +27,10 @@ export class MapNode {
 		this( new Some<String>( type), Maps.empty( ), Maps.empty( ), Maps.empty( ));
 	}
 	fold(node : Node, iter : Iter<Tuple2<String, T>>, mapper : Function<Node, BiFunction<String, T, Node>>) : Node {
-		return iter.fold( node,  (Node current, Tuple2<String, T> tuple)  => { String left=tuple.left( ); T right=tuple.right( );return mapper.apply( current).apply( left, right);});
+		return iter.fold( node, (current : Node, tuple : Tuple2<String, T>) => { String left=tuple.left( ); T right=tuple.right( );return mapper.apply( current).apply( left, right);});
 	}
 	formatNodeList(depth : int, nodeList : NodeList) : String {
-		return nodeList.iter( ).map( (Node child)  => child.format( depth+1)).collect( new Joiner( ", ")).orElse( "");
+		return nodeList.iter( ).map( (child : Node) => child.format( depth+1)).collect( new Joiner( ", ")).orElse( "");
 	}
 	createIndent(depth : int) : String {
 		return "\n" + "\t".repeat( depth);
@@ -46,17 +46,17 @@ export class MapNode {
 		return this.format( 0);
 	}
 	format(depth : int) : String {
-		 String typeString=this.maybeType.map( (String type)  => type+" ").orElse( "");
-		 Iter<String> stringsStream=this.toStream( depth, this.strings,  (String value)  => "\"" + value + "\"");
-		 Iter<String> nodesStream=this.toStream( depth, this.nodes,  (Node value)  => value.format( depth+1));
-		 Iter<String> nodeListsStream=this.toStream( depth, this.nodeLists,  (NodeList values)  => "[" + MapNode.formatNodeList(depth, values) + "]");
+		 String typeString=this.maybeType.map( (type : String) => type+" ").orElse( "");
+		 Iter<String> stringsStream=this.toStream( depth, this.strings, (value : String) => "\"" + value + "\"");
+		 Iter<String> nodesStream=this.toStream( depth, this.nodes, (value : Node) => value.format( depth+1));
+		 Iter<String> nodeListsStream=this.toStream( depth, this.nodeLists, (values : NodeList) => "[" + MapNode.formatNodeList(depth, values) + "]");
 		 String joined=stringsStream.concat( nodesStream).concat( nodeListsStream).collect( new Joiner( ", ")).orElse( "");
 		return typeString+"{" + joined + MapNode.createIndent(depth) + "}";
 	}
 	toStream(depth : int, map : Map<String, T>, mapper : Function<T, String>) : Iter<String> {
 		if(map.isEmpty( )){ 
 		return Iters.empty( );}
-		return map.iterEntries( ).map( (Tuple2<String, T> entry)  => { String key=entry.left( ); T value=entry.right( );return MapNode.formatEntry( depth, key, mapper.apply( value));});
+		return map.iterEntries( ).map( (entry : Tuple2<String, T>) => { String key=entry.left( ); T value=entry.right( );return MapNode.formatEntry( depth, key, mapper.apply( value));});
 	}
 	withString(key : String, value : String) : Node {
 		this.strings=this.strings.put( key, value);
@@ -72,7 +72,7 @@ export class MapNode {
 		return this.strings;
 	}
 	is(type : String) : boolean {
-		return this.maybeType.filter( (String inner)  => inner.equals( type)).isPresent( );
+		return this.maybeType.filter( (inner : String) => inner.equals( type)).isPresent( );
 	}
 	retype(type : String) : Node {
 		return new MapNode( new Some<String>( type), this.strings, this.nodes, this.nodeLists);
@@ -88,9 +88,9 @@ export class MapNode {
 		return new None<>( );}
 	}
 	merge(other : Node) : Node {
-		 var withStrings=MapNode.fold( this, other.iterStrings( ),  (Node current)  =>  (String key2, String value1)  => current.withString( key2, value1));
-		 var withNodes=MapNode.fold( withStrings, other.iterNodes( ),  (Node current)  =>  (String key1, Node value)  => current.withNode( key1, value));
-		return MapNode.fold( withNodes, other.iterNodeLists( ),  (Node current)  =>  (String key, NodeList values)  => current.withNodeList( key, values));
+		 var withStrings=MapNode.fold( this, other.iterStrings( ), (current : Node) => (key2 : String, value1 : String) => current.withString( key2, value1));
+		 var withNodes=MapNode.fold( withStrings, other.iterNodes( ), (current : Node) => (key1 : String, value : Node) => current.withNode( key1, value));
+		return MapNode.fold( withNodes, other.iterNodeLists( ), (current : Node) => (key : String, values : NodeList) => current.withNodeList( key, values));
 	}
 	iterStrings() : Iter<Tuple2<String, String>> {
 		return this.strings( ).iterEntries( );

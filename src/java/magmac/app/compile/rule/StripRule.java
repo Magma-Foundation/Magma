@@ -17,6 +17,6 @@ public record StripRule(String beforeKey, Rule rule, String afterKey) implements
     public CompileResult<String> generate(Node node) {
         String before = node.findString(this.beforeKey).orElse("");
         String after = node.findString(this.afterKey).orElse("");
-        return this.rule.generate(node).mapValue(result -> before + result + after);
+        return this.rule.generate(node).mapValue((String result) -> before + result + after);
     }
 }

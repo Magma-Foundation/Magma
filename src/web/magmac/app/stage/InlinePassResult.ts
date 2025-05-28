@@ -16,6 +16,6 @@ export class InlinePassResult {
 		return new InlinePassResult( new Some<>( InlineCompileResult.fromOk( new Tuple2<>( state, node))));
 	}
 	orElseGet(other : Supplier<Tuple2<ParseState, Node>>) : CompileResult<Tuple2<ParseState, Node>> {
-		return this.option.orElseGet( ()  => InlineCompileResult.fromResult( new Ok<>( other.get( ))));
+		return this.option.orElseGet( ( )->InlineCompileResult.fromResult( new Ok<>( other.get( ))));
 	}
 }

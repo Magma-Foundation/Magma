@@ -13,7 +13,6 @@ import { StringRule } from "../../../magmac/app/compile/rule/StringRule";
 import { StripRule } from "../../../magmac/app/compile/rule/StripRule";
 import { SuffixRule } from "../../../magmac/app/compile/rule/SuffixRule";
 import { TypeRule } from "../../../magmac/app/compile/rule/TypeRule";
-import { Divider } from "../../../magmac/app/compile/rule/divide/Divider";
 import { FoldingDivider } from "../../../magmac/app/compile/rule/divide/FoldingDivider";
 import { StatementFolder } from "../../../magmac/app/compile/rule/fold/StatementFolder";
 import { DividingSplitter } from "../../../magmac/app/compile/rule/split/DividingSplitter";
@@ -34,19 +33,19 @@ export class CommonLang {
 		return new DivideRule( key, new StatementFolder( ), childRule);
 	}
 	createAssignmentRule(value : Rule) : Rule {
-		 Rule definition=new OrRule( Lists.of( new NodeRule( "definition", CommonLang.createDefinitionRule( )), new NodeRule( "destination", value)));
+		 Rule definition=new OrRule( Lists.of( new NodeRule( "definition", JavaLang.createDefinitionRule( )), new NodeRule( "destination", value)));
 		 Rule source=new NodeRule( "source", value);
 		return new TypeRule( "assignment", LocatingRule.First( definition, "=", source));
 	}
-	initValueRule(segment : Rule, value : LazyRule, lambdaInfix : String) : LazyRule {
-		return value.set( new OrRule( Lists.of( CommonLang.createLambdaRule( value, segment, lambdaInfix), new StripRule( new PrefixRule( "!", new NodeRule( "child", value))), CommonLang.createCharRule( ), CommonLang.createStringRule( ), CommonLang.createInvokableRule( value), CommonLang.createNumberRule( ), CommonLang.createAccessRule( value), CommonLang.createSymbolValueRule( ), CommonLang.createOperationRule( value, "add", "+"), CommonLang.createOperationRule( value, "subtract", "-"), CommonLang.createOperationRule( value, "equals", "=="), CommonLang.createOperationRule( value, "less-than", "<"), CommonLang.createOperationRule( value, "and", "&&"), CommonLang.createOperationRule( value, "or", "||"), CommonLang.createOperationRule( value, "not-equals", "!="), CommonLang.createOperationRule( value, "greater-than", ">"), CommonLang.createIndexRule( value))));
+	initValueRule(segment : Rule, value : LazyRule, lambdaInfix : String, definition : Rule) : LazyRule {
+		return value.set( new OrRule( Lists.of( CommonLang.createLambdaRule( value, segment, lambdaInfix, definition), new StripRule( new PrefixRule( "!", new NodeRule( "child", value))), CommonLang.createCharRule( ), CommonLang.createStringRule( ), CommonLang.createInvokableRule( value), CommonLang.createNumberRule( ), CommonLang.createAccessRule( value), CommonLang.createSymbolValueRule( ), CommonLang.createOperationRule( value, "add", "+"), CommonLang.createOperationRule( value, "subtract", "-"), CommonLang.createOperationRule( value, "equals", "=="), CommonLang.createOperationRule( value, "less-than", "<"), CommonLang.createOperationRule( value, "and", "&&"), CommonLang.createOperationRule( value, "or", "||"), CommonLang.createOperationRule( value, "not-equals", "!="), CommonLang.createOperationRule( value, "greater-than", ">"), CommonLang.createIndexRule( value))));
 	}
 	createIndexRule(value : LazyRule) : TypeRule {
 		return new TypeRule( "index", new StripRule( new SuffixRule( LocatingRule.First( new NodeRule( "parent", value), "[", new NodeRule( "argument", value)), "]")));
 	}
-	createLambdaRule(value : LazyRule, functionSegment : Rule, infix : String) : TypeRule {
+	createLambdaRule(value : LazyRule, functionSegment : Rule, infix : String, definition : Rule) : TypeRule {
 		 Rule value1=new OrRule( Lists.of( new StripRule( new PrefixRule( "{", new SuffixRule( CommonLang.Statements( "children", functionSegment), "}"))), new NodeRule( "value", value)));
-		return new TypeRule( "lambda", LocatingRule.First( new StringRule( "before-arrow"), infix, value1));
+		return new TypeRule( "lambda", LocatingRule.First( new StripRule( new PrefixRule( "(", new SuffixRule( new DivideRule( "parameters", new ValueFolder( ), definition), ")"))), infix, value1));
 	}
 	createOperationRule(value : Rule, type : String, infix : String) : TypeRule {
 		return new TypeRule( type, LocatingRule.First( new NodeRule( "left", value), infix, new NodeRule( "right", value)));
@@ -90,7 +89,7 @@ export class CommonLang {
 		return new TypeRule( "block", new StripRule( new SuffixRule( childRule, "}")));
 	}
 	createBlockHeaderRule(value : Rule) : Rule {
-		return new OrRule( Lists.of( new TypeRule( "else", new StripRule( new ExactRule( "else"))), new TypeRule( "try", new StripRule( new ExactRule( "try"))), CommonLang.createConditionalRule( "if", value), CommonLang.createConditionalRule( "while", value), new StripRule( new PrefixRule( "catch", new StripRule( new PrefixRule( "(", new SuffixRule( new NodeRule( "definition", CommonLang.createDefinitionRule( )), ")")))))));
+		return new OrRule( Lists.of( new TypeRule( "else", new StripRule( new ExactRule( "else"))), new TypeRule( "try", new StripRule( new ExactRule( "try"))), CommonLang.createConditionalRule( "if", value), CommonLang.createConditionalRule( "while", value), new StripRule( new PrefixRule( "catch", new StripRule( new PrefixRule( "(", new SuffixRule( new NodeRule( "definition", JavaLang.createDefinitionRule( )), ")")))))));
 	}
 	createConditionalRule(prefix : String, value : Rule) : StripRule {
 		return new StripRule( new PrefixRule( prefix, new StripRule( new PrefixRule( "(", new SuffixRule( new NodeRule( "condition", value), ")")))));
@@ -103,14 +102,6 @@ export class CommonLang {
 	}
 	createReturnRule(value : Rule) : TypeRule {
 		return new TypeRule( "return", new StripRule( new PrefixRule( "return ", new NodeRule( "value", value))));
-	}
-	createDefinitionRule() : Rule {
-		 Rule leftRule1=new StringRule( "before-type");
-		 Rule rightRule=new NodeRule( "type", CommonLang.createTypeRule( ));
-		 Divider divider=new FoldingDivider( new TypeSeparatorFolder( ));
-		 Splitter splitter=DividingSplitter.Last( divider, " ");
-		 Rule leftRule=new LocatingRule( leftRule1, splitter, rightRule);
-		return new StripRule( LocatingRule.Last( leftRule, " ", new StringRule( "name")));
 	}
 	createTypeRule() : Rule {
 		 LazyRule orRule=new MutableLazyRule( );

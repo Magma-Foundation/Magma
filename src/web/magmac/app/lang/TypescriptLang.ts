@@ -38,7 +38,7 @@ export class TypescriptLang {
 	createFunctionSegmentRule() : Rule {
 		 LazyRule functionSegmentRule=new MutableLazyRule( );
 		 LazyRule valueLazy=new MutableLazyRule( );
-		 LazyRule value=CommonLang.initValueRule( functionSegmentRule, valueLazy, " => ");
+		 LazyRule value=CommonLang.initValueRule( functionSegmentRule, valueLazy, " => ", TypescriptLang.createDefinitionRule( ));
 		return CommonLang.initFunctionSegmentRule( functionSegmentRule, value);
 	}
 	createConstructorRule() : TypeRule {

@@ -24,11 +24,9 @@ export class LocatingRule {
 		return new LocatingRule( leftRule, new LocatingSplitter( infix, locator), rightRule);
 	}
 	lex(input : String) : CompileResult<Node> {
-		return this.splitter.split( input).map( (Tuple2<String, String> tuple)  => { String left=tuple.left( ); String right=tuple.right( );return this.leftRule.lex( left).merge( ()  => this.rightRule.lex( right),  (Node node, Node other)  => node.merge( other));}).orElseGet( ()  => CompileErrors.createStringError( this.splitter.createMessage( ), input));
+		return this.splitter.split( input).map( (tuple : Tuple2<String, String>) => { String left=tuple.left( ); String right=tuple.right( );return this.leftRule.lex( left).merge( ( )->this.rightRule.lex( right), (node : Node, other : Node) => node.merge( other));}).orElseGet( ( )->CompileErrors.createStringError( this.splitter.createMessage( ), input));
 	}
 	generate(node : Node) : CompileResult<String> {
-		return this.leftRule.generate( node).merge( 
-                ()  => this.rightRule.generate( node), 
-                (String leftString, String rightString)  => this.splitter.merge( leftString, rightString));
+		return this.leftRule.generate( node).merge( ( )->this.rightRule.generate( node), (leftString : String, rightString : String) => this.splitter.merge( leftString, rightString));
 	}
 }

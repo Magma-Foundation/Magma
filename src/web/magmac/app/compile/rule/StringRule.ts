@@ -9,6 +9,6 @@ export class StringRule {
 		return InlineCompileResult.fromResult( new Ok<>( new MapNode( ).withString( this.key, input)));
 	}
 	generate(node : Node) : CompileResult<String> {
-		return node.findString( this.key).map( (String value)  => InlineCompileResult.fromResult( new Ok<>( value))).orElseGet( ()  => CompileErrors.createNodeError( "String '" + this.key + "' not present", node));
+		return node.findString( this.key).map( (value : String) => InlineCompileResult.fromResult( new Ok<>( value))).orElseGet( ( )->CompileErrors.createNodeError( "String '" + this.key + "' not present", node));
 	}
 }

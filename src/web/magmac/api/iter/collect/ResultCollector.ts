@@ -6,6 +6,6 @@ export class ResultCollector {
 		return new Ok<>( this.collector.createInitial( ));
 	}
 	fold(currentResult : Result<C, X>, element : Result<T, X>) : Result<C, X> {
-		return currentResult.and( ()  => element).mapValue( (Tuple2<C, T> tuple)  => this.collector.fold( tuple.left( ), tuple.right( )));
+		return currentResult.and( ( )->element).mapValue( (tuple : Tuple2<C, T>) => this.collector.fold( tuple.left( ), tuple.right( )));
 	}
 }
