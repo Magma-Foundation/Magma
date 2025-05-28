@@ -11,8 +11,31 @@ import { Path } from "../../../java/nio/file/Path";
 import { Collectors } from "../../../java/util/stream/Collectors";
 import { Stream } from "../../../java/util/stream/Stream";
 export class SafeFiles {
-	writeString(target : Path, output : String) : Option<IOException> {try{ Files.writeString( target, output);return new None<>( );}catch( IOException e){ return new Some<>( e);}}
-	walk(sourceDirectory : Path) : IOResult<Iter<Path>> {try{  Stream<Path> stream=Files.walk( sourceDirectory);return new InlineIOResult<>( new Ok<>( new JVMList<>( stream.collect( Collectors.toList( ))).iter( )));}catch( IOException e){ return new InlineIOResult<>( new Err<>( e));}}
-	readString(source : Path) : IOResult<String> {try{ return new InlineIOResult<>( new Ok<>( Files.readString( source)));}catch( IOException e){ return new InlineIOResult<>( new Err<>( e));}}
-	createDirectories(targetParent : Path) : Option<IOException> {try{ Files.createDirectories( targetParent);return new None<>( );}catch( IOException e){ return new Some<>( e);}}
+	writeString(target : Path, output : String) : Option<IOException> {
+		try{ 
+		Files.writeString( target, output);
+		return new None<>( );}
+		catch( IOException e){ 
+		return new Some<>( e);}
+	}
+	walk(sourceDirectory : Path) : IOResult<Iter<Path>> {
+		try{ 
+		 Stream<Path> stream=Files.walk( sourceDirectory);
+		return new InlineIOResult<>( new Ok<>( new JVMList<>( stream.collect( Collectors.toList( ))).iter( )));}
+		catch( IOException e){ 
+		return new InlineIOResult<>( new Err<>( e));}
+	}
+	readString(source : Path) : IOResult<String> {
+		try{ 
+		return new InlineIOResult<>( new Ok<>( Files.readString( source)));}
+		catch( IOException e){ 
+		return new InlineIOResult<>( new Err<>( e));}
+	}
+	createDirectories(targetParent : Path) : Option<IOException> {
+		try{ 
+		Files.createDirectories( targetParent);
+		return new None<>( );}
+		catch( IOException e){ 
+		return new Some<>( e);}
+	}
 }

@@ -9,6 +9,7 @@ import magmac.app.compile.rule.OrRule;
 import magmac.app.compile.rule.PrefixRule;
 import magmac.app.compile.rule.Rule;
 import magmac.app.compile.rule.StringRule;
+import magmac.app.compile.rule.StripRule;
 import magmac.app.compile.rule.SuffixRule;
 import magmac.app.compile.rule.TypeRule;
 import magmac.app.compile.rule.fold.DelimitedFolder;
@@ -51,7 +52,7 @@ public final class TypescriptLang {
 
         PrefixRule header1 = new PrefixRule("\n\t", new NodeRule("header", header));
         DivideRule children = CommonLang.Statements("children", TypescriptLang.createFunctionSegmentRule());
-        SuffixRule childRule = new SuffixRule(LocatingRule.First(header1, " {", children), "}");
+        SuffixRule childRule = new SuffixRule(LocatingRule.First(header1, " {", new StripRule("", children, "after-children")), "}");
         return new TypeRule("method", new OptionNodeListRule("children",
                 childRule,
                 new SuffixRule(header1, ";")

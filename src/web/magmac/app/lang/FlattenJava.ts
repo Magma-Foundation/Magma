@@ -11,6 +11,16 @@ import { PassResult } from "../../../magmac/app/stage/PassResult";
 import { Passer } from "../../../magmac/app/stage/Passer";
 import { ParseState } from "../../../magmac/app/stage/parse/ParseState";
 export class FlattenJava {
-	getChildren(state : ParseState, node : Node) : InlinePassResult { Tuple2<ParseState, Node> parseStateNodeTuple2=new Tuple2<>( state, node);return new InlinePassResult( new Some<>( InlineCompileResult.fromOk( parseStateNodeTuple2)));}
-	pass(state : ParseState, node : Node) : PassResult {if(node.is( "root")){  NodeList values=new InlineNodeList( node.findNodeList( "children").orElse( InlineNodeList.empty( )).iter( ).filter( (Node child) ->!child.is( "package")).collect( new ListCollector<>( )));return FlattenJava.getChildren( state, node.withNodeList( "children", values));}if(node.is( "record")){ return FlattenJava.getChildren( state, node.retype( "class"));}return InlinePassResult.empty( );}
+	getChildren(state : ParseState, node : Node) : InlinePassResult {
+		 Tuple2<ParseState, Node> parseStateNodeTuple2=new Tuple2<>( state, node);
+		return new InlinePassResult( new Some<>( InlineCompileResult.fromOk( parseStateNodeTuple2)));
+	}
+	pass(state : ParseState, node : Node) : PassResult {
+		if(node.is( "root")){ 
+		 NodeList values=new InlineNodeList( node.findNodeList( "children").orElse( InlineNodeList.empty( )).iter( ).filter( (Node child) ->!child.is( "package")).collect( new ListCollector<>( )));
+		return FlattenJava.getChildren( state, node.withNodeList( "children", values));}
+		if(node.is( "record")){ 
+		return FlattenJava.getChildren( state, node.retype( "class"));}
+		return InlinePassResult.empty( );
+	}
 }

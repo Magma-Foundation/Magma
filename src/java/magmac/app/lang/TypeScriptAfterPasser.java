@@ -46,7 +46,8 @@ public class TypeScriptAfterPasser implements Passer {
             Node header = node.findNode("header").orElse(new MapNode());
             NodeList parameters = node.findNodeList("parameters").orElse(InlineNodeList.empty());
             Node withParameters = header.withNodeList("parameters", parameters);
-            return new Some<>(new InlinePassResult(new Some<>(InlineCompileResult.fromOk(new Tuple2<>(state, node.withNode("header", withParameters))))));
+            return new Some<>(InlinePassResult.from(state, node.withNode("header", withParameters)
+                    .withString("after-children", "\n\t")));
         }
 
         return new None<>();
@@ -56,6 +57,16 @@ public class TypeScriptAfterPasser implements Passer {
     public PassResult pass(ParseState state, Node node) {
         return TypeScriptAfterPasser.passImport(state, node)
                 .or(() -> TypeScriptAfterPasser.passMethod(state, node))
+                .or(() -> this.format(state, node))
                 .orElseGet(() -> InlinePassResult.empty());
+    }
+
+    private Option<PassResult> format(ParseState state, Node node) {
+        if (node.is("statement") || node.is("block")) {
+            Node before = node.withString("before", "\n\t\t");
+            return new Some<>(InlinePassResult.from(state, before));
+        }
+
+        return new None<>();
     }
 }

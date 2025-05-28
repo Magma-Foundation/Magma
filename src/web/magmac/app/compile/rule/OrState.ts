@@ -11,8 +11,18 @@ import { Context } from "../../../../magmac/app/compile/error/context/Context";
 import { CompileError } from "../../../../magmac/app/compile/error/error/CompileError";
 import { ImmutableCompileError } from "../../../../magmac/app/error/ImmutableCompileError";
 export class OrState {
-	constructor() {this( new None<T>( ), Lists.empty( ));}
-	withValue(value : T) : OrState<T> {if(this.maybeValue.isPresent( )){ return this;}return new OrState<>( new Some<T>( value), this.errors);}
-	toResult(context : Context) : CompileResult<T> {return this.maybeValue.map( (T value) ->InlineCompileResult.fromResult( new Ok<>( value))).orElseGet( () ->InlineCompileResult.fromResult( new Err<>( new ImmutableCompileError( "Invalid combination", context, this.errors))));}
-	withError(error : CompileError) : OrState<T> {return new OrState<>( this.maybeValue, this.errors.add( error));}
+	constructor() {
+		this( new None<T>( ), Lists.empty( ));
+	}
+	withValue(value : T) : OrState<T> {
+		if(this.maybeValue.isPresent( )){ 
+		return this;}
+		return new OrState<>( new Some<T>( value), this.errors);
+	}
+	toResult(context : Context) : CompileResult<T> {
+		return this.maybeValue.map( (T value) ->InlineCompileResult.fromResult( new Ok<>( value))).orElseGet( () ->InlineCompileResult.fromResult( new Err<>( new ImmutableCompileError( "Invalid combination", context, this.errors))));
+	}
+	withError(error : CompileError) : OrState<T> {
+		return new OrState<>( this.maybeValue, this.errors.add( error));
+	}
 }

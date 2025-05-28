@@ -20,6 +20,8 @@ import magmac.app.compile.rule.divide.FoldingDivider;
 import magmac.app.compile.rule.fold.DelimitedFolder;
 import magmac.app.compile.rule.split.DividingSplitter;
 
+import java.lang.reflect.Type;
+
 public final class JavaLang {
     public static Rule createRule() {
         return new TypeRule("root", CommonLang.Statements("children", new OrRule(Lists.of(
@@ -170,7 +172,7 @@ public final class JavaLang {
 
         Rule parameters = CommonLang.createParametersRule(JavaLang.createDefinitionRule());
         Rule content = CommonLang.Statements("children", JavaLang.createFunctionSegmentRule());
-        Rule rightRule = new StripRule(new PrefixRule("{", new SuffixRule(content, "}")));
+        Rule rightRule = new StripRule(new PrefixRule("{", new SuffixRule(new StripRule("", content, "after-children"), "}")));
         Rule withParams = new OrRule(Lists.of(
                 new SuffixRule(parameters, ");"),
                 LocatingRule.First(parameters, ")", rightRule)
@@ -182,11 +184,13 @@ public final class JavaLang {
     static Rule createFunctionSegmentRule() {
         LazyRule functionSegmentRule = new MutableLazyRule();
         Rule functionSegmentValueRule = JavaLang.createFunctionSegmentValueRule(functionSegmentRule);
-        return functionSegmentRule.set(new OrRule(Lists.of(
+        Rule rule = new OrRule(Lists.of(
                 CommonLang.createWhitespaceRule(),
-                new StripRule(new SuffixRule(functionSegmentValueRule, ";")),
+                new TypeRule("statement", new StripRule(new SuffixRule(new NodeRule("child", functionSegmentValueRule), ";"))),
                 JavaLang.createBlockRule(functionSegmentRule)
-        )));
+        ));
+
+        return functionSegmentRule.set(new StripRule("before", rule, ""));
     }
 
     private static Rule createBlockRule(LazyRule functionSegmentRule) {
@@ -194,7 +198,7 @@ public final class JavaLang {
         Rule children = CommonLang.Statements("children", functionSegmentRule);
         Splitter first = DividingSplitter.First(new FoldingDivider(new BlockFolder()), "");
         Rule childRule = new LocatingRule(new SuffixRule(header, "{"), first, children);
-        return new StripRule(new SuffixRule(childRule, "}"));
+        return new TypeRule("block", new StripRule(new SuffixRule(childRule, "}")));
     }
 
     private static Rule createBlockHeaderRule(Rule functionSegment) {

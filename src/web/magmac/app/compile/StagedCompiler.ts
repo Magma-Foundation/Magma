@@ -6,5 +6,7 @@ import { Lexer } from "../../../magmac/app/stage/lexer/Lexer";
 import { Parser } from "../../../magmac/app/stage/parse/Parser";
 import { Map } from "../../../magmac/api/collect/map/Map";
 export class StagedCompiler {
-	compile(units : Map<Location, String>) : CompileResult<Map<Location, String>> {return this.lexer.apply( units).flatMapValue( (Roots trees) ->this.parser.apply( trees)).flatMapValue( (Roots trees) ->this.generator.apply( trees));}
+	compile(units : Map<Location, String>) : CompileResult<Map<Location, String>> {
+		return this.lexer.apply( units).flatMapValue( (Roots trees) ->this.parser.apply( trees)).flatMapValue( (Roots trees) ->this.generator.apply( trees));
+	}
 }

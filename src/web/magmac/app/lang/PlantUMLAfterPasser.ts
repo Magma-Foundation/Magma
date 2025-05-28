@@ -14,9 +14,34 @@ import { PassResult } from "../../../magmac/app/stage/PassResult";
 import { Passer } from "../../../magmac/app/stage/Passer";
 import { ParseState } from "../../../magmac/app/stage/parse/ParseState";
 export class PlantUMLAfterPasser {
-	createInherits(child : Node, key : String) : Option<Node> {return child.findNode( key).map( (Node implemented) ->new MapNode( "inherits").withString( "child", child.findString( "name").orElse( "")).withString( "parent", PlantUMLAfterPasser.findValue( implemented)));}
-	findValue(type : Node) : String {if(type.is( "template")){ return type.findString( "base").orElse( "?");}if(type.is( "symbol")){ return type.findString( "value").orElse( "?");}return "?";}
-	replaceRootChild(child : Node) : Iter<Node> { Option<Node> extended=PlantUMLAfterPasser.createInherits( child, "extended"); Option<Node> implemented=PlantUMLAfterPasser.createInherits( child, "implemented");return Iters.fromValues( child).concat( Iters.fromOption( extended)).concat( Iters.fromOption( implemented));}
-	replaceRootChildren(node : Node) : NodeList {return new InlineNodeList( node.findNodeList( "children").orElse( InlineNodeList.empty( )).iter( ).flatMap( (Node child) ->PlantUMLAfterPasser.replaceRootChild( child)).collect( new ListCollector<>( )));}
-	pass(state : ParseState, node : Node) : PassResult {if(node.is( "root")){  NodeList values=PlantUMLAfterPasser.replaceRootChildren( node); Tuple2<ParseState, Node> tuple=new Tuple2<>( state, node.withNodeList( "children", values));return new InlinePassResult( new Some<>( InlineCompileResult.fromOk( tuple)));}if(node.is( "import")){  String child=node.findNodeList( "segments").orElse( InlineNodeList.empty( )).findLast( ).orElse( null).findString( "value").orElse( ""); Node dependency=new MapNode( "dependency").withString( "parent", state.findLocation( ).name( )).withString( "child", child); Tuple2<ParseState, Node> tuple=new Tuple2<>( state, dependency);return new InlinePassResult( new Some<>( InlineCompileResult.fromOk( tuple)));}return InlinePassResult.empty( );}
+	createInherits(child : Node, key : String) : Option<Node> {
+		return child.findNode( key).map( (Node implemented) ->new MapNode( "inherits").withString( "child", child.findString( "name").orElse( "")).withString( "parent", PlantUMLAfterPasser.findValue( implemented)));
+	}
+	findValue(type : Node) : String {
+		if(type.is( "template")){ 
+		return type.findString( "base").orElse( "?");}
+		if(type.is( "symbol")){ 
+		return type.findString( "value").orElse( "?");}
+		return "?";
+	}
+	replaceRootChild(child : Node) : Iter<Node> {
+		 Option<Node> extended=PlantUMLAfterPasser.createInherits( child, "extended");
+		 Option<Node> implemented=PlantUMLAfterPasser.createInherits( child, "implemented");
+		return Iters.fromValues( child).concat( Iters.fromOption( extended)).concat( Iters.fromOption( implemented));
+	}
+	replaceRootChildren(node : Node) : NodeList {
+		return new InlineNodeList( node.findNodeList( "children").orElse( InlineNodeList.empty( )).iter( ).flatMap( (Node child) ->PlantUMLAfterPasser.replaceRootChild( child)).collect( new ListCollector<>( )));
+	}
+	pass(state : ParseState, node : Node) : PassResult {
+		if(node.is( "root")){ 
+		 NodeList values=PlantUMLAfterPasser.replaceRootChildren( node);
+		 Tuple2<ParseState, Node> tuple=new Tuple2<>( state, node.withNodeList( "children", values));
+		return new InlinePassResult( new Some<>( InlineCompileResult.fromOk( tuple)));}
+		if(node.is( "import")){ 
+		 String child=node.findNodeList( "segments").orElse( InlineNodeList.empty( )).findLast( ).orElse( null).findString( "value").orElse( "");
+		 Node dependency=new MapNode( "dependency").withString( "parent", state.findLocation( ).name( )).withString( "child", child);
+		 Tuple2<ParseState, Node> tuple=new Tuple2<>( state, dependency);
+		return new InlinePassResult( new Some<>( InlineCompileResult.fromOk( tuple)));}
+		return InlinePassResult.empty( );
+	}
 }
