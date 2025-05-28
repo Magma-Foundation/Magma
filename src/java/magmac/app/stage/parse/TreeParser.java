@@ -13,9 +13,9 @@ import magmac.app.compile.node.Node;
 import magmac.app.compile.node.NodeList;
 import magmac.app.io.Location;
 import magmac.app.stage.AfterAll;
-import magmac.app.stage.MapRoots;
+import magmac.app.stage.MapUnitSet;
 import magmac.app.stage.Passer;
-import magmac.app.stage.Roots;
+import magmac.app.stage.UnitSet;
 
 public class TreeParser implements Parser {
     private final Passer beforeChild;
@@ -67,10 +67,10 @@ public class TreeParser implements Parser {
     }
 
     @Override
-    public CompileResult<Roots> apply(Roots initial) {
-        return initial.iter()
+    public CompileResult<UnitSet<Node>> apply(UnitSet<Node> initial) {
+        return initial.iter().map(unit -> unit.tuple())
                 .map((Tuple2<Location, Node> tuple) -> this.parse(tuple.left(), tuple.right()))
                 .collect(new CompileResultCollector<>(new MapCollector<>()))
-                .flatMapValue((Map<Location, Node> parsed) -> InlineCompileResult.fromResult(new Ok<Roots, CompileError>(new MapRoots(this.afterAllChildren.afterAll(parsed)))));
+                .flatMapValue((Map<Location, Node> parsed) -> InlineCompileResult.fromResult(new Ok<UnitSet<Node>, CompileError>(new MapUnitSet(this.afterAllChildren.afterAll(parsed)))));
     }
 }

@@ -1,8 +1,9 @@
 package magmac.app.stage.parse;
 
-import magmac.app.stage.Roots;
+import magmac.app.compile.node.Node;
+import magmac.app.stage.UnitSet;
 import magmac.app.stage.Stage;
 
-public interface Parser extends Stage<Roots, Roots> {
+public interface Parser extends Stage<UnitSet<Node>, UnitSet<Node>> {
 
 }

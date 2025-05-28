@@ -9,8 +9,8 @@ import magmac.app.compile.error.InlineCompileResult;
 import magmac.app.compile.node.Node;
 import magmac.app.compile.rule.Rule;
 import magmac.app.io.Location;
-import magmac.app.stage.MapRoots;
-import magmac.app.stage.Roots;
+import magmac.app.stage.MapUnitSet;
+import magmac.app.stage.UnitSet;
 
 public class RuleLexer implements Lexer {
     private final Rule rootRule;
@@ -28,11 +28,11 @@ public class RuleLexer implements Lexer {
     }
 
     @Override
-    public CompileResult<Roots> apply(Map<Location, String> initial) {
+    public CompileResult<UnitSet<Node>> apply(Map<Location, String> initial) {
         return InlineCompileResult.fromResult(initial.iterEntries()
                 .map((Tuple2<Location, String> entry) -> this.foldEntry(entry))
                 .map((CompileResult<Tuple2<Location, Node>> tuple2CompileResult) -> tuple2CompileResult.result())
                 .collect(new ResultCollector<>(new MapCollector<>()))
-                .mapValue((Map<Location, Node> roots) -> new MapRoots(roots)));
+                .mapValue((Map<Location, Node> roots) -> new MapUnitSet(roots)));
     }
 }

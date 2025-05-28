@@ -7,6 +7,8 @@ class TypeScriptTargetPlatform
 
 interface Targets
 
+class Unit
+
 interface List
 
 interface TargetPlatform
@@ -63,6 +65,9 @@ class RuleLexer
 
 class CompileApplication
 ? <|-- CompileApplication
+
+class MapUnitSet
+UnitSet <|-- MapUnitSet
 
 class OrState
 
@@ -142,12 +147,12 @@ class ContextRule
 
 interface Selector
 
+interface UnitSet
+
 class RangeHead
 Head <|-- RangeHead
 
 interface Source
-
-interface Roots
 
 class FlatMapHead
 Head <|-- FlatMapHead
@@ -223,9 +228,6 @@ class PlantUMLTargetPlatform
 
 class MutableLazyRule
 ? <|-- MutableLazyRule
-
-class MapRoots
-? <|-- MapRoots
 
 class JVMMap
 Map <|-- JVMMap
@@ -359,10 +361,6 @@ MergeDiagram --> Node
 MergeDiagram --> NodeList
 MergeDiagram --> Location
 MergeDiagram --> AfterAll
-Roots --> Tuple2
-Roots --> Iter
-Roots --> Node
-Roots --> Location
 Node --> Option
 Node --> Tuple2
 Node --> Iter
@@ -442,7 +440,8 @@ SingleHead --> Some
 Sources --> IOResult
 Sources --> Location
 Sources --> Map
-Parser --> Roots
+Parser --> Node
+Parser --> UnitSet
 EmptyAfterAll --> Node
 EmptyAfterAll --> Location
 EmptyAfterAll --> Map
@@ -459,19 +458,15 @@ TreeParser --> Node
 TreeParser --> NodeList
 TreeParser --> Location
 TreeParser --> AfterAll
-TreeParser --> MapRoots
+TreeParser --> MapUnitSet
 TreeParser --> Passer
-TreeParser --> Roots
-MapRoots --> Tuple2
-MapRoots --> Iter
-MapRoots --> Node
-MapRoots --> Location
-MapRoots --> Map
+TreeParser --> UnitSet
 InlineNodeList --> Option
 InlineNodeList --> Some
 InlineNodeList --> List
 InlineNodeList --> Lists
 InlineNodeList --> Iter
+UnitSet --> Iter
 Rule --> CompileResult
 Rule --> Node
 RuleGenerator --> Tuple2
@@ -482,7 +477,7 @@ RuleGenerator --> InlineCompileResult
 RuleGenerator --> Node
 RuleGenerator --> Rule
 RuleGenerator --> Location
-RuleGenerator --> Roots
+RuleGenerator --> UnitSet
 RuleGenerator --> Map
 Map --> Tuple2
 Map --> Iter
@@ -492,8 +487,9 @@ JVMMap --> JVMList
 JVMMap --> ArrayList
 Application --> Error
 Application --> Option
+Generator --> Node
 Generator --> Location
-Generator --> Roots
+Generator --> UnitSet
 Generator --> Map
 CompileResultCollector --> Ok
 Max --> Optional
@@ -561,8 +557,9 @@ Targets --> IOException
 Targets --> Map
 Targets --> Option
 StagedCompiler --> CompileResult
+StagedCompiler --> Node
 StagedCompiler --> Location
-StagedCompiler --> Roots
+StagedCompiler --> UnitSet
 StagedCompiler --> Generator
 StagedCompiler --> Lexer
 StagedCompiler --> Parser
@@ -669,6 +666,8 @@ FilterRule --> Node
 FilterRule --> Filter
 FilterRule --> NumberFilter
 FilterRule --> SymbolFilter
+Unit --> Tuple2
+Unit --> Location
 Passer --> Node
 Passer --> ParseState
 Result --> Tuple2
@@ -744,8 +743,9 @@ DivideState --> Option
 DivideState --> Iter
 HeadedIter --> Ok
 Lexer --> Map
+Lexer --> Node
 Lexer --> Location
-Lexer --> Roots
+Lexer --> UnitSet
 Option --> Consumer
 Option --> Function
 Option --> Predicate
@@ -785,6 +785,10 @@ PathSources --> SafeFiles
 PathSources --> IOException
 PathSources --> Files
 PathSources --> Path
+MapUnitSet --> Tuple2
+MapUnitSet --> Node
+MapUnitSet --> Location
+MapUnitSet --> Map
 ThrowableError --> Error
 ThrowableError --> PrintWriter
 ThrowableError --> StringWriter
@@ -900,8 +904,8 @@ RuleLexer --> InlineCompileResult
 RuleLexer --> Node
 RuleLexer --> Rule
 RuleLexer --> Location
-RuleLexer --> MapRoots
-RuleLexer --> Roots
+RuleLexer --> MapUnitSet
+RuleLexer --> UnitSet
 Location --> List
 Location --> Joiner
 TypeRule --> Lists
