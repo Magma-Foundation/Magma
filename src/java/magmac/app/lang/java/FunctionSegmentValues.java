@@ -6,7 +6,7 @@ import magmac.app.compile.node.Node;
 
 public class FunctionSegmentValues {
     public static CompileResult<FunctionSegmentValue> deserialize(Node node) {
-        return Deserializers.or(node, Lists.of(
+        return Deserializers.orError(node, Lists.of(
                 Return::deserialize
         ));
     }

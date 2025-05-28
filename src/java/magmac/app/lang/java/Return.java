@@ -7,7 +7,7 @@ import magmac.app.compile.node.Node;
 public record Return(Value value) implements FunctionSegmentValue {
     public static Option<CompileResult<FunctionSegmentValue>> deserialize(Node node) {
         return node.deserializeWithType("return").map(deserializer -> {
-            return deserializer.node("value", Values::deserialize).complete(value -> new Return(value));
+            return deserializer.node("value", Values::deserializeError).complete(value -> new Return(value));
         });
     }
 }

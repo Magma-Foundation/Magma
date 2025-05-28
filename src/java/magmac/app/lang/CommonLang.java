@@ -131,9 +131,9 @@ final class CommonLang {
     }
 
     private static Rule createInvokableRule(Rule value) {
-        Rule caller = new ContextRule("With caller", new SuffixRule(new OrRule(Lists.of(
-                new ContextRule("As construction", new StripRule(new PrefixRule("new ", new NodeRule("type", CommonLang.createTypeRule())))),
-                new ContextRule("As invocation", new NodeRule("caller", value))
+        Rule caller = new NodeRule("caller", new SuffixRule(new OrRule(Lists.of(
+                new ContextRule("As construction", CommonLang.createConstructionRule()),
+                new ContextRule("As invocation", value)
         )), "("));
 
         NodeListRule arguments = CommonLang.createArgumentsRule(value);
@@ -141,7 +141,11 @@ final class CommonLang {
         return new TypeRule("invokable", new StripRule(new SuffixRule(new LocatingRule(caller, splitter, arguments), ")")));
     }
 
-    public static NodeListRule createArgumentsRule(Rule value) {
+    private static Rule createConstructionRule() {
+        return new TypeRule("construction", new StripRule(new PrefixRule("new ", new NodeRule("type", CommonLang.createTypeRule()))));
+    }
+
+    static NodeListRule createArgumentsRule(Rule value) {
         return new NodeListRule("arguments", new ValueFolder(), new OrRule(Lists.of(
                 CommonLang.createWhitespaceRule(),
                 value

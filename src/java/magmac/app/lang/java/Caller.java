@@ -4,10 +4,11 @@ import magmac.api.collect.list.Lists;
 import magmac.app.compile.error.CompileResult;
 import magmac.app.compile.node.Node;
 
-public interface FunctionSegment {
-    static CompileResult<FunctionSegment> deserialize(Node node) {
+public interface Caller {
+    static CompileResult<Caller> deserialize(Node node) {
         return Deserializers.orError(node, Lists.of(
-                StatementNode::deserialize
+                Construction::deserialize,
+                node1 -> Values.deserialize(node1).map(result -> result.mapValue(type -> type))
         ));
     }
 }
