@@ -8,6 +8,6 @@ export class FirstSelector {
 		this.delimiter=delimiter;
 	}
 	select(list : List<String>) : Option<Tuple2<String, String>> {
-		return list.popFirst( ).map( (Tuple2<String, List<String>> tuple) ->{ String joined=tuple.right( ).iter( ).collect( new Joiner( this.delimiter)).orElse( "");return new Tuple2<String, String>( tuple.left( ), joined);});
+		return list.popFirst( ).map( (Tuple2<String, List<String>> tuple)  => { String joined=tuple.right( ).iter( ).collect( new Joiner( this.delimiter)).orElse( "");return new Tuple2<String, String>( tuple.left( ), joined);});
 	}
 }

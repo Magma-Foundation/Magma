@@ -9,6 +9,6 @@ export class Joiner {
 		return new None<>( );
 	}
 	fold(current : Option<String>, element : String) : Option<String> {
-		return new Some<>( current.map( (String inner) ->inner+this.delimiter+element).orElse( element));
+		return new Some<>( current.map( (String inner)  => inner+this.delimiter+element).orElse( element));
 	}
 }

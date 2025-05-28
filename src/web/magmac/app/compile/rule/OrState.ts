@@ -20,7 +20,7 @@ export class OrState {
 		return new OrState<>( new Some<T>( value), this.errors);
 	}
 	toResult(context : Context) : CompileResult<T> {
-		return this.maybeValue.map( (T value) ->InlineCompileResult.fromResult( new Ok<>( value))).orElseGet( () ->InlineCompileResult.fromResult( new Err<>( new ImmutableCompileError( "Invalid combination", context, this.errors))));
+		return this.maybeValue.map( (T value)  => InlineCompileResult.fromResult( new Ok<>( value))).orElseGet( ()  => InlineCompileResult.fromResult( new Err<>( new ImmutableCompileError( "Invalid combination", context, this.errors))));
 	}
 	withError(error : CompileError) : OrState<T> {
 		return new OrState<>( this.maybeValue, this.errors.add( error));

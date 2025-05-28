@@ -8,7 +8,7 @@ export class FoldingDivider {
 	foldSingleQuotes(current : DivideState, c : char) : Option<DivideState> {
 		if('\''!=c){ 
 		return new None<>( );}
-		return current.append( c).popAndAppendToTuple( ).flatMap( (Tuple2<DivideState, Character> tuple) ->FoldingDivider.foldEscape( current, tuple.right( ))).flatMap( (DivideState state) ->state.popAndAppendToOption( ));
+		return current.append( c).popAndAppendToTuple( ).flatMap( (Tuple2<DivideState, Character> tuple)  => FoldingDivider.foldEscape( current, tuple.right( ))).flatMap( (DivideState state)  => state.popAndAppendToOption( ));
 	}
 	foldEscape(current : DivideState, c : char) : Option<DivideState> {
 		if('\\'==c){ 
@@ -41,7 +41,7 @@ export class FoldingDivider {
 		current=maybePopped.orElse( null).left( );
 		 char c=maybePopped.orElse( null).right( );
 		 DivideState finalCurrent=current;
-		current=FoldingDivider.foldSingleQuotes( current, c).or( () ->FoldingDivider.foldDoubleQuotes( finalCurrent, c)).orElseGet( () ->this.folder.fold( finalCurrent, c));}
+		current=FoldingDivider.foldSingleQuotes( current, c).or( ()  => FoldingDivider.foldDoubleQuotes( finalCurrent, c)).orElseGet( ()  => this.folder.fold( finalCurrent, c));}
 		return current.advance( ).iter( );
 	}
 }

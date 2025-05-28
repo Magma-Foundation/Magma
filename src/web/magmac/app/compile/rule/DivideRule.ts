@@ -13,12 +13,12 @@ import { FoldingDivider } from "../../../../magmac/app/compile/rule/divide/Foldi
 import { Folder } from "../../../../magmac/app/compile/rule/fold/Folder";
 export class DivideRule {
 	join(list : NodeList) : CompileResult<Option<String>> {
-		return list.iter( ).map( (Node node) ->this.childRule.generate( node)).collect( new CompileResultCollector<>( new Joiner( this.folder.createDelimiter( ))));
+		return list.iter( ).map( (Node node)  => this.childRule.generate( node)).collect( new CompileResultCollector<>( new Joiner( this.folder.createDelimiter( ))));
 	}
 	lex(input : String) : CompileResult<Node> {
-		return new FoldingDivider( this.folder).divide( input).map( (String segment) ->this.childRule.lex( segment)).collect( new CompileResultCollector<>( new ListCollector<>( ))).mapValue( (List<Node> children) ->new MapNode( ).withNodeList( this.key( ), new InlineNodeList( children)));
+		return new FoldingDivider( this.folder).divide( input).map( (String segment)  => this.childRule.lex( segment)).collect( new CompileResultCollector<>( new ListCollector<>( ))).mapValue( (List<Node> children)  => new MapNode( ).withNodeList( this.key( ), new InlineNodeList( children)));
 	}
 	generate(node : Node) : CompileResult<String> {
-		return node.findNodeList( this.key).map( (NodeList list) ->this.join( list)).orElseGet( () ->CompileErrors.createNodeError( "Node list '" + this.key + "' not present", node)).mapValue( (Option<String> value) ->value.orElse( ""));
+		return node.findNodeList( this.key).map( (NodeList list)  => this.join( list)).orElseGet( ()  => CompileErrors.createNodeError( "Node list '" + this.key + "' not present", node)).mapValue( (Option<String> value)  => value.orElse( ""));
 	}
 }

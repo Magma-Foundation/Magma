@@ -14,6 +14,6 @@ export class RuleGenerator {
 		this.rootRule=rootRule;
 	}
 	apply(initial : Roots) : CompileResult<Map<Location, String>> {
-		return InlineCompileResult.fromResult( initial.iter( ).map( (Tuple2<Location, Node> entry) ->this.rootRule.generate( entry.right( )).result( ).mapValue( (String generated) ->new Tuple2<>( entry.left( ), generated))).collect( new ResultCollector<>( new MapCollector<>( ))));
+		return InlineCompileResult.fromResult( initial.iter( ).map( (Tuple2<Location, Node> entry)  => this.rootRule.generate( entry.right( )).result( ).mapValue( (String generated)  => new Tuple2<>( entry.left( ), generated))).collect( new ResultCollector<>( new MapCollector<>( ))));
 	}
 }

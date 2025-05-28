@@ -9,7 +9,7 @@ import { Files } from "../../../../java/nio/file/Files";
 import { Path } from "../../../../java/nio/file/Path";
 export class PathTargets {
 	write(location : Location, output : String) : Option<IOException> {
-		 Path targetParent=location.namespace( ).iter( ).fold( this.root( ),  (Path path, String other) ->path.resolve( other));
+		 Path targetParent=location.namespace( ).iter( ).fold( this.root( ),  (Path path, String other)  => path.resolve( other));
 		if(!Files.exists( targetParent)){ 
 		 Option<IOException> maybeError=SafeFiles.createDirectories( targetParent);
 		if(maybeError.isPresent( )){ 
@@ -18,6 +18,6 @@ export class PathTargets {
 		return SafeFiles.writeString( target, output);
 	}
 	writeAll(outputs : Map<Location, String>) : Option<IOException> {
-		return outputs.iterEntries( ).map( (Tuple2<Location, String> entry) ->this.write( entry.left( ), entry.right( ))).flatMap( (Option<IOException> option) ->Iters.fromOption( option)).next( );
+		return outputs.iterEntries( ).map( (Tuple2<Location, String> entry)  => this.write( entry.left( ), entry.right( ))).flatMap( (Option<IOException> option)  => Iters.fromOption( option)).next( );
 	}
 }

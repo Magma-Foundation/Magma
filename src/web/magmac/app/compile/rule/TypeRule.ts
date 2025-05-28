@@ -13,11 +13,11 @@ export class TypeRule {
 		return new ImmutableCompileError( "Cannot use type '" + this.type + "'", context, Lists.of( err));
 	}
 	lex(input : String) : CompileResult<Node> {
-		return InlineCompileResult.fromResult( this.childRule.lex( input).result( ).mapValue( (Node node) ->node.retype( this.type)).mapErr( (CompileError err) ->this.createError( new StringContext( input), err)));
+		return InlineCompileResult.fromResult( this.childRule.lex( input).result( ).mapValue( (Node node)  => node.retype( this.type)).mapErr( (CompileError err)  => this.createError( new StringContext( input), err)));
 	}
 	generate(node : Node) : CompileResult<String> {
 		if(node.is( this.type)){ 
-		return InlineCompileResult.fromResult( this.childRule.generate( node).result( ).mapErr( (CompileError err) ->this.createError( new NodeContext( node), err)));}
+		return InlineCompileResult.fromResult( this.childRule.generate( node).result( ).mapErr( (CompileError err)  => this.createError( new NodeContext( node), err)));}
 		return CompileErrors.createNodeError( "Type '" + this.type + "' not present", node);
 	}
 }

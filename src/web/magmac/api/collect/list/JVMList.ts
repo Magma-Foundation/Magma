@@ -18,23 +18,23 @@ export class JVMList {
 		return new JVMList<>( copy);
 	}
 	iter() : Iter<T> {
-		return new HeadedIter<>( new RangeHead( this.elements.size( ))).map( (Integer index) ->this.get( index));
+		return new HeadedIter<>( new RangeHead( this.elements.size( ))).map( (Integer index)  => this.get( index));
 	}
 	addAll(others : List<T>) : List<T> {
-		return others.iter( ).fold( this.createInitial( ),  (List<T> tList, T element) ->tList.add( element));
+		return others.iter( ).fold( this.createInitial( ),  (List<T> tList, T element)  => tList.add( element));
 	}
 	createInitial() : List<T> {
 		return this;
 	}
 	removeAll(others : List<T>) : List<T> {
-		return this.iter( ).filter( (T value) ->!others.contains( value)).collect( new ListCollector<>( ));
+		return this.iter( ).filter( (T value)  => !others.contains( value)).collect( new ListCollector<>( ));
 	}
 	get(index : int) : T {
 		return this.elements.get( index);
 	}
 	sort(sorter : BiFunction<T, T, Integer>) : List<T> {
 		 ArrayList<T> copy=new ArrayList<>( this.elements);
-		copy.sort( (T t, T u) ->sorter.apply( t, u));
+		copy.sort( (T t, T u)  => sorter.apply( t, u));
 		return new JVMList<>( copy);
 	}
 	getLast() : T {

@@ -8,7 +8,7 @@ export class LastSelector {
 		this.delimiter=delimiter;
 	}
 	select(list : List<String>) : Option<Tuple2<String, String>> {
-		return list.popLast( ).map( (Tuple2<List<String>, String> tuple) ->this.merge( tuple));
+		return list.popLast( ).map( (Tuple2<List<String>, String> tuple)  => this.merge( tuple));
 	}
 	merge(tuple : Tuple2<List<String>, String>) : Tuple2<String, String> {
 		 String joined=tuple.left( ).iter( ).collect( new Joiner( this.delimiter)).orElse( "");

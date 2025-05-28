@@ -9,6 +9,6 @@ export class PrefixRule {
 		return this.childRule.lex( sliced);
 	}
 	generate(node : Node) : CompileResult<String> {
-		return this.childRule.generate( node).mapValue( (String value) ->this.prefix+value);
+		return this.childRule.generate( node).mapValue( (String value)  => this.prefix+value);
 	}
 }

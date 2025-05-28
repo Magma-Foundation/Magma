@@ -5,6 +5,6 @@ export class CompileResultCollector {
 		return InlineCompileResult.fromResult( new Ok<>( this.joiner.createInitial( )));
 	}
 	fold(maybeCurrent : CompileResult<C>, maybeElement : CompileResult<T>) : CompileResult<C> {
-		return maybeCurrent.flatMapValue( (C currentValue) ->maybeElement.mapValue( (T element) ->this.joiner.fold( currentValue, element)));
+		return maybeCurrent.flatMapValue( (C currentValue)  => maybeElement.mapValue( (T element)  => this.joiner.fold( currentValue, element)));
 	}
 }

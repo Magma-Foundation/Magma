@@ -38,15 +38,15 @@ export class CommonLang {
 		 Rule source=new NodeRule( "source", value);
 		return new TypeRule( "assignment", LocatingRule.First( definition, "=", source));
 	}
-	initValueRule(segment : Rule, value : LazyRule) : LazyRule {
-		return value.set( new OrRule( Lists.of( CommonLang.createLambdaRule( value, segment), new StripRule( new PrefixRule( "!", new NodeRule( "child", value))), CommonLang.createCharRule( ), CommonLang.createStringRule( ), CommonLang.createInvokableRule( value), CommonLang.createNumberRule( ), CommonLang.createAccessRule( value), CommonLang.createSymbolValueRule( ), CommonLang.createOperationRule( value, "add", "+"), CommonLang.createOperationRule( value, "subtract", "-"), CommonLang.createOperationRule( value, "equals", "=="), CommonLang.createOperationRule( value, "less-than", "<"), CommonLang.createOperationRule( value, "and", "&&"), CommonLang.createOperationRule( value, "or", "||"), CommonLang.createOperationRule( value, "not-equals", "!="), CommonLang.createOperationRule( value, "greater-than", ">"), CommonLang.createIndexRule( value))));
+	initValueRule(segment : Rule, value : LazyRule, lambdaInfix : String) : LazyRule {
+		return value.set( new OrRule( Lists.of( CommonLang.createLambdaRule( value, segment, lambdaInfix), new StripRule( new PrefixRule( "!", new NodeRule( "child", value))), CommonLang.createCharRule( ), CommonLang.createStringRule( ), CommonLang.createInvokableRule( value), CommonLang.createNumberRule( ), CommonLang.createAccessRule( value), CommonLang.createSymbolValueRule( ), CommonLang.createOperationRule( value, "add", "+"), CommonLang.createOperationRule( value, "subtract", "-"), CommonLang.createOperationRule( value, "equals", "=="), CommonLang.createOperationRule( value, "less-than", "<"), CommonLang.createOperationRule( value, "and", "&&"), CommonLang.createOperationRule( value, "or", "||"), CommonLang.createOperationRule( value, "not-equals", "!="), CommonLang.createOperationRule( value, "greater-than", ">"), CommonLang.createIndexRule( value))));
 	}
 	createIndexRule(value : LazyRule) : TypeRule {
 		return new TypeRule( "index", new StripRule( new SuffixRule( LocatingRule.First( new NodeRule( "parent", value), "[", new NodeRule( "argument", value)), "]")));
 	}
-	createLambdaRule(value : LazyRule, functionSegment : Rule) : TypeRule {
+	createLambdaRule(value : LazyRule, functionSegment : Rule, infix : String) : TypeRule {
 		 Rule value1=new OrRule( Lists.of( new StripRule( new PrefixRule( "{", new SuffixRule( CommonLang.Statements( "children", functionSegment), "}"))), new NodeRule( "value", value)));
-		return new TypeRule( "lambda", LocatingRule.First( new StringRule( "before-arrow"), "->", value1));
+		return new TypeRule( "lambda", LocatingRule.First( new StringRule( "before-arrow"), infix, value1));
 	}
 	createOperationRule(value : Rule, type : String, infix : String) : TypeRule {
 		return new TypeRule( type, LocatingRule.First( new NodeRule( "left", value), infix, new NodeRule( "right", value)));

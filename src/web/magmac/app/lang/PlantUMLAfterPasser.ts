@@ -15,7 +15,7 @@ import { Passer } from "../../../magmac/app/stage/Passer";
 import { ParseState } from "../../../magmac/app/stage/parse/ParseState";
 export class PlantUMLAfterPasser {
 	createInherits(child : Node, key : String) : Option<Node> {
-		return child.findNode( key).map( (Node implemented) ->new MapNode( "inherits").withString( "child", child.findString( "name").orElse( "")).withString( "parent", PlantUMLAfterPasser.findValue( implemented)));
+		return child.findNode( key).map( (Node implemented)  => new MapNode( "inherits").withString( "child", child.findString( "name").orElse( "")).withString( "parent", PlantUMLAfterPasser.findValue( implemented)));
 	}
 	findValue(type : Node) : String {
 		if(type.is( "template")){ 
@@ -30,7 +30,7 @@ export class PlantUMLAfterPasser {
 		return Iters.fromValues( child).concat( Iters.fromOption( extended)).concat( Iters.fromOption( implemented));
 	}
 	replaceRootChildren(node : Node) : NodeList {
-		return new InlineNodeList( node.findNodeList( "children").orElse( InlineNodeList.empty( )).iter( ).flatMap( (Node child) ->PlantUMLAfterPasser.replaceRootChild( child)).collect( new ListCollector<>( )));
+		return new InlineNodeList( node.findNodeList( "children").orElse( InlineNodeList.empty( )).iter( ).flatMap( (Node child)  => PlantUMLAfterPasser.replaceRootChild( child)).collect( new ListCollector<>( )));
 	}
 	pass(state : ParseState, node : Node) : PassResult {
 		if(node.is( "root")){ 

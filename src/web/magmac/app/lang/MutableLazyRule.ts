@@ -8,10 +8,10 @@ import { Rule } from "../../../magmac/app/compile/rule/Rule";
 export class MutableLazyRule {
 	temp : ?;
 	lex(input : String) : CompileResult<Node> {
-		return this.maybeRule.map( (Rule rule) ->rule.lex( input)).orElseGet( () ->CompileErrors.createStringError( "Rule not set", input));
+		return this.maybeRule.map( (Rule rule)  => rule.lex( input)).orElseGet( ()  => CompileErrors.createStringError( "Rule not set", input));
 	}
 	generate(node : Node) : CompileResult<String> {
-		return this.maybeRule.map( (Rule rule) ->rule.generate( node)).orElseGet( () ->CompileErrors.createNodeError( "Rule not set", node));
+		return this.maybeRule.map( (Rule rule)  => rule.generate( node)).orElseGet( ()  => CompileErrors.createNodeError( "Rule not set", node));
 	}
 	set(rule : Rule) : LazyRule {
 		this.maybeRule=new Some<>( rule);

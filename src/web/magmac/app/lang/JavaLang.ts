@@ -28,7 +28,7 @@ export class JavaLang {
 	createStructureMemberRule() : OrRule {
 		 LazyRule functionSegmentRule=new MutableLazyRule( );
 		 LazyRule valueLazy=new MutableLazyRule( );
-		 LazyRule value=CommonLang.initValueRule( functionSegmentRule, valueLazy);
+		 LazyRule value=CommonLang.initValueRule( functionSegmentRule, valueLazy, "->");
 		 Rule functionSegment=CommonLang.initFunctionSegmentRule( functionSegmentRule, value);
 		return new OrRule( Lists.of( CommonLang.createWhitespaceRule( ), JavaLang.createStructureStatementRule( value), JavaLang.createMethodRule( functionSegment)));
 	}

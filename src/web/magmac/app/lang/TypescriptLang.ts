@@ -36,9 +36,10 @@ export class TypescriptLang {
 		return new TypeRule( "method", new OptionNodeListRule( "children", childRule, new SuffixRule( header1, ";")));
 	}
 	createFunctionSegmentRule() : Rule {
-		final MutableLazyRule functionSegmentRule=new MutableLazyRule( );
-		final MutableLazyRule valueLazy=new MutableLazyRule( );
-		return CommonLang.initFunctionSegmentRule( functionSegmentRule, CommonLang.initValueRule( functionSegmentRule, valueLazy));
+		 LazyRule functionSegmentRule=new MutableLazyRule( );
+		 LazyRule valueLazy=new MutableLazyRule( );
+		 LazyRule value=CommonLang.initValueRule( functionSegmentRule, valueLazy, " => ");
+		return CommonLang.initFunctionSegmentRule( functionSegmentRule, value);
 	}
 	createConstructorRule() : TypeRule {
 		 DivideRule parametersRule=CommonLang.createParametersRule( TypescriptLang.createDefinitionRule( ));

@@ -17,15 +17,15 @@ export class ImmutableCompileError {
 		return this.format( 0);
 	}
 	format(depth : int) : String {
-		 List<CompileError> copy=this.errors.sort( (CompileError first, CompileError second) ->first.computeMaxDepth( )-second.computeMaxDepth( ));
+		 List<CompileError> copy=this.errors.sort( (CompileError first, CompileError second)  => first.computeMaxDepth( )-second.computeMaxDepth( ));
 		 String joined=ImmutableCompileError.joinSorted( depth, copy);
 		return this.message+": "+this.context.display( )+joined;
 	}
 	joinSorted(depth : int, copy : List<CompileError>) : String {
-		return copy.iter( ).map( (CompileError compileError) ->compileError.format( depth+1)).map( (String display) ->ImmutableCompileError.formatEntry( depth, display)).collect( new Joiner( )).orElse( "");
+		return copy.iter( ).map( (CompileError compileError)  => compileError.format( depth+1)).map( (String display)  => ImmutableCompileError.formatEntry( depth, display)).collect( new Joiner( )).orElse( "");
 	}
 	computeMaxDepth() : int {
 		 Iter<CompileError> compileErrorIter=this.errors.iter( );
-		return 1+compileErrorIter.map( (CompileError compileError) ->compileError.computeMaxDepth( )).collect( new Max( )).orElse( 0);
+		return 1+compileErrorIter.map( (CompileError compileError)  => compileError.computeMaxDepth( )).collect( new Max( )).orElse( 0);
 	}
 }

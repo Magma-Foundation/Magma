@@ -54,9 +54,9 @@ final class CommonLang {
         return new TypeRule("assignment", LocatingRule.First(definition, "=", source));
     }
 
-    static LazyRule initValueRule(Rule segment, LazyRule value) {
+    static LazyRule initValueRule(Rule segment, LazyRule value, String lambdaInfix) {
         return value.set(new OrRule(Lists.of(
-                CommonLang.createLambdaRule(value, segment),
+                CommonLang.createLambdaRule(value, segment, lambdaInfix),
                 new StripRule(new PrefixRule("!", new NodeRule("child", value))),
                 CommonLang.createCharRule(),
                 CommonLang.createStringRule(),
@@ -80,13 +80,13 @@ final class CommonLang {
         return new TypeRule("index", new StripRule(new SuffixRule(LocatingRule.First(new NodeRule("parent", value), "[", new NodeRule("argument", value)), "]")));
     }
 
-    private static TypeRule createLambdaRule(LazyRule value, Rule functionSegment) {
+    private static TypeRule createLambdaRule(LazyRule value, Rule functionSegment, String infix) {
         Rule value1 = new OrRule(Lists.of(
                 new StripRule(new PrefixRule("{", new SuffixRule(CommonLang.Statements("children", functionSegment), "}"))),
                 new NodeRule("value", value)
         ));
 
-        return new TypeRule("lambda", LocatingRule.First(new StringRule("before-arrow"), "->", value1));
+        return new TypeRule("lambda", LocatingRule.First(new StringRule("before-arrow"), infix, value1));
     }
 
     private static TypeRule createOperationRule(Rule value, String type, String infix) {

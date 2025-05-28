@@ -17,7 +17,7 @@ export class FlattenJava {
 	}
 	pass(state : ParseState, node : Node) : PassResult {
 		if(node.is( "root")){ 
-		 NodeList values=new InlineNodeList( node.findNodeList( "children").orElse( InlineNodeList.empty( )).iter( ).filter( (Node child) ->!child.is( "package")).collect( new ListCollector<>( )));
+		 NodeList values=new InlineNodeList( node.findNodeList( "children").orElse( InlineNodeList.empty( )).iter( ).filter( (Node child)  => !child.is( "package")).collect( new ListCollector<>( )));
 		return FlattenJava.getChildren( state, node.withNodeList( "children", values));}
 		if(node.is( "record")){ 
 		return FlattenJava.getChildren( state, node.retype( "class"));}
