@@ -8,6 +8,9 @@ public class LastLocator implements Locator {
     @Override
     public Option<Integer> locate(String input, String infix) {
         int index = input.lastIndexOf(infix);
-        return -1 == index ? new None<Integer>() : new Some<>(index);
+        if (-1 == index) {
+            return new None<Integer>();
+        }
+        return new Some<>(index);
     }
 }

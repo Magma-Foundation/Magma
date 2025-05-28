@@ -12,10 +12,6 @@ public record CompileResultCollector<T, C>(Collector<T, C> joiner
 
     @Override
     public CompileResult<C> fold(CompileResult<C> maybeCurrent, CompileResult<T> maybeElement) {
-        return maybeCurrent.flatMapValue(currentValue -> {
-            return maybeElement.mapValue(element -> {
-                return this.joiner.fold(currentValue, element);
-            });
-        });
+        return maybeCurrent.flatMapValue(currentValue -> maybeElement.mapValue(element -> this.joiner.fold(currentValue, element)));
     }
 }

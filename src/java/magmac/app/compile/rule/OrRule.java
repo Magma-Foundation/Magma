@@ -13,7 +13,7 @@ import java.util.function.Function;
 
 public record OrRule(List<Rule> rules) implements Rule {
     private static <T> OrState<T> foldElement(OrState<T> state, Rule rule, Function<Rule, CompileResult<T>> mapper) {
-        return mapper.apply(rule).match(state::withValue, state::withError);
+        return mapper.apply(rule).match(value -> state.withValue(value), error -> state.withError(error));
     }
 
     private <T> CompileResult<T> foldAll(Function<Rule, CompileResult<T>> mapper, Context context) {

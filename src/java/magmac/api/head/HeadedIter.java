@@ -40,14 +40,17 @@ public record HeadedIter<T>(Head<T> head) implements Iter<T> {
 
     @Override
     public <C> C collect(Collector<T, C> collector) {
-        return this.fold(collector.createInitial(), collector::fold);
+        return this.fold(collector.createInitial(), (current, element) -> collector.fold(current, element));
     }
 
     @Override
     public Iter<T> filter(Predicate<T> predicate) {
-        return this.flatMap(value -> new HeadedIter<>(predicate.test(value)
-                ? new SingleHead<>(value)
-                : new EmptyHead<>()));
+        return this.flatMap(value -> {
+            if (predicate.test(value)) {
+                return new HeadedIter<>(new SingleHead<>(value));
+            }
+            return new HeadedIter<>(new EmptyHead<>());
+        });
     }
 
     @Override

@@ -151,8 +151,8 @@ public final class MapNode implements Node {
 
     @Override
     public Node merge(Node other) {
-        var withStrings = MapNode.fold(this, other.iterStrings(), current -> current::withString);
-        var withNodes = MapNode.fold(withStrings, other.iterNodes(), current -> current::withNode);
+        var withStrings = MapNode.fold(this, other.iterStrings(), current -> (key2, value1) -> current.withString(key2, value1));
+        var withNodes = MapNode.fold(withStrings, other.iterNodes(), current -> (key1, value) -> current.withNode(key1, value));
         return MapNode.fold(withNodes, other.iterNodeLists(), current -> (key, values) -> current.withNodeList(key, values));
     }
 

@@ -16,13 +16,12 @@ final class Main {
 
         Iters.fromValues(new PlantUMLTargetPlatform(), new TypeScriptTargetPlatform())
                 .map(platform -> ApplicationBuilder.run(platform, sources))
-                .flatMap(Iters::fromOption)
+                .flatMap(option -> Iters.fromOption(option))
                 .next()
                 .ifPresent(error -> Main.handleError(error));
     }
 
     private static void handleError(Error error) {
-        //noinspection CallToPrintStackTrace
         System.err.println(error.display());
     }
 }

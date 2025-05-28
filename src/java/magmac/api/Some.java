@@ -38,7 +38,10 @@ public record Some<T>(T value) implements Option<T> {
 
     @Override
     public Option<T> filter(Predicate<T> predicate) {
-        return predicate.test(this.value) ? this : new None<>();
+        if (predicate.test(this.value)) {
+            return this;
+        }
+        return new None<>();
     }
 
     @Override

@@ -35,7 +35,7 @@ public final class LocatingRule implements Rule {
         return this.splitter.split(input).map(tuple -> {
             String left = tuple.left();
             String right = tuple.right();
-            return this.leftRule.lex(left).merge(() -> this.rightRule.lex(right), Node::merge);
+            return this.leftRule.lex(left).merge(() -> this.rightRule.lex(right), (node, other) -> node.merge(other));
         }).orElseGet(() -> CompileErrors.createStringError(this.splitter.createMessage(), input));
     }
 

@@ -69,26 +69,26 @@ public final class JavaLang {
     private static Rule createStructureStatementRule() {
         Rule definition = new OrRule(Lists.of(
                 new NodeRule("value", new TypeRule("definition", JavaLang.createDefinitionRule())),
-                JavaLang.createAssignmentRule())
+                JavaLang.createAssignmentRule(JavaLang.createFunctionSegmentRule()))
         );
 
         return new TypeRule("statement", new StripRule(new SuffixRule(definition, ";")));
     }
 
-    private static Rule createAssignmentRule() {
+    private static Rule createAssignmentRule(Rule functionSegment) {
         Rule definition = new OrRule(Lists.of(
                 new NodeRule("definition", JavaLang.createDefinitionRule()),
-                new NodeRule("destination", JavaLang.createValueRule())
+                new NodeRule("destination", JavaLang.createValueRule(functionSegment))
         ));
 
-        Rule value = new NodeRule("source", JavaLang.createValueRule());
+        Rule value = new NodeRule("source", JavaLang.createValueRule(functionSegment));
         return new TypeRule("assignment", LocatingRule.First(definition, "=", value));
     }
 
-    private static Rule createValueRule() {
+    private static Rule createValueRule(Rule functionSegment) {
         LazyRule value = new LazyRule();
         value.set(new OrRule(Lists.of(
-                new TypeRule("lambda", LocatingRule.First(new StringRule("before-arrow"), "->", new NodeRule("value", value))),
+                JavaLang.createLambdaRule(value, functionSegment),
                 new StripRule(new PrefixRule("!", new NodeRule("child", value))),
                 JavaLang.createCharRule(),
                 JavaLang.createStringRule(),
@@ -100,6 +100,15 @@ public final class JavaLang {
                 JavaLang.createOperationRule(value, "subtract", "-")
         )));
         return value;
+    }
+
+    private static TypeRule createLambdaRule(LazyRule value, Rule functionSegment) {
+        Rule value1 = new OrRule(Lists.of(
+                new StripRule(new PrefixRule("{", new SuffixRule(CommonLang.Statements("children", functionSegment), "}"))),
+                new NodeRule("value", value)
+        ));
+
+        return new TypeRule("lambda", LocatingRule.First(new StringRule("before-arrow"), "->", value1));
     }
 
     private static TypeRule createOperationRule(Rule value, String type, String infix) {
@@ -163,24 +172,24 @@ public final class JavaLang {
         LazyRule functionSegmentRule = new LazyRule();
         functionSegmentRule.set(new OrRule(Lists.of(
                 CommonLang.createWhitespaceRule(),
-                new TypeRule("statement", new StripRule(new SuffixRule(JavaLang.createFunctionSegmentValueRule(), ";"))),
-                new StripRule(new SuffixRule(LocatingRule.First(new NodeRule("header", JavaLang.createBlockHeaderRule()), "{", CommonLang.Statements("children", functionSegmentRule)), "}"))
+                new TypeRule("statement", new StripRule(new SuffixRule(JavaLang.createFunctionSegmentValueRule(functionSegmentRule), ";"))),
+                new StripRule(new SuffixRule(LocatingRule.First(new NodeRule("header", JavaLang.createBlockHeaderRule(functionSegmentRule)), "{", CommonLang.Statements("children", functionSegmentRule)), "}"))
         )));
 
         return functionSegmentRule;
     }
 
-    private static Rule createBlockHeaderRule() {
+    private static Rule createBlockHeaderRule(Rule functionSegment) {
         return new OrRule(Lists.of(
-                new StripRule(new PrefixRule("if", new StripRule(new PrefixRule("(", new SuffixRule(new NodeRule("condition", JavaLang.createValueRule()), ")")))))
+                new StripRule(new PrefixRule("if", new StripRule(new PrefixRule("(", new SuffixRule(new NodeRule("condition", JavaLang.createValueRule(functionSegment)), ")")))))
         ));
     }
 
-    private static Rule createFunctionSegmentValueRule() {
+    private static Rule createFunctionSegmentValueRule(Rule functionSegment) {
         return new OrRule(Lists.of(
-                JavaLang.createInvokableRule(JavaLang.createValueRule()),
-                JavaLang.createAssignmentRule(),
-                new TypeRule("return", new StripRule(new PrefixRule("return ", new NodeRule("value", JavaLang.createValueRule()))))
+                JavaLang.createInvokableRule(JavaLang.createValueRule(functionSegment)),
+                JavaLang.createAssignmentRule(functionSegment),
+                new TypeRule("return", new StripRule(new PrefixRule("return ", new NodeRule("value", JavaLang.createValueRule(functionSegment)))))
         ));
     }
 

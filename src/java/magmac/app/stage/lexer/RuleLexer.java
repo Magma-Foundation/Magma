@@ -31,8 +31,8 @@ public class RuleLexer implements Lexer {
     public CompileResult<Roots> apply(Map<Location, String> initial) {
         return InlineCompileResult.fromResult(initial.iterEntries()
                 .map(entry -> this.foldEntry(entry))
-                .map(CompileResult::result)
+                .map(tuple2CompileResult -> tuple2CompileResult.result())
                 .collect(new ResultCollector<>(new MapCollector<>()))
-                .mapValue(MapRoots::new));
+                .mapValue(roots -> new MapRoots(roots)));
     }
 }

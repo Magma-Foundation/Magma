@@ -14,6 +14,11 @@ public record ImmutableCompileError(String message, Context context,
         this(message, context, Lists.empty());
     }
 
+    private static String formatEntry(int depth, String display) {
+        String repeated = "| ".repeat(depth + 1);
+        return "\n" + repeated + display;
+    }
+
     @Override
     public String display() {
         return this.format(0);
@@ -22,20 +27,22 @@ public record ImmutableCompileError(String message, Context context,
     @Override
     public String format(int depth) {
         List<CompileError> copy = this.errors.sort((first, second) -> first.computeMaxDepth() - second.computeMaxDepth());
+        String joined = this.joinSorted(depth, copy);
+        return this.message + ": " + this.context.display() + joined;
+    }
 
-        String joined = copy.iter()
+    private String joinSorted(int depth, List<CompileError> copy) {
+        return copy.iter()
                 .map(compileError -> compileError.format(depth + 1))
-                .map(display -> "\n" + "| ".repeat(depth + 1) + display)
+                .map(display -> ImmutableCompileError.formatEntry(depth, display))
                 .collect(new Joiner())
                 .orElse("");
-
-        return this.message + ": " + this.context.display() + joined;
     }
 
     @Override
     public int computeMaxDepth() {
         Iter<CompileError> compileErrorIter = this.errors.iter();
-        return 1 + compileErrorIter.map(CompileError::computeMaxDepth)
+        return 1 + compileErrorIter.map(compileError -> compileError.computeMaxDepth())
                 .collect(new Max())
                 .orElse(0);
     }

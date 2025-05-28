@@ -28,7 +28,7 @@ public final class CommonLang {
 
     static DivideRule createParametersRule(Rule definition) {
         return new DivideRule("parameters", new ValueFolder(), new OrRule(Lists.of(
-                createWhitespaceRule(),
+                CommonLang.createWhitespaceRule(),
                 definition
         )));
     }

@@ -20,11 +20,11 @@ public record PathSources(Path root) implements Sources {
     }
 
     private IOResult<Map<Location, String>> apply(Iter<Path> sources) {
-        return new InlineIOResult<>(sources.filter(Files::isRegularFile)
+        return new InlineIOResult<>(sources.filter(path1 -> Files.isRegularFile(path1))
                 .filter(file -> file.toString().endsWith(".java"))
                 .map(path -> new PathSource(this.root, path))
                 .map(source -> source.read().mapValue(input -> new Tuple2<>(source.computeLocation(), input)))
-                .map(IOResult::result)
+                .map(tuple2IOResult -> tuple2IOResult.result())
                 .collect(new ResultCollector<>(new MapCollector<>())));
     }
 }

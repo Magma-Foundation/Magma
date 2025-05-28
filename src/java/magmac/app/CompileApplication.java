@@ -26,15 +26,15 @@ public final class CompileApplication implements Application {
     @Override
     public Option<Error> run() {
         return this.sources.readAll()
-                .mapErr(ThrowableError::new)
-                .mapErr(ApplicationError::new)
+                .mapErr(throwable -> new ThrowableError(throwable))
+                .mapErr(error -> new ApplicationError(error))
                 .match(units -> this.compileAndWrite(units), value -> new Some<>(value));
     }
 
     private Option<Error> compileAndWrite(Map<Location, String> units) {
         return this.compiler.compile(units).result()
-                .mapErr(ApplicationError::new)
-                .match(outputs -> this.targets.writeAll(outputs).map(ThrowableError::new).map(ApplicationError::new), err -> new Some<>(err));
+                .mapErr(error1 -> new ApplicationError(error1))
+                .match(outputs -> this.targets.writeAll(outputs).map(throwable -> new ThrowableError(throwable)).map(error -> new ApplicationError(error)), err -> new Some<>(err));
     }
 }
 

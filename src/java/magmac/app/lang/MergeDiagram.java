@@ -1,6 +1,5 @@
 package magmac.app.lang;
 
-import magmac.api.Tuple2;
 import magmac.api.collect.list.List;
 import magmac.api.collect.list.Lists;
 import magmac.api.collect.map.Map;
@@ -50,10 +49,10 @@ public class MergeDiagram implements AfterAll {
     @Override
     public Map<Location, Node> afterAll(Map<Location, Node> roots) {
         NodeList oldRootSegments = new InlineNodeList(roots.iterEntries()
-                .map(Tuple2::right)
+                .map(locationNodeTuple2 -> locationNodeTuple2.right())
                 .map(node -> node.findNodeList("children"))
-                .flatMap(Iters::fromOption)
-                .flatMap(NodeList::iter)
+                .flatMap(option -> Iters.fromOption(option))
+                .flatMap(nodeList -> nodeList.iter())
                 .collect(new ListCollector<>()));
 
         Map<String, List<String>> childrenWithInheritedTypes = MergeDiagram.findChildrenWithInheritedTypes(oldRootSegments);

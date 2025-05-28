@@ -88,7 +88,7 @@ public class MutableDivideState implements DivideState {
 
     @Override
     public Option<DivideState> popAndAppendToOption() {
-        return this.popAndAppendToTuple().map(Tuple2::left);
+        return this.popAndAppendToTuple().map(divideStateCharacterTuple2 -> divideStateCharacterTuple2.left());
     }
 
     @Override

@@ -14,9 +14,11 @@ public class LastSelector implements Selector {
 
     @Override
     public Option<Tuple2<String, String>> select(List<String> list) {
-        return list.popLast().map(tuple -> {
-            String joined = tuple.left().iter().collect(new Joiner(this.delimiter)).orElse("");
-            return new Tuple2<String, String>(joined, tuple.right());
-        });
+        return list.popLast().map(tuple -> this.merge(tuple));
+    }
+
+    private Tuple2<String, String> merge(Tuple2<List<String>, String> tuple) {
+        String joined = tuple.left().iter().collect(new Joiner(this.delimiter)).orElse("");
+        return new Tuple2<String, String>(joined, tuple.right());
     }
 }

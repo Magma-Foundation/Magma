@@ -16,7 +16,7 @@ public record FoldingDivider(Folder folder) implements Divider {
         return current.append(c)
                 .popAndAppendToTuple()
                 .flatMap(tuple -> FoldingDivider.foldEscape(current, tuple.right()))
-                .flatMap(DivideState::popAndAppendToOption);
+                .flatMap(state -> state.popAndAppendToOption());
     }
 
     private static Option<DivideState> foldEscape(DivideState current, char c) {

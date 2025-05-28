@@ -14,7 +14,7 @@ public record PathTargets(Path root, String extension) implements Targets {
     private Option<IOException> write(Location location, String output) {
         Path targetParent = location.namespace()
                 .iter()
-                .fold(this.root(), Path::resolve);
+                .fold(this.root(), (path, other) -> path.resolve(other));
 
         if (!Files.exists(targetParent)) {
             Option<IOException> maybeError = SafeFiles.createDirectories(targetParent);
@@ -31,7 +31,7 @@ public record PathTargets(Path root, String extension) implements Targets {
     public Option<IOException> writeAll(Map<Location, String> outputs) {
         return outputs.iterEntries()
                 .map(entry -> this.write(entry.left(), entry.right()))
-                .flatMap(Iters::fromOption)
+                .flatMap(option -> Iters.fromOption(option))
                 .next();
     }
 }
