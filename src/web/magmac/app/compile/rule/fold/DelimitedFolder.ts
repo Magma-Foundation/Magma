@@ -1,10 +1,10 @@
 import { DivideState } from "../../../../../magmac/app/compile/rule/divide/DivideState";
 export class DelimitedFolder {
 	temp : ?;
-	DelimitedFolder : public{
+	DelimitedFolder : public {
 	}
-	fold : DivideState{
+	fold : DivideState {
 	}
-	createDelimiter : String{
+	createDelimiter : String {
 	}
 }

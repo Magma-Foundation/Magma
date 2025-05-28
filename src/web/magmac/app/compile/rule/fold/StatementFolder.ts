@@ -1,7 +1,7 @@
 import { DivideState } from "../../../../../magmac/app/compile/rule/divide/DivideState";
 export class StatementFolder {
-	fold : DivideState{
+	fold : DivideState {
 	}
-	createDelimiter : String{
+	createDelimiter : String {
 	}
 }

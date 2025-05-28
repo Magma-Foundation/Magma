@@ -6,8 +6,8 @@ export class FlatMapHead {
 	temp : ?;
 	temp : ?;
 	temp : ?;
-	FlatMapHead : public{
+	FlatMapHead : public {
 	}
-	next : Option<R>{
+	next : Option<R> {
 	}
 }

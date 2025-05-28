@@ -7,10 +7,10 @@ import { Node } from "../../../magmac/app/compile/node/Node";
 import { Rule } from "../../../magmac/app/compile/rule/Rule";
 export class LazyRule {
 	temp : ?;
-	lex : CompileResult<Node>{
+	lex : CompileResult<Node> {
 	}
-	generate : CompileResult<String>{
+	generate : CompileResult<String> {
 	}
-	set : void{
+	set : void {
 	}
 }

@@ -12,10 +12,10 @@ export class CompileApplication {
 	temp : ?;
 	temp : ?;
 	temp : ?;
-	CompileApplication : public{
+	CompileApplication : public {
 	}
-	run : Option<Error>{
+	run : Option<Error> {
 	}
-	compileAndWrite : Option<Error>{
+	compileAndWrite : Option<Error> {
 	}
 }

@@ -1,7 +1,7 @@
 import { Collector } from "../../../../magmac/api/iter/collect/Collector";
 export class NodeListCollector {
-	createInitial : NodeList{
+	createInitial : NodeList {
 	}
-	fold : NodeList{
+	fold : NodeList {
 	}
 }

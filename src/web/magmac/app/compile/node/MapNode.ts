@@ -14,52 +14,52 @@ export class MapNode {
 	temp : ?;
 	temp : ?;
 	temp : ?;
-	MapNode : public{
+	MapNode : public {
 	}
-	MapNode : private{
+	MapNode : private {
 	}
-	MapNode : public{
+	MapNode : public {
 	}
-	fold : Node{
+	fold : Node {
 	}
-	iterNodes : Iter<Tuple2<String, Node>>{
+	iterNodes : Iter<Tuple2<String, Node>> {
 	}
-	display : String{
+	display : String {
 	}
-	format : String{
+	format : String {
 	}
-	toStream : Iter<String>{
+	toStream : Iter<String> {
 	}
-	formatNodeList : String{
+	formatNodeList : String {
 	}
-	formatEntry : String{
+	formatEntry : String {
 	}
-	createIndent : String{
+	createIndent : String {
 	}
-	withString : Node{
+	withString : Node {
 	}
-	findString : Option<String>{
+	findString : Option<String> {
 	}
-	strings : Map<String, String>{
+	strings : Map<String, String> {
 	}
-	is : boolean{
+	is : boolean {
 	}
-	retype : Node{
+	retype : Node {
 	}
-	withNode : Node{
+	withNode : Node {
 	}
-	findNode : Option<Node>{
+	findNode : Option<Node> {
 	}
-	merge : Node{
+	merge : Node {
 	}
-	iterStrings : Iter<Tuple2<String, String>>{
+	iterStrings : Iter<Tuple2<String, String>> {
 	}
-	iterNodeLists : Iter<Tuple2<String, NodeList>>{
+	iterNodeLists : Iter<Tuple2<String, NodeList>> {
 	}
-	withNodeList : Node{
+	withNodeList : Node {
 	}
-	toString : String{
+	toString : String {
 	}
-	findNodeList : Option<NodeList>{
+	findNodeList : Option<NodeList> {
 	}
 }

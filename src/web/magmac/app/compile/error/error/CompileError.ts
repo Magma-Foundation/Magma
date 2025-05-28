@@ -1,6 +1,6 @@
 import { Error } from "../../../../../magmac/api/error/Error";
 export interface CompileError {
 	temp : ?;
-	format : String{
+	format : String {
 	}
 }

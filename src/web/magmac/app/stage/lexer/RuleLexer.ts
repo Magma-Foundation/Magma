@@ -11,10 +11,10 @@ import { Roots } from "../../../../magmac/app/stage/Roots";
 import { Map } from "../../../../magmac/api/collect/map/Map";
 export class RuleLexer {
 	temp : ?;
-	RuleLexer : public{
+	RuleLexer : public {
 	}
-	foldEntry : CompileResult<Tuple2<Location, Node>>{
+	foldEntry : CompileResult<Tuple2<Location, Node>> {
 	}
-	apply : CompileResult<Roots>{
+	apply : CompileResult<Roots> {
 	}
 }

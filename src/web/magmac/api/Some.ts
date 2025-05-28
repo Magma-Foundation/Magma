@@ -3,22 +3,22 @@ import { Function } from "../../java/util/function/Function";
 import { Predicate } from "../../java/util/function/Predicate";
 import { Supplier } from "../../java/util/function/Supplier";
 export class Some {
-	map : Option<R>{
+	map : Option<R> {
 	}
-	isPresent : boolean{
+	isPresent : boolean {
 	}
-	orElseGet : T{
+	orElseGet : T {
 	}
-	isEmpty : boolean{
+	isEmpty : boolean {
 	}
-	flatMap : Option<R>{
+	flatMap : Option<R> {
 	}
-	orElse : T{
+	orElse : T {
 	}
-	filter : Option<T>{
+	filter : Option<T> {
 	}
-	or : Option<T>{
+	or : Option<T> {
 	}
-	ifPresent : void{
+	ifPresent : void {
 	}
 }

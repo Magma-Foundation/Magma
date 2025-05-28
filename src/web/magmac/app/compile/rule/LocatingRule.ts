@@ -8,16 +8,16 @@ export class LocatingRule {
 	temp : ?;
 	temp : ?;
 	temp : ?;
-	LocatingRule : public{
+	LocatingRule : public {
 	}
-	First : Rule{
+	First : Rule {
 	}
-	Last : Rule{
+	Last : Rule {
 	}
-	createLocatingRule : Rule{
+	createLocatingRule : Rule {
 	}
-	lex : CompileResult<Node>{
+	lex : CompileResult<Node> {
 	}
-	generate : CompileResult<String>{
+	generate : CompileResult<String> {
 	}
 }

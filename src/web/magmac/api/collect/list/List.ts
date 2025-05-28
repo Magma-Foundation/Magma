@@ -3,16 +3,16 @@ import { Tuple2 } from "../../../../magmac/api/Tuple2";
 import { Iter } from "../../../../magmac/api/iter/Iter";
 import { BiFunction } from "../../../../java/util/function/BiFunction";
 export interface List {
-	add : List<T>{
+	add : List<T> {
 	}
 	temp : ?;
 	temp : ?;
 	temp : ?;
-	get : T{
+	get : T {
 	}
 	temp : ?;
 	temp : ?;
-	contains : boolean{
+	contains : boolean {
 	}
 	temp : ?;
 	temp : ?;

@@ -7,20 +7,20 @@ import { BiFunction } from "../../../java/util/function/BiFunction";
 import { Function } from "../../../java/util/function/Function";
 import { Predicate } from "../../../java/util/function/Predicate";
 export class HeadedIter {
-	foldToResult : Result<R, X>{
+	foldToResult : Result<R, X> {
 	}
-	map : Iter<R>{
+	map : Iter<R> {
 	}
-	fold : R{
+	fold : R {
 	}
-	collect : C{
+	collect : C {
 	}
-	filter : Iter<T>{
+	filter : Iter<T> {
 	}
-	next : Option<T>{
+	next : Option<T> {
 	}
-	flatMap : Iter<R>{
+	flatMap : Iter<R> {
 	}
-	concat : Iter<T>{
+	concat : Iter<T> {
 	}
 }

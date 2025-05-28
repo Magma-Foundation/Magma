@@ -5,18 +5,18 @@ import { ArrayList } from "../../../../java/util/ArrayList";
 import { Function } from "../../../../java/util/function/Function";
 import { Supplier } from "../../../../java/util/function/Supplier";
 export class JVMMap {
-	getOrDefault : V{
+	getOrDefault : V {
 	}
-	iterEntries : Iter<Tuple2<K, V>>{
+	iterEntries : Iter<Tuple2<K, V>> {
 	}
-	put : Map<K, V>{
+	put : Map<K, V> {
 	}
-	containsKey : boolean{
+	containsKey : boolean {
 	}
-	get : V{
+	get : V {
 	}
-	isEmpty : boolean{
+	isEmpty : boolean {
 	}
-	mapOrPut : Map<K, V>{
+	mapOrPut : Map<K, V> {
 	}
 }

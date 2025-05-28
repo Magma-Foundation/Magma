@@ -5,8 +5,8 @@ import { CompileErrors } from "../../../../magmac/app/compile/error/error/Compil
 import { MapNode } from "../../../../magmac/app/compile/node/MapNode";
 import { Node } from "../../../../magmac/app/compile/node/Node";
 export class ExactRule {
-	lex : CompileResult<Node>{
+	lex : CompileResult<Node> {
 	}
-	generate : CompileResult<String>{
+	generate : CompileResult<String> {
 	}
 }

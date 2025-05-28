@@ -10,8 +10,8 @@ import { Files } from "../../../../java/nio/file/Files";
 import { Path } from "../../../../java/nio/file/Path";
 import { Map } from "../../../../magmac/api/collect/map/Map";
 export class PathSources {
-	readAll : IOResult<Map<Location, String>>{
+	readAll : IOResult<Map<Location, String>> {
 	}
-	apply : IOResult<Map<Location, String>>{
+	apply : IOResult<Map<Location, String>> {
 	}
 }

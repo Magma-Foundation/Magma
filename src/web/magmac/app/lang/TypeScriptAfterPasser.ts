@@ -13,8 +13,8 @@ import { PassResult } from "../../../magmac/app/stage/PassResult";
 import { Passer } from "../../../magmac/app/stage/Passer";
 import { ParseState } from "../../../magmac/app/stage/parse/ParseState";
 export class TypeScriptAfterPasser {
-	pass : PassResult{
+	pass : PassResult {
 	}
-	passImport : Option<Node>{
+	passImport : Option<Node> {
 	}
 }

@@ -49,7 +49,7 @@ public final class TypescriptLang {
                 new TypeRule("constructor", new ExactRule("constructor"))
         ));
 
-        return new TypeRule("method", new SuffixRule(new PrefixRule("\n\t", new NodeRule("header", header)), "{\n\t}"));
+        return new TypeRule("method", new SuffixRule(new PrefixRule("\n\t", new NodeRule("header", header)), " {\n\t}"));
     }
 
     private static Rule createDefinitionRule() {

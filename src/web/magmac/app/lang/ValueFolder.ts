@@ -1,8 +1,8 @@
 import { DivideState } from "../../../magmac/app/compile/rule/divide/DivideState";
 import { Folder } from "../../../magmac/app/compile/rule/fold/Folder";
 export class ValueFolder {
-	fold : DivideState{
+	fold : DivideState {
 	}
-	createDelimiter : String{
+	createDelimiter : String {
 	}
 }

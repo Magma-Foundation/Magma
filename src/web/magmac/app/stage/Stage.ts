@@ -1,5 +1,5 @@
 import { CompileResult } from "../../../magmac/app/compile/error/CompileResult";
 export interface Stage {
-	apply : CompileResult<R>{
+	apply : CompileResult<R> {
 	}
 }
