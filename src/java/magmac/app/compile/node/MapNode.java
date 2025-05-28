@@ -173,9 +173,9 @@ public final class MapNode implements Node {
     }
 
     @Override
-    public Option<EmptyDestroyer> deserializeWithType(String type) {
+    public Option<InitialDeserializer> deserializeWithType(String type) {
         if (this.is(type)) {
-            return new Some<>(new EmptyDestroyer(this));
+            return new Some<>(new InitialDeserializerImpl(this));
         }
         else {
             return new None<>();
@@ -215,8 +215,8 @@ public final class MapNode implements Node {
     }
 
     @Override
-    public EmptyDestroyer deserialize() {
-        return new EmptyDestroyer(this);
+    public InitialDeserializer deserialize() {
+        return new InitialDeserializerImpl(this);
     }
 
     @Override

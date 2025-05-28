@@ -9,13 +9,14 @@ import magmac.app.compile.error.CompileResults;
 
 import java.util.function.Function;
 
-public class SingleDestroyer<T> {
+public class CompoundDeserializerImpl<T> implements CompoundDeserializer<T> {
     private final CompileResult<Tuple2<Node, T>> result;
 
-    public SingleDestroyer(CompileResult<Tuple2<Node, T>> result) {
+    public CompoundDeserializerImpl(CompileResult<Tuple2<Node, T>> result) {
         this.result = result;
     }
 
+    @Override
     public <R> CompileResult<R> complete(Function<T, R> mapper) {
         return this.result.flatMapValue((Tuple2<Node, T> tuple) -> {
             if (!tuple.left().isEmpty()) {
@@ -26,8 +27,9 @@ public class SingleDestroyer<T> {
         });
     }
 
-    public <R> SingleDestroyer<Tuple2<T, List<R>>> nodeList(String key, Function<Node, CompileResult<R>> deserializer) {
-        return new SingleDestroyer<>(this.result.flatMapValue((Tuple2<Node, T> inner) -> this.getTuple2CompileResult(key, deserializer, inner)));
+    @Override
+    public <R> CompoundDeserializer<Tuple2<T, List<R>>> nodeList(String key, Function<Node, CompileResult<R>> deserializer) {
+        return new CompoundDeserializerImpl<>(this.result.flatMapValue((Tuple2<Node, T> inner) -> this.getTuple2CompileResult(key, deserializer, inner)));
     }
 
     private <R> CompileResult<Tuple2<Node, Tuple2<T, List<R>>>> getTuple2CompileResult(String key, Function<Node, CompileResult<R>> deserializer, Tuple2<Node, T> inner) {

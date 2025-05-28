@@ -43,7 +43,7 @@ public interface Node {
 
     boolean hasNodeList(String key);
 
-    Option<EmptyDestroyer> deserializeWithType(String type);
+    Option<InitialDeserializer> deserializeWithType(String type);
 
     CompileResult<Tuple2<Node, NodeList>> removeNodeList(String key);
 
@@ -53,7 +53,7 @@ public interface Node {
 
     CompileResult<Tuple2<Node, String>> removeString(String key);
 
-    EmptyDestroyer deserialize();
+    InitialDeserializer deserialize();
 
     CompileResult<Tuple2<Node, Node>> removeNode(String key);
 }
