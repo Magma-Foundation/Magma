@@ -18,7 +18,7 @@ public record MapUnitSet<T>(Map<Location, T> roots) implements UnitSet<T> {
 
     @Override
     public UnitSet<T> add(Unit<T> element) {
-        return new MapUnitSet<>(element.merge((Location key, T value) -> this.roots.put(key, value)));
+        return new MapUnitSet<>(element.deconstruct((Location key, T value) -> this.roots.put(key, value)));
     }
 
     @Override

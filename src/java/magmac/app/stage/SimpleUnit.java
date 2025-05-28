@@ -16,7 +16,7 @@ public final class SimpleUnit<T> implements Unit<T> {
     }
 
     @Override
-    public <R> R merge(BiFunction<Location, T, R> merger) {
+    public <R> R deconstruct(BiFunction<Location, T, R> merger) {
         return merger.apply(this.location, this.value);
     }
 

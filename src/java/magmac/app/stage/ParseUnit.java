@@ -34,8 +34,4 @@ public final class ParseUnit<T> {
     public T right() {
         return this.node;
     }
-
-    public ParseState state() {
-        return this.state;
-    }
 }

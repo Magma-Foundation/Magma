@@ -7,7 +7,7 @@ TargetPlatform <|-- TypeScriptTargetPlatform
 
 interface Targets
 
-class Unit
+interface Unit
 
 interface List
 
@@ -146,6 +146,9 @@ Folder <|-- TypeSeparatorFolder
 
 class UnitSetCollector
 Collector <|-- UnitSetCollector
+
+class SimpleUnit
+Unit <|-- SimpleUnit
 
 class ContextRule
 Rule <|-- ContextRule
@@ -365,7 +368,7 @@ MergeDiagram --> MapNode
 MergeDiagram --> NodeList
 MergeDiagram --> Location
 MergeDiagram --> MapUnitSet
-MergeDiagram --> Unit
+MergeDiagram --> SimpleUnit
 MergeDiagram --> UnitSet
 Node --> Option
 Node --> Tuple2
@@ -437,11 +440,9 @@ Sources --> UnitSet
 Parser --> Node
 Parser --> UnitSet
 TreeParser --> Tuple2
-TreeParser --> Ok
 TreeParser --> CompileResult
 TreeParser --> CompileResultCollector
 TreeParser --> CompileResults
-TreeParser --> CompileError
 TreeParser --> NodeList
 TreeParser --> Location
 TreeParser --> UnitSetCollector
@@ -471,9 +472,7 @@ JVMMap --> ArrayList
 Application --> Error
 Application --> Option
 Generator --> Node
-Generator --> Location
 Generator --> UnitSet
-Generator --> Map
 CompileResultCollector --> Ok
 Max --> Optional
 TypescriptLang --> Lists
@@ -609,8 +608,10 @@ FilterRule --> CompileErrors
 FilterRule --> Filter
 FilterRule --> NumberFilter
 FilterRule --> SymbolFilter
-Unit --> Tuple2
+Unit --> CompileResult
 Unit --> Location
+Unit --> BiFunction
+Unit --> Function
 Passer --> Node
 Passer --> ParseState
 Result --> Tuple2
@@ -648,8 +649,6 @@ ResultCollector --> Tuple2
 ResultCollector --> Ok
 ResultCollector --> Result
 Compiler --> CompileResult
-Compiler --> Location
-Compiler --> Map
 Compiler --> UnitSet
 OrRule --> Iter
 OrRule --> Context
@@ -679,9 +678,7 @@ DivideState --> Tuple2
 DivideState --> Option
 DivideState --> Iter
 HeadedIter --> Ok
-Lexer --> Map
 Lexer --> Node
-Lexer --> Location
 Lexer --> UnitSet
 Option --> Consumer
 Option --> Function
@@ -706,10 +703,12 @@ PathSources --> ResultCollector
 PathSources --> Result
 PathSources --> InlineIOResult
 PathSources --> SafeFiles
+PathSources --> SimpleUnit
 PathSources --> Unit
 PathSources --> IOException
 PathSources --> Files
 PathSources --> Path
+MapUnitSet --> Tuple2
 MapUnitSet --> Map
 MapUnitSet --> Maps
 MapUnitSet --> Location
