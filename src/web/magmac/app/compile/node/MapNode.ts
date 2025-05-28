@@ -10,52 +10,56 @@ import { Joiner } from "../../../../magmac/api/iter/collect/Joiner";
 import { BiFunction } from "../../../../java/util/function/BiFunction";
 import { Function } from "../../../../java/util/function/Function";
 export class MapNode {
-	temp(){
+	temp : ?;
+	temp : ?;
+	temp : ?;
+	temp : ?;
+	MapNode : ?{
 	}
-	temp(){
+	MapNode : ?{
 	}
-	temp(){
+	MapNode : ?{
 	}
-	temp(){
+	fold : ?{
 	}
-	temp(){
+	iterNodes : ?{
 	}
-	temp(){
+	display : ?{
 	}
-	temp(){
+	format : ?{
 	}
-	temp(){
+	toStream : ?{
 	}
-	temp(){
+	formatNodeList : ?{
 	}
-	temp(){
+	formatEntry : ?{
 	}
-	temp(){
+	createIndent : ?{
 	}
-	temp(){
+	withString : ?{
 	}
-	temp(){
+	findString : ?{
 	}
-	temp(){
+	strings : ?{
 	}
-	temp(){
+	is : ?{
 	}
-	temp(){
+	retype : ?{
 	}
-	temp(){
+	withNode : ?{
 	}
-	temp(){
+	findNode : ?{
 	}
-	temp(){
+	merge : ?{
 	}
-	temp(){
+	iterStrings : ?{
 	}
-	temp(){
+	iterNodeLists : ?{
 	}
-	temp(){
+	withNodeList : ?{
 	}
-	temp(){
+	toString : ?{
 	}
-	temp(){
+	findNodeList : ?{
 	}
 }

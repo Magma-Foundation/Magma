@@ -5,14 +5,16 @@ import { Filter } from "../../../../magmac/app/compile/rule/filter/Filter";
 import { NumberFilter } from "../../../../magmac/app/compile/rule/filter/NumberFilter";
 import { SymbolFilter } from "../../../../magmac/app/compile/rule/filter/SymbolFilter";
 export class FilterRule {
-	temp(){
+	temp : ?;
+	temp : ?;
+	FilterRule : ?{
 	}
-	temp(){
+	Symbol : ?{
 	}
-	temp(){
+	Number : ?{
 	}
-	temp(){
+	lex : ?{
 	}
-	temp(){
+	generate : ?{
 	}
 }

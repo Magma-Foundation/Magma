@@ -5,12 +5,12 @@ import { Location } from "../../../../magmac/app/io/Location";
 import { SafeFiles } from "../../../../magmac/app/io/SafeFiles";
 import { Path } from "../../../../java/nio/file/Path";
 export class PathSource {
-	temp(){
+	computeName : ?{
 	}
-	temp(){
+	read : ?{
 	}
-	temp(){
+	computeLocation : ?{
 	}
-	temp(){
+	computeNamespace : ?{
 	}
 }

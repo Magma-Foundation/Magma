@@ -14,16 +14,19 @@ import { Passer } from "../../../../magmac/app/stage/Passer";
 import { Roots } from "../../../../magmac/app/stage/Roots";
 import { Map } from "../../../../magmac/api/collect/map/Map";
 export class TreeParser {
-	temp(){
+	temp : ?;
+	temp : ?;
+	temp : ?;
+	TreeParser : ?{
 	}
-	temp(){
+	parseNodeLists : ?{
 	}
-	temp(){
+	parseNodeList : ?{
 	}
-	temp(){
+	parse : ?{
 	}
-	temp(){
+	parseTree : ?{
 	}
-	temp(){
+	apply : ?{
 	}
 }

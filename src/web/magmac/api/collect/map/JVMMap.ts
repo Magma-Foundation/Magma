@@ -5,18 +5,18 @@ import { ArrayList } from "../../../../java/util/ArrayList";
 import { Function } from "../../../../java/util/function/Function";
 import { Supplier } from "../../../../java/util/function/Supplier";
 export class JVMMap {
-	temp(){
+	getOrDefault : ?{
 	}
-	temp(){
+	iterEntries : ?{
 	}
-	temp(){
+	put : ?{
 	}
-	temp(){
+	containsKey : ?{
 	}
-	temp(){
+	get : ?{
 	}
-	temp(){
+	isEmpty : ?{
 	}
-	temp(){
+	mapOrPut : ?{
 	}
 }

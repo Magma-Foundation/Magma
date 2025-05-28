@@ -90,7 +90,7 @@ public final class JavaLang {
     private static Rule createMethodRule() {
         NodeRule header = new NodeRule("header", new OrRule(Lists.of(
                 JavaLang.createDefinitionRule(),
-                new StringRule("name")
+                new TypeRule("constructor", new StripRule(FilterRule.Symbol(new StringRule("name"))))
         )));
 
         Rule parameters = new DivideRule("parameters", new ValueFolder(), new OrRule(Lists.of(
@@ -117,9 +117,15 @@ public final class JavaLang {
                 JavaLang.createVariadicRule(orRule),
                 JavaLang.createArrayRule(orRule),
                 JavaLang.createTemplateRule(),
-                JavaLang.createSymbolTypeRule()
+                JavaLang.createSymbolTypeRule(),
+                JavaLang.createQualifiedRule()
         )));
         return orRule;
+    }
+
+    private static Rule createQualifiedRule() {
+        Rule childRule = new DivideRule("segments", new DelimitedFolder('.'), new StringRule("value"));
+        return new TypeRule("qualified", childRule);
     }
 
     private static TypeRule createArrayRule(Rule rule) {

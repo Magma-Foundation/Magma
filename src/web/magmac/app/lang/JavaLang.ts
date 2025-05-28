@@ -17,32 +17,34 @@ import { FoldingDivider } from "../../../magmac/app/compile/rule/divide/FoldingD
 import { DelimitedFolder } from "../../../magmac/app/compile/rule/fold/DelimitedFolder";
 import { DividingSplitter } from "../../../magmac/app/compile/rule/split/DividingSplitter";
 export class JavaLang {
-	temp(){
+	createRule : ?{
 	}
-	temp(){
+	createStructureRule : ?{
 	}
-	temp(){
+	createStructureMemberRule : ?{
 	}
-	temp(){
+	createStatementRule : ?{
 	}
-	temp(){
+	createAssignmentRule : ?{
 	}
-	temp(){
+	createValueRule : ?{
 	}
-	temp(){
+	createMethodRule : ?{
 	}
-	temp(){
+	createDefinitionRule : ?{
 	}
-	temp(){
+	createTypeRule : ?{
 	}
-	temp(){
+	createQualifiedRule : ?{
 	}
-	temp(){
+	createArrayRule : ?{
 	}
-	temp(){
+	createVariadicRule : ?{
 	}
-	temp(){
+	createSymbolTypeRule : ?{
 	}
-	temp(){
+	createTemplateRule : ?{
+	}
+	createNamespacedRule : ?{
 	}
 }

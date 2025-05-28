@@ -439,6 +439,7 @@ TypescriptLang --> Lists
 TypescriptLang --> DivideRule
 TypescriptLang --> ExactRule
 TypescriptLang --> LocatingRule
+TypescriptLang --> NodeRule
 TypescriptLang --> OrRule
 TypescriptLang --> PrefixRule
 TypescriptLang --> Rule
@@ -446,6 +447,7 @@ TypescriptLang --> StringRule
 TypescriptLang --> SuffixRule
 TypescriptLang --> TypeRule
 TypescriptLang --> DelimitedFolder
+TypescriptLang --> List
 MapNode --> None
 MapNode --> Some
 MapNode --> Map

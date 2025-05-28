@@ -4,18 +4,19 @@ import { List } from "../../../../magmac/api/collect/list/List";
 import { Lists } from "../../../../magmac/api/collect/list/Lists";
 import { Iter } from "../../../../magmac/api/iter/Iter";
 export class InlineNodeList {
-	temp(){
+	temp : ?;
+	InlineNodeList : ?{
 	}
-	temp(){
+	empty : ?{
 	}
-	temp(){
+	iter : ?{
 	}
-	temp(){
+	last : ?{
 	}
-	temp(){
+	add : ?{
 	}
-	temp(){
+	addAll : ?{
 	}
-	temp(){
+	findLast : ?{
 	}
 }

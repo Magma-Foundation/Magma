@@ -5,22 +5,23 @@ import { BiFunction } from "../../../../java/util/function/BiFunction";
 import { Function } from "../../../../java/util/function/Function";
 import { Supplier } from "../../../../java/util/function/Supplier";
 export class InlineCompileResult {
-	temp(){
+	temp : ?;
+	InlineCompileResult : ?{
 	}
-	temp(){
+	fromResult : ?{
 	}
-	temp(){
+	mapValue : ?{
 	}
-	temp(){
+	match : ?{
 	}
-	temp(){
+	mapErr : ?{
 	}
-	temp(){
+	flatMapValue : ?{
 	}
-	temp(){
+	and : ?{
 	}
-	temp(){
+	result : ?{
 	}
-	temp(){
+	merge : ?{
 	}
 }

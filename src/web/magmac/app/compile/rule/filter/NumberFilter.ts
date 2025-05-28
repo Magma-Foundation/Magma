@@ -1,6 +1,6 @@
 export class NumberFilter {
-	temp(){
+	test : ?{
 	}
-	temp(){
+	createMessage : ?{
 	}
 }

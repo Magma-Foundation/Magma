@@ -5,12 +5,12 @@ import { Tuple2 } from "../../../../../magmac/api/Tuple2";
 import { Iter } from "../../../../../magmac/api/iter/Iter";
 import { Folder } from "../../../../../magmac/app/compile/rule/fold/Folder";
 export class FoldingDivider {
-	temp(){
+	foldSingleQuotes : ?{
 	}
-	temp(){
+	foldEscape : ?{
 	}
-	temp(){
+	foldDoubleQuotes : ?{
 	}
-	temp(){
+	divide : ?{
 	}
 }

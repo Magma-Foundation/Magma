@@ -10,10 +10,11 @@ import { MapRoots } from "../../../../magmac/app/stage/MapRoots";
 import { Roots } from "../../../../magmac/app/stage/Roots";
 import { Map } from "../../../../magmac/api/collect/map/Map";
 export class RuleLexer {
-	temp(){
+	temp : ?;
+	RuleLexer : ?{
 	}
-	temp(){
+	foldEntry : ?{
 	}
-	temp(){
+	apply : ?{
 	}
 }

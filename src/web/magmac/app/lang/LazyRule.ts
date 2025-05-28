@@ -6,10 +6,11 @@ import { CompileErrors } from "../../../magmac/app/compile/error/error/CompileEr
 import { Node } from "../../../magmac/app/compile/node/Node";
 import { Rule } from "../../../magmac/app/compile/rule/Rule";
 export class LazyRule {
-	temp(){
+	temp : ?;
+	lex : ?{
 	}
-	temp(){
+	generate : ?{
 	}
-	temp(){
+	set : ?{
 	}
 }

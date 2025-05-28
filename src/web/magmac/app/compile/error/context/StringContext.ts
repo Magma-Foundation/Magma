@@ -1,4 +1,4 @@
 export class StringContext {
-	temp(){
+	display : ?{
 	}
 }

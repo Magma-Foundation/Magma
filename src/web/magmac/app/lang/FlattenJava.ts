@@ -8,8 +8,8 @@ import { InlinePassResult } from "../../../magmac/app/stage/InlinePassResult";
 import { Passer } from "../../../magmac/app/stage/Passer";
 import { ParseState } from "../../../magmac/app/stage/parse/ParseState";
 export class FlattenJava {
-	temp(){
+	pass : ?{
 	}
-	temp(){
+	getChildren : ?{
 	}
 }

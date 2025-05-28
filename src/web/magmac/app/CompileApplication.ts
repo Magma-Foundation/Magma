@@ -9,10 +9,13 @@ import { Targets } from "../../magmac/app/io/targets/Targets";
 import { Map } from "../../magmac/api/collect/map/Map";
 import { Option } from "../../magmac/api/Option";
 export class CompileApplication {
-	temp(){
+	temp : ?;
+	temp : ?;
+	temp : ?;
+	CompileApplication : ?{
 	}
-	temp(){
+	run : ?{
 	}
-	temp(){
+	compileAndWrite : ?{
 	}
 }

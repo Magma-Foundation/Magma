@@ -1,7 +1,8 @@
 import { Location } from "../../../../magmac/app/io/Location";
 export class ImmutableParseState {
-	temp(){
+	temp : ?;
+	ImmutableParseState : ?{
 	}
-	temp(){
+	findLocation : ?{
 	}
 }

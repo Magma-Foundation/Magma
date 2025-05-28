@@ -1,6 +1,6 @@
 export class SymbolFilter {
-	temp(){
+	test : ?{
 	}
-	temp(){
+	createMessage : ?{
 	}
 }

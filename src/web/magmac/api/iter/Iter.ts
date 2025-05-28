@@ -5,4 +5,12 @@ import { BiFunction } from "../../../java/util/function/BiFunction";
 import { Function } from "../../../java/util/function/Function";
 import { Predicate } from "../../../java/util/function/Predicate";
 export interface Iter {
+	temp : ?;
+	temp : ?;
+	temp : ?;
+	temp : ?;
+	temp : ?;
+	temp : ?;
+	temp : ?;
+	temp : ?;
 }

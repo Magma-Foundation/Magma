@@ -3,4 +3,9 @@ import { AfterAll } from "../../../magmac/app/stage/AfterAll";
 import { Passer } from "../../../magmac/app/stage/Passer";
 import { Path } from "../../../java/nio/file/Path";
 export interface TargetPlatform {
+	temp : ?;
+	temp : ?;
+	temp : ?;
+	temp : ?;
+	temp : ?;
 }

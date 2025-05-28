@@ -12,12 +12,12 @@ import { NodeList } from "../../../magmac/app/compile/node/NodeList";
 import { Location } from "../../../magmac/app/io/Location";
 import { AfterAll } from "../../../magmac/app/stage/AfterAll";
 export class MergeDiagram {
-	temp(){
+	findParentDependencies : ?{
 	}
-	temp(){
+	findChildrenWithDependencies : ?{
 	}
-	temp(){
+	findChildrenWithInheritedTypes : ?{
 	}
-	temp(){
+	afterAll : ?{
 	}
 }

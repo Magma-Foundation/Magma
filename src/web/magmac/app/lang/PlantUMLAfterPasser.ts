@@ -12,14 +12,14 @@ import { InlinePassResult } from "../../../magmac/app/stage/InlinePassResult";
 import { Passer } from "../../../magmac/app/stage/Passer";
 import { ParseState } from "../../../magmac/app/stage/parse/ParseState";
 export class PlantUMLAfterPasser {
-	temp(){
+	createInherits : ?{
 	}
-	temp(){
+	findValue : ?{
 	}
-	temp(){
+	replaceRootChild : ?{
 	}
-	temp(){
+	replaceRootChildren : ?{
 	}
-	temp(){
+	pass : ?{
 	}
 }

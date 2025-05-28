@@ -8,8 +8,9 @@ import { Location } from "../../../../magmac/app/io/Location";
 import { Roots } from "../../../../magmac/app/stage/Roots";
 import { Map } from "../../../../magmac/api/collect/map/Map";
 export class RuleGenerator {
-	temp(){
+	temp : ?;
+	RuleGenerator : ?{
 	}
-	temp(){
+	apply : ?{
 	}
 }

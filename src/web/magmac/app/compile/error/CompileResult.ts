@@ -5,4 +5,11 @@ import { BiFunction } from "../../../../java/util/function/BiFunction";
 import { Function } from "../../../../java/util/function/Function";
 import { Supplier } from "../../../../java/util/function/Supplier";
 export interface CompileResult {
+	temp : ?;
+	temp : ?;
+	temp : ?;
+	temp : ?;
+	temp : ?;
+	temp : ?;
+	temp : ?;
 }

@@ -5,16 +5,19 @@ import { FirstLocator } from "../../../../magmac/app/compile/rule/locate/FirstLo
 import { LastLocator } from "../../../../magmac/app/compile/rule/locate/LastLocator";
 import { Locator } from "../../../../magmac/app/compile/rule/locate/Locator";
 export class LocatingRule {
-	temp(){
+	temp : ?;
+	temp : ?;
+	temp : ?;
+	LocatingRule : ?{
 	}
-	temp(){
+	First : ?{
 	}
-	temp(){
+	Last : ?{
 	}
-	temp(){
+	createLocatingRule : ?{
 	}
-	temp(){
+	lex : ?{
 	}
-	temp(){
+	generate : ?{
 	}
 }
