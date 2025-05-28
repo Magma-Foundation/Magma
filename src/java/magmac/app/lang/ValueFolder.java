@@ -11,10 +11,10 @@ public class ValueFolder implements Folder {
         }
 
         DivideState appended = state.append(c);
-        if ('<' == c || '(' == c) {
+        if ('<' == c || '(' == c || '{' == c) {
             return appended.enter();
         }
-        if ('>' == c || ')' == c) {
+        if ('>' == c || ')' == c || '}' == c) {
             return appended.exit();
         }
         return appended;

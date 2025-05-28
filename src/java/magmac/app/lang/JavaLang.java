@@ -88,6 +88,7 @@ public final class JavaLang {
     private static Rule createValueRule() {
         LazyRule value = new LazyRule();
         value.set(new OrRule(Lists.of(
+                new StripRule(new PrefixRule("!", new NodeRule("child", value))),
                 JavaLang.createCharRule(),
                 JavaLang.createStringRule(),
                 JavaLang.createInvocationRule(value),
