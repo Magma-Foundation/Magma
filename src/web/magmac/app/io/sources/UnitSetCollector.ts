@@ -1,7 +1,7 @@
 import { Collector } from "../../../../magmac/api/iter/collect/Collector";
-import { MapUnitSet } from "../../../../magmac/app/stage/MapUnitSet";
-import { Unit } from "../../../../magmac/app/stage/Unit";
-import { UnitSet } from "../../../../magmac/app/stage/UnitSet";
+import { MapUnitSet } from "../../../../magmac/app/stage/unit/MapUnitSet";
+import { Unit } from "../../../../magmac/app/stage/unit/Unit";
+import { UnitSet } from "../../../../magmac/app/stage/unit/UnitSet";
 export class UnitSetCollector {
 	public createInitial() : UnitSet<T> {
 		return new MapUnitSet<>( );

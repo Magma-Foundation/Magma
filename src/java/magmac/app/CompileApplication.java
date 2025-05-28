@@ -10,7 +10,7 @@ import magmac.app.io.sources.Sources;
 import magmac.app.io.targets.Targets;
 
 import magmac.api.Option;
-import magmac.app.stage.UnitSet;
+import magmac.app.stage.unit.UnitSet;
 
 import java.io.IOException;
 

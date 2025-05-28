@@ -1,7 +1,7 @@
 package magmac.app.config;
 
 import magmac.app.compile.rule.Rule;
-import magmac.app.stage.AfterAll;
+import magmac.app.stage.after.AfterAll;
 import magmac.app.stage.Passer;
 
 import java.nio.file.Path;

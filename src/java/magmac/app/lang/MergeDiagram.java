@@ -13,10 +13,10 @@ import magmac.app.compile.node.MapNode;
 import magmac.app.compile.node.Node;
 import magmac.app.compile.node.NodeList;
 import magmac.app.io.Location;
-import magmac.app.stage.AfterAll;
-import magmac.app.stage.MapUnitSet;
-import magmac.app.stage.SimpleUnit;
-import magmac.app.stage.UnitSet;
+import magmac.app.stage.after.AfterAll;
+import magmac.app.stage.unit.MapUnitSet;
+import magmac.app.stage.unit.SimpleUnit;
+import magmac.app.stage.unit.UnitSet;
 
 public class MergeDiagram implements AfterAll {
     private static List<String> findParentDependencies(String child, Map<String, List<String>> childToParents, Map<String, List<String>> dependencyMap) {

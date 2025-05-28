@@ -5,8 +5,8 @@ import magmac.app.compile.error.CompileResultCollector;
 import magmac.app.compile.node.Node;
 import magmac.app.compile.rule.Rule;
 import magmac.app.io.sources.UnitSetCollector;
-import magmac.app.stage.Unit;
-import magmac.app.stage.UnitSet;
+import magmac.app.stage.unit.Unit;
+import magmac.app.stage.unit.UnitSet;
 
 public class RuleGenerator implements Generator {
     private final Rule rootRule;

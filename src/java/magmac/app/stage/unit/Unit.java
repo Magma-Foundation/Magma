@@ -1,4 +1,4 @@
-package magmac.app.stage;
+package magmac.app.stage.unit;
 
 import magmac.app.compile.error.CompileResult;
 import magmac.app.io.Location;

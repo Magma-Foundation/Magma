@@ -9,10 +9,10 @@ import { MapNode } from "../../../magmac/app/compile/node/MapNode";
 import { Node } from "../../../magmac/app/compile/node/Node";
 import { NodeList } from "../../../magmac/app/compile/node/NodeList";
 import { NodeListCollector } from "../../../magmac/app/compile/node/NodeListCollector";
-import { InlinePassResult } from "../../../magmac/app/stage/InlinePassResult";
-import { ParseResult } from "../../../magmac/app/stage/ParseResult";
-import { ParseUnit } from "../../../magmac/app/stage/ParseUnit";
-import { ParseUnitImpl } from "../../../magmac/app/stage/ParseUnitImpl";
+import { InlinePassResult } from "../../../magmac/app/stage/result/InlinePassResult";
+import { ParseResult } from "../../../magmac/app/stage/result/ParseResult";
+import { ParseUnit } from "../../../magmac/app/stage/unit/ParseUnit";
+import { ParseUnitImpl } from "../../../magmac/app/stage/unit/ParseUnitImpl";
 import { Passer } from "../../../magmac/app/stage/Passer";
 import { ParseState } from "../../../magmac/app/stage/parse/ParseState";
 export class TypeScriptAfterPasser {

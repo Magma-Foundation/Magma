@@ -11,10 +11,10 @@ import { MapNode } from "../../../magmac/app/compile/node/MapNode";
 import { Node } from "../../../magmac/app/compile/node/Node";
 import { NodeList } from "../../../magmac/app/compile/node/NodeList";
 import { Location } from "../../../magmac/app/io/Location";
-import { AfterAll } from "../../../magmac/app/stage/AfterAll";
-import { MapUnitSet } from "../../../magmac/app/stage/MapUnitSet";
-import { SimpleUnit } from "../../../magmac/app/stage/SimpleUnit";
-import { UnitSet } from "../../../magmac/app/stage/UnitSet";
+import { AfterAll } from "../../../magmac/app/stage/after/AfterAll";
+import { MapUnitSet } from "../../../magmac/app/stage/unit/MapUnitSet";
+import { SimpleUnit } from "../../../magmac/app/stage/unit/SimpleUnit";
+import { UnitSet } from "../../../magmac/app/stage/unit/UnitSet";
 export class MergeDiagram {
 	private static findParentDependencies( child : String,  childToParents : Map<String, List<String>>,  dependencyMap : Map<String, List<String>>) : List<String> {
 		return childToParents.getOrDefault( child, Lists.empty( )).iter( ).map( ( parent : String) => dependencyMap.getOrDefault( parent, Lists.empty( ))).flatMap( ( stringList : List<String>) => stringList.iter( )).collect( new ListCollector<>( ));

@@ -13,10 +13,10 @@ import magmac.app.compile.node.Node;
 import magmac.app.compile.node.NodeList;
 import magmac.app.compile.node.NodeListCollector;
 import magmac.app.compile.rule.StringRule;
-import magmac.app.stage.InlinePassResult;
-import magmac.app.stage.ParseResult;
-import magmac.app.stage.ParseUnit;
-import magmac.app.stage.ParseUnitImpl;
+import magmac.app.stage.result.InlinePassResult;
+import magmac.app.stage.result.ParseResult;
+import magmac.app.stage.unit.ParseUnit;
+import magmac.app.stage.unit.ParseUnitImpl;
 import magmac.app.stage.Passer;
 import magmac.app.stage.parse.ParseState;
 

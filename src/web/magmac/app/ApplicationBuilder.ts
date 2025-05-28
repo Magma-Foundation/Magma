@@ -8,7 +8,7 @@ import { PathTargets } from "../../magmac/app/io/targets/PathTargets";
 import { Targets } from "../../magmac/app/io/targets/Targets";
 import { FlattenJava } from "../../magmac/app/lang/FlattenJava";
 import { JavaLang } from "../../magmac/app/lang/JavaLang";
-import { AfterAll } from "../../magmac/app/stage/AfterAll";
+import { AfterAll } from "../../magmac/app/stage/after/AfterAll";
 import { Passer } from "../../magmac/app/stage/Passer";
 import { Generator } from "../../magmac/app/stage/generate/Generator";
 import { RuleGenerator } from "../../magmac/app/stage/generate/RuleGenerator";

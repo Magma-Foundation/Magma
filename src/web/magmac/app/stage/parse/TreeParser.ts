@@ -6,12 +6,12 @@ import { Node } from "../../../../magmac/app/compile/node/Node";
 import { NodeList } from "../../../../magmac/app/compile/node/NodeList";
 import { Location } from "../../../../magmac/app/io/Location";
 import { UnitSetCollector } from "../../../../magmac/app/io/sources/UnitSetCollector";
-import { AfterAll } from "../../../../magmac/app/stage/AfterAll";
-import { ParseUnit } from "../../../../magmac/app/stage/ParseUnit";
-import { ParseUnitImpl } from "../../../../magmac/app/stage/ParseUnitImpl";
+import { AfterAll } from "../../../../magmac/app/stage/after/AfterAll";
+import { ParseUnit } from "../../../../magmac/app/stage/unit/ParseUnit";
+import { ParseUnitImpl } from "../../../../magmac/app/stage/unit/ParseUnitImpl";
 import { Passer } from "../../../../magmac/app/stage/Passer";
-import { Unit } from "../../../../magmac/app/stage/Unit";
-import { UnitSet } from "../../../../magmac/app/stage/UnitSet";
+import { Unit } from "../../../../magmac/app/stage/unit/Unit";
+import { UnitSet } from "../../../../magmac/app/stage/unit/UnitSet";
 export class TreeParser {private final beforeChild : Passer;private final afterChild : Passer;private final afterAllChildren : AfterAll;
 	 TreeParser( beforeChild : Passer,  afterChild : Passer,  afterAllChildren : AfterAll) : public {
 		this.beforeChild=beforeChild;

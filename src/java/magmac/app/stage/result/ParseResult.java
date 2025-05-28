@@ -1,7 +1,8 @@
-package magmac.app.stage;
+package magmac.app.stage.result;
 
 import magmac.app.compile.error.CompileResult;
 import magmac.app.compile.node.Node;
+import magmac.app.stage.unit.ParseUnit;
 
 import java.util.function.Supplier;
 

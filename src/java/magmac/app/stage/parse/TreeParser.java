@@ -8,12 +8,12 @@ import magmac.app.compile.node.Node;
 import magmac.app.compile.node.NodeList;
 import magmac.app.io.Location;
 import magmac.app.io.sources.UnitSetCollector;
-import magmac.app.stage.AfterAll;
-import magmac.app.stage.ParseUnit;
-import magmac.app.stage.ParseUnitImpl;
+import magmac.app.stage.after.AfterAll;
+import magmac.app.stage.unit.ParseUnit;
+import magmac.app.stage.unit.ParseUnitImpl;
 import magmac.app.stage.Passer;
-import magmac.app.stage.Unit;
-import magmac.app.stage.UnitSet;
+import magmac.app.stage.unit.Unit;
+import magmac.app.stage.unit.UnitSet;
 
 public class TreeParser implements Parser {
     private final Passer beforeChild;

@@ -10,7 +10,7 @@ import magmac.app.io.targets.PathTargets;
 import magmac.app.io.targets.Targets;
 import magmac.app.lang.FlattenJava;
 import magmac.app.lang.JavaLang;
-import magmac.app.stage.AfterAll;
+import magmac.app.stage.after.AfterAll;
 import magmac.app.stage.Passer;
 import magmac.app.stage.generate.Generator;
 import magmac.app.stage.generate.RuleGenerator;

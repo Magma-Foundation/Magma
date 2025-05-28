@@ -1,9 +1,9 @@
 package magmac.app.io.sources;
 
 import magmac.api.iter.collect.Collector;
-import magmac.app.stage.MapUnitSet;
-import magmac.app.stage.Unit;
-import magmac.app.stage.UnitSet;
+import magmac.app.stage.unit.MapUnitSet;
+import magmac.app.stage.unit.Unit;
+import magmac.app.stage.unit.UnitSet;
 
 public class UnitSetCollector<T> implements Collector<Unit<T>, UnitSet<T>> {
     @Override

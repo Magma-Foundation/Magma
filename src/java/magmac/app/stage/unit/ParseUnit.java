@@ -1,4 +1,4 @@
-package magmac.app.stage;
+package magmac.app.stage.unit;
 
 import magmac.app.compile.node.NodeList;
 import magmac.app.stage.parse.ParseState;

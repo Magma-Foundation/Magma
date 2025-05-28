@@ -4,8 +4,8 @@ import { CompileResults } from "../../../../magmac/app/compile/error/CompileResu
 import { Node } from "../../../../magmac/app/compile/node/Node";
 import { Rule } from "../../../../magmac/app/compile/rule/Rule";
 import { UnitSetCollector } from "../../../../magmac/app/io/sources/UnitSetCollector";
-import { Unit } from "../../../../magmac/app/stage/Unit";
-import { UnitSet } from "../../../../magmac/app/stage/UnitSet";
+import { Unit } from "../../../../magmac/app/stage/unit/Unit";
+import { UnitSet } from "../../../../magmac/app/stage/unit/UnitSet";
 export class RuleLexer {private final rootRule : Rule;
 	 RuleLexer( rootRule : Rule) : public {
 		this.rootRule=rootRule;

@@ -7,7 +7,7 @@ import { ThrowableError } from "../../magmac/app/error/ThrowableError";
 import { Sources } from "../../magmac/app/io/sources/Sources";
 import { Targets } from "../../magmac/app/io/targets/Targets";
 import { Option } from "../../magmac/api/Option";
-import { UnitSet } from "../../magmac/app/stage/UnitSet";
+import { UnitSet } from "../../magmac/app/stage/unit/UnitSet";
 import { IOException } from "../../java/io/IOException";
 export class CompileApplication {private final sources : Sources;private final targets : Targets;private final compiler : Compiler;
 	 CompileApplication( sources : Sources,  compiler : Compiler,  targets : Targets) : public {

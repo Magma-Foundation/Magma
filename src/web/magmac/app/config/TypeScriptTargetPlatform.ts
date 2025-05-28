@@ -1,8 +1,8 @@
 import { Rule } from "../../../magmac/app/compile/rule/Rule";
 import { TypeScriptAfterPasser } from "../../../magmac/app/lang/TypeScriptAfterPasser";
 import { TypescriptLang } from "../../../magmac/app/lang/TypescriptLang";
-import { AfterAll } from "../../../magmac/app/stage/AfterAll";
-import { EmptyAfterAll } from "../../../magmac/app/stage/EmptyAfterAll";
+import { AfterAll } from "../../../magmac/app/stage/after/AfterAll";
+import { EmptyAfterAll } from "../../../magmac/app/stage/after/EmptyAfterAll";
 import { Passer } from "../../../magmac/app/stage/Passer";
 import { Path } from "../../../java/nio/file/Path";
 import { Paths } from "../../../java/nio/file/Paths";

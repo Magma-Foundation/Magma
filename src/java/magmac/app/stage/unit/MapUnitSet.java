@@ -1,4 +1,4 @@
-package magmac.app.stage;
+package magmac.app.stage.unit;
 
 import magmac.api.Tuple2;
 import magmac.api.collect.map.Map;

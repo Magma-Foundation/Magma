@@ -1,6 +1,7 @@
-package magmac.app.stage;
+package magmac.app.stage.after;
 
 import magmac.app.compile.node.Node;
+import magmac.app.stage.unit.UnitSet;
 
 public class EmptyAfterAll implements AfterAll {
     @Override

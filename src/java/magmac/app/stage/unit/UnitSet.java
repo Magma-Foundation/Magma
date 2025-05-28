@@ -1,4 +1,4 @@
-package magmac.app.stage;
+package magmac.app.stage.unit;
 
 import magmac.api.iter.Iter;
 
