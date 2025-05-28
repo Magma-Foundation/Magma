@@ -509,7 +509,6 @@ TypescriptLang --> StripRule
 TypescriptLang --> SuffixRule
 TypescriptLang --> TypeRule
 TypescriptLang --> DelimitedFolder
-TypescriptLang --> LastLocator
 MapNode --> None
 MapNode --> Option
 MapNode --> Some

@@ -58,7 +58,17 @@ public class TypeScriptAfterPasser implements Passer {
         return TypeScriptAfterPasser.passImport(state, node)
                 .or(() -> TypeScriptAfterPasser.passMethod(state, node))
                 .or(() -> this.format(state, node))
+                .or(() -> TypeScriptAfterPasser.passVariadic(state, node))
                 .orElseGet(() -> InlinePassResult.empty());
+    }
+
+    private static Option<PassResult> passVariadic(ParseState state, Node node) {
+        if (node.is("variadic")) {
+            return new Some<>(InlinePassResult.from(state, node.retype("array")));
+        }
+        else {
+            return new None<>();
+        }
     }
 
     private Option<PassResult> format(ParseState state, Node node) {

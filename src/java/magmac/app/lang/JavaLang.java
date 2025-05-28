@@ -79,10 +79,10 @@ public final class JavaLang {
         Rule parameters = CommonLang.createParametersRule(JavaLang.createDefinitionRule());
         Rule content = CommonLang.Statements("children", childRule);
         Rule rightRule = new StripRule(new PrefixRule("{", new SuffixRule(new StripRule("", content, "after-children"), "}")));
-        Rule withParams = new OrRule(Lists.of(
+        Rule withParams = new OptionNodeListRule("parameters",
                 new SuffixRule(parameters, ");"),
                 LocatingRule.First(parameters, ")", rightRule)
-        ));
+        );
 
         return new TypeRule("method", LocatingRule.First(header, "(", withParams));
     }
