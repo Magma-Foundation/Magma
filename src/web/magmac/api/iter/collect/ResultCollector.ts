@@ -5,7 +5,7 @@ export class ResultCollector {
 	public createInitial() : Result<C, X> {
 		return new Ok<>( this.collector.createInitial( ));
 	}
-	public fold( currentResult : Result<C, X>,  element : Result<T, X>) : Result<C, X> {
-		return currentResult.and( ( )->element).mapValue( ( tuple : Tuple2<C, T>) => this.collector.fold( tuple.left( ), tuple.right( )));
+	public fold( currentResult() : Result<C, X>,  element() : Result<T, X>) : Result<C, X> {
+		return currentResult.and( ( )->element).mapValue( ( tuple() : Tuple2<C, T>) => this.collector.fold( tuple.left( ), tuple.right( )));
 	}
 }

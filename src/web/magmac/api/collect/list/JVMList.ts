@@ -12,35 +12,35 @@ export class JVMList {
 	 JVMList() : public {
 		this( new ArrayList<>( ));
 	}
-	public add( element : T) : List<T> {
-		 copy : ArrayList<T>=new ArrayList<>( this.elements);
+	public add( element() : T) : List<T> {
+		 copy() : ArrayList<T>=new ArrayList<>( this.elements);
 		copy.add( element);
 		return new JVMList<>( copy);
 	}
 	public iter() : Iter<T> {
-		return new HeadedIter<>( new RangeHead( this.elements.size( ))).map( ( index : Integer) => this.get( index));
+		return new HeadedIter<>( new RangeHead( this.elements.size( ))).map( ( index() : Integer) => this.get( index));
 	}
-	public addAll( others : List<T>) : List<T> {
-		return others.iter( ).fold( this.createInitial( ), ( tList : List<T>,  element : T) => tList.add( element));
+	public addAll( others() : List<T>) : List<T> {
+		return others.iter( ).fold( this.createInitial( ), ( tList() : List<T>,  element() : T) => tList.add( element));
 	}
 	private createInitial() : List<T> {
 		return this;
 	}
-	public removeAll( others : List<T>) : List<T> {
-		return this.iter( ).filter( ( value : T) => !others.contains( value)).collect( new ListCollector<>( ));
+	public removeAll( others() : List<T>) : List<T> {
+		return this.iter( ).filter( ( value() : T) => !others.contains( value)).collect( new ListCollector<>( ));
 	}
-	public get( index : int) : T {
+	public get( index() : int) : T {
 		return this.elements.get( index);
 	}
-	public sort( sorter : BiFunction<T, T, Integer>) : List<T> {
-		 copy : ArrayList<T>=new ArrayList<>( this.elements);
-		copy.sort( ( t : T,  u : T) => sorter.apply( t, u));
+	public sort( sorter() : BiFunction<T, T, Integer>) : List<T> {
+		 copy() : ArrayList<T>=new ArrayList<>( this.elements);
+		copy.sort( ( t() : T,  u() : T) => sorter.apply( t, u));
 		return new JVMList<>( copy);
 	}
 	public getLast() : T {
 		return this.elements.getLast( );
 	}
-	public contains( element : T) : boolean {
+	public contains( element() : T) : boolean {
 		return this.elements.contains( element);
 	}
 	public size() : int {
@@ -49,13 +49,13 @@ export class JVMList {
 	public popLast() : Option<Tuple2<List<T>, T>> {
 		if(this.elements.isEmpty( )){ 
 		return new None<>( );}
-		 slice : java.util.List<T>=this.elements.subList( 0, this.elements.size( )-1);
+		 slice() : java.util.List<T>=this.elements.subList( 0, this.elements.size( )-1);
 		return new Some<>( new Tuple2<>( new JVMList<>( slice), this.elements.getLast( )));
 	}
 	public popFirst() : Option<Tuple2<T, List<T>>> {
 		if(this.elements.isEmpty( )){ 
 		return new None<>( );}
-		 slice : java.util.List<T>=this.elements.subList( 1, this.elements.size( ));
+		 slice() : java.util.List<T>=this.elements.subList( 1, this.elements.size( ));
 		return new Some<>( new Tuple2<>( this.elements.getFirst( ), new JVMList<>( slice)));
 	}
 }

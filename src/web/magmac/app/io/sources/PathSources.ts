@@ -15,18 +15,18 @@ import { Files } from "../../../../java/nio/file/Files";
 import { Path } from "../../../../java/nio/file/Path";
 export class PathSources {
 	public readAll() : IOResult<Map<Location, String>> {
-		return SafeFiles.walk( this.root).flatMapValue( ( sources : Iter<Path>) => this.apply( sources));
+		return SafeFiles.walk( this.root).flatMapValue( ( sources() : Iter<Path>) => this.apply( sources));
 	}
-	private apply( sources : Iter<Path>) : IOResult<Map<Location, String>> {
+	private apply( sources() : Iter<Path>) : IOResult<Map<Location, String>> {
 		return new InlineIOResult<>( this.getCollect( sources));
 	}
-	private getCollect( sources : Iter<Path>) : Result<Map<Location, String>, IOException> {
-		return this.getCollected( sources).iter( ).map( ( source : PathSource) => this.getTuple2IOResult( source)).map( ( tuple2IOResult : IOResult<Tuple2<Location, String>>) => tuple2IOResult.result( )).collect( new ResultCollector<>( new MapCollector<>( )));
+	private getCollect( sources() : Iter<Path>) : Result<Map<Location, String>, IOException> {
+		return this.getCollected( sources).iter( ).map( ( source() : PathSource) => this.getTuple2IOResult( source)).map( ( tuple2IOResult() : IOResult<Tuple2<Location, String>>) => tuple2IOResult.result( )).collect( new ResultCollector<>( new MapCollector<>( )));
 	}
-	private getTuple2IOResult( source : PathSource) : IOResult<Tuple2<Location, String>> {
-		return source.read( ).mapValue( ( input : String) => new Tuple2<>( source.computeLocation( ), input));
+	private getTuple2IOResult( source() : PathSource) : IOResult<Tuple2<Location, String>> {
+		return source.read( ).mapValue( ( input() : String) => new Tuple2<>( source.computeLocation( ), input));
 	}
-	private getCollected( sources : Iter<Path>) : List<PathSource> {
-		return sources.filter( ( path1 : Path) => Files.isRegularFile( path1)).filter( ( file : Path) => file.toString( ).endsWith( ".java")).map( ( path : Path) => new PathSource( this.root, path)).collect( new ListCollector<>( ));
+	private getCollected( sources() : Iter<Path>) : List<PathSource> {
+		return sources.filter( ( path1() : Path) => Files.isRegularFile( path1)).filter( ( file() : Path) => file.toString( ).endsWith( ".java")).map( ( path() : Path) => new PathSource( this.root, path)).collect( new ListCollector<>( ));
 	}
 }

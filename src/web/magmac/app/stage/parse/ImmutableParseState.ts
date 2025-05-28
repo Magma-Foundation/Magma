@@ -1,6 +1,6 @@
 import { Location } from "../../../../magmac/app/io/Location";
-export class ImmutableParseState {private final location : Location;
-	 ImmutableParseState( location : Location) : public {
+export class ImmutableParseState {private final location() : Location;
+	 ImmutableParseState( location() : Location) : public {
 		this.location=location;
 	}
 	public findLocation() : Location {

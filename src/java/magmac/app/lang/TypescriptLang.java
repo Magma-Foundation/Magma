@@ -80,7 +80,7 @@ public final class TypescriptLang {
         Rule name = new StringRule("name");
         Rule leftRule = new OrRule(Lists.of(
                 new SuffixRule(LocatingRule.First(name, "(", parameters), ")"),
-                name
+                new SuffixRule(name, "()")
         ));
 
         Rule first = LocatingRule.First(leftRule, " : ", new NodeRule("type", TypescriptLang.createTypeRule()));

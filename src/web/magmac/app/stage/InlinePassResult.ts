@@ -12,10 +12,10 @@ export class InlinePassResult {
 	public static empty() : PassResult {
 		return new InlinePassResult( new None<>( ));
 	}
-	public static from( state : ParseState,  node : Node) : PassResult {
+	public static from( state() : ParseState,  node() : Node) : PassResult {
 		return new InlinePassResult( new Some<>( InlineCompileResult.fromOk( new Tuple2<>( state, node))));
 	}
-	public orElseGet( other : Supplier<Tuple2<ParseState, Node>>) : CompileResult<Tuple2<ParseState, Node>> {
+	public orElseGet( other() : Supplier<Tuple2<ParseState, Node>>) : CompileResult<Tuple2<ParseState, Node>> {
 		return this.option.orElseGet( ( )->InlineCompileResult.fromResult( new Ok<>( other.get( ))));
 	}
 }

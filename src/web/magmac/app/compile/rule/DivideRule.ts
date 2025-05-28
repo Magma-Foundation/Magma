@@ -12,13 +12,13 @@ import { NodeList } from "../../../../magmac/app/compile/node/NodeList";
 import { FoldingDivider } from "../../../../magmac/app/compile/rule/divide/FoldingDivider";
 import { Folder } from "../../../../magmac/app/compile/rule/fold/Folder";
 export class DivideRule {
-	private join( list : NodeList) : CompileResult<Option<String>> {
-		return list.iter( ).map( ( node : Node) => this.childRule.generate( node)).collect( new CompileResultCollector<>( new Joiner( this.folder.createDelimiter( ))));
+	private join( list() : NodeList) : CompileResult<Option<String>> {
+		return list.iter( ).map( ( node() : Node) => this.childRule.generate( node)).collect( new CompileResultCollector<>( new Joiner( this.folder.createDelimiter( ))));
 	}
-	public lex( input : String) : CompileResult<Node> {
-		return new FoldingDivider( this.folder).divide( input).map( ( segment : String) => this.childRule.lex( segment)).collect( new CompileResultCollector<>( new ListCollector<>( ))).mapValue( ( children : List<Node>) => new MapNode( ).withNodeList( this.key( ), new InlineNodeList( children)));
+	public lex( input() : String) : CompileResult<Node> {
+		return new FoldingDivider( this.folder).divide( input).map( ( segment() : String) => this.childRule.lex( segment)).collect( new CompileResultCollector<>( new ListCollector<>( ))).mapValue( ( children() : List<Node>) => new MapNode( ).withNodeList( this.key( ), new InlineNodeList( children)));
 	}
-	public generate( node : Node) : CompileResult<String> {
-		return node.findNodeList( this.key).map( ( list : NodeList) => this.join( list)).orElseGet( ( )->CompileErrors.createNodeError( "Node list '" + this.key + "' not present", node)).mapValue( ( value : Option<String>) => value.orElse( ""));
+	public generate( node() : Node) : CompileResult<String> {
+		return node.findNodeList( this.key).map( ( list() : NodeList) => this.join( list)).orElseGet( ( )->CompileErrors.createNodeError( "Node list '" + this.key + "' not present", node)).mapValue( ( value() : Option<String>) => value.orElse( ""));
 	}
 }

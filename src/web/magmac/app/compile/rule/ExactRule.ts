@@ -5,12 +5,12 @@ import { CompileErrors } from "../../../../magmac/app/compile/error/error/Compil
 import { MapNode } from "../../../../magmac/app/compile/node/MapNode";
 import { Node } from "../../../../magmac/app/compile/node/Node";
 export class ExactRule {
-	public lex( input : String) : CompileResult<Node> {
+	public lex( input() : String) : CompileResult<Node> {
 		if(input.equals( this.value)){ 
 		return InlineCompileResult.fromResult( new Ok<>( new MapNode( )));}
 		return CompileErrors.createStringError( "Slice '" + this.value + "' not present", input);
 	}
-	public generate( node : Node) : CompileResult<String> {
+	public generate( node() : Node) : CompileResult<String> {
 		return InlineCompileResult.fromResult( new Ok<>( this.value));
 	}
 }

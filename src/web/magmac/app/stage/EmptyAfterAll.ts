@@ -2,7 +2,7 @@ import { Node } from "../../../magmac/app/compile/node/Node";
 import { Location } from "../../../magmac/app/io/Location";
 import { Map } from "../../../magmac/api/collect/map/Map";
 export class EmptyAfterAll {
-	public afterAll( roots : Map<Location, Node>) : Map<Location, Node> {
+	public afterAll( roots() : Map<Location, Node>) : Map<Location, Node> {
 		return roots;
 	}
 }

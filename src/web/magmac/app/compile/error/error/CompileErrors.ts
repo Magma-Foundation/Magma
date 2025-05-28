@@ -6,10 +6,10 @@ import { StringContext } from "../../../../../magmac/app/compile/error/context/S
 import { Node } from "../../../../../magmac/app/compile/node/Node";
 import { ImmutableCompileError } from "../../../../../magmac/app/error/ImmutableCompileError";
 export class CompileErrors {
-	public static createNodeError( message : String,  node : Node) : CompileResult<T> {
+	public static createNodeError( message() : String,  node() : Node) : CompileResult<T> {
 		return InlineCompileResult.fromResult( new Err<>( new ImmutableCompileError( message, new NodeContext( node))));
 	}
-	public static createStringError( message : String,  context : String) : CompileResult<T> {
+	public static createStringError( message() : String,  context() : String) : CompileResult<T> {
 		return InlineCompileResult.fromResult( new Err<>( new ImmutableCompileError( message, new StringContext( context))));
 	}
 }
