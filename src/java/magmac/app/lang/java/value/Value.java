@@ -1,4 +1,6 @@
 package magmac.app.lang.java.value;
 
-public interface Value extends Caller {
+import magmac.app.lang.java.Argument;
+
+public interface Value extends Caller, Argument {
 }

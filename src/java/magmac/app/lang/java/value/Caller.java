@@ -8,7 +8,7 @@ import magmac.app.lang.java.Deserializers;
 
 public interface Caller {
     static CompileResult<Caller> deserialize(Node node) {
-        return Deserializers.orError(node, Lists.of(
+        return Deserializers.orError("caller", node, Lists.of(
                 Construction::deserialize,
                 node1 -> Values.deserialize(node1).map(result -> result.mapValue(type -> type))
         ));

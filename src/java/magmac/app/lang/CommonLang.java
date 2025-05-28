@@ -1,7 +1,6 @@
 package magmac.app.lang;
 
 import magmac.api.collect.list.Lists;
-import magmac.app.compile.rule.ContextRule;
 import magmac.app.compile.rule.ExactRule;
 import magmac.app.compile.rule.FilterRule;
 import magmac.app.compile.rule.LocatingRule;
@@ -19,11 +18,12 @@ import magmac.app.compile.rule.divide.FoldingDivider;
 import magmac.app.compile.rule.fold.DelimitedFolder;
 import magmac.app.compile.rule.fold.StatementFolder;
 import magmac.app.compile.rule.split.DividingSplitter;
+import magmac.app.lang.java.Invokable;
 import magmac.app.lang.java.Symbol;
 import magmac.app.lang.java.value.DataAccess;
 
 public final class CommonLang {
-    static Rule createWhitespaceRule() {
+    public static Rule createWhitespaceRule() {
         return new TypeRule("whitespace", new StripRule(new ExactRule("")));
     }
 
@@ -58,11 +58,12 @@ public final class CommonLang {
                 new StripRule(new PrefixRule("!", new NodeRule("child", value))),
                 CommonLang.createCharRule(),
                 CommonLang.createStringRule(),
-                CommonLang.createInvokableRule(value),
+                Invokable.createInvokableRule(value),
+                CommonLang.createIndexRule(value),
                 CommonLang.createNumberRule(),
+                Symbol.createSymbolValueRule(),
                 DataAccess.createAccessRule(".", value, "data-access"),
                 DataAccess.createAccessRule("::", value, "method-access"),
-                Symbol.createSymbolValueRule(),
                 CommonLang.createOperationRule(value, "add", "+"),
                 CommonLang.createOperationRule(value, "subtract", "-"),
                 CommonLang.createOperationRule(value, "equals", "=="),
@@ -70,8 +71,7 @@ public final class CommonLang {
                 CommonLang.createOperationRule(value, "and", "&&"),
                 CommonLang.createOperationRule(value, "or", "||"),
                 CommonLang.createOperationRule(value, "not-equals", "!="),
-                CommonLang.createOperationRule(value, "greater-than", ">"),
-                CommonLang.createIndexRule(value)
+                CommonLang.createOperationRule(value, "greater-than", ">")
         )));
     }
 
@@ -115,28 +115,6 @@ public final class CommonLang {
         return new TypeRule("char", new StripRule(new PrefixRule("'", new SuffixRule(new StringRule("value"), "'"))));
     }
 
-    private static Rule createInvokableRule(Rule value) {
-        Rule caller = new NodeRule("caller", new SuffixRule(new OrRule(Lists.of(
-                new ContextRule("As construction", CommonLang.createConstructionRule()),
-                new ContextRule("As invocation", value)
-        )), "("));
-
-        NodeListRule arguments = CommonLang.createArgumentsRule(value);
-        Splitter splitter = DividingSplitter.Last(new FoldingDivider(new InvocationFolder()), "");
-        return new TypeRule("invokable", new StripRule(new SuffixRule(new LocatingRule(caller, splitter, arguments), ")")));
-    }
-
-    private static Rule createConstructionRule() {
-        return new TypeRule("construction", new StripRule(new PrefixRule("new ", new NodeRule("type", CommonLang.createTypeRule()))));
-    }
-
-    static NodeListRule createArgumentsRule(Rule value) {
-        return new NodeListRule("arguments", new ValueFolder(), new OrRule(Lists.of(
-                CommonLang.createWhitespaceRule(),
-                value
-        )));
-    }
-
     static Rule initFunctionSegmentRule(LazyRule functionSegmentRule, Rule value, Rule definition) {
         Rule functionSegmentValueRule = CommonLang.createFunctionSegmentValueRule(value, definition);
 
@@ -178,7 +156,7 @@ public final class CommonLang {
 
     private static Rule createFunctionSegmentValueRule(Rule value, Rule definition) {
         return new OrRule(Lists.of(
-                CommonLang.createInvokableRule(value),
+                Invokable.createInvokableRule(value),
                 CommonLang.createAssignmentRule(definition, value),
                 CommonLang.createReturnRule(value),
                 CommonLang.createPostRule("post-increment", "++", value),
@@ -196,7 +174,7 @@ public final class CommonLang {
         return new TypeRule("return", new StripRule(new PrefixRule("return ", new NodeRule("value", value))));
     }
 
-    static Rule createTypeRule() {
+    public static Rule createTypeRule() {
         LazyRule orRule = new MutableLazyRule();
         return orRule.set(new OrRule(Lists.of(
                 CommonLang.createVariadicRule(orRule),

@@ -1,8 +1,8 @@
 package magmac.app.lang;
 
 import magmac.api.collect.list.Lists;
-import magmac.app.compile.rule.NodeListRule;
 import magmac.app.compile.rule.LocatingRule;
+import magmac.app.compile.rule.NodeListRule;
 import magmac.app.compile.rule.NodeRule;
 import magmac.app.compile.rule.OrRule;
 import magmac.app.compile.rule.PrefixRule;
@@ -85,11 +85,14 @@ public final class TypescriptLang {
 
     private static Rule createTypeRule() {
         LazyRule orRule = new MutableLazyRule();
-        orRule.set(new OrRule(Lists.of(
-                Symbol.createSymbolTypeRule(),
+        return orRule.set(new OrRule(Lists.of(
                 CommonLang.createTemplateRule(),
-                new TypeRule("array", new SuffixRule(new NodeRule("child", orRule), "[]"))
+                TypescriptLang.createArrayRule(orRule),
+                Symbol.createSymbolTypeRule()
         )));
-        return orRule;
+    }
+
+    private static TypeRule createArrayRule(LazyRule orRule) {
+        return new TypeRule("array", new SuffixRule(new NodeRule("child", orRule), "[]"));
     }
 }

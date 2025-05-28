@@ -8,7 +8,7 @@ import magmac.app.lang.java.root.JavaRootSegment;
 
 final class JavaRootSegments {
     public static CompileResult<JavaRootSegment> deserialize(Node node) {
-        return Deserializers.orError(node, Lists.of(
+        return Deserializers.orError("root-segment", node, Lists.of(
                 Namespaced::deserialize,
                 ClassNode::deserialize
         ));

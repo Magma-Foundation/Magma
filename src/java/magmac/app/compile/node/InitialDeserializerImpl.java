@@ -5,8 +5,10 @@ import magmac.api.collect.list.List;
 import magmac.api.iter.collect.ListCollector;
 import magmac.app.compile.error.CompileResult;
 import magmac.app.compile.error.CompileResultCollector;
+import magmac.app.compile.error.CompileResults;
 
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 public class InitialDeserializerImpl implements InitialDeserializer {
     private final Node node;
@@ -32,5 +34,10 @@ public class InitialDeserializerImpl implements InitialDeserializer {
     @Override
     public <T> CompoundDeserializer<T> withNode(String key, Function<Node, CompileResult<T>> deserializer) {
         return new CompoundDeserializerImpl<>(this.node.removeNode(key).flatMapValue((Tuple2<Node, Node> tuple) -> deserializer.apply(tuple.right()).mapValue((T deserialized) -> new Tuple2<>(tuple.left(), deserialized))));
+    }
+
+    @Override
+    public <T> CompileResult<T> complete(Supplier<T> supplier) {
+        return CompileResults.Ok(supplier.get());
     }
 }

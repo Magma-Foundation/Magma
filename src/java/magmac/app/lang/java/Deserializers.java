@@ -8,9 +8,8 @@ import magmac.app.compile.error.CompileResults;
 import magmac.app.compile.node.Node;
 
 public class Deserializers {
-    public static <T> CompileResult<T> orError(Node node, List<Deserializer<T>> deserializers) {
-        return Deserializers.or(node, deserializers)
-                .orElseGet(() -> CompileResults.NodeErr("Cannot deserialize", node));
+    public static <T> CompileResult<T> orError(String type, Node node, List<Deserializer<T>> deserializers) {
+        return Deserializers.or(node, deserializers).orElseGet(() -> CompileResults.NodeErr("Cannot deserialize of type '" + type + "'", node));
     }
 
     public static <T> Option<CompileResult<T>> or(Node node, List<Deserializer<T>> deserializers) {

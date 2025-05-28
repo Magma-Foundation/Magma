@@ -18,6 +18,7 @@ import magmac.app.compile.rule.divide.Divider;
 import magmac.app.compile.rule.divide.FoldingDivider;
 import magmac.app.compile.rule.fold.DelimitedFolder;
 import magmac.app.compile.rule.split.DividingSplitter;
+import magmac.app.lang.java.value.Arguments;
 
 public final class JavaLang {
     public static Rule createRule() {
@@ -41,13 +42,15 @@ public final class JavaLang {
                 beforeContent
         ));
 
+        Rule extended = new NodeListRule("extended", new ValueFolder(), CommonLang.createTypeRule());
         Rule withEnds = new OrRule(Lists.of(
-                LocatingRule.First(withParameters, " extends ", new NodeRule("extended", CommonLang.createTypeRule())),
+                LocatingRule.First(withParameters, " extends ", extended),
                 withParameters
         ));
 
+        Rule implemented = new NodeListRule("implemented", new ValueFolder(), CommonLang.createTypeRule());
         Rule withImplements = new OrRule(Lists.of(
-                new ContextRule("With implements", LocatingRule.First(withEnds, " implements ", new NodeRule("implemented", CommonLang.createTypeRule()))),
+                new ContextRule("With implements", LocatingRule.First(withEnds, " implements ", implemented)),
                 new ContextRule("Without implements", withEnds)
         ));
 
@@ -70,7 +73,7 @@ public final class JavaLang {
 
     private static TypeRule createEnumValuesRule(Rule value) {
         Rule name = new StripRule(FilterRule.Symbol(new StringRule("name")));
-        Rule enumValue = new StripRule(new SuffixRule(LocatingRule.First(name, "(", CommonLang.createArgumentsRule(value)), ")"));
+        Rule enumValue = new StripRule(new SuffixRule(LocatingRule.First(name, "(", Arguments.createArgumentsRule(value)), ")"));
         return new TypeRule("enum-values", new StripRule(new SuffixRule(new NodeListRule("children", new ValueFolder(), enumValue), ";")));
     }
 
