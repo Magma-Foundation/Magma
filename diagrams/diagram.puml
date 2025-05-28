@@ -3,7 +3,7 @@ skinparam linetype ortho
 class TypescriptLang
 
 class TypeScriptTargetPlatform
-? <|-- TypeScriptTargetPlatform
+unknown <|-- TypeScriptTargetPlatform
 
 interface Targets
 
@@ -18,7 +18,7 @@ class ListCollector
 Collector <|-- ListCollector
 
 class FlattenJava
-? <|-- FlattenJava
+unknown <|-- FlattenJava
 
 class Maps
 
@@ -27,13 +27,13 @@ class Tuple2
 interface PassResult
 
 class ApplicationError
-? <|-- ApplicationError
+unknown <|-- ApplicationError
 
 class StagedCompiler
-? <|-- StagedCompiler
+unknown <|-- StagedCompiler
 
 interface LazyRule
-? <|-- LazyRule
+unknown <|-- LazyRule
 
 interface Compiler
 
@@ -41,17 +41,17 @@ class MapCollector
 Collector <|-- MapCollector
 
 class ImmutableCompileError
-? <|-- ImmutableCompileError
+unknown <|-- ImmutableCompileError
 
 interface NodeList
 
 interface Folder
 
 class LastSelector
-? <|-- LastSelector
+unknown <|-- LastSelector
 
 class RuleGenerator
-? <|-- RuleGenerator
+unknown <|-- RuleGenerator
 
 interface Passer
 
@@ -59,15 +59,15 @@ class InlineCompileResult
 CompileResult <|-- InlineCompileResult
 
 class RuleLexer
-? <|-- RuleLexer
+unknown <|-- RuleLexer
 
 class CompileApplication
-? <|-- CompileApplication
+unknown <|-- CompileApplication
 
 class OrState
 
 class InlinePassResult
-? <|-- InlinePassResult
+unknown <|-- InlinePassResult
 
 interface ParseState
 
@@ -79,7 +79,7 @@ Collector <|-- CompileResultCollector
 interface Error
 
 class PathTargets
-? <|-- PathTargets
+unknown <|-- PathTargets
 
 class Location
 
@@ -89,7 +89,7 @@ Head <|-- SingleHead
 interface Option
 
 class StripRule
-? <|-- StripRule
+unknown <|-- StripRule
 
 class CompileErrors
 
@@ -103,15 +103,15 @@ interface Lexer
 Stage <|-- Lexer
 
 class DivideRule
-? <|-- DivideRule
+unknown <|-- DivideRule
 
 interface IOResult
 
 class LocatingRule
-? <|-- LocatingRule
+unknown <|-- LocatingRule
 
 class SuffixRule
-? <|-- SuffixRule
+unknown <|-- SuffixRule
 
 interface Result
 
@@ -122,21 +122,21 @@ class PlantUMLLang
 class Main
 
 class LastLocator
-? <|-- LastLocator
+unknown <|-- LastLocator
 
 class MutableDivideState
-? <|-- MutableDivideState
+unknown <|-- MutableDivideState
 
 interface CompileError
-? <|-- CompileError
+unknown <|-- CompileError
 
 interface Locator
 
 class TypeSeparatorFolder
-? <|-- TypeSeparatorFolder
+unknown <|-- TypeSeparatorFolder
 
 class ContextRule
-? <|-- ContextRule
+unknown <|-- ContextRule
 
 interface Selector
 
@@ -151,24 +151,24 @@ class FlatMapHead
 Head <|-- FlatMapHead
 
 class FoldingDivider
-? <|-- FoldingDivider
+unknown <|-- FoldingDivider
 
 class Lists
 
 class CommonLang
 
 class InvocationFolder
-? <|-- InvocationFolder
+unknown <|-- InvocationFolder
 
 class JavaLang
 
 interface Filter
 
 class StringRule
-? <|-- StringRule
+unknown <|-- StringRule
 
 class ThrowableError
-? <|-- ThrowableError
+unknown <|-- ThrowableError
 
 class None
 Option <|-- None
@@ -182,7 +182,7 @@ Collector <|-- ResultCollector
 interface Head
 
 class StatementFolder
-? <|-- StatementFolder
+unknown <|-- StatementFolder
 
 interface Generator
 Stage <|-- Generator
@@ -191,12 +191,12 @@ class Max
 Collector <|-- Max
 
 class NodeContext
-? <|-- NodeContext
+unknown <|-- NodeContext
 
 interface CompileResult
 
 class DividingSplitter
-? <|-- DividingSplitter
+unknown <|-- DividingSplitter
 
 class EmptyHead
 Head <|-- EmptyHead
@@ -205,81 +205,81 @@ class NodeListCollector
 Collector <|-- NodeListCollector
 
 class NumberFilter
-? <|-- NumberFilter
+unknown <|-- NumberFilter
 
 interface Stage
 
 class PathSources
-? <|-- PathSources
+unknown <|-- PathSources
 
 interface Map
 
 interface DivideState
 
 class PlantUMLTargetPlatform
-? <|-- PlantUMLTargetPlatform
+unknown <|-- PlantUMLTargetPlatform
 
 class MutableLazyRule
-? <|-- MutableLazyRule
+unknown <|-- MutableLazyRule
 
 class MapRoots
-? <|-- MapRoots
+unknown <|-- MapRoots
 
 class JVMMap
 Map <|-- JVMMap
 
 class PrefixRule
-? <|-- PrefixRule
+unknown <|-- PrefixRule
 
 class EmptyAfterAll
-? <|-- EmptyAfterAll
+unknown <|-- EmptyAfterAll
 
 class FirstSelector
-? <|-- FirstSelector
+unknown <|-- FirstSelector
 
 class ExactRule
-? <|-- ExactRule
+unknown <|-- ExactRule
 
 class PathSource
-? <|-- PathSource
+unknown <|-- PathSource
 
 class StringContext
-? <|-- StringContext
+unknown <|-- StringContext
 
 class TypeRule
-? <|-- TypeRule
+unknown <|-- TypeRule
 
 class SymbolFilter
-? <|-- SymbolFilter
+unknown <|-- SymbolFilter
 
 class InlineNodeList
-? <|-- InlineNodeList
+unknown <|-- InlineNodeList
 
 class FirstLocator
-? <|-- FirstLocator
+unknown <|-- FirstLocator
 
 interface Node
 
 class OrRule
-? <|-- OrRule
+unknown <|-- OrRule
 
 interface Iter
 
 class NodeRule
-? <|-- NodeRule
+unknown <|-- NodeRule
 
 class Iters
 
 class BlockFolder
-? <|-- BlockFolder
+unknown <|-- BlockFolder
 
 class ApplicationBuilder
 
 class DelimitedFolder
-? <|-- DelimitedFolder
+unknown <|-- DelimitedFolder
 
 class TypeScriptAfterPasser
-? <|-- TypeScriptAfterPasser
+unknown <|-- TypeScriptAfterPasser
 
 interface Collector
 
@@ -287,36 +287,36 @@ class Some
 Option <|-- Some
 
 class LocatingSplitter
-? <|-- LocatingSplitter
+unknown <|-- LocatingSplitter
 
 interface Context
 
 class MergeDiagram
-? <|-- MergeDiagram
+unknown <|-- MergeDiagram
 
 interface Sources
 
 interface Application
 
 class ImmutableParseState
-? <|-- ImmutableParseState
+unknown <|-- ImmutableParseState
 
 interface Divider
 
 class TreeParser
-? <|-- TreeParser
+unknown <|-- TreeParser
 
 class Err
 Result <|-- Err
 
 class OptionNodeListRule
-? <|-- OptionNodeListRule
+unknown <|-- OptionNodeListRule
 
 class PlantUMLAfterPasser
-? <|-- PlantUMLAfterPasser
+unknown <|-- PlantUMLAfterPasser
 
 class ValueFolder
-? <|-- ValueFolder
+unknown <|-- ValueFolder
 
 class SafeFiles
 
@@ -326,10 +326,10 @@ Iter <|-- HeadedIter
 interface Splitter
 
 class MapNode
-? <|-- MapNode
+unknown <|-- MapNode
 
 class FilterRule
-? <|-- FilterRule
+unknown <|-- FilterRule
 
 class InlineIOResult
 IOResult <|-- InlineIOResult
