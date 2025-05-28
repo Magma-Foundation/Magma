@@ -8,6 +8,6 @@ record Definition(String name, Type right) {
         return node.deserialize()
                 .string("name")
                 .node("type", Type::deserialize)
-                .complete((result) -> new Definition(result.left(), result.right()));
+                .complete(result -> new Definition(result.left(), result.right()));
     }
 }

@@ -4,8 +4,9 @@ import magmac.app.compile.error.CompileResult;
 import magmac.app.compile.error.CompileResults;
 import magmac.app.compile.node.Node;
 
-public class Type {
+public interface Type {
     public static CompileResult<Type> deserialize(Node node) {
-        return CompileResults.NodeErr("Not a type", node);
+        return Symbol.deserialize(node)
+                .orElseGet(() -> CompileResults.NodeErr("Not a type", node));
     }
 }

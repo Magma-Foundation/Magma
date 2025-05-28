@@ -26,7 +26,11 @@ final class CommonLang {
     }
 
     static Rule createSymbolTypeRule() {
-        return new TypeRule("symbol-type", new StripRule(FilterRule.Symbol(new StringRule("value"))));
+        return new TypeRule("symbol-type", CommonLang.createSymbolRule("value"));
+    }
+
+    private static StripRule createSymbolRule(String name) {
+        return new StripRule(FilterRule.Symbol(new StringRule(name)));
     }
 
     static Rule createTemplateRule() {
@@ -62,7 +66,8 @@ final class CommonLang {
                 CommonLang.createStringRule(),
                 CommonLang.createInvokableRule(value),
                 CommonLang.createNumberRule(),
-                CommonLang.createAccessRule(value),
+                CommonLang.createAccessRule(".", value, "data-access"),
+                CommonLang.createAccessRule("::", value, "method-access"),
                 CommonLang.createSymbolValueRule(),
                 CommonLang.createOperationRule(value, "add", "+"),
                 CommonLang.createOperationRule(value, "subtract", "-"),
@@ -86,7 +91,18 @@ final class CommonLang {
                 new NodeRule("value", value)
         ));
 
-        return new TypeRule("lambda", LocatingRule.First(new StripRule(new PrefixRule("(", new SuffixRule(new NodeListRule("parameters", new ValueFolder(), definition), ")"))), infix, value1));
+        NodeListRule parameters = new NodeListRule("parameters", new ValueFolder(), new OrRule(Lists.of(
+                definition,
+                CommonLang.createSymbolRule("param")
+        )));
+
+        PrefixRule rule = new PrefixRule("(", new SuffixRule(parameters, ")"));
+        OrRule rule1 = new OrRule(Lists.of(
+                rule,
+                CommonLang.createSymbolRule("param")
+        ));
+
+        return new TypeRule("lambda", LocatingRule.First(new StripRule(rule1), infix, value1));
     }
 
     private static Rule createOperationRule(Rule value, String type, String infix) {
@@ -94,12 +110,12 @@ final class CommonLang {
     }
 
     private static Rule createSymbolValueRule() {
-        return new StripRule(FilterRule.Symbol(new StringRule("value")));
+        return CommonLang.createSymbolRule("value");
     }
 
-    private static Rule createAccessRule(LazyRule value) {
-        Rule property = new StripRule(FilterRule.Symbol(new StringRule("property")));
-        return new TypeRule("access", LocatingRule.Last(new NodeRule("instance", value), ".", property));
+    private static Rule createAccessRule(String infix, LazyRule value, String type) {
+        Rule property = CommonLang.createSymbolRule("property");
+        return new TypeRule(type, LocatingRule.Last(new NodeRule("instance", value), infix, property));
     }
 
     private static Rule createNumberRule() {
