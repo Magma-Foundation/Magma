@@ -11,6 +11,7 @@ import magmac.app.compile.rule.StringRule;
 import magmac.app.compile.rule.StripRule;
 import magmac.app.compile.rule.SuffixRule;
 import magmac.app.compile.rule.TypeRule;
+import magmac.app.compile.rule.fold.StatementFolder;
 
 public final class CommonLang {
     static Rule createWhitespaceRule() {
@@ -30,5 +31,9 @@ public final class CommonLang {
                 createWhitespaceRule(),
                 definition
         )));
+    }
+
+    public static DivideRule Statements(String key, Rule childRule) {
+        return new DivideRule(key, new StatementFolder(), childRule);
     }
 }

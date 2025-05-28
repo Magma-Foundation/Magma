@@ -21,7 +21,7 @@ import magmac.app.compile.rule.split.DividingSplitter;
 
 public final class JavaLang {
     public static Rule createRule() {
-        return new TypeRule("root", DivideRule.Statements("children", new OrRule(Lists.of(
+        return new TypeRule("root", CommonLang.Statements("children", new OrRule(Lists.of(
                 CommonLang.createWhitespaceRule(),
                 JavaLang.createNamespacedRule("package"),
                 JavaLang.createNamespacedRule("import"),
@@ -54,7 +54,7 @@ public final class JavaLang {
                 new ContextRule("Without implements", withEnds)
         ));
 
-        Rule afterKeyword = LocatingRule.First(withImplements, "{", new StripRule(new SuffixRule(DivideRule.Statements("children", JavaLang.createStructureMemberRule()), "}")));
+        Rule afterKeyword = LocatingRule.First(withImplements, "{", new StripRule(new SuffixRule(CommonLang.Statements("children", JavaLang.createStructureMemberRule()), "}")));
         return new TypeRule(keyword, LocatingRule.First(new StringRule("before-keyword"), keyword + " ", afterKeyword));
     }
 
@@ -94,7 +94,7 @@ public final class JavaLang {
         )));
 
         Rule parameters = CommonLang.createParametersRule(JavaLang.createDefinitionRule());
-        Rule content = new StringRule("content");
+        Rule content = CommonLang.Statements("content", JavaLang.createFunctionSegmentRule());
         Rule rightRule = new StripRule(new PrefixRule("{", new SuffixRule(content, "}")));
         Rule withParams = new OrRule(Lists.of(
                 new SuffixRule(parameters, ");"),
@@ -102,6 +102,18 @@ public final class JavaLang {
         ));
 
         return new TypeRule("method", LocatingRule.First(header, "(", withParams));
+    }
+
+    private static OrRule createFunctionSegmentRule() {
+        return new OrRule(Lists.of(
+                new StripRule(new SuffixRule(JavaLang.createFunctionSegmentValueRule(), ";"))
+        ));
+    }
+
+    private static Rule createFunctionSegmentValueRule() {
+        return new OrRule(Lists.of(
+                new TypeRule("return", new StripRule(new PrefixRule("return ", new NodeRule("value", JavaLang.createValueRule()))))
+        ));
     }
 
     private static Rule createDefinitionRule() {

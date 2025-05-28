@@ -15,7 +15,7 @@ import magmac.app.compile.rule.fold.DelimitedFolder;
 
 public final class TypescriptLang {
     public static Rule createRule() {
-        return new TypeRule("root", DivideRule.Statements("children", new OrRule(Lists.of(
+        return new TypeRule("root", CommonLang.Statements("children", new OrRule(Lists.of(
                 CommonLang.createWhitespaceRule(),
                 TypescriptLang.createImportRule(),
                 TypescriptLang.createClassRule("class"),
@@ -30,7 +30,7 @@ public final class TypescriptLang {
     }
 
     private static Rule createClassRule(String type) {
-        Rule children = DivideRule.Statements("children", TypescriptLang.createStructureMemberRule());
+        Rule children = CommonLang.Statements("children", TypescriptLang.createStructureMemberRule());
         Rule name = LocatingRule.First(new StringRule("name"), " {", new SuffixRule(children, "\n}\n"));
         return new TypeRule(type, new PrefixRule("export " + type + " ", name));
     }

@@ -12,13 +12,8 @@ import magmac.app.compile.node.Node;
 import magmac.app.compile.node.NodeList;
 import magmac.app.compile.rule.divide.FoldingDivider;
 import magmac.app.compile.rule.fold.Folder;
-import magmac.app.compile.rule.fold.StatementFolder;
 
 public record DivideRule(String key, Folder folder, Rule childRule) implements Rule {
-    public static DivideRule Statements(String key, Rule childRule) {
-        return new DivideRule(key, new StatementFolder(), childRule);
-    }
-
     private CompileResult<Option<String>> join(NodeList list) {
         return list.iter()
                 .map(node -> this.childRule.generate(node))
