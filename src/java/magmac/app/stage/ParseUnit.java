@@ -15,6 +15,10 @@ public final class ParseUnit<T> {
         this.node = node;
     }
 
+    public Unit<T> toLocationUnit() {
+        return this.merge((state, node) -> new Unit<>(state.findLocation(), node));
+    }
+
     public <R> R merge(BiFunction<ParseState, T, R> merge) {
         return merge.apply(this.state, this.node);
     }

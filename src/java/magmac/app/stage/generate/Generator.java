@@ -7,5 +7,5 @@ import magmac.app.stage.Stage;
 
 import magmac.api.collect.map.Map;
 
-public interface Generator extends Stage<UnitSet<Node>, Map<Location, String>> {
+public interface Generator extends Stage<UnitSet<Node>, UnitSet<String>> {
 }

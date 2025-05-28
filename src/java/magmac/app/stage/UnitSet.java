@@ -4,4 +4,6 @@ import magmac.api.iter.Iter;
 
 public interface UnitSet<T> {
     Iter<Unit<T>> iter();
+
+    UnitSet<T> add(Unit<T> element);
 }

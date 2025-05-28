@@ -6,5 +6,5 @@ import magmac.app.io.Location;
 import magmac.app.stage.UnitSet;
 import magmac.app.stage.Stage;
 
-public interface Lexer extends Stage<Map<Location, String>, UnitSet<Node>> {
+public interface Lexer extends Stage<UnitSet<String>, UnitSet<Node>> {
 }

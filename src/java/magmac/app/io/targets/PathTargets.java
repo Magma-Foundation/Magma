@@ -1,11 +1,11 @@
 package magmac.app.io.targets;
 
 import magmac.api.Option;
-import magmac.api.Tuple2;
-import magmac.api.collect.map.Map;
 import magmac.api.iter.Iters;
 import magmac.app.io.Location;
 import magmac.app.io.SafeFiles;
+import magmac.app.stage.Unit;
+import magmac.app.stage.UnitSet;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -29,9 +29,9 @@ public record PathTargets(Path root, String extension) implements Targets {
     }
 
     @Override
-    public Option<IOException> writeAll(Map<Location, String> outputs) {
-        return outputs.iterEntries()
-                .map((Tuple2<Location, String> entry) -> this.write(entry.left(), entry.right()))
+    public Option<IOException> writeAll(UnitSet<String> outputs) {
+        return outputs.iter()
+                .map((Unit<String> entry) -> this.write(entry.left(), entry.right()))
                 .flatMap((Option<IOException> option) -> Iters.fromOption(option))
                 .next();
     }

@@ -1,11 +1,10 @@
 package magmac.app.io.targets;
 
-import magmac.app.io.Location;
-
 import java.io.IOException;
-import magmac.api.collect.map.Map;
+
 import magmac.api.Option;
+import magmac.app.stage.UnitSet;
 
 public interface Targets {
-    Option<IOException> writeAll(Map<Location, String> outputs);
+    Option<IOException> writeAll(UnitSet<String> outputs);
 }

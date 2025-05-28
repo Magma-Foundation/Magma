@@ -1,8 +1,6 @@
 package magmac.app.stage.parse;
 
 import magmac.api.Tuple2;
-import magmac.api.collect.map.Map;
-import magmac.api.collect.map.MapCollector;
 import magmac.api.result.Ok;
 import magmac.app.compile.error.CompileResult;
 import magmac.app.compile.error.CompileResultCollector;
@@ -11,10 +9,11 @@ import magmac.app.compile.error.error.CompileError;
 import magmac.app.compile.node.Node;
 import magmac.app.compile.node.NodeList;
 import magmac.app.io.Location;
+import magmac.app.io.sources.UnitSetCollector;
 import magmac.app.stage.AfterAll;
-import magmac.app.stage.MapUnitSet;
 import magmac.app.stage.ParseUnit;
 import magmac.app.stage.Passer;
+import magmac.app.stage.Unit;
 import magmac.app.stage.UnitSet;
 
 public class TreeParser implements Parser {
@@ -54,9 +53,9 @@ public class TreeParser implements Parser {
         });
     }
 
-    private CompileResult<Tuple2<Location, Node>> parse(Location location, Node root) {
+    private CompileResult<Unit<Node>> parse(Location location, Node root) {
         ParseState initial = new ImmutableParseState(location);
-        return this.parseTree(initial, root).mapValue((ParseUnit<Node> parsed) -> new Tuple2<>(parsed.left().findLocation(), parsed.right()));
+        return this.parseTree(initial, root).mapValue((ParseUnit<Node> parsed) -> parsed.toLocationUnit());
     }
 
     private CompileResult<ParseUnit<Node>> parseTree(ParseState state, Node root) {
@@ -69,9 +68,9 @@ public class TreeParser implements Parser {
 
     @Override
     public CompileResult<UnitSet<Node>> apply(UnitSet<Node> initial) {
-        return initial.iter().map(unit -> unit.tuple())
-                .map((Tuple2<Location, Node> tuple) -> this.parse(tuple.left(), tuple.right()))
-                .collect(new CompileResultCollector<>(new MapCollector<>()))
-                .flatMapValue((Map<Location, Node> parsed) -> CompileResults.fromResult(new Ok<UnitSet<Node>, CompileError>(new MapUnitSet(this.afterAllChildren.afterAll(parsed)))));
+        return initial.iter()
+                .map((Unit<Node> tuple) -> this.parse(tuple.left(), tuple.right()))
+                .collect(new CompileResultCollector<>(new UnitSetCollector<>()))
+                .flatMapValue((parsed) -> CompileResults.fromResult(new Ok<UnitSet<Node>, CompileError>(this.afterAllChildren.afterAll(parsed))));
     }
 }

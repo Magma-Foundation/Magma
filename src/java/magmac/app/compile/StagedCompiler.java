@@ -12,7 +12,7 @@ import magmac.api.collect.map.Map;
 
 public record StagedCompiler(Lexer lexer, Parser parser, Generator generator) implements Compiler {
     @Override
-    public CompileResult<Map<Location, String>> compile(Map<Location, String> units) {
+    public CompileResult<UnitSet<String>> compile(UnitSet<String> units) {
         return this.lexer.apply(units)
                 .flatMapValue((UnitSet<Node> trees) -> this.parser.apply(trees))
                 .flatMapValue((UnitSet<Node> trees) -> this.generator.apply(trees));
