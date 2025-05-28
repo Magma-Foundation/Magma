@@ -216,6 +216,8 @@ Filter <|-- NumberFilter
 
 interface Stage
 
+class CompileResults
+
 class PathSources
 Sources <|-- PathSources
 
@@ -338,7 +340,6 @@ Rule <|-- FilterRule
 class InlineIOResult
 IOResult <|-- InlineIOResult
 
-InlineCompileResult --> Ok
 Iters --> Option
 Iters --> EmptyHead
 Iters --> HeadedIter
@@ -383,7 +384,7 @@ OrState --> Lists
 OrState --> Err
 OrState --> Ok
 OrState --> CompileResult
-OrState --> InlineCompileResult
+OrState --> CompileResults
 OrState --> Context
 OrState --> CompileError
 OrState --> ImmutableCompileError
@@ -434,7 +435,7 @@ TreeParser --> MapCollector
 TreeParser --> Ok
 TreeParser --> CompileResult
 TreeParser --> CompileResultCollector
-TreeParser --> InlineCompileResult
+TreeParser --> CompileResults
 TreeParser --> CompileError
 TreeParser --> InlineNodeList
 TreeParser --> NodeList
@@ -452,7 +453,7 @@ RuleGenerator --> Tuple2
 RuleGenerator --> MapCollector
 RuleGenerator --> ResultCollector
 RuleGenerator --> CompileResult
-RuleGenerator --> InlineCompileResult
+RuleGenerator --> CompileResults
 RuleGenerator --> Rule
 Map --> Tuple2
 Map --> Iter
@@ -504,6 +505,9 @@ TypeScriptTargetPlatform --> TypescriptLang
 TypeScriptTargetPlatform --> EmptyAfterAll
 TypeScriptTargetPlatform --> Paths
 EmptyHead --> None
+CompileResults --> Ok
+CompileResults --> Result
+CompileResults --> CompileError
 SafeFiles --> None
 SafeFiles --> Option
 SafeFiles --> Some
@@ -592,7 +596,7 @@ CompileResult --> Supplier
 FlattenJava --> Some
 FlattenJava --> Tuple2
 FlattenJava --> ListCollector
-FlattenJava --> InlineCompileResult
+FlattenJava --> CompileResults
 FlattenJava --> InlineNodeList
 FlattenJava --> NodeList
 FlattenJava --> InlinePassResult
@@ -661,7 +665,7 @@ PathTargets --> Files
 PathTargets --> Path
 CompileErrors --> Err
 CompileErrors --> CompileResult
-CompileErrors --> InlineCompileResult
+CompileErrors --> CompileResults
 CompileErrors --> NodeContext
 CompileErrors --> StringContext
 CompileErrors --> Node
@@ -679,14 +683,14 @@ Option --> Function
 Option --> Predicate
 Option --> Supplier
 StringRule --> Ok
-StringRule --> InlineCompileResult
+StringRule --> CompileResults
 StringRule --> CompileErrors
 StringRule --> MapNode
 InlinePassResult --> None
 InlinePassResult --> Option
 InlinePassResult --> Some
 InlinePassResult --> Ok
-InlinePassResult --> InlineCompileResult
+InlinePassResult --> CompileResults
 Source --> IOResult
 Source --> Location
 PathSources --> Tuple2
@@ -708,7 +712,7 @@ MapUnitSet --> Map
 ThrowableError --> PrintWriter
 ThrowableError --> StringWriter
 ExactRule --> Ok
-ExactRule --> InlineCompileResult
+ExactRule --> CompileResults
 ExactRule --> CompileErrors
 ExactRule --> MapNode
 LocatingSplitter --> Locator
@@ -757,7 +761,7 @@ TypeScriptAfterPasser --> Some
 TypeScriptAfterPasser --> Tuple2
 TypeScriptAfterPasser --> Lists
 TypeScriptAfterPasser --> CompileResult
-TypeScriptAfterPasser --> InlineCompileResult
+TypeScriptAfterPasser --> CompileResults
 TypeScriptAfterPasser --> InlineNodeList
 TypeScriptAfterPasser --> MapNode
 TypeScriptAfterPasser --> NodeList
@@ -765,7 +769,7 @@ TypeScriptAfterPasser --> NodeListCollector
 TypeScriptAfterPasser --> InlinePassResult
 TypeScriptAfterPasser --> PassResult
 NodeRule --> Ok
-NodeRule --> InlineCompileResult
+NodeRule --> CompileResults
 NodeRule --> CompileErrors
 NodeRule --> MapNode
 DividingSplitter --> List
@@ -789,13 +793,13 @@ RuleLexer --> Tuple2
 RuleLexer --> MapCollector
 RuleLexer --> ResultCollector
 RuleLexer --> CompileResult
-RuleLexer --> InlineCompileResult
+RuleLexer --> CompileResults
 RuleLexer --> Rule
 RuleLexer --> MapUnitSet
 Location --> List
 Location --> Joiner
 TypeRule --> Lists
-TypeRule --> InlineCompileResult
+TypeRule --> CompileResults
 TypeRule --> Context
 TypeRule --> NodeContext
 TypeRule --> StringContext
@@ -808,7 +812,7 @@ PlantUMLAfterPasser --> List
 PlantUMLAfterPasser --> ListCollector
 PlantUMLAfterPasser --> CompileResult
 PlantUMLAfterPasser --> CompileResultCollector
-PlantUMLAfterPasser --> InlineCompileResult
+PlantUMLAfterPasser --> CompileResults
 PlantUMLAfterPasser --> CompileErrors
 PlantUMLAfterPasser --> InlineNodeList
 PlantUMLAfterPasser --> MapNode

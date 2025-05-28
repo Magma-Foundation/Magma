@@ -1,7 +1,6 @@
 package magmac.app.compile.error;
 
 import magmac.api.Tuple2;
-import magmac.api.result.Ok;
 import magmac.api.result.Result;
 import magmac.app.compile.error.error.CompileError;
 
@@ -9,24 +8,10 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-public final class InlineCompileResult<T> implements CompileResult<T> {
-    private final Result<T, CompileError> result;
-
-    private InlineCompileResult(Result<T, CompileError> result) {
-        this.result = result;
-    }
-
-    public static <T> CompileResult<T> fromResult(Result<T, CompileError> result) {
-        return new InlineCompileResult<T>(result);
-    }
-
-    public static <T> CompileResult<T> fromOk(T value) {
-        return InlineCompileResult.fromResult(new Ok<>(value));
-    }
-
+public record InlineCompileResult<T>(Result<T, CompileError> result) implements CompileResult<T> {
     @Override
     public <R> CompileResult<R> mapValue(Function<T, R> mapper) {
-        return InlineCompileResult.fromResult(this.result.mapValue(mapper));
+        return CompileResults.fromResult(this.result.mapValue(mapper));
     }
 
     @Override
@@ -36,22 +21,17 @@ public final class InlineCompileResult<T> implements CompileResult<T> {
 
     @Override
     public CompileResult<T> mapErr(Function<CompileError, CompileError> mapper) {
-        return InlineCompileResult.fromResult(this.result.mapErr(mapper));
+        return CompileResults.fromResult(this.result.mapErr(mapper));
     }
 
     @Override
     public <R> CompileResult<R> flatMapValue(Function<T, CompileResult<R>> mapper) {
-        return InlineCompileResult.fromResult(this.result.flatMapValue((T t) -> mapper.apply(t).result()));
+        return CompileResults.fromResult(this.result.flatMapValue((T t) -> mapper.apply(t).result()));
     }
 
     @Override
     public <R> CompileResult<Tuple2<T, R>> and(Supplier<CompileResult<R>> supplier) {
-        return InlineCompileResult.fromResult(this.result.and(() -> supplier.get().result()));
-    }
-
-    @Override
-    public Result<T, CompileError> result() {
-        return this.result;
+        return CompileResults.fromResult(this.result.and(() -> supplier.get().result()));
     }
 
     @Override

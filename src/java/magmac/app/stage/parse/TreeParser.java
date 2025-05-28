@@ -6,7 +6,7 @@ import magmac.api.collect.map.MapCollector;
 import magmac.api.result.Ok;
 import magmac.app.compile.error.CompileResult;
 import magmac.app.compile.error.CompileResultCollector;
-import magmac.app.compile.error.InlineCompileResult;
+import magmac.app.compile.error.CompileResults;
 import magmac.app.compile.error.error.CompileError;
 import magmac.app.compile.node.InlineNodeList;
 import magmac.app.compile.node.Node;
@@ -30,7 +30,7 @@ public class TreeParser implements Parser {
 
     private CompileResult<Tuple2<ParseState, Node>> parseNodeLists(ParseState state, Node root) {
         Tuple2<ParseState, Node> parseStateNodeTuple2 = new Tuple2<>(state, root);
-        return root.iterNodeLists().fold(InlineCompileResult.fromOk(parseStateNodeTuple2), (CompileResult<Tuple2<ParseState, Node>> current, Tuple2<String, NodeList> entry) -> current.flatMapValue((Tuple2<ParseState, Node> inner) -> this.parseNodeList(inner, entry)));
+        return root.iterNodeLists().fold(CompileResults.fromOk(parseStateNodeTuple2), (CompileResult<Tuple2<ParseState, Node>> current, Tuple2<String, NodeList> entry) -> current.flatMapValue((Tuple2<ParseState, Node> inner) -> this.parseNodeList(inner, entry)));
     }
 
     private CompileResult<Tuple2<ParseState, Node>> parseNodeList(Tuple2<ParseState, Node> current, Tuple2<String, NodeList> entry) {
@@ -39,7 +39,7 @@ public class TreeParser implements Parser {
 
         String key = entry.left();
 
-        CompileResult<Tuple2<ParseState, NodeList>> initial = InlineCompileResult.fromOk(new Tuple2<>(currentState, InlineNodeList.empty()));
+        CompileResult<Tuple2<ParseState, NodeList>> initial = CompileResults.fromOk(new Tuple2<>(currentState, InlineNodeList.empty()));
         return entry.right().iter().fold(initial, (CompileResult<Tuple2<ParseState, NodeList>> currentTupleResult, Node node) -> currentTupleResult.flatMapValue((Tuple2<ParseState, NodeList> currentTuple) -> {
             ParseState currentState1 = currentTuple.left();
             NodeList currentElements = currentTuple.right();
@@ -71,6 +71,6 @@ public class TreeParser implements Parser {
         return initial.iter().map(unit -> unit.tuple())
                 .map((Tuple2<Location, Node> tuple) -> this.parse(tuple.left(), tuple.right()))
                 .collect(new CompileResultCollector<>(new MapCollector<>()))
-                .flatMapValue((Map<Location, Node> parsed) -> InlineCompileResult.fromResult(new Ok<UnitSet<Node>, CompileError>(new MapUnitSet(this.afterAllChildren.afterAll(parsed)))));
+                .flatMapValue((Map<Location, Node> parsed) -> CompileResults.fromResult(new Ok<UnitSet<Node>, CompileError>(new MapUnitSet(this.afterAllChildren.afterAll(parsed)))));
     }
 }

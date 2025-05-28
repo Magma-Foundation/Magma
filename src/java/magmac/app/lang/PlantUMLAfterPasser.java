@@ -6,7 +6,7 @@ import magmac.api.collect.list.List;
 import magmac.api.iter.collect.ListCollector;
 import magmac.app.compile.error.CompileResult;
 import magmac.app.compile.error.CompileResultCollector;
-import magmac.app.compile.error.InlineCompileResult;
+import magmac.app.compile.error.CompileResults;
 import magmac.app.compile.error.error.CompileErrors;
 import magmac.app.compile.node.InlineNodeList;
 import magmac.app.compile.node.MapNode;
@@ -23,7 +23,7 @@ public class PlantUMLAfterPasser implements Passer {
     private static CompileResult<NodeList> createInherits(Node child, String key) {
         return child.findNode(key)
                 .map((Node implemented) -> PlantUMLAfterPasser.getNodeListCompileResult(child, implemented))
-                .orElseGet(() -> InlineCompileResult.fromOk(InlineNodeList.empty()));
+                .orElseGet(() -> CompileResults.fromOk(InlineNodeList.empty()));
     }
 
     private static CompileResult<NodeList> getNodeListCompileResult(Node child, Node implemented) {
@@ -102,7 +102,7 @@ public class PlantUMLAfterPasser implements Passer {
                     .withString("child", child);
 
             Tuple2<ParseState, Node> tuple = new Tuple2<>(state, dependency);
-            return new InlinePassResult(new Some<>(InlineCompileResult.fromOk(tuple)));
+            return new InlinePassResult(new Some<>(CompileResults.fromOk(tuple)));
         }
 
         return InlinePassResult.empty();
@@ -110,6 +110,6 @@ public class PlantUMLAfterPasser implements Passer {
 
     private CompileResult<Tuple2<ParseState, Node>> getTuple2CompileResult(ParseState state, Node node, NodeList values) {
         Tuple2<ParseState, Node> tuple = new Tuple2<>(state, node.withNodeList("children", values));
-        return InlineCompileResult.fromOk(tuple);
+        return CompileResults.fromOk(tuple);
     }
 }

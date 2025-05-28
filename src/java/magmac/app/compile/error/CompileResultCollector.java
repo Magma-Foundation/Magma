@@ -7,7 +7,7 @@ public record CompileResultCollector<T, C>(Collector<T, C> joiner
 ) implements Collector<CompileResult<T>, CompileResult<C>> {
     @Override
     public CompileResult<C> createInitial() {
-        return InlineCompileResult.fromResult(new Ok<>(this.joiner.createInitial()));
+        return CompileResults.fromResult(new Ok<>(this.joiner.createInitial()));
     }
 
     @Override

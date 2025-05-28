@@ -8,7 +8,7 @@ import magmac.api.collect.list.Lists;
 import magmac.api.result.Err;
 import magmac.api.result.Ok;
 import magmac.app.compile.error.CompileResult;
-import magmac.app.compile.error.InlineCompileResult;
+import magmac.app.compile.error.CompileResults;
 import magmac.app.compile.error.context.Context;
 import magmac.app.compile.error.error.CompileError;
 import magmac.app.error.ImmutableCompileError;
@@ -27,8 +27,8 @@ record OrState<T>(Option<T> maybeValue, List<CompileError> errors) {
 
     CompileResult<T> toResult(Context context) {
         return this.maybeValue
-                .map((T value) -> InlineCompileResult.fromResult(new Ok<>(value)))
-                .orElseGet(() -> InlineCompileResult.fromResult(new Err<>(new ImmutableCompileError("Invalid combination", context, this.errors))));
+                .map((T value) -> CompileResults.fromResult(new Ok<>(value)))
+                .orElseGet(() -> CompileResults.fromResult(new Err<>(new ImmutableCompileError("Invalid combination", context, this.errors))));
     }
 
     OrState<T> withError(CompileError error) {

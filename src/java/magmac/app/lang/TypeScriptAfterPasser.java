@@ -6,7 +6,7 @@ import magmac.api.Some;
 import magmac.api.Tuple2;
 import magmac.api.collect.list.Lists;
 import magmac.app.compile.error.CompileResult;
-import magmac.app.compile.error.InlineCompileResult;
+import magmac.app.compile.error.CompileResults;
 import magmac.app.compile.node.InlineNodeList;
 import magmac.app.compile.node.MapNode;
 import magmac.app.compile.node.Node;
@@ -35,7 +35,7 @@ public class TypeScriptAfterPasser implements Passer {
             String value = last.findString("value").orElse("");
             NodeList values = copy.addAll(segments);
             Node node1 = node.withString("child", value).withNodeList("segments", values);
-            return InlineCompileResult.fromOk(new Tuple2<>(state, node1));
+            return CompileResults.fromOk(new Tuple2<>(state, node1));
         });
 
         return new Some<>(new InlinePassResult(map));
