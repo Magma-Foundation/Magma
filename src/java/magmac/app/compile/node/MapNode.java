@@ -9,6 +9,10 @@ import magmac.api.collect.map.Maps;
 import magmac.api.iter.Iter;
 import magmac.api.iter.Iters;
 import magmac.api.iter.collect.Joiner;
+import magmac.api.result.Ok;
+import magmac.app.compile.error.CompileResult;
+import magmac.app.compile.error.CompileResults;
+import magmac.app.compile.error.error.CompileErrors;
 
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -191,5 +195,12 @@ public final class MapNode implements Node {
         else {
             return new None<>();
         }
+    }
+
+    @Override
+    public CompileResult<Node> findNodeOrError(String key) {
+        return findNode(key)
+                .map((Node node1) -> CompileResults.fromResult(new Ok<>(node1)))
+                .orElseGet(() -> CompileErrors.createNodeError("Node '" + key + "' not present", this));
     }
 }

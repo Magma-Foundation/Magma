@@ -375,6 +375,7 @@ MergeDiagram --> SimpleUnit
 Node --> Option
 Node --> Tuple2
 Node --> Iter
+Node --> CompileResult
 ParseState --> Location
 ParseUnitImpl --> InlineNodeList
 FlatMapHead --> None
@@ -497,6 +498,9 @@ MapNode --> Map
 MapNode --> Maps
 MapNode --> Iters
 MapNode --> Joiner
+MapNode --> Ok
+MapNode --> CompileResults
+MapNode --> CompileErrors
 MapNode --> BiFunction
 MapNode --> Function
 Folder --> DivideState
@@ -782,9 +786,6 @@ TypeScriptAfterPasser --> NodeListCollector
 TypeScriptAfterPasser --> InlinePassResult
 TypeScriptAfterPasser --> ParseUnit
 TypeScriptAfterPasser --> ParseUnitImpl
-NodeRule --> Ok
-NodeRule --> CompileResults
-NodeRule --> CompileErrors
 NodeRule --> MapNode
 DividingSplitter --> List
 DividingSplitter --> ListCollector

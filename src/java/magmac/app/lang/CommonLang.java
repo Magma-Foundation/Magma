@@ -76,11 +76,11 @@ final class CommonLang {
         )));
     }
 
-    private static TypeRule createIndexRule(LazyRule value) {
+    private static Rule createIndexRule(LazyRule value) {
         return new TypeRule("index", new StripRule(new SuffixRule(LocatingRule.First(new NodeRule("parent", value), "[", new NodeRule("argument", value)), "]")));
     }
 
-    private static TypeRule createLambdaRule(LazyRule value, Rule functionSegment, String infix, Rule definition) {
+    private static Rule createLambdaRule(LazyRule value, Rule functionSegment, String infix, Rule definition) {
         Rule value1 = new OrRule(Lists.of(
                 new StripRule(new PrefixRule("{", new SuffixRule(CommonLang.Statements("children", functionSegment), "}"))),
                 new NodeRule("value", value)
@@ -89,7 +89,7 @@ final class CommonLang {
         return new TypeRule("lambda", LocatingRule.First(new StripRule(new PrefixRule("(", new SuffixRule(new DivideRule("parameters", new ValueFolder(), definition), ")"))), infix, value1));
     }
 
-    private static TypeRule createOperationRule(Rule value, String type, String infix) {
+    private static Rule createOperationRule(Rule value, String type, String infix) {
         return new TypeRule(type, LocatingRule.First(new NodeRule("left", value), infix, new NodeRule("right", value)));
     }
 
@@ -106,11 +106,11 @@ final class CommonLang {
         return new TypeRule("number", new StripRule(FilterRule.Number(new StringRule("value"))));
     }
 
-    private static TypeRule createStringRule() {
+    private static Rule createStringRule() {
         return new TypeRule("string", new StripRule(new PrefixRule("\"", new SuffixRule(new StringRule("value"), "\""))));
     }
 
-    private static TypeRule createCharRule() {
+    private static Rule createCharRule() {
         return new TypeRule("char", new StripRule(new PrefixRule("'", new SuffixRule(new StringRule("value"), "'"))));
     }
 
@@ -141,7 +141,7 @@ final class CommonLang {
         return functionSegmentRule.set(new StripRule("before", rule, ""));
     }
 
-    private static TypeRule createStatementRule(Rule rule) {
+    private static Rule createStatementRule(Rule rule) {
         NodeRule child = new NodeRule("child", rule);
         return new TypeRule("statement", new StripRule(new SuffixRule(child, ";")));
     }
@@ -180,11 +180,11 @@ final class CommonLang {
         ));
     }
 
-    private static TypeRule createPostRule(String type, String suffix, Rule value) {
+    private static Rule createPostRule(String type, String suffix, Rule value) {
         return new TypeRule(type, new StripRule(new SuffixRule(new NodeRule("child", value), suffix)));
     }
 
-    private static TypeRule createReturnRule(Rule value) {
+    private static Rule createReturnRule(Rule value) {
         return new TypeRule("return", new StripRule(new PrefixRule("return ", new NodeRule("value", value))));
     }
 
@@ -198,12 +198,12 @@ final class CommonLang {
         )));
     }
 
-    private static TypeRule createArrayRule(Rule rule) {
+    private static Rule createArrayRule(Rule rule) {
         NodeRule child = new NodeRule("child", rule);
         return new TypeRule("array", new StripRule(new SuffixRule(child, "[]")));
     }
 
-    private static TypeRule createVariadicRule(Rule rule) {
+    private static Rule createVariadicRule(Rule rule) {
         NodeRule child = new NodeRule("child", rule);
         return new TypeRule("variadic", new StripRule(new SuffixRule(child, "...")));
     }

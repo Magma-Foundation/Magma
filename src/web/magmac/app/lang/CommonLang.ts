@@ -41,14 +41,14 @@ export class CommonLang {
 	static initValueRule( segment : Rule,  value : LazyRule,  lambdaInfix : String,  definition : Rule) : LazyRule {
 		return value.set( new OrRule( Lists.of( CommonLang.createLambdaRule( value, segment, lambdaInfix, definition), new StripRule( new PrefixRule( "!", new NodeRule( "child", value))), CommonLang.createCharRule( ), CommonLang.createStringRule( ), CommonLang.createInvokableRule( value), CommonLang.createNumberRule( ), CommonLang.createAccessRule( value), CommonLang.createSymbolValueRule( ), CommonLang.createOperationRule( value, "add", "+"), CommonLang.createOperationRule( value, "subtract", "-"), CommonLang.createOperationRule( value, "equals", "=="), CommonLang.createOperationRule( value, "less-than", "<"), CommonLang.createOperationRule( value, "and", "&&"), CommonLang.createOperationRule( value, "or", "||"), CommonLang.createOperationRule( value, "not-equals", "!="), CommonLang.createOperationRule( value, "greater-than", ">"), CommonLang.createIndexRule( value))));
 	}
-	private static createIndexRule( value : LazyRule) : TypeRule {
+	private static createIndexRule( value : LazyRule) : Rule {
 		return new TypeRule( "index", new StripRule( new SuffixRule( LocatingRule.First( new NodeRule( "parent", value), "[", new NodeRule( "argument", value)), "]")));
 	}
-	private static createLambdaRule( value : LazyRule,  functionSegment : Rule,  infix : String,  definition : Rule) : TypeRule {
+	private static createLambdaRule( value : LazyRule,  functionSegment : Rule,  infix : String,  definition : Rule) : Rule {
 		 value1 : Rule=new OrRule( Lists.of( new StripRule( new PrefixRule( "{", new SuffixRule( CommonLang.Statements( "children", functionSegment), "}"))), new NodeRule( "value", value)));
 		return new TypeRule( "lambda", LocatingRule.First( new StripRule( new PrefixRule( "(", new SuffixRule( new DivideRule( "parameters", new ValueFolder( ), definition), ")"))), infix, value1));
 	}
-	private static createOperationRule( value : Rule,  type : String,  infix : String) : TypeRule {
+	private static createOperationRule( value : Rule,  type : String,  infix : String) : Rule {
 		return new TypeRule( type, LocatingRule.First( new NodeRule( "left", value), infix, new NodeRule( "right", value)));
 	}
 	private static createSymbolValueRule() : StripRule {
@@ -61,10 +61,10 @@ export class CommonLang {
 	private static createNumberRule() : Rule {
 		return new TypeRule( "number", new StripRule( FilterRule.Number( new StringRule( "value"))));
 	}
-	private static createStringRule() : TypeRule {
+	private static createStringRule() : Rule {
 		return new TypeRule( "string", new StripRule( new PrefixRule( "\"", new SuffixRule( new StringRule( "value"), "\""))));
 	}
-	private static createCharRule() : TypeRule {
+	private static createCharRule() : Rule {
 		return new TypeRule( "char", new StripRule( new PrefixRule( "'", new SuffixRule( new StringRule( "value"), "'"))));
 	}
 	private static createInvokableRule( value : Rule) : Rule {
@@ -78,7 +78,7 @@ export class CommonLang {
 		 rule : Rule=new OrRule( Lists.of( CommonLang.createWhitespaceRule( ), CommonLang.createStatementRule( functionSegmentValueRule), CommonLang.createBlockRule( functionSegmentRule, value, definition)));
 		return functionSegmentRule.set( new StripRule( "before", rule, ""));
 	}
-	private static createStatementRule( rule : Rule) : TypeRule {
+	private static createStatementRule( rule : Rule) : Rule {
 		 child : NodeRule=new NodeRule( "child", rule);
 		return new TypeRule( "statement", new StripRule( new SuffixRule( child, ";")));
 	}
@@ -98,21 +98,21 @@ export class CommonLang {
 	private static createFunctionSegmentValueRule( value : Rule,  definition : Rule) : Rule {
 		return new OrRule( Lists.of( CommonLang.createInvokableRule( value), CommonLang.createAssignmentRule( definition, value), CommonLang.createReturnRule( value), CommonLang.createPostRule( "post-increment", "++", value), CommonLang.createPostRule( "post-decrement", "--", value), new TypeRule( "break", new ExactRule( "break")), new TypeRule( "continue", new ExactRule( "continue"))));
 	}
-	private static createPostRule( type : String,  suffix : String,  value : Rule) : TypeRule {
+	private static createPostRule( type : String,  suffix : String,  value : Rule) : Rule {
 		return new TypeRule( type, new StripRule( new SuffixRule( new NodeRule( "child", value), suffix)));
 	}
-	private static createReturnRule( value : Rule) : TypeRule {
+	private static createReturnRule( value : Rule) : Rule {
 		return new TypeRule( "return", new StripRule( new PrefixRule( "return ", new NodeRule( "value", value))));
 	}
 	static createTypeRule() : Rule {
 		 orRule : LazyRule=new MutableLazyRule( );
 		return orRule.set( new OrRule( Lists.of( CommonLang.createVariadicRule( orRule), CommonLang.createArrayRule( orRule), CommonLang.createTemplateRule( ), CommonLang.createSymbolTypeRule( ))));
 	}
-	private static createArrayRule( rule : Rule) : TypeRule {
+	private static createArrayRule( rule : Rule) : Rule {
 		 child : NodeRule=new NodeRule( "child", rule);
 		return new TypeRule( "array", new StripRule( new SuffixRule( child, "[]")));
 	}
-	private static createVariadicRule( rule : Rule) : TypeRule {
+	private static createVariadicRule( rule : Rule) : Rule {
 		 child : NodeRule=new NodeRule( "child", rule);
 		return new TypeRule( "variadic", new StripRule( new SuffixRule( child, "...")));
 	}

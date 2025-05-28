@@ -23,7 +23,7 @@ public final class TypescriptLang {
         ))));
     }
 
-    private static TypeRule createImportRule() {
+    private static Rule createImportRule() {
         Rule segments = new SuffixRule(new DivideRule("segments", new DelimitedFolder('/'), new StringRule("value")), "\";\n");
         Rule first = LocatingRule.First(new StringRule("child"), " } from \"", segments);
         return new TypeRule("import", new PrefixRule("import { ", first));
@@ -38,7 +38,7 @@ public final class TypescriptLang {
 
     private static Rule createStructureMemberRule() {
         Rule definitionRule = TypescriptLang.createDefinitionRule();
-        MutableLazyRule valueLazy = new MutableLazyRule();
+        LazyRule valueLazy = new MutableLazyRule();
         return new OrRule(Lists.of(
                 CommonLang.createWhitespaceRule(),
                 TypescriptLang.createMethodRule(definitionRule, valueLazy),
@@ -46,28 +46,23 @@ public final class TypescriptLang {
         ));
     }
 
-    private static TypeRule createMethodRule(Rule definition, LazyRule valueLazy) {
-        Rule header = new OrRule(Lists.of(
+    private static Rule createMethodRule(Rule definition, LazyRule valueLazy) {
+        Rule header = new PrefixRule("\n\t", new NodeRule("header", new OrRule(Lists.of(
                 definition,
                 TypescriptLang.createConstructorRule(definition)
-        ));
+        ))));
 
-        PrefixRule header1 = new PrefixRule("\n\t", new NodeRule("header", header));
         LazyRule functionSegmentRule = new MutableLazyRule();
         LazyRule value = CommonLang.initValueRule(functionSegmentRule, valueLazy, " => ", definition);
-        DivideRule children = CommonLang.Statements("children", TypescriptLang.createFunctionSegmentRule(definition, value, functionSegmentRule));
-        SuffixRule childRule = new SuffixRule(LocatingRule.First(header1, " {", new StripRule("", children, "after-children")), "}");
+        Rule children = CommonLang.Statements("children", CommonLang.initFunctionSegmentRule(functionSegmentRule, value, definition));
+        Rule childRule = new SuffixRule(LocatingRule.First(header, " {", new StripRule("", children, "after-children")), "}");
         return new TypeRule("method", new OptionNodeListRule("children",
                 childRule,
-                new SuffixRule(header1, ";")
+                new SuffixRule(header, ";")
         ));
     }
 
-    private static Rule createFunctionSegmentRule(Rule definition, LazyRule value, LazyRule functionSegmentRule) {
-        return CommonLang.initFunctionSegmentRule(functionSegmentRule, value, definition);
-    }
-
-    private static TypeRule createConstructorRule(Rule definition) {
+    private static Rule createConstructorRule(Rule definition) {
         DivideRule parametersRule = CommonLang.createParametersRule(definition);
         return new TypeRule("constructor", new PrefixRule("constructor(", new SuffixRule(parametersRule, ")")));
     }

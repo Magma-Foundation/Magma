@@ -1,7 +1,9 @@
 import { Option } from "../../../../magmac/api/Option";
 import { Tuple2 } from "../../../../magmac/api/Tuple2";
 import { Iter } from "../../../../magmac/api/iter/Iter";
+import { CompileResult } from "../../../../magmac/app/compile/error/CompileResult";
 export interface Node {
+	 findNodeOrError( key : String) : CompileResult<Node>;
 	 iterNodes() : Iter<Tuple2<String, Node>>;
 	 display() : String;
 	 format( depth : int) : String;

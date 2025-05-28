@@ -3,8 +3,11 @@ package magmac.app.compile.node;
 import magmac.api.Option;
 import magmac.api.Tuple2;
 import magmac.api.iter.Iter;
+import magmac.app.compile.error.CompileResult;
 
 public interface Node {
+    CompileResult<Node> findNodeOrError(String key);
+
     Iter<Tuple2<String, Node>> iterNodes();
 
     String display();

@@ -7,6 +7,10 @@ import { Maps } from "../../../../magmac/api/collect/map/Maps";
 import { Iter } from "../../../../magmac/api/iter/Iter";
 import { Iters } from "../../../../magmac/api/iter/Iters";
 import { Joiner } from "../../../../magmac/api/iter/collect/Joiner";
+import { Ok } from "../../../../magmac/api/result/Ok";
+import { CompileResult } from "../../../../magmac/app/compile/error/CompileResult";
+import { CompileResults } from "../../../../magmac/app/compile/error/CompileResults";
+import { CompileErrors } from "../../../../magmac/app/compile/error/error/CompileErrors";
 import { BiFunction } from "../../../../java/util/function/BiFunction";
 import { Function } from "../../../../java/util/function/Function";
 export class MapNode {private final maybeType : Option<String>;private nodeLists : Map<String, NodeList>;private nodes : Map<String, Node>;private strings : Map<String, String>;
@@ -115,5 +119,8 @@ export class MapNode {private final maybeType : Option<String>;private nodeLists
 		return new Some<>( this.nodeLists.get( key));}
 		else{ 
 		return new None<>( );}
+	}
+	public findNodeOrError( key : String) : CompileResult<Node> {
+		return findNode( key).map( ( node1 : Node) => CompileResults.fromResult( new Ok<>( node1))).orElseGet( ( )->CompileErrors.createNodeError( "Node '" + key + "' not present", this));
 	}
 }

@@ -11,12 +11,12 @@ import magmac.app.compile.node.MapNode;
 import magmac.app.compile.node.Node;
 import magmac.app.compile.node.NodeList;
 import magmac.app.compile.node.NodeListCollector;
+import magmac.app.stage.Passer;
+import magmac.app.stage.parse.ParseState;
 import magmac.app.stage.result.InlinePassResult;
 import magmac.app.stage.result.ParseResult;
 import magmac.app.stage.unit.ParseUnit;
 import magmac.app.stage.unit.ParseUnitImpl;
-import magmac.app.stage.Passer;
-import magmac.app.stage.parse.ParseState;
 
 public class TypeScriptAfterPasser implements Passer {
     private static Option<ParseResult> passImport(ParseState state, Node node) {
@@ -54,15 +54,6 @@ public class TypeScriptAfterPasser implements Passer {
         return new None<>();
     }
 
-    @Override
-    public ParseResult pass(ParseState state, Node node) {
-        return TypeScriptAfterPasser.passImport(state, node)
-                .or(() -> TypeScriptAfterPasser.passMethod(state, node))
-                .or(() -> TypeScriptAfterPasser.format(state, node))
-                .or(() -> TypeScriptAfterPasser.passVariadic(state, node))
-                .orElseGet(() -> InlinePassResult.empty());
-    }
-
     private static Option<ParseResult> passVariadic(ParseState state, Node node) {
         if (node.is("variadic")) {
             return new Some<>(InlinePassResult.from(state, node.retype("array")));
@@ -79,5 +70,47 @@ public class TypeScriptAfterPasser implements Passer {
         }
 
         return new None<>();
+    }
+
+    @Override
+    public ParseResult pass(ParseState state, Node node) {
+        return TypeScriptAfterPasser.passImport(state, node)
+                .or(() -> TypeScriptAfterPasser.passMethod(state, node))
+                .or(() -> TypeScriptAfterPasser.format(state, node))
+                .or(() -> TypeScriptAfterPasser.passVariadic(state, node))
+                .or(() -> this.passTemp(state, node))
+                .orElseGet(() -> InlinePassResult.empty());
+    }
+
+    private Option<ParseResult> passTemp(ParseState state, Node node) {
+        if (node.is("statement")) {
+            var value1 = node.findNodeOrError("value")
+                    .flatMapValue((Node value) -> this.getObjectCompileResult(state, value));
+
+            return new Some<>(new InlinePassResult(new Some<>(value1)));
+        }
+
+        return new None<>();
+    }
+
+    private CompileResult<ParseUnit<Node>> getObjectCompileResult(ParseState state, Node value) {
+        if (value.is("assignment")) {
+            return value.findNodeOrError("destination")
+                    .mapValue((Node destination) -> this.getNode(destination))
+                    .mapValue(result -> new ParseUnitImpl<>(state, result));
+        }
+
+        return CompileResults.fromOk(new ParseUnitImpl<>(state, value));
+    }
+
+    private Node getNode(Node destination) {
+        if (destination.is("definition")) {
+            NodeList modifiers = destination.findNodeList("modifiers").orElse(InlineNodeList.empty());
+            NodeList newModifiers = modifiers.add(new MapNode().withString("value", "let"));
+            return destination.withNodeList("modifiers", newModifiers);
+        }
+        else {
+            return destination;
+        }
     }
 }
