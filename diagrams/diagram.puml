@@ -597,7 +597,6 @@ CompileResult --> BiFunction
 CompileResult --> Function
 CompileResult --> Supplier
 FlattenJava --> Some
-FlattenJava --> Tuple2
 FlattenJava --> ListCollector
 FlattenJava --> CompileResults
 FlattenJava --> InlineNodeList
@@ -636,7 +635,6 @@ ApplicationBuilder --> Parser
 ApplicationBuilder --> TreeParser
 ApplicationBuilder --> Path
 Maps --> HashMap
-ParseUnit --> Node
 ParseUnit --> ParseState
 List --> Option
 List --> Tuple2
@@ -692,7 +690,6 @@ InlinePassResult --> Option
 InlinePassResult --> Some
 InlinePassResult --> Ok
 InlinePassResult --> CompileResults
-InlinePassResult --> Node
 InlinePassResult --> ParseState
 Source --> IOResult
 Source --> Location
@@ -732,6 +729,7 @@ LastLocator --> Some
 Splitter --> Option
 Splitter --> Tuple2
 ParseResult --> CompileResult
+ParseResult --> Node
 ParseResult --> Supplier
 ImmutableCompileError --> List
 ImmutableCompileError --> Lists
@@ -763,7 +761,6 @@ CommonLang --> DividingSplitter
 TypeScriptAfterPasser --> None
 TypeScriptAfterPasser --> Option
 TypeScriptAfterPasser --> Some
-TypeScriptAfterPasser --> Tuple2
 TypeScriptAfterPasser --> Lists
 TypeScriptAfterPasser --> CompileResult
 TypeScriptAfterPasser --> CompileResults
@@ -813,7 +810,6 @@ TypeRule --> CompileError
 TypeRule --> CompileErrors
 TypeRule --> ImmutableCompileError
 PlantUMLAfterPasser --> Some
-PlantUMLAfterPasser --> Tuple2
 PlantUMLAfterPasser --> List
 PlantUMLAfterPasser --> ListCollector
 PlantUMLAfterPasser --> CompileResult

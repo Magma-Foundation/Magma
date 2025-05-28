@@ -1,7 +1,6 @@
 package magmac.app.lang;
 
 import magmac.api.Some;
-import magmac.api.Tuple2;
 import magmac.api.collect.list.List;
 import magmac.api.iter.collect.ListCollector;
 import magmac.app.compile.error.CompileResult;
@@ -78,7 +77,7 @@ public class PlantUMLAfterPasser implements Passer {
     @Override
     public ParseResult pass(ParseState state, Node node) {
         if (node.is("root")) {
-            CompileResult<ParseUnit> result = PlantUMLAfterPasser.replaceRootChildren(node)
+            CompileResult<ParseUnit<Node>> result = PlantUMLAfterPasser.replaceRootChildren(node)
                     .flatMapValue((NodeList values) -> PlantUMLAfterPasser.getTuple2CompileResult(state, node, values));
 
             return new InlinePassResult(new Some<>(result));
@@ -94,14 +93,14 @@ public class PlantUMLAfterPasser implements Passer {
                     .withString("parent", state.findLocation().name())
                     .withString("child", child);
 
-            ParseUnit tuple = new ParseUnit(state, dependency);
+            ParseUnit<Node> tuple = new ParseUnit<Node>(state, dependency);
             return new InlinePassResult(new Some<>(CompileResults.fromOk(tuple)));
         }
 
         return InlinePassResult.empty();
     }
 
-    private static CompileResult<ParseUnit> getTuple2CompileResult(ParseState state, Node node, NodeList values) {
-        return CompileResults.fromOk(new ParseUnit(state, node.withNodeList("children", values)));
+    private static CompileResult<ParseUnit<Node>> getTuple2CompileResult(ParseState state, Node node, NodeList values) {
+        return CompileResults.fromOk(new ParseUnit<Node>(state, node.withNodeList("children", values)));
     }
 }

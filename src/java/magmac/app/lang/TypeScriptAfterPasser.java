@@ -3,7 +3,6 @@ package magmac.app.lang;
 import magmac.api.None;
 import magmac.api.Option;
 import magmac.api.Some;
-import magmac.api.Tuple2;
 import magmac.api.collect.list.Lists;
 import magmac.app.compile.error.CompileResult;
 import magmac.app.compile.error.CompileResults;
@@ -32,11 +31,11 @@ public class TypeScriptAfterPasser implements Passer {
         NodeList segments = node.findNodeList("segments")
                 .orElse(InlineNodeList.empty());
 
-        Option<CompileResult<ParseUnit>> map = segments.findLast().map((Node last) -> {
+        Option<CompileResult<ParseUnit<Node>>> map = segments.findLast().map((Node last) -> {
             String value = last.findString("value").orElse("");
             NodeList values = copy.addAll(segments);
             Node node1 = node.withString("child", value).withNodeList("segments", values);
-            return CompileResults.fromOk(new ParseUnit(state, node1));
+            return CompileResults.fromOk(new ParseUnit<Node>(state, node1));
         });
 
         return new Some<>(new InlinePassResult(map));
