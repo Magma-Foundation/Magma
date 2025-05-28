@@ -1,6 +1,6 @@
-import { Node } from "magmacappcompilenodeNode";
-import { Location } from "magmacappioLocation";
-import { Map } from "magmacapicollectmapMap";
+import { Node } from "magmac/app/compile/node/Node";
+import { Location } from "magmac/app/io/Location";
+import { Map } from "magmac/api/collect/map/Map";
 export class EmptyAfterAll {
 	temp(){
 	}

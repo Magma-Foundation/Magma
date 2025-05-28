@@ -19,4 +19,9 @@ class TypeSeparatorFolder implements Folder {
         }
         return appended;
     }
+
+    @Override
+    public String createDelimiter() {
+        return " ";
+    }
 }

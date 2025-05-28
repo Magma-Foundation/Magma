@@ -1,8 +1,8 @@
-import { Tuple2 } from "magmacapiTuple2";
-import { Result } from "magmacapiresultResult";
-import { CompileError } from "magmacappcompileerrorerrorCompileError";
-import { BiFunction } from "javautilfunctionBiFunction";
-import { Function } from "javautilfunctionFunction";
-import { Supplier } from "javautilfunctionSupplier";
+import { Tuple2 } from "magmac/api/Tuple2";
+import { Result } from "magmac/api/result/Result";
+import { CompileError } from "magmac/app/compile/error/error/CompileError";
+import { BiFunction } from "java/util/function/BiFunction";
+import { Function } from "java/util/function/Function";
+import { Supplier } from "java/util/function/Supplier";
 export interface ? {
 }

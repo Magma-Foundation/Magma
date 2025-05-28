@@ -1,6 +1,6 @@
-import { Option } from "magmacapiOption";
-import { Tuple2 } from "magmacapiTuple2";
-import { Locator } from "magmacappcompilerulelocateLocator";
+import { Option } from "magmac/api/Option";
+import { Tuple2 } from "magmac/api/Tuple2";
+import { Locator } from "magmac/app/compile/rule/locate/Locator";
 export class LocatingSplitter {
 	temp(){
 	}

@@ -1,5 +1,5 @@
-import { Tuple2 } from "magmacapiTuple2";
-import { Option } from "magmacapiOption";
-import { Iter } from "magmacapiiterIter";
+import { Tuple2 } from "magmac/api/Tuple2";
+import { Option } from "magmac/api/Option";
+import { Iter } from "magmac/api/iter/Iter";
 export interface ? {
 }

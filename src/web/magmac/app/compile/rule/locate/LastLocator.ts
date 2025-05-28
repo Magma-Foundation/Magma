@@ -1,6 +1,6 @@
-import { None } from "magmacapiNone";
-import { Option } from "magmacapiOption";
-import { Some } from "magmacapiSome";
+import { None } from "magmac/api/None";
+import { Option } from "magmac/api/Option";
+import { Some } from "magmac/api/Some";
 export class LastLocator {
 	temp(){
 	}

@@ -1,4 +1,4 @@
-import { HashMap } from "javautilHashMap";
+import { HashMap } from "java/util/HashMap";
 export class Maps {
 	temp(){
 	}

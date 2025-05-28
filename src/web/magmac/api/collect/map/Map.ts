@@ -1,6 +1,6 @@
-import { Tuple2 } from "magmacapiTuple2";
-import { Iter } from "magmacapiiterIter";
-import { Function } from "javautilfunctionFunction";
-import { Supplier } from "javautilfunctionSupplier";
+import { Tuple2 } from "magmac/api/Tuple2";
+import { Iter } from "magmac/api/iter/Iter";
+import { Function } from "java/util/function/Function";
+import { Supplier } from "java/util/function/Supplier";
 export interface ? {
 }

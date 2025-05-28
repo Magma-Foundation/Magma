@@ -1,6 +1,6 @@
-import { Rule } from "magmacappcompileruleRule";
-import { AfterAll } from "magmacappstageAfterAll";
-import { Passer } from "magmacappstagePasser";
-import { Path } from "javaniofilePath";
+import { Rule } from "magmac/app/compile/rule/Rule";
+import { AfterAll } from "magmac/app/stage/AfterAll";
+import { Passer } from "magmac/app/stage/Passer";
+import { Path } from "java/nio/file/Path";
 export interface ? {
 }

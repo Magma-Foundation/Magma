@@ -16,4 +16,9 @@ public class DelimitedFolder implements Folder {
         }
         return state.append(c);
     }
+
+    @Override
+    public String createDelimiter() {
+        return String.valueOf(this.delimter);
+    }
 }

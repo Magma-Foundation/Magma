@@ -1,6 +1,6 @@
-import { CompileResult } from "magmacappcompileerrorCompileResult";
-import { CompileErrors } from "magmacappcompileerrorerrorCompileErrors";
-import { Node } from "magmacappcompilenodeNode";
+import { CompileResult } from "magmac/app/compile/error/CompileResult";
+import { CompileErrors } from "magmac/app/compile/error/error/CompileErrors";
+import { Node } from "magmac/app/compile/node/Node";
 export class SuffixRule {
 	temp(){
 	}

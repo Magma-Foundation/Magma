@@ -1,4 +1,4 @@
-import { Option } from "magmacapiOption";
-import { Tuple2 } from "magmacapiTuple2";
+import { Option } from "magmac/api/Option";
+import { Tuple2 } from "magmac/api/Tuple2";
 export interface ? {
 }

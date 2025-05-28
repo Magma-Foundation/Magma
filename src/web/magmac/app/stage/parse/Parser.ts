@@ -1,4 +1,4 @@
-import { Roots } from "magmacappstageRoots";
-import { Stage } from "magmacappstageStage";
+import { Roots } from "magmac/app/stage/Roots";
+import { Stage } from "magmac/app/stage/Stage";
 export interface ? {
 }

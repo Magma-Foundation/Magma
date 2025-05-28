@@ -1,4 +1,4 @@
-import { Option } from "magmacapiOption";
-import { Iter } from "magmacapiiterIter";
+import { Option } from "magmac/api/Option";
+import { Iter } from "magmac/api/iter/Iter";
 export interface ? {
 }

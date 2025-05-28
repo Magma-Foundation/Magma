@@ -1,7 +1,7 @@
-import { None } from "magmacapiNone";
-import { Iter } from "magmacapiiterIter";
-import { Option } from "magmacapiOption";
-import { Function } from "javautilfunctionFunction";
+import { None } from "magmac/api/None";
+import { Iter } from "magmac/api/iter/Iter";
+import { Option } from "magmac/api/Option";
+import { Function } from "java/util/function/Function";
 export class FlatMapHead {
 	temp(){
 	}

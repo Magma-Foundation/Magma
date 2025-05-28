@@ -1,6 +1,6 @@
-import { Tuple2 } from "magmacapiTuple2";
-import { Node } from "magmacappcompilenodeNode";
-import { ParseState } from "magmacappstageparseParseState";
-import { Supplier } from "javautilfunctionSupplier";
+import { Tuple2 } from "magmac/api/Tuple2";
+import { Node } from "magmac/app/compile/node/Node";
+import { ParseState } from "magmac/app/stage/parse/ParseState";
+import { Supplier } from "java/util/function/Supplier";
 export interface ? {
 }

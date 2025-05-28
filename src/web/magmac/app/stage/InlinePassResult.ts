@@ -1,9 +1,9 @@
-import { None } from "magmacapiNone";
-import { Option } from "magmacapiOption";
-import { Tuple2 } from "magmacapiTuple2";
-import { Node } from "magmacappcompilenodeNode";
-import { ParseState } from "magmacappstageparseParseState";
-import { Supplier } from "javautilfunctionSupplier";
+import { None } from "magmac/api/None";
+import { Option } from "magmac/api/Option";
+import { Tuple2 } from "magmac/api/Tuple2";
+import { Node } from "magmac/app/compile/node/Node";
+import { ParseState } from "magmac/app/stage/parse/ParseState";
+import { Supplier } from "java/util/function/Supplier";
 export class InlinePassResult {
 	temp(){
 	}

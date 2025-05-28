@@ -1,5 +1,5 @@
-import { IOResult } from "magmacappioIOResult";
-import { Location } from "magmacappioLocation";
-import { Map } from "magmacapicollectmapMap";
+import { IOResult } from "magmac/app/io/IOResult";
+import { Location } from "magmac/app/io/Location";
+import { Map } from "magmac/api/collect/map/Map";
 export interface ? {
 }

@@ -22,7 +22,7 @@ public record DivideRule(String key, Folder folder, Rule childRule) implements R
     private CompileResult<Option<String>> join(NodeList list) {
         return list.iter()
                 .map(node -> this.childRule.generate(node))
-                .collect(new CompileResultCollector<>(new Joiner()));
+                .collect(new CompileResultCollector<>(new Joiner(this.folder.createDelimiter())));
     }
 
     @Override

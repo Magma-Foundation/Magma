@@ -1,15 +1,15 @@
-import { None } from "magmacapiNone";
-import { Option } from "magmacapiOption";
-import { Some } from "magmacapiSome";
-import { List } from "magmacapicollectlistList";
-import { Lists } from "magmacapicollectlistLists";
-import { Err } from "magmacapiresultErr";
-import { Ok } from "magmacapiresultOk";
-import { CompileResult } from "magmacappcompileerrorCompileResult";
-import { InlineCompileResult } from "magmacappcompileerrorInlineCompileResult";
-import { Context } from "magmacappcompileerrorcontextContext";
-import { CompileError } from "magmacappcompileerrorerrorCompileError";
-import { ImmutableCompileError } from "magmacapperrorImmutableCompileError";
+import { None } from "magmac/api/None";
+import { Option } from "magmac/api/Option";
+import { Some } from "magmac/api/Some";
+import { List } from "magmac/api/collect/list/List";
+import { Lists } from "magmac/api/collect/list/Lists";
+import { Err } from "magmac/api/result/Err";
+import { Ok } from "magmac/api/result/Ok";
+import { CompileResult } from "magmac/app/compile/error/CompileResult";
+import { InlineCompileResult } from "magmac/app/compile/error/InlineCompileResult";
+import { Context } from "magmac/app/compile/error/context/Context";
+import { CompileError } from "magmac/app/compile/error/error/CompileError";
+import { ImmutableCompileError } from "magmac/app/error/ImmutableCompileError";
 export class OrState {
 	temp(){
 	}

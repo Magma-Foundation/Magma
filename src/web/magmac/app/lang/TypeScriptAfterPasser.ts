@@ -1,14 +1,14 @@
-import { None } from "magmacapiNone";
-import { Option } from "magmacapiOption";
-import { Some } from "magmacapiSome";
-import { Tuple2 } from "magmacapiTuple2";
-import { InlineNodeList } from "magmacappcompilenodeInlineNodeList";
-import { Node } from "magmacappcompilenodeNode";
-import { NodeList } from "magmacappcompilenodeNodeList";
-import { InlinePassResult } from "magmacappstageInlinePassResult";
-import { PassResult } from "magmacappstagePassResult";
-import { Passer } from "magmacappstagePasser";
-import { ParseState } from "magmacappstageparseParseState";
+import { None } from "magmac/api/None";
+import { Option } from "magmac/api/Option";
+import { Some } from "magmac/api/Some";
+import { Tuple2 } from "magmac/api/Tuple2";
+import { InlineNodeList } from "magmac/app/compile/node/InlineNodeList";
+import { Node } from "magmac/app/compile/node/Node";
+import { NodeList } from "magmac/app/compile/node/NodeList";
+import { InlinePassResult } from "magmac/app/stage/InlinePassResult";
+import { PassResult } from "magmac/app/stage/PassResult";
+import { Passer } from "magmac/app/stage/Passer";
+import { ParseState } from "magmac/app/stage/parse/ParseState";
 export class TypeScriptAfterPasser {
 	temp(){
 	}

@@ -1,3 +1,3 @@
-import { CompileResult } from "magmacappcompileerrorCompileResult";
+import { CompileResult } from "magmac/app/compile/error/CompileResult";
 export interface ? {
 }

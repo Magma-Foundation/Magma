@@ -1,5 +1,5 @@
-import { Result } from "magmacapiresultResult";
-import { IOException } from "javaioIOException";
-import { Function } from "javautilfunctionFunction";
+import { Result } from "magmac/api/result/Result";
+import { IOException } from "java/io/IOException";
+import { Function } from "java/util/function/Function";
 export interface ? {
 }

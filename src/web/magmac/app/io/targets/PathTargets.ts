@@ -1,11 +1,11 @@
-import { Option } from "magmacapiOption";
-import { Map } from "magmacapicollectmapMap";
-import { Iters } from "magmacapiiterIters";
-import { Location } from "magmacappioLocation";
-import { SafeFiles } from "magmacappioSafeFiles";
-import { IOException } from "javaioIOException";
-import { Files } from "javaniofileFiles";
-import { Path } from "javaniofilePath";
+import { Option } from "magmac/api/Option";
+import { Map } from "magmac/api/collect/map/Map";
+import { Iters } from "magmac/api/iter/Iters";
+import { Location } from "magmac/app/io/Location";
+import { SafeFiles } from "magmac/app/io/SafeFiles";
+import { IOException } from "java/io/IOException";
+import { Files } from "java/nio/file/Files";
+import { Path } from "java/nio/file/Path";
 export class PathTargets {
 	temp(){
 	}

@@ -1,5 +1,5 @@
-import { ArrayList } from "javautilArrayList";
-import { Arrays } from "javautilArrays";
+import { ArrayList } from "java/util/ArrayList";
+import { Arrays } from "java/util/Arrays";
 export class Lists {
 	temp(){
 	}

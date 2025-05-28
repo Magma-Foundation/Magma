@@ -1,6 +1,6 @@
-import { Option } from "magmacapiOption";
-import { Tuple2 } from "magmacapiTuple2";
-import { Iter } from "magmacapiiterIter";
-import { BiFunction } from "javautilfunctionBiFunction";
+import { Option } from "magmac/api/Option";
+import { Tuple2 } from "magmac/api/Tuple2";
+import { Iter } from "magmac/api/iter/Iter";
+import { BiFunction } from "java/util/function/BiFunction";
 export interface ? {
 }
