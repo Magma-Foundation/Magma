@@ -51,9 +51,10 @@ public final class InlineNodeList implements NodeList {
     }
 
     @Override
-    public CompileResult<Option<String>> join(String delimiter, Function<Node, CompileResult<String>> generator) {
+    public CompileResult<String> join(String delimiter, Function<Node, CompileResult<String>> generator) {
         return this.iter()
                 .map(generator)
-                .collect(new CompileResultCollector<>(new Joiner(delimiter)));
+                .collect(new CompileResultCollector<>(new Joiner(delimiter)))
+                .mapValue((Option<String> option) -> option.orElse(""));
     }
 }

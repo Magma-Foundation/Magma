@@ -388,14 +388,11 @@ OrState --> CompileResults
 OrState --> Context
 OrState --> CompileError
 OrState --> ImmutableCompileError
-DivideRule --> Option
-DivideRule --> List
-DivideRule --> ListCollector
 DivideRule --> CompileResultCollector
 DivideRule --> CompileErrors
-DivideRule --> InlineNodeList
 DivideRule --> MapNode
 DivideRule --> NodeList
+DivideRule --> NodeListCollector
 DivideRule --> FoldingDivider
 DivideRule --> Folder
 Locator --> Option

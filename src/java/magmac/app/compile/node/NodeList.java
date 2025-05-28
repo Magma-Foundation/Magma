@@ -15,5 +15,5 @@ public interface NodeList {
 
     NodeList addAll(NodeList others);
 
-    CompileResult<Option<String>> join(String delimiter, Function<Node, CompileResult<String>> generator);
+    CompileResult<String> join(String delimiter, Function<Node, CompileResult<String>> generator);
 }
