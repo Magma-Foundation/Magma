@@ -42,11 +42,13 @@ public class TreeParser implements Parser {
     }
 
     private CompileResult<ParseUnit<Node>> parseTree(ParseState state, Node root) {
-        return this.beforeChild.pass(state, root).orElseGet(() -> new ParseUnitImpl<Node>(state, root)).flatMapValue((ParseUnit<Node> beforeTuple) -> this.parseNodeLists(beforeTuple).flatMapValue((ParseUnit<Node> nodeListsTuple) -> {
-            ParseState state1 = nodeListsTuple.left();
-            Node node = nodeListsTuple.right();
-            return this.afterChild.pass(state1, node).orElseGet(() -> new ParseUnitImpl<Node>(state1, node));
-        }));
+        return this.beforeChild.pass(state, root).orElseGet(() -> new ParseUnitImpl<Node>(state, root))
+                .flatMapValue((ParseUnit<Node> beforeTuple) -> this.parseNodeLists(beforeTuple))
+                .flatMapValue((ParseUnit<Node> nodeListsTuple) -> {
+                    ParseState state1 = nodeListsTuple.left();
+                    Node node = nodeListsTuple.right();
+                    return this.afterChild.pass(state1, node).orElseGet(() -> new ParseUnitImpl<Node>(state1, node));
+                });
     }
 
     private CompileResult<ParseUnit<Node>> parseNodeLists(ParseUnit<Node> beforeTuple) {
@@ -57,13 +59,13 @@ public class TreeParser implements Parser {
     @Override
     public CompileResult<UnitSet<Node>> apply(UnitSet<Node> initial) {
         return initial.iter()
-                .map((Unit<Node> tuple) -> this.getMerge(tuple))
+                .map((Unit<Node> unit) -> this.parseUnit(unit))
                 .collect(new CompileResultCollector<>(new UnitSetCollector<>()))
                 .flatMapValue((UnitSet<Node> parsed) -> CompileResults.fromOk(this.afterAllChildren.afterAll(parsed)));
     }
 
-    private CompileResult<Unit<Node>> getMerge(Unit<Node> tuple) {
-        return tuple.deconstruct((Location location, Node root) -> {
+    private CompileResult<Unit<Node>> parseUnit(Unit<Node> unit) {
+        return unit.deconstruct((Location location, Node root) -> {
             ParseState initial = new ImmutableParseState(location);
             return this.parseTree(initial, root).mapValue((ParseUnit<Node> parsed) -> parsed.toLocationUnit());
         });
