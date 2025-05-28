@@ -53,7 +53,16 @@ public final class TypescriptLang {
     }
 
     private static Rule createDefinitionRule() {
-        return LocatingRule.First(new StringRule("name"), " : ", new NodeRule("type", TypescriptLang.createTypeRule()));
+        LazyRule definition = new LazyRule();
+        DivideRule parameters = CommonLang.createParametersRule(definition);
+        Rule name = new StringRule("name");
+        Rule leftRule = new OrRule(Lists.of(
+                new SuffixRule(LocatingRule.First(name, "(", parameters), ")"),
+                name
+        ));
+
+        definition.set(LocatingRule.First(leftRule, " : ", new NodeRule("type", TypescriptLang.createTypeRule())));
+        return definition;
     }
 
     private static Rule createTypeRule() {

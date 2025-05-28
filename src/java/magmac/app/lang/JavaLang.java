@@ -93,11 +93,7 @@ public final class JavaLang {
                 new TypeRule("constructor", new StripRule(FilterRule.Symbol(new StringRule("name"))))
         )));
 
-        Rule parameters = new DivideRule("parameters", new ValueFolder(), new OrRule(Lists.of(
-                CommonLang.createWhitespaceRule(),
-                JavaLang.createDefinitionRule()
-        )));
-
+        Rule parameters = CommonLang.createParametersRule(JavaLang.createDefinitionRule());
         Rule withParams = LocatingRule.First(parameters, ")", new StringRule("with-braces"));
         return new TypeRule("method", LocatingRule.First(header, "(", withParams));
     }

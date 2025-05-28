@@ -1,6 +1,9 @@
+import { Lists } from "../../../magmac/api/collect/list/Lists";
+import { DivideRule } from "../../../magmac/app/compile/rule/DivideRule";
 import { ExactRule } from "../../../magmac/app/compile/rule/ExactRule";
 import { FilterRule } from "../../../magmac/app/compile/rule/FilterRule";
 import { LocatingRule } from "../../../magmac/app/compile/rule/LocatingRule";
+import { OrRule } from "../../../magmac/app/compile/rule/OrRule";
 import { Rule } from "../../../magmac/app/compile/rule/Rule";
 import { StringRule } from "../../../magmac/app/compile/rule/StringRule";
 import { StripRule } from "../../../magmac/app/compile/rule/StripRule";
@@ -12,5 +15,7 @@ export class CommonLang {
 	createSymbolTypeRule : Rule {
 	}
 	createTemplateRule : Rule {
+	}
+	createParametersRule : DivideRule {
 	}
 }

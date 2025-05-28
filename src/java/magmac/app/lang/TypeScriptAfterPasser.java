@@ -18,12 +18,11 @@ import magmac.app.stage.parse.ParseState;
 public class TypeScriptAfterPasser implements Passer {
     @Override
     public PassResult pass(ParseState state, Node node) {
-        return this.passImport(state, node)
-                .<PassResult>map(result -> new InlinePassResult(new Some<>(new Tuple2<>(state, result))))
+        return TypeScriptAfterPasser.passImport(state, node)
                 .orElseGet(() -> InlinePassResult.empty());
     }
 
-    private Option<Node> passImport(ParseState state, Node node) {
+    private static Option<PassResult> passImport(ParseState state, Node node) {
         if (!node.is("import")) {
             return new None<>();
         }
@@ -33,13 +32,16 @@ public class TypeScriptAfterPasser implements Passer {
                 .iter()
                 .map(value -> new MapNode().withString("value", value))
                 .collect(new NodeListCollector());
-
         NodeList segments = node.findNodeList("segments")
                 .orElse(InlineNodeList.empty());
 
-        return segments.findLast().map(last -> {
-            return node.withString("child", last.findString("value").orElse(""))
-                    .withNodeList("segments", copy.addAll(segments));
+        Option<Tuple2<ParseState, Node>> map = segments.findLast().map(last -> {
+            String value = last.findString("value").orElse("");
+            NodeList values = copy.addAll(segments);
+            Node node1 = node.withString("child", value).withNodeList("segments", values);
+            return new Tuple2<>(state, node1);
         });
+
+        return new Some<>(new InlinePassResult(map));
     }
 }

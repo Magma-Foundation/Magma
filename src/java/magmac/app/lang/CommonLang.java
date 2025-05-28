@@ -1,8 +1,11 @@
 package magmac.app.lang;
 
+import magmac.api.collect.list.Lists;
+import magmac.app.compile.rule.DivideRule;
 import magmac.app.compile.rule.ExactRule;
 import magmac.app.compile.rule.FilterRule;
 import magmac.app.compile.rule.LocatingRule;
+import magmac.app.compile.rule.OrRule;
 import magmac.app.compile.rule.Rule;
 import magmac.app.compile.rule.StringRule;
 import magmac.app.compile.rule.StripRule;
@@ -20,5 +23,12 @@ public final class CommonLang {
 
     static Rule createTemplateRule() {
         return new TypeRule("template", new StripRule(new SuffixRule(LocatingRule.First(new StripRule(new StringRule("base")), "<", new StringRule("arguments")), ">")));
+    }
+
+    static DivideRule createParametersRule(Rule definition) {
+        return new DivideRule("parameters", new ValueFolder(), new OrRule(Lists.of(
+                createWhitespaceRule(),
+                definition
+        )));
     }
 }

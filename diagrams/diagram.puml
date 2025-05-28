@@ -767,9 +767,12 @@ ImmutableCompileError --> Joiner
 ImmutableCompileError --> Max
 ImmutableCompileError --> Context
 ImmutableCompileError --> CompileError
+CommonLang --> Lists
+CommonLang --> DivideRule
 CommonLang --> ExactRule
 CommonLang --> FilterRule
 CommonLang --> LocatingRule
+CommonLang --> OrRule
 CommonLang --> Rule
 CommonLang --> StringRule
 CommonLang --> StripRule
