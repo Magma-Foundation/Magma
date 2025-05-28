@@ -21,6 +21,8 @@ export class TypescriptLang {
 	}
 	createMethodRule() : TypeRule {
 	}
+	createConstructorRule() : TypeRule {
+	}
 	createDefinitionRule() : Rule {
 	}
 	createTypeRule() : Rule {

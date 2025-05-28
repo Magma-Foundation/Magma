@@ -46,10 +46,15 @@ public final class TypescriptLang {
     private static TypeRule createMethodRule() {
         Rule header = new OrRule(Lists.of(
                 TypescriptLang.createDefinitionRule(),
-                new TypeRule("constructor", new ExactRule("constructor"))
+                TypescriptLang.createConstructorRule()
         ));
 
         return new TypeRule("method", new SuffixRule(new PrefixRule("\n\t", new NodeRule("header", header)), " {\n\t}"));
+    }
+
+    private static TypeRule createConstructorRule() {
+        DivideRule parametersRule = CommonLang.createParametersRule(TypescriptLang.createDefinitionRule());
+        return new TypeRule("constructor", new PrefixRule("constructor(", new SuffixRule(parametersRule, ")")));
     }
 
     private static Rule createDefinitionRule() {
