@@ -173,14 +173,24 @@ public final class MapNode implements Node {
     }
 
     @Override
-    public EmptyDestroyer destroy() {
-        return new EmptyDestroyer(this);
+    public Option<EmptyDestroyer> deserializeWithType(String type) {
+        if (this.is(type)) {
+            return new Some<>(new EmptyDestroyer(this));
+        }
+        else {
+            return new None<>();
+        }
     }
 
     @Override
     public CompileResult<Tuple2<Node, NodeList>> removeNodeList(String key) {
-        this.nodeLists.removeKey(key);
-        throw new UnsupportedOperationException();
+        return this.nodeLists.removeByKey(key)
+                .map((Tuple2<Map<String, NodeList>, NodeList> tuple) -> CompileResults.Ok(new Tuple2<>(this.withNodeLists(tuple.left()), tuple.right())))
+                .orElseGet(() -> CompileResults.NodeErr("Key '" + key + "' not present", this));
+    }
+
+    private Node withNodeLists(Map<String, NodeList> nodeLists) {
+        return new MapNode(this.maybeType, this.strings, this.nodes, nodeLists);
     }
 
     @Override
@@ -195,6 +205,22 @@ public final class MapNode implements Node {
                 .collect(new NodeListCollector());
 
         return this.withNodeList(key, nodeList);
+    }
+
+    @Override
+    public CompileResult<Tuple2<Node, String>> removeString(String key) {
+        return this.strings.removeByKey(key)
+                .map((Tuple2<Map<String, String>, String> tuple) -> CompileResults.Ok(new Tuple2<>(this.withStrings(tuple.left()), tuple.right())))
+                .orElseGet(() -> CompileResults.NodeErr("Key '" + key + "' not present", this));
+    }
+
+    @Override
+    public EmptyDestroyer deserialize() {
+        return new EmptyDestroyer(this);
+    }
+
+    private Node withStrings(Map<String, String> strings) {
+        return new MapNode(this.maybeType, strings, this.nodes, this.nodeLists);
     }
 
     @Override
@@ -233,7 +259,7 @@ public final class MapNode implements Node {
     @Override
     public CompileResult<NodeList> findNodeListOrError(String key) {
         return this.findNodeList(key)
-                .map((NodeList list) -> CompileResults.fromOk(list))
+                .map((NodeList list) -> CompileResults.Ok(list))
                 .orElseGet(() -> CompileErrors.createNodeError("Node list '" + key + "' not present", this));
     }
 }

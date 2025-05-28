@@ -24,7 +24,7 @@ public class PlantUMLAfterPasser implements Passer {
     private static CompileResult<NodeList> createInherits(Node child, String key) {
         return child.findNode(key)
                 .map((Node implemented) -> PlantUMLAfterPasser.getNodeListCompileResult(child, implemented))
-                .orElseGet(() -> CompileResults.fromOk(InlineNodeList.empty()));
+                .orElseGet(() -> CompileResults.Ok(InlineNodeList.empty()));
     }
 
     private static CompileResult<NodeList> getNodeListCompileResult(Node child, Node implemented) {
@@ -95,13 +95,13 @@ public class PlantUMLAfterPasser implements Passer {
                     .withString("child", child);
 
             ParseUnit<Node> tuple = new ParseUnitImpl<Node>(state, dependency);
-            return new InlinePassResult(new Some<>(CompileResults.fromOk(tuple)));
+            return new InlinePassResult(new Some<>(CompileResults.Ok(tuple)));
         }
 
         return InlinePassResult.empty();
     }
 
     private static CompileResult<ParseUnit<Node>> getTuple2CompileResult(ParseState state, Node node, NodeList values) {
-        return CompileResults.fromOk(new ParseUnitImpl<Node>(state, node.withNodeList("children", values)));
+        return CompileResults.Ok(new ParseUnitImpl<Node>(state, node.withNodeList("children", values)));
     }
 }

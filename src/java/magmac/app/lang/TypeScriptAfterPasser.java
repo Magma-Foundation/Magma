@@ -36,7 +36,7 @@ public class TypeScriptAfterPasser implements Passer {
             String value = last.findString("value").orElse("");
             NodeList values = copy.addAll(segments);
             Node node1 = node.withString("child", value).withNodeList("segments", values);
-            return CompileResults.fromOk(new ParseUnitImpl<Node>(state, node1));
+            return CompileResults.Ok(new ParseUnitImpl<Node>(state, node1));
         });
 
         return new Some<>(new InlinePassResult(map));
@@ -100,7 +100,7 @@ public class TypeScriptAfterPasser implements Passer {
                     .mapValue((Node result) -> new ParseUnitImpl<>(state, result));
         }
 
-        return CompileResults.fromOk(new ParseUnitImpl<>(state, value));
+        return CompileResults.Ok(new ParseUnitImpl<>(state, value));
     }
 
     private Node getNode(Node destination) {

@@ -16,10 +16,10 @@ public class SingleDestroyer<T> {
     public <R> CompileResult<R> complete(Function<T, R> mapper) {
         return this.result.flatMapValue((Tuple2<Node, T> tuple) -> {
             if (!tuple.left().isEmpty()) {
-                return CompileResults.fromErrWithNode("Fields still present", tuple.left());
+                return CompileResults.NodeErr("Fields still present", tuple.left());
             }
 
-            return CompileResults.fromOk(mapper.apply(tuple.right()));
+            return CompileResults.Ok(mapper.apply(tuple.right()));
         });
     }
 }

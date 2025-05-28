@@ -60,8 +60,8 @@ record JVMMap<K, V>(java.util.Map<K, V> map) implements Map<K, V> {
     }
 
     @Override
-    public Option<Tuple2<Map<K, V>, V>> removeKey(K key) {
-        if (this.map.containsKey(key)) {
+    public Option<Tuple2<Map<K, V>, V>> removeByKey(K key) {
+        if (!this.map.containsKey(key)) {
             return new None<>();
         }
 

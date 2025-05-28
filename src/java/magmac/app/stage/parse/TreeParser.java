@@ -30,7 +30,7 @@ public class TreeParser implements Parser<Node, Node> {
         Node currentNode = current.right();
         String key = entry.left();
 
-        CompileResult<ParseUnit<NodeList>> initial = CompileResults.fromOk(current.retainWithList());
+        CompileResult<ParseUnit<NodeList>> initial = CompileResults.Ok(current.retainWithList());
         return entry.right()
                 .iter()
                 .fold(initial, (CompileResult<ParseUnit<NodeList>> currentTupleResult, Node node) -> currentTupleResult.flatMapValue((ParseUnit<NodeList> currentTuple) -> currentTuple.merge((ParseState currentState2, NodeList currentElements1) -> this.getParseUnitCompileResult(node, currentState2, currentElements1))))
@@ -53,7 +53,7 @@ public class TreeParser implements Parser<Node, Node> {
     }
 
     private CompileResult<ParseUnit<Node>> parseNodes(ParseUnit<Node> withNodeLists) {
-        return withNodeLists.right().iterNodes().fold(CompileResults.fromOk(withNodeLists),
+        return withNodeLists.right().iterNodes().fold(CompileResults.Ok(withNodeLists),
                 (CompileResult<ParseUnit<Node>> current, Tuple2<String, Node> entry) -> current.flatMapValue((ParseUnit<Node> inner) -> this.parseNodeEntry(inner, entry)));
 
     }
@@ -67,7 +67,7 @@ public class TreeParser implements Parser<Node, Node> {
     }
 
     private CompileResult<ParseUnit<Node>> parseNodeLists(ParseUnit<Node> beforeTuple) {
-        return beforeTuple.right().iterNodeLists().fold(CompileResults.fromOk(beforeTuple),
+        return beforeTuple.right().iterNodeLists().fold(CompileResults.Ok(beforeTuple),
                 (CompileResult<ParseUnit<Node>> current, Tuple2<String, NodeList> entry) -> current.flatMapValue((ParseUnit<Node> inner) -> this.parseNodeListEntry(inner, entry)));
     }
 
@@ -76,7 +76,7 @@ public class TreeParser implements Parser<Node, Node> {
         return initial.iter()
                 .map((Unit<Node> unit) -> this.parseUnit(unit))
                 .collect(new CompileResultCollector<>(new UnitSetCollector<>()))
-                .flatMapValue((UnitSet<Node> parsed) -> CompileResults.fromOk(this.afterAllChildren.afterAll(parsed)));
+                .flatMapValue((UnitSet<Node> parsed) -> CompileResults.Ok(this.afterAllChildren.afterAll(parsed)));
     }
 
     private CompileResult<Unit<Node>> parseUnit(Unit<Node> unit) {

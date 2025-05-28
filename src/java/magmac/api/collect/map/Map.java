@@ -22,5 +22,5 @@ public interface Map<K, V> {
 
     Map<K, V> mapOrPut(K key, Function<V, V> mapper, Supplier<V> supplier);
 
-    Option<Tuple2<Map<K, V>, V>> removeKey(K key);
+    Option<Tuple2<Map<K, V>, V>> removeByKey(K key);
 }

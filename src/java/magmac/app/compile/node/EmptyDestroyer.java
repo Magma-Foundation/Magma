@@ -18,8 +18,12 @@ public class EmptyDestroyer {
     public <T> SingleDestroyer<List<T>> nodeList(String key, Function<Node, CompileResult<T>> deserializer) {
         return new SingleDestroyer<>(this.node.removeNodeList(key).flatMapValue((Tuple2<Node, NodeList> tuple) -> tuple.right()
                 .iter()
-                .map(t -> deserializer.apply(t))
+                .map(deserializer)
                 .collect(new CompileResultCollector<>(new ListCollector<>()))
                 .mapValue((List<T> collect) -> new Tuple2<>(tuple.left(), collect))));
+    }
+
+    public SingleDestroyer<String> string(String key) {
+        return new SingleDestroyer<>(this.node.removeString(key));
     }
 }

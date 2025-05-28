@@ -8,7 +8,7 @@ import magmac.app.lang.java.root.JavaRootSegment;
 
 public record JavaRoot(List<JavaRootSegment> children) implements Serializable {
     public static CompileResult<JavaRoot> deserialize(Node node) {
-        return node.destroy()
+        return node.deserialize()
                 .nodeList("children", (Node node1) -> JavaRootSegments.deserialize(node1))
                 .complete((List<JavaRootSegment> segments) -> new JavaRoot(segments));
     }

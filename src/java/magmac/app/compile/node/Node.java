@@ -43,11 +43,15 @@ public interface Node {
 
     boolean hasNodeList(String key);
 
-    EmptyDestroyer destroy();
+    Option<EmptyDestroyer> deserializeWithType(String type);
 
     CompileResult<Tuple2<Node, NodeList>> removeNodeList(String key);
 
     boolean isEmpty();
 
     <T> Node withNodeListFromElements(String key, List<T> list, Function<T, Node> serializer);
+
+    CompileResult<Tuple2<Node, String>> removeString(String key);
+
+    EmptyDestroyer deserialize();
 }

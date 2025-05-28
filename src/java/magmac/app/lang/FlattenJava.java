@@ -16,7 +16,7 @@ import magmac.app.stage.parse.ParseState;
 public class FlattenJava implements Passer {
     private static InlinePassResult getChildren(ParseState state, Node node) {
         ParseUnit<Node> parseStateNodeTuple2 = new ParseUnitImpl<Node>(state, node);
-        return new InlinePassResult(new Some<>(CompileResults.fromOk(parseStateNodeTuple2)));
+        return new InlinePassResult(new Some<>(CompileResults.Ok(parseStateNodeTuple2)));
     }
 
     @Override
