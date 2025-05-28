@@ -1,0 +1,12 @@
+import { Collector } from "../../../../magmac/api/iter/collect/Collector";
+import { MapUnitSet } from "../../../../magmac/app/stage/MapUnitSet";
+import { Unit } from "../../../../magmac/app/stage/Unit";
+import { UnitSet } from "../../../../magmac/app/stage/UnitSet";
+export class UnitSetCollector {
+	public createInitial() : UnitSet<T> {
+		return new MapUnitSet<>( );
+	}
+	public fold( current : UnitSet<T>,  element : Unit<T>) : UnitSet<T> {
+		return current.add( element);
+	}
+}
