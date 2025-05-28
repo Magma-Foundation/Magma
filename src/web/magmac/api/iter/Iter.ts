@@ -4,5 +4,5 @@ import { Result } from "../../../magmac/api/result/Result";
 import { BiFunction } from "../../../java/util/function/BiFunction";
 import { Function } from "../../../java/util/function/Function";
 import { Predicate } from "../../../java/util/function/Predicate";
-export interface ? {
+export interface Iter {
 }

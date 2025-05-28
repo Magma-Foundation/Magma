@@ -1,3 +1,5 @@
 import { Iter } from "../../../../../magmac/api/iter/Iter";
-export interface ? {
+export interface Divider {
+	temp(){
+	}
 }

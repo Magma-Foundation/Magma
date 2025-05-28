@@ -1,3 +1,5 @@
 import { CompileResult } from "../../../magmac/app/compile/error/CompileResult";
-export interface ? {
+export interface Stage {
+	temp(){
+	}
 }

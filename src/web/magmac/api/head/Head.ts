@@ -1,3 +1,3 @@
 import { Option } from "../../../magmac/api/Option";
-export interface ? {
+export interface Head {
 }

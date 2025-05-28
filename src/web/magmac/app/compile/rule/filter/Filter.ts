@@ -1,2 +1,4 @@
-export interface ? {
+export interface Filter {
+	temp(){
+	}
 }

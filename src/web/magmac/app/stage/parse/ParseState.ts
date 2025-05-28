@@ -1,3 +1,3 @@
 import { Location } from "../../../../magmac/app/io/Location";
-export interface ? {
+export interface ParseState {
 }

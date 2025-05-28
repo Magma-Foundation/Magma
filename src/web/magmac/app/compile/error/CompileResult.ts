@@ -4,5 +4,5 @@ import { CompileError } from "../../../../magmac/app/compile/error/error/Compile
 import { BiFunction } from "../../../../java/util/function/BiFunction";
 import { Function } from "../../../../java/util/function/Function";
 import { Supplier } from "../../../../java/util/function/Supplier";
-export interface ? {
+export interface CompileResult {
 }

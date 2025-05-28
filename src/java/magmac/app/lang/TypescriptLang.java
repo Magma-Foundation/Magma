@@ -17,9 +17,8 @@ public final class TypescriptLang {
         return new TypeRule("root", DivideRule.Statements("children", new OrRule(Lists.of(
                 CommonLang.createWhitespaceRule(),
                 TypescriptLang.createImportRule(),
-                TypescriptLang.createClassRule(),
-                new TypeRule("interface", new ExactRule("export interface ? {\n}\n")),
-                new TypeRule("enum", new ExactRule("export enum ? {\n}\n"))
+                TypescriptLang.createClassRule("class"),
+                TypescriptLang.createClassRule("interface")
         ))));
     }
 
@@ -29,10 +28,10 @@ public final class TypescriptLang {
         return new TypeRule("import", new PrefixRule("import { ", first));
     }
 
-    private static Rule createClassRule() {
+    private static Rule createClassRule(String type) {
         Rule children = DivideRule.Statements("children", TypescriptLang.createStructureMemberRule());
         Rule name = LocatingRule.First(new StringRule("name"), " {", new SuffixRule(children, "\n}\n"));
-        return new TypeRule("class", new PrefixRule("export class ", name));
+        return new TypeRule(type, new PrefixRule("export " + type + " ", name));
     }
 
     private static Rule createStructureMemberRule() {

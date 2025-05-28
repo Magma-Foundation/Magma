@@ -1,2 +1,2 @@
-export interface ? {
+export interface Context {
 }

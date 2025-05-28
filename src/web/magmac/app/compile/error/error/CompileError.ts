@@ -1,3 +1,5 @@
 import { Error } from "../../../../../magmac/api/error/Error";
-export interface ? {
+export interface CompileError {
+	temp(){
+	}
 }
