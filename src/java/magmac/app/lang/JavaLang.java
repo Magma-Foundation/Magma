@@ -52,7 +52,7 @@ public final class JavaLang {
         ));
 
         Rule afterKeyword = LocatingRule.First(withImplements, "{", new StripRule(new SuffixRule(CommonLang.Statements("children", JavaLang.createClassMemberRule()), "}")));
-        return new TypeRule(keyword, LocatingRule.First(new StringRule("before-keyword"), keyword + " ", afterKeyword));
+        return new TypeRule(keyword, LocatingRule.First(CommonLang.createModifiersRule(), keyword + " ", afterKeyword));
     }
 
     private static Rule createClassMemberRule() {
