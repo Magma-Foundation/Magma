@@ -16,7 +16,7 @@ export class PlantUMLLang {
 	private static createRootSegmentRule() : SuffixRule {
 		return new SuffixRule( new OrRule( Lists.of( CommonLang.createWhitespaceRule( ), new TypeRule( "start", new ExactRule( "@startuml\nskinparam linetype ortho")), new TypeRule( "end", new ExactRule( "@enduml")), PlantUMLLang.createStructureRule( "class"), PlantUMLLang.createStructureRule( "interface"), PlantUMLLang.createStructureRule( "enum"), new TypeRule( "inherits", LocatingRule.First( new StringRule( "parent"), " <|-- ", new StringRule( "child"))), new TypeRule( "dependency", LocatingRule.First( new StringRule( "child"), " --> ", new StringRule( "parent"))))), "\n");
 	}
-	private static createStructureRule( type() : String) : Rule {
+	private static createStructureRule( type : String) : Rule {
 		return new TypeRule( type, new PrefixRule( type+" ", new StringRule( "name")));
 	}
 }

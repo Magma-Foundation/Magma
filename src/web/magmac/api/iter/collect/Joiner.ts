@@ -8,7 +8,7 @@ export class Joiner {
 	public createInitial() : Option<String> {
 		return new None<>( );
 	}
-	public fold( current() : Option<String>,  element() : String) : Option<String> {
-		return new Some<>( current.map( ( inner() : String) => inner+this.delimiter+element).orElse( element));
+	public fold( current : Option<String>,  element : String) : Option<String> {
+		return new Some<>( current.map( ( inner : String) => inner+this.delimiter+element).orElse( element));
 	}
 }

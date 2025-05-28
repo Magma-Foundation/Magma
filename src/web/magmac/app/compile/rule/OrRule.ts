@@ -8,18 +8,18 @@ import { Node } from "../../../../magmac/app/compile/node/Node";
 import { List } from "../../../../magmac/api/collect/list/List";
 import { Function } from "../../../../java/util/function/Function";
 export class OrRule {
-	private static foldElement( state() : OrState<T>,  rule() : Rule,  mapper() : Function<Rule, CompileResult<T>>) : OrState<T> {
-		return mapper.apply( rule).match( ( value() : T) => state.withValue( value), ( error() : CompileError) => state.withError( error));
+	private static foldElement( state : OrState<T>,  rule : Rule,  mapper : Function<Rule, CompileResult<T>>) : OrState<T> {
+		return mapper.apply( rule).match( ( value : T) => state.withValue( value), ( error : CompileError) => state.withError( error));
 	}
-	private foldAll( mapper() : Function<Rule, CompileResult<T>>,  context() : Context) : CompileResult<T> {
-		 ruleIter() : Iter<Rule>=this.rules.iter( );
-		 initial() : OrState<T>=new OrState<T>( );
-		return ruleIter.fold( initial, ( state() : OrState<T>,  rule() : Rule) => OrRule.foldElement( state, rule, mapper)).toResult( context);
+	private foldAll( mapper : Function<Rule, CompileResult<T>>,  context : Context) : CompileResult<T> {
+		 ruleIter : Iter<Rule>=this.rules.iter( );
+		 initial : OrState<T>=new OrState<T>( );
+		return ruleIter.fold( initial, ( state : OrState<T>,  rule : Rule) => OrRule.foldElement( state, rule, mapper)).toResult( context);
 	}
-	public lex( input() : String) : CompileResult<Node> {
-		return this.foldAll( ( rule1() : Rule) => rule1.lex( input), new StringContext( input));
+	public lex( input : String) : CompileResult<Node> {
+		return this.foldAll( ( rule1 : Rule) => rule1.lex( input), new StringContext( input));
 	}
-	public generate( node() : Node) : CompileResult<String> {
-		return this.foldAll( ( rule1() : Rule) => rule1.generate( node), new NodeContext( node));
+	public generate( node : Node) : CompileResult<String> {
+		return this.foldAll( ( rule1 : Rule) => rule1.generate( node), new NodeContext( node));
 	}
 }

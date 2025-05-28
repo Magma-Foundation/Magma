@@ -27,35 +27,35 @@ export class CommonLang {
 	static createTemplateRule() : Rule {
 		return new TypeRule( "template", new StripRule( new SuffixRule( LocatingRule.First( new StripRule( new StringRule( "base")), "<", new StringRule( "arguments")), ">")));
 	}
-	static createParametersRule( definition() : Rule) : DivideRule {
+	static createParametersRule( definition : Rule) : DivideRule {
 		return new DivideRule( "parameters", new ValueFolder( ), new OrRule( Lists.of( CommonLang.createWhitespaceRule( ), definition)));
 	}
-	public static Statements( key() : String,  childRule() : Rule) : DivideRule {
+	public static Statements( key : String,  childRule : Rule) : DivideRule {
 		return new DivideRule( key, new StatementFolder( ), childRule);
 	}
-	static createAssignmentRule( definition() : Rule,  value() : Rule) : Rule {
-		 before() : Rule=new OrRule( Lists.of( new NodeRule( "definition", definition), new NodeRule( "destination", value)));
-		 source() : Rule=new NodeRule( "source", value);
+	private static createAssignmentRule( definition : Rule,  value : Rule) : Rule {
+		 before : Rule=new OrRule( Lists.of( new NodeRule( "definition", definition), new NodeRule( "destination", value)));
+		 source : Rule=new NodeRule( "source", value);
 		return new TypeRule( "assignment", LocatingRule.First( before, "=", source));
 	}
-	static initValueRule( segment() : Rule,  value() : LazyRule,  lambdaInfix() : String,  definition() : Rule) : LazyRule {
+	static initValueRule( segment : Rule,  value : LazyRule,  lambdaInfix : String,  definition : Rule) : LazyRule {
 		return value.set( new OrRule( Lists.of( CommonLang.createLambdaRule( value, segment, lambdaInfix, definition), new StripRule( new PrefixRule( "!", new NodeRule( "child", value))), CommonLang.createCharRule( ), CommonLang.createStringRule( ), CommonLang.createInvokableRule( value), CommonLang.createNumberRule( ), CommonLang.createAccessRule( value), CommonLang.createSymbolValueRule( ), CommonLang.createOperationRule( value, "add", "+"), CommonLang.createOperationRule( value, "subtract", "-"), CommonLang.createOperationRule( value, "equals", "=="), CommonLang.createOperationRule( value, "less-than", "<"), CommonLang.createOperationRule( value, "and", "&&"), CommonLang.createOperationRule( value, "or", "||"), CommonLang.createOperationRule( value, "not-equals", "!="), CommonLang.createOperationRule( value, "greater-than", ">"), CommonLang.createIndexRule( value))));
 	}
-	private static createIndexRule( value() : LazyRule) : TypeRule {
+	private static createIndexRule( value : LazyRule) : TypeRule {
 		return new TypeRule( "index", new StripRule( new SuffixRule( LocatingRule.First( new NodeRule( "parent", value), "[", new NodeRule( "argument", value)), "]")));
 	}
-	private static createLambdaRule( value() : LazyRule,  functionSegment() : Rule,  infix() : String,  definition() : Rule) : TypeRule {
-		 value1() : Rule=new OrRule( Lists.of( new StripRule( new PrefixRule( "{", new SuffixRule( CommonLang.Statements( "children", functionSegment), "}"))), new NodeRule( "value", value)));
+	private static createLambdaRule( value : LazyRule,  functionSegment : Rule,  infix : String,  definition : Rule) : TypeRule {
+		 value1 : Rule=new OrRule( Lists.of( new StripRule( new PrefixRule( "{", new SuffixRule( CommonLang.Statements( "children", functionSegment), "}"))), new NodeRule( "value", value)));
 		return new TypeRule( "lambda", LocatingRule.First( new StripRule( new PrefixRule( "(", new SuffixRule( new DivideRule( "parameters", new ValueFolder( ), definition), ")"))), infix, value1));
 	}
-	private static createOperationRule( value() : Rule,  type() : String,  infix() : String) : TypeRule {
+	private static createOperationRule( value : Rule,  type : String,  infix : String) : TypeRule {
 		return new TypeRule( type, LocatingRule.First( new NodeRule( "left", value), infix, new NodeRule( "right", value)));
 	}
 	private static createSymbolValueRule() : StripRule {
 		return new StripRule( FilterRule.Symbol( new StringRule( "value")));
 	}
-	private static createAccessRule( value() : LazyRule) : Rule {
-		 property() : StripRule=new StripRule( FilterRule.Symbol( new StringRule( "property")));
+	private static createAccessRule( value : LazyRule) : Rule {
+		 property : StripRule=new StripRule( FilterRule.Symbol( new StringRule( "property")));
 		return new TypeRule( "access", LocatingRule.Last( new NodeRule( "instance", value), ".", property));
 	}
 	private static createNumberRule() : Rule {
@@ -67,57 +67,57 @@ export class CommonLang {
 	private static createCharRule() : TypeRule {
 		return new TypeRule( "char", new StripRule( new PrefixRule( "'", new SuffixRule( new StringRule( "value"), "'"))));
 	}
-	private static createInvokableRule( value() : Rule) : Rule {
-		 caller() : Rule=new ContextRule( "With caller", new SuffixRule( new OrRule( Lists.of( new ContextRule( "As construction", new StripRule( new PrefixRule( "new ", new NodeRule( "type", CommonLang.createTypeRule( ))))), new ContextRule( "As invocation", new NodeRule( "caller", value)))), "("));
-		 arguments() : DivideRule=new DivideRule( "arguments", new ValueFolder( ), new OrRule( Lists.of( CommonLang.createWhitespaceRule( ), value)));
-		 splitter() : Splitter=DividingSplitter.Last( new FoldingDivider( new InvocationFolder( )), "");
+	private static createInvokableRule( value : Rule) : Rule {
+		 caller : Rule=new ContextRule( "With caller", new SuffixRule( new OrRule( Lists.of( new ContextRule( "As construction", new StripRule( new PrefixRule( "new ", new NodeRule( "type", CommonLang.createTypeRule( ))))), new ContextRule( "As invocation", new NodeRule( "caller", value)))), "("));
+		 arguments : DivideRule=new DivideRule( "arguments", new ValueFolder( ), new OrRule( Lists.of( CommonLang.createWhitespaceRule( ), value)));
+		 splitter : Splitter=DividingSplitter.Last( new FoldingDivider( new InvocationFolder( )), "");
 		return new TypeRule( "invocation", new StripRule( new SuffixRule( new LocatingRule( caller, splitter, arguments), ")")));
 	}
-	static initFunctionSegmentRule( functionSegmentRule() : LazyRule,  value() : Rule,  definition() : Rule) : Rule {
-		 functionSegmentValueRule() : Rule=CommonLang.createFunctionSegmentValueRule( value, definition);
-		 rule() : Rule=new OrRule( Lists.of( CommonLang.createWhitespaceRule( ), CommonLang.createStatementRule( functionSegmentValueRule), CommonLang.createBlockRule( functionSegmentRule, value, definition)));
+	static initFunctionSegmentRule( functionSegmentRule : LazyRule,  value : Rule,  definition : Rule) : Rule {
+		 functionSegmentValueRule : Rule=CommonLang.createFunctionSegmentValueRule( value, definition);
+		 rule : Rule=new OrRule( Lists.of( CommonLang.createWhitespaceRule( ), CommonLang.createStatementRule( functionSegmentValueRule), CommonLang.createBlockRule( functionSegmentRule, value, definition)));
 		return functionSegmentRule.set( new StripRule( "before", rule, ""));
 	}
-	private static createStatementRule( rule() : Rule) : TypeRule {
-		 child() : NodeRule=new NodeRule( "child", rule);
+	private static createStatementRule( rule : Rule) : TypeRule {
+		 child : NodeRule=new NodeRule( "child", rule);
 		return new TypeRule( "statement", new StripRule( new SuffixRule( child, ";")));
 	}
-	private static createBlockRule( functionSegmentRule() : LazyRule,  value() : Rule,  definition() : Rule) : Rule {
-		 header() : Rule=new NodeRule( "header", CommonLang.createBlockHeaderRule( value, definition));
-		 children() : Rule=CommonLang.Statements( "children", functionSegmentRule);
-		 first() : Splitter=DividingSplitter.First( new FoldingDivider( new BlockFolder( )), "");
-		 childRule() : Rule=new LocatingRule( new SuffixRule( header, "{"), first, children);
+	private static createBlockRule( functionSegmentRule : LazyRule,  value : Rule,  definition : Rule) : Rule {
+		 header : Rule=new NodeRule( "header", CommonLang.createBlockHeaderRule( value, definition));
+		 children : Rule=CommonLang.Statements( "children", functionSegmentRule);
+		 first : Splitter=DividingSplitter.First( new FoldingDivider( new BlockFolder( )), "");
+		 childRule : Rule=new LocatingRule( new SuffixRule( header, "{"), first, children);
 		return new TypeRule( "block", new StripRule( new SuffixRule( childRule, "}")));
 	}
-	private static createBlockHeaderRule( value() : Rule,  definition() : Rule) : Rule {
+	private static createBlockHeaderRule( value : Rule,  definition : Rule) : Rule {
 		return new OrRule( Lists.of( new TypeRule( "else", new StripRule( new ExactRule( "else"))), new TypeRule( "try", new StripRule( new ExactRule( "try"))), CommonLang.createConditionalRule( "if", value), CommonLang.createConditionalRule( "while", value), new StripRule( new PrefixRule( "catch", new StripRule( new PrefixRule( "(", new SuffixRule( new NodeRule( "definition", definition), ")")))))));
 	}
-	private static createConditionalRule( prefix() : String,  value() : Rule) : StripRule {
+	private static createConditionalRule( prefix : String,  value : Rule) : StripRule {
 		return new StripRule( new PrefixRule( prefix, new StripRule( new PrefixRule( "(", new SuffixRule( new NodeRule( "condition", value), ")")))));
 	}
-	private static createFunctionSegmentValueRule( value() : Rule,  definition() : Rule) : Rule {
+	private static createFunctionSegmentValueRule( value : Rule,  definition : Rule) : Rule {
 		return new OrRule( Lists.of( CommonLang.createInvokableRule( value), CommonLang.createAssignmentRule( definition, value), CommonLang.createReturnRule( value), CommonLang.createPostRule( "post-increment", "++", value), CommonLang.createPostRule( "post-decrement", "--", value), new TypeRule( "break", new ExactRule( "break")), new TypeRule( "continue", new ExactRule( "continue"))));
 	}
-	private static createPostRule( type() : String,  suffix() : String,  value() : Rule) : TypeRule {
+	private static createPostRule( type : String,  suffix : String,  value : Rule) : TypeRule {
 		return new TypeRule( type, new StripRule( new SuffixRule( new NodeRule( "child", value), suffix)));
 	}
-	private static createReturnRule( value() : Rule) : TypeRule {
+	private static createReturnRule( value : Rule) : TypeRule {
 		return new TypeRule( "return", new StripRule( new PrefixRule( "return ", new NodeRule( "value", value))));
 	}
 	static createTypeRule() : Rule {
-		 orRule() : LazyRule=new MutableLazyRule( );
+		 orRule : LazyRule=new MutableLazyRule( );
 		return orRule.set( new OrRule( Lists.of( CommonLang.createVariadicRule( orRule), CommonLang.createArrayRule( orRule), CommonLang.createTemplateRule( ), CommonLang.createSymbolTypeRule( ))));
 	}
-	private static createArrayRule( rule() : Rule) : TypeRule {
-		 child() : NodeRule=new NodeRule( "child", rule);
+	private static createArrayRule( rule : Rule) : TypeRule {
+		 child : NodeRule=new NodeRule( "child", rule);
 		return new TypeRule( "array", new StripRule( new SuffixRule( child, "[]")));
 	}
-	private static createVariadicRule( rule() : Rule) : TypeRule {
-		 child() : NodeRule=new NodeRule( "child", rule);
+	private static createVariadicRule( rule : Rule) : TypeRule {
+		 child : NodeRule=new NodeRule( "child", rule);
 		return new TypeRule( "variadic", new StripRule( new SuffixRule( child, "...")));
 	}
-	static createStructureStatementRule( definition1() : Rule,  value() : LazyRule) : Rule {
-		 definition() : Rule=new NodeRule( "value", new OrRule( Lists.of( definition1, CommonLang.createAssignmentRule( definition1, value))));
+	static createStructureStatementRule( definition1 : Rule,  value : LazyRule) : Rule {
+		 definition : Rule=new NodeRule( "value", new OrRule( Lists.of( definition1, CommonLang.createAssignmentRule( definition1, value))));
 		return new TypeRule( "statement", new StripRule( new SuffixRule( definition, ";")));
 	}
 	static createModifiersRule() : Rule {

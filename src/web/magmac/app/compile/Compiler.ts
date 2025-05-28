@@ -1,5 +1,4 @@
 import { CompileResult } from "../../../magmac/app/compile/error/CompileResult";
-import { Location } from "../../../magmac/app/io/Location";
-import { Map } from "../../../magmac/api/collect/map/Map";
-export interface Compiler {CompileResult units)() : compile(Map<Location, String>;
+import { UnitSet } from "../../../magmac/app/stage/UnitSet";
+export interface Compiler {CompileResult units) : compile(UnitSet<String>;
 }

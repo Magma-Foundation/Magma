@@ -1,32 +1,31 @@
-import { Tuple2 } from "../../../../magmac/api/Tuple2";
 import { List } from "../../../../magmac/api/collect/list/List";
-import { Map } from "../../../../magmac/api/collect/map/Map";
-import { MapCollector } from "../../../../magmac/api/collect/map/MapCollector";
 import { Iter } from "../../../../magmac/api/iter/Iter";
 import { ListCollector } from "../../../../magmac/api/iter/collect/ListCollector";
 import { ResultCollector } from "../../../../magmac/api/iter/collect/ResultCollector";
 import { Result } from "../../../../magmac/api/result/Result";
 import { IOResult } from "../../../../magmac/app/io/IOResult";
 import { InlineIOResult } from "../../../../magmac/app/io/InlineIOResult";
-import { Location } from "../../../../magmac/app/io/Location";
 import { SafeFiles } from "../../../../magmac/app/io/SafeFiles";
+import { SimpleUnit } from "../../../../magmac/app/stage/SimpleUnit";
+import { Unit } from "../../../../magmac/app/stage/Unit";
+import { UnitSet } from "../../../../magmac/app/stage/UnitSet";
 import { IOException } from "../../../../java/io/IOException";
 import { Files } from "../../../../java/nio/file/Files";
 import { Path } from "../../../../java/nio/file/Path";
 export class PathSources {
-	public readAll() : IOResult<Map<Location, String>> {
-		return SafeFiles.walk( this.root).flatMapValue( ( sources() : Iter<Path>) => this.apply( sources));
+	private static getTuple2IOResult( source : PathSource) : IOResult<Unit<String>> {
+		return source.read( ).mapValue( ( input : String) => new SimpleUnit<>( source.computeLocation( ), input));
 	}
-	private apply( sources() : Iter<Path>) : IOResult<Map<Location, String>> {
+	public readAll() : IOResult<UnitSet<String>> {
+		return SafeFiles.walk( this.root).flatMapValue( ( sources : Iter<Path>) => this.apply( sources));
+	}
+	private apply( sources : Iter<Path>) : IOResult<UnitSet<String>> {
 		return new InlineIOResult<>( this.getCollect( sources));
 	}
-	private getCollect( sources() : Iter<Path>) : Result<Map<Location, String>, IOException> {
-		return this.getCollected( sources).iter( ).map( ( source() : PathSource) => this.getTuple2IOResult( source)).map( ( tuple2IOResult() : IOResult<Tuple2<Location, String>>) => tuple2IOResult.result( )).collect( new ResultCollector<>( new MapCollector<>( )));
+	private getCollect( sources : Iter<Path>) : Result<UnitSet<String>, IOException> {
+		return this.getCollected( sources).iter( ).map( ( source : PathSource) => PathSources.getTuple2IOResult( source)).map( ( tuple2IOResult : IOResult<Unit<String>>) => tuple2IOResult.result( )).collect( new ResultCollector<>( new UnitSetCollector<>( )));
 	}
-	private getTuple2IOResult( source() : PathSource) : IOResult<Tuple2<Location, String>> {
-		return source.read( ).mapValue( ( input() : String) => new Tuple2<>( source.computeLocation( ), input));
-	}
-	private getCollected( sources() : Iter<Path>) : List<PathSource> {
-		return sources.filter( ( path1() : Path) => Files.isRegularFile( path1)).filter( ( file() : Path) => file.toString( ).endsWith( ".java")).map( ( path() : Path) => new PathSource( this.root, path)).collect( new ListCollector<>( ));
+	private getCollected( sources : Iter<Path>) : List<PathSource> {
+		return sources.filter( ( path1 : Path) => Files.isRegularFile( path1)).filter( ( file : Path) => file.toString( ).endsWith( ".java")).map( ( path : Path) => new PathSource( this.root, path)).collect( new ListCollector<>( ));
 	}
 }

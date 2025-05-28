@@ -1,14 +1,17 @@
 import { Ok } from "../../../../magmac/api/result/Ok";
 import { CompileResult } from "../../../../magmac/app/compile/error/CompileResult";
-import { InlineCompileResult } from "../../../../magmac/app/compile/error/InlineCompileResult";
+import { CompileResults } from "../../../../magmac/app/compile/error/CompileResults";
 import { CompileErrors } from "../../../../magmac/app/compile/error/error/CompileErrors";
 import { MapNode } from "../../../../magmac/app/compile/node/MapNode";
 import { Node } from "../../../../magmac/app/compile/node/Node";
 export class StringRule {
-	public lex( input() : String) : CompileResult<Node> {
-		return InlineCompileResult.fromResult( new Ok<>( new MapNode( ).withString( this.key, input)));
+	public static findString( node : Node,  key : String) : CompileResult<String> {
+		return node.findString( key).map( ( value : String) => CompileResults.fromResult( new Ok<>( value))).orElseGet( ( )->CompileErrors.createNodeError( "String '" + key + "' not present", node));
 	}
-	public generate( node() : Node) : CompileResult<String> {
-		return node.findString( this.key).map( ( value() : String) => InlineCompileResult.fromResult( new Ok<>( value))).orElseGet( ( )->CompileErrors.createNodeError( "String '" + this.key + "' not present", node));
+	public lex( input : String) : CompileResult<Node> {
+		return CompileResults.fromResult( new Ok<>( new MapNode( ).withString( this.key, input)));
+	}
+	public generate( node : Node) : CompileResult<String> {
+		return StringRule.findString( node, this.key);
 	}
 }

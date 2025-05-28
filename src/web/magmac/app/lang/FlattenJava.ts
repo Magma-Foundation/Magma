@@ -1,22 +1,23 @@
 import { Some } from "../../../magmac/api/Some";
-import { Tuple2 } from "../../../magmac/api/Tuple2";
 import { ListCollector } from "../../../magmac/api/iter/collect/ListCollector";
-import { InlineCompileResult } from "../../../magmac/app/compile/error/InlineCompileResult";
+import { CompileResults } from "../../../magmac/app/compile/error/CompileResults";
 import { InlineNodeList } from "../../../magmac/app/compile/node/InlineNodeList";
 import { Node } from "../../../magmac/app/compile/node/Node";
 import { NodeList } from "../../../magmac/app/compile/node/NodeList";
 import { InlinePassResult } from "../../../magmac/app/stage/InlinePassResult";
-import { PassResult } from "../../../magmac/app/stage/PassResult";
+import { ParseResult } from "../../../magmac/app/stage/ParseResult";
+import { ParseUnit } from "../../../magmac/app/stage/ParseUnit";
+import { ParseUnitImpl } from "../../../magmac/app/stage/ParseUnitImpl";
 import { Passer } from "../../../magmac/app/stage/Passer";
 import { ParseState } from "../../../magmac/app/stage/parse/ParseState";
 export class FlattenJava {
-	private static getChildren( state() : ParseState,  node() : Node) : InlinePassResult {
-		 parseStateNodeTuple2() : Tuple2<ParseState, Node>=new Tuple2<>( state, node);
-		return new InlinePassResult( new Some<>( InlineCompileResult.fromOk( parseStateNodeTuple2)));
+	private static getChildren( state : ParseState,  node : Node) : InlinePassResult {
+		 parseStateNodeTuple2 : ParseUnit<Node>=new ParseUnitImpl<Node>( state, node);
+		return new InlinePassResult( new Some<>( CompileResults.fromOk( parseStateNodeTuple2)));
 	}
-	public pass( state() : ParseState,  node() : Node) : PassResult {
+	public pass( state : ParseState,  node : Node) : ParseResult {
 		if(node.is( "root")){ 
-		 values() : NodeList=new InlineNodeList( node.findNodeList( "children").orElse( InlineNodeList.empty( )).iter( ).filter( ( child() : Node) => !child.is( "package")).collect( new ListCollector<>( )));
+		 values : NodeList=new InlineNodeList( node.findNodeList( "children").orElse( InlineNodeList.empty( )).iter( ).filter( ( child : Node) => !child.is( "package")).collect( new ListCollector<>( )));
 		return FlattenJava.getChildren( state, node.withNodeList( "children", values));}
 		if(node.is( "record")){ 
 		return FlattenJava.getChildren( state, node.retype( "class"));}

@@ -1,6 +1,5 @@
-import { Location } from "../../../../magmac/app/io/Location";
 import { IOException } from "../../../../java/io/IOException";
-import { Map } from "../../../../magmac/api/collect/map/Map";
 import { Option } from "../../../../magmac/api/Option";
-export interface Targets {Option outputs)() : writeAll(Map<Location, String>;
+import { UnitSet } from "../../../../magmac/app/stage/UnitSet";
+export interface Targets {Option outputs) : writeAll(UnitSet<String>;
 }

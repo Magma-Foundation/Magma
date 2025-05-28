@@ -87,9 +87,12 @@ public final class TypescriptLang {
     }
 
     private static Rule createTypeRule() {
-        return new OrRule(Lists.of(
+        LazyRule orRule = new MutableLazyRule();
+        orRule.set(new OrRule(Lists.of(
                 CommonLang.createSymbolTypeRule(),
-                CommonLang.createTemplateRule()
-        ));
+                CommonLang.createTemplateRule(),
+                new TypeRule("array", new SuffixRule(new NodeRule("child", orRule), "[]"))
+        )));
+        return orRule;
     }
 }

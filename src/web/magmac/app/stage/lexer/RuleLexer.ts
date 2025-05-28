@@ -1,25 +1,19 @@
-import { Tuple2 } from "../../../../magmac/api/Tuple2";
-import { Map } from "../../../../magmac/api/collect/map/Map";
-import { MapCollector } from "../../../../magmac/api/collect/map/MapCollector";
 import { ResultCollector } from "../../../../magmac/api/iter/collect/ResultCollector";
 import { CompileResult } from "../../../../magmac/app/compile/error/CompileResult";
-import { InlineCompileResult } from "../../../../magmac/app/compile/error/InlineCompileResult";
+import { CompileResults } from "../../../../magmac/app/compile/error/CompileResults";
 import { Node } from "../../../../magmac/app/compile/node/Node";
 import { Rule } from "../../../../magmac/app/compile/rule/Rule";
-import { Location } from "../../../../magmac/app/io/Location";
-import { MapRoots } from "../../../../magmac/app/stage/MapRoots";
-import { Roots } from "../../../../magmac/app/stage/Roots";
-export class RuleLexer {private final rootRule() : Rule;
-	 RuleLexer( rootRule() : Rule) : public {
+import { UnitSetCollector } from "../../../../magmac/app/io/sources/UnitSetCollector";
+import { Unit } from "../../../../magmac/app/stage/Unit";
+import { UnitSet } from "../../../../magmac/app/stage/UnitSet";
+export class RuleLexer {private final rootRule : Rule;
+	 RuleLexer( rootRule : Rule) : public {
 		this.rootRule=rootRule;
 	}
-	private foldEntry( tuple() : Tuple2<Location, String>) : CompileResult<Tuple2<Location, Node>> {
-		 location() : Location=tuple.left( );
-		 input() : String=tuple.right( );
-		System.out.println( "Lexing: "+location);
-		return this.rootRule.lex( input).mapValue( ( root() : Node) => new Tuple2<>( location, root));
+	private foldEntry( unit : Unit<String>) : CompileResult<Unit<Node>> {
+		return unit.mapValue( ( input : String) => this.rootRule.lex( input));
 	}
-	public apply( initial() : Map<Location, String>) : CompileResult<Roots> {
-		return InlineCompileResult.fromResult( initial.iterEntries( ).map( ( entry() : Tuple2<Location, String>) => this.foldEntry( entry)).map( ( tuple2CompileResult() : CompileResult<Tuple2<Location, Node>>) => tuple2CompileResult.result( )).collect( new ResultCollector<>( new MapCollector<>( ))).mapValue( ( roots() : Map<Location, Node>) => new MapRoots( roots)));
+	public apply( initial : UnitSet<String>) : CompileResult<UnitSet<Node>> {
+		return CompileResults.fromResult( initial.iter( ).map( ( entry : Unit<String>) => this.foldEntry( entry)).map( ( tuple2CompileResult : CompileResult<Unit<Node>>) => tuple2CompileResult.result( )).collect( new ResultCollector<>( new UnitSetCollector<>( ))));
 	}
 }

@@ -18,17 +18,17 @@ import { Parser } from "../../magmac/app/stage/parse/Parser";
 import { TreeParser } from "../../magmac/app/stage/parse/TreeParser";
 import { Path } from "../../java/nio/file/Path";
 export class ApplicationBuilder {
-	public static run( platform() : TargetPlatform,  sources() : Sources) : Option<Error> {
-		 targetPath() : Path=platform.createTargetPath( );
-		 extension() : String=platform.createExtension( );
-		 targets() : Targets=new PathTargets( targetPath, extension);
-		 lexer() : Lexer=new RuleLexer( JavaLang.createRule( ));
-		 afterAllChildren() : AfterAll=platform.createAfterAll( );
-		 afterChild() : Passer=platform.createAfterChild( );
-		 parser() : Parser=new TreeParser( new FlattenJava( ), afterChild, afterAllChildren);
-		 generator() : Generator=new RuleGenerator( platform.createRule( ));
-		 compiler() : Compiler=new StagedCompiler( lexer, parser, generator);
-		 application() : Application=new CompileApplication( sources, compiler, targets);
+	public static run( platform : TargetPlatform,  sources : Sources) : Option<Error> {
+		 targetPath : Path=platform.createTargetPath( );
+		 extension : String=platform.createExtension( );
+		 targets : Targets=new PathTargets( targetPath, extension);
+		 lexer : Lexer=new RuleLexer( JavaLang.createRule( ));
+		 afterAllChildren : AfterAll=platform.createAfterAll( );
+		 afterChild : Passer=platform.createAfterChild( );
+		 parser : Parser=new TreeParser( new FlattenJava( ), afterChild, afterAllChildren);
+		 generator : Generator=new RuleGenerator( platform.createRule( ));
+		 compiler : Compiler=new StagedCompiler( lexer, parser, generator);
+		 application : Application=new CompileApplication( sources, compiler, targets);
 		return application.run( );
 	}
 }
