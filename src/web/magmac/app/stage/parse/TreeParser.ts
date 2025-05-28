@@ -18,16 +18,10 @@ export class TreeParser {
 	temp : ?;
 	temp : ?;
 	temp : ?;
-	TreeParser(beforeChild : Passer, afterChild : Passer, afterAllChildren : AfterAll) : public {
-	}
-	parseNodeLists(state : ParseState, root : Node) : CompileResult<Tuple2<ParseState, Node>> {
-	}
-	parseNodeList(current : Tuple2<ParseState, Node>, entry : Tuple2<String, NodeList>) : CompileResult<Tuple2<ParseState, Node>> {
-	}
-	parse(location : Location, root : Node) : CompileResult<Tuple2<Location, Node>> {
-	}
-	parseTree(state : ParseState, root : Node) : CompileResult<Tuple2<ParseState, Node>> {
-	}
-	apply(initial : Roots) : CompileResult<Roots> {
-	}
+	TreeParser(beforeChild : Passer, afterChild : Passer, afterAllChildren : AfterAll) : public;
+	parseNodeLists(state : ParseState, root : Node) : CompileResult<Tuple2<ParseState, Node>>;
+	parseNodeList(current : Tuple2<ParseState, Node>, entry : Tuple2<String, NodeList>) : CompileResult<Tuple2<ParseState, Node>>;
+	parse(location : Location, root : Node) : CompileResult<Tuple2<Location, Node>>;
+	parseTree(state : ParseState, root : Node) : CompileResult<Tuple2<ParseState, Node>>;
+	apply(initial : Roots) : CompileResult<Roots>;
 }

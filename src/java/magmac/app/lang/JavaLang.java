@@ -169,7 +169,7 @@ public final class JavaLang {
         )));
 
         Rule parameters = CommonLang.createParametersRule(JavaLang.createDefinitionRule());
-        Rule content = CommonLang.Statements("content", JavaLang.createFunctionSegmentRule());
+        Rule content = CommonLang.Statements("children", JavaLang.createFunctionSegmentRule());
         Rule rightRule = new StripRule(new PrefixRule("{", new SuffixRule(content, "}")));
         Rule withParams = new OrRule(Lists.of(
                 new SuffixRule(parameters, ");"),
@@ -179,11 +179,12 @@ public final class JavaLang {
         return new TypeRule("method", LocatingRule.First(header, "(", withParams));
     }
 
-    private static Rule createFunctionSegmentRule() {
+    static Rule createFunctionSegmentRule() {
         LazyRule functionSegmentRule = new MutableLazyRule();
+        Rule functionSegmentValueRule = JavaLang.createFunctionSegmentValueRule(functionSegmentRule);
         return functionSegmentRule.set(new OrRule(Lists.of(
                 CommonLang.createWhitespaceRule(),
-                new TypeRule("statement", new StripRule(new SuffixRule(JavaLang.createFunctionSegmentValueRule(functionSegmentRule), ";"))),
+                new TypeRule("statement", new StripRule(new SuffixRule(functionSegmentValueRule, ";"))),
                 JavaLang.createBlockRule(functionSegmentRule)
         )));
     }
@@ -217,8 +218,8 @@ public final class JavaLang {
                 JavaLang.createReturnRule(functionSegment),
                 JavaLang.createPostRule("post-increment", "++", functionSegment),
                 JavaLang.createPostRule("post-decrement", "--", functionSegment),
-                new ExactRule("break"),
-                new ExactRule("continue")
+                new TypeRule("break", new ExactRule("break")),
+                new TypeRule("continue", new ExactRule("continue"))
         ));
     }
 

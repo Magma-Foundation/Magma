@@ -10,8 +10,6 @@ import { Roots } from "../../../../magmac/app/stage/Roots";
 import { Map } from "../../../../magmac/api/collect/map/Map";
 export class RuleGenerator {
 	temp : ?;
-	RuleGenerator(rootRule : Rule) : public {
-	}
-	apply(initial : Roots) : CompileResult<Map<Location, String>> {
-	}
+	RuleGenerator(rootRule : Rule) : public;
+	apply(initial : Roots) : CompileResult<Map<Location, String>>;
 }

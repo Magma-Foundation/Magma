@@ -1,5 +1,4 @@
 export interface Filter {
-	test(input : String) : boolean {
-	}
+	test(input : String) : boolean;
 	temp : ?;
 }

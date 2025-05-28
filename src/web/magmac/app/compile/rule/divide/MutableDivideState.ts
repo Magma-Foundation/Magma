@@ -11,30 +11,17 @@ export class MutableDivideState {
 	temp : ?;
 	temp : ?;
 	temp : ?;
-	MutableDivideState(segments : List<String>, buffer : StringBuilder, input : String) : private {
-	}
-	MutableDivideState(input : String) : public {
-	}
-	append(c : char) : DivideState {
-	}
-	advance() : DivideState {
-	}
-	iter() : Iter<String> {
-	}
-	isLevel() : boolean {
-	}
-	enter() : DivideState {
-	}
-	exit() : DivideState {
-	}
-	isShallow() : boolean {
-	}
-	pop() : Option<Tuple2<DivideState, Character>> {
-	}
-	popAndAppendToTuple() : Option<Tuple2<DivideState, Character>> {
-	}
-	popAndAppendToOption() : Option<DivideState> {
-	}
-	peek() : char {
-	}
+	MutableDivideState(segments : List<String>, buffer : StringBuilder, input : String) : private;
+	MutableDivideState(input : String) : public;
+	append(c : char) : DivideState;
+	advance() : DivideState;
+	iter() : Iter<String>;
+	isLevel() : boolean;
+	enter() : DivideState;
+	exit() : DivideState;
+	isShallow() : boolean;
+	pop() : Option<Tuple2<DivideState, Character>>;
+	popAndAppendToTuple() : Option<Tuple2<DivideState, Character>>;
+	popAndAppendToOption() : Option<DivideState>;
+	peek() : char;
 }

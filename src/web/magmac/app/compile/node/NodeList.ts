@@ -3,8 +3,6 @@ import { Iter } from "../../../../magmac/api/iter/Iter";
 export interface NodeList {
 	temp : ?;
 	temp : ?;
-	add(element : Node) : NodeList {
-	}
-	addAll(others : NodeList) : NodeList {
-	}
+	add(element : Node) : NodeList;
+	addAll(others : NodeList) : NodeList;
 }

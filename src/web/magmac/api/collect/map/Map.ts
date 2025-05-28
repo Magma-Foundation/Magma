@@ -6,10 +6,8 @@ export interface Map {
 	temp : ?;
 	temp : ?;
 	temp : ?;
-	containsKey(key : K) : boolean {
-	}
-	get(key : K) : V {
-	}
+	containsKey(key : K) : boolean;
+	get(key : K) : V;
 	temp : ?;
 	temp : ?;
 }

@@ -14,10 +14,7 @@ export class CompileApplication {
 	temp : ?;
 	temp : ?;
 	temp : ?;
-	CompileApplication(sources : Sources, compiler : Compiler, targets : Targets) : public {
-	}
-	run() : Option<Error> {
-	}
-	compileAndWrite(units : Map<Location, String>) : Option<Error> {
-	}
+	CompileApplication(sources : Sources, compiler : Compiler, targets : Targets) : public;
+	run() : Option<Error>;
+	compileAndWrite(units : Map<Location, String>) : Option<Error>;
 }

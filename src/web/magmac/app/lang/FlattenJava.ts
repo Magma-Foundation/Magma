@@ -11,8 +11,6 @@ import { PassResult } from "../../../magmac/app/stage/PassResult";
 import { Passer } from "../../../magmac/app/stage/Passer";
 import { ParseState } from "../../../magmac/app/stage/parse/ParseState";
 export class FlattenJava {
-	getChildren(state : ParseState, node : Node) : InlinePassResult {
-	}
-	pass(state : ParseState, node : Node) : PassResult {
-	}
+	getChildren(state : ParseState, node : Node) : InlinePassResult;
+	pass(state : ParseState, node : Node) : PassResult;
 }

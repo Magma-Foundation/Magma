@@ -8,8 +8,7 @@ export interface Option {
 	temp : ?;
 	temp : ?;
 	temp : ?;
-	orElse(other : T) : T {
-	}
+	orElse(other : T) : T;
 	temp : ?;
 	temp : ?;
 	temp : ?;

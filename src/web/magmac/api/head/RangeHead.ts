@@ -4,8 +4,6 @@ import { Some } from "../../../magmac/api/Some";
 export class RangeHead {
 	temp : ?;
 	temp : ?;
-	RangeHead(length : int) : public {
-	}
-	next() : Option<Integer> {
-	}
+	RangeHead(length : int) : public;
+	next() : Option<Integer>;
 }

@@ -7,14 +7,9 @@ import { SymbolFilter } from "../../../../magmac/app/compile/rule/filter/SymbolF
 export class FilterRule {
 	temp : ?;
 	temp : ?;
-	FilterRule(filter : Filter, childRule : Rule) : private {
-	}
-	Symbol(childRule : Rule) : Rule {
-	}
-	Number(childRule : Rule) : Rule {
-	}
-	lex(input : String) : CompileResult<Node> {
-	}
-	generate(node : Node) : CompileResult<String> {
-	}
+	FilterRule(filter : Filter, childRule : Rule) : private;
+	Symbol(childRule : Rule) : Rule;
+	Number(childRule : Rule) : Rule;
+	lex(input : String) : CompileResult<Node>;
+	generate(node : Node) : CompileResult<String>;
 }

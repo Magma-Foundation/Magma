@@ -9,16 +9,10 @@ export class LocatingRule {
 	temp : ?;
 	temp : ?;
 	temp : ?;
-	LocatingRule(leftRule : Rule, splitter : Splitter, rightRule : Rule) : public {
-	}
-	First(leftRule : Rule, infix : String, rightRule : Rule) : Rule {
-	}
-	Last(leftRule : Rule, infix : String, rightRule : Rule) : Rule {
-	}
-	createLocatingRule(leftRule : Rule, infix : String, rightRule : Rule, locator : Locator) : Rule {
-	}
-	lex(input : String) : CompileResult<Node> {
-	}
-	generate(node : Node) : CompileResult<String> {
-	}
+	LocatingRule(leftRule : Rule, splitter : Splitter, rightRule : Rule) : public;
+	First(leftRule : Rule, infix : String, rightRule : Rule) : Rule;
+	Last(leftRule : Rule, infix : String, rightRule : Rule) : Rule;
+	createLocatingRule(leftRule : Rule, infix : String, rightRule : Rule, locator : Locator) : Rule;
+	lex(input : String) : CompileResult<Node>;
+	generate(node : Node) : CompileResult<String>;
 }

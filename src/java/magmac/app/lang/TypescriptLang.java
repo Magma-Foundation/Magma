@@ -49,7 +49,17 @@ public final class TypescriptLang {
                 TypescriptLang.createConstructorRule()
         ));
 
-        return new TypeRule("method", new SuffixRule(new PrefixRule("\n\t", new NodeRule("header", header)), " {\n\t}"));
+        PrefixRule header1 = new PrefixRule("\n\t", new NodeRule("header", header));
+        DivideRule children = CommonLang.Statements("children", TypescriptLang.createFunctionSegmentRule());
+        SuffixRule childRule = new SuffixRule(LocatingRule.First(header1, " {", children), "}");
+        return new TypeRule("method", new OrRule(Lists.of(
+                childRule,
+                new SuffixRule(header1, ";")
+        )));
+    }
+
+    private static Rule createFunctionSegmentRule() {
+        return JavaLang.createFunctionSegmentRule();
     }
 
     private static TypeRule createConstructorRule() {

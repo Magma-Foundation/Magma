@@ -11,10 +11,7 @@ import { MapRoots } from "../../../../magmac/app/stage/MapRoots";
 import { Roots } from "../../../../magmac/app/stage/Roots";
 export class RuleLexer {
 	temp : ?;
-	RuleLexer(rootRule : Rule) : public {
-	}
-	foldEntry(tuple : Tuple2<Location, String>) : CompileResult<Tuple2<Location, Node>> {
-	}
-	apply(initial : Map<Location, String>) : CompileResult<Roots> {
-	}
+	RuleLexer(rootRule : Rule) : public;
+	foldEntry(tuple : Tuple2<Location, String>) : CompileResult<Tuple2<Location, Node>>;
+	apply(initial : Map<Location, String>) : CompileResult<Roots>;
 }

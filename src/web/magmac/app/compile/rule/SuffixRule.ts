@@ -2,8 +2,6 @@ import { CompileResult } from "../../../../magmac/app/compile/error/CompileResul
 import { CompileErrors } from "../../../../magmac/app/compile/error/error/CompileErrors";
 import { Node } from "../../../../magmac/app/compile/node/Node";
 export class SuffixRule {
-	lex(input : String) : CompileResult<Node> {
-	}
-	generate(node : Node) : CompileResult<String> {
-	}
+	lex(input : String) : CompileResult<Node>;
+	generate(node : Node) : CompileResult<String>;
 }

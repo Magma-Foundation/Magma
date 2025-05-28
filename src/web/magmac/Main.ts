@@ -9,8 +9,6 @@ import { PathSources } from "../magmac/app/io/sources/PathSources";
 import { Sources } from "../magmac/app/io/sources/Sources";
 import { Paths } from "../java/nio/file/Paths";
 export class Main {
-	main() : void {
-	}
-	handleError(error : Error) : void {
-	}
+	main() : void;
+	handleError(error : Error) : void;
 }

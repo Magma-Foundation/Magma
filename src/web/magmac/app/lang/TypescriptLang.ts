@@ -11,20 +11,13 @@ import { SuffixRule } from "../../../magmac/app/compile/rule/SuffixRule";
 import { TypeRule } from "../../../magmac/app/compile/rule/TypeRule";
 import { DelimitedFolder } from "../../../magmac/app/compile/rule/fold/DelimitedFolder";
 export class TypescriptLang {
-	createRule() : Rule {
-	}
-	createImportRule() : TypeRule {
-	}
-	createClassRule(type : String) : Rule {
-	}
-	createStructureMemberRule() : Rule {
-	}
-	createMethodRule() : TypeRule {
-	}
-	createConstructorRule() : TypeRule {
-	}
-	createDefinitionRule() : Rule {
-	}
-	createTypeRule() : Rule {
-	}
+	createRule() : Rule;
+	createImportRule() : TypeRule;
+	createClassRule(type : String) : Rule;
+	createStructureMemberRule() : Rule;
+	createMethodRule() : TypeRule;
+	createFunctionSegmentRule() : Rule;
+	createConstructorRule() : TypeRule;
+	createDefinitionRule() : Rule;
+	createTypeRule() : Rule;
 }

@@ -1,4 +1,3 @@
 export class StringContext {
-	display() : String {
-	}
+	display() : String;
 }
