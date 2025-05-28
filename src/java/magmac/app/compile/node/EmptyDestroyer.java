@@ -26,4 +26,8 @@ public class EmptyDestroyer {
     public SingleDestroyer<String> string(String key) {
         return new SingleDestroyer<>(this.node.removeString(key));
     }
+
+    public <T> SingleDestroyer<T> node(String key, Function<Node, CompileResult<T>> deserializer) {
+        return new SingleDestroyer<>(this.node.removeNode(key).flatMapValue((Tuple2<Node, Node> tuple) -> deserializer.apply(tuple.right()).mapValue((T deserialized) -> new Tuple2<>(tuple.left(), deserialized))));
+    }
 }

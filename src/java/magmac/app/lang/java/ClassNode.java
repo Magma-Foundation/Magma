@@ -8,13 +8,11 @@ import magmac.app.compile.node.EmptyDestroyer;
 import magmac.app.compile.node.Node;
 import magmac.app.lang.java.root.JavaRootSegment;
 
-public record ClassNode(String name, List<ClassMember> members) implements JavaRootSegment {
+record ClassNode(String name, List<ClassMember> members) implements JavaRootSegment {
     public static Option<CompileResult<JavaRootSegment>> deserialize(Node node) {
-        return node.deserializeWithType("class").map((EmptyDestroyer deserializer) -> {
-            return deserializer
-                    .string("name")
-                    .nodeList("children", (Node node1) -> ClassMembers.deserialize(node1))
-                    .complete((Tuple2<String, List<ClassMember>> tuple) -> new ClassNode(tuple.left(), tuple.right()));
-        });
+        return node.deserializeWithType("class").map((EmptyDestroyer deserializer) -> deserializer
+                .string("name")
+                .nodeList("children", (Node node1) -> ClassMembers.deserialize(node1))
+                .complete((Tuple2<String, List<ClassMember>> tuple) -> new ClassNode(tuple.left(), tuple.right())));
     }
 }

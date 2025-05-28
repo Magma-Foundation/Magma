@@ -54,4 +54,6 @@ public interface Node {
     CompileResult<Tuple2<Node, String>> removeString(String key);
 
     EmptyDestroyer deserialize();
+
+    CompileResult<Tuple2<Node, Node>> removeNode(String key);
 }

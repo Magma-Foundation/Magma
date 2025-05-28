@@ -186,7 +186,7 @@ public final class MapNode implements Node {
     public CompileResult<Tuple2<Node, NodeList>> removeNodeList(String key) {
         return this.nodeLists.removeByKey(key)
                 .map((Tuple2<Map<String, NodeList>, NodeList> tuple) -> CompileResults.Ok(new Tuple2<>(this.withNodeLists(tuple.left()), tuple.right())))
-                .orElseGet(() -> CompileResults.NodeErr("Key '" + key + "' not present", this));
+                .orElseGet(() -> this.createNotPresent(key));
     }
 
     private Node withNodeLists(Map<String, NodeList> nodeLists) {
@@ -211,12 +211,27 @@ public final class MapNode implements Node {
     public CompileResult<Tuple2<Node, String>> removeString(String key) {
         return this.strings.removeByKey(key)
                 .map((Tuple2<Map<String, String>, String> tuple) -> CompileResults.Ok(new Tuple2<>(this.withStrings(tuple.left()), tuple.right())))
-                .orElseGet(() -> CompileResults.NodeErr("Key '" + key + "' not present", this));
+                .orElseGet(() -> this.createNotPresent(key));
     }
 
     @Override
     public EmptyDestroyer deserialize() {
         return new EmptyDestroyer(this);
+    }
+
+    @Override
+    public CompileResult<Tuple2<Node, Node>> removeNode(String key) {
+        return this.nodes.removeByKey(key)
+                .map((Tuple2<Map<String, Node>, Node> tuple) -> CompileResults.Ok(new Tuple2<>(this.withNodes(tuple.left()), tuple.right())))
+                .orElseGet(() -> this.createNotPresent(key));
+    }
+
+    private <T> CompileResult<Tuple2<Node, T>> createNotPresent(String key) {
+        return CompileResults.NodeErr("Key '" + key + "' not present", this);
+    }
+
+    private Node withNodes(Map<String, Node> nodes) {
+        return new MapNode(this.maybeType, this.strings, nodes, this.nodeLists);
     }
 
     private Node withStrings(Map<String, String> strings) {
