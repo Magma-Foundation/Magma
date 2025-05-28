@@ -1,4 +1,4 @@
-package magmac.app.lang.java;
+package magmac.app.lang.java.root;
 
 public enum NamespacedType {
     Package("package"),

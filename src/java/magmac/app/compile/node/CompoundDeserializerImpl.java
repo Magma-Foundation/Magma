@@ -37,7 +37,7 @@ public class CompoundDeserializerImpl<T> implements CompoundDeserializer<T> {
     }
 
     @Override
-    public <R> CompoundDeserializer<Tuple2<T, R>> node(String key, Function<Node, CompileResult<R>> deserializer) {
+    public <R> CompoundDeserializer<Tuple2<T, R>> withNode(String key, Function<Node, CompileResult<R>> deserializer) {
         return new CompoundDeserializerImpl<Tuple2<T, R>>(this.result.flatMapValue((Tuple2<Node, T> inner) -> inner.left().removeNode(key).flatMapValue((Tuple2<Node, Node> removed) -> {
             Node right = removed.right();
             return deserializer.apply(right).flatMapValue((R newRight) -> CompileResults.Ok(new Tuple2<>(removed.left(), new Tuple2<>(inner.right(), newRight))));

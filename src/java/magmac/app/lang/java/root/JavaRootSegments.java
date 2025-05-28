@@ -1,10 +1,11 @@
-package magmac.app.lang.java;
+package magmac.app.lang.java.root;
 
 import magmac.api.collect.list.Lists;
 import magmac.app.compile.error.CompileResult;
 import magmac.app.compile.node.MapNode;
 import magmac.app.compile.node.Node;
-import magmac.app.lang.java.root.JavaRootSegment;
+import magmac.app.lang.java.Deserializers;
+import magmac.app.lang.java.structure.ClassNode;
 
 final class JavaRootSegments {
     public static CompileResult<JavaRootSegment> deserialize(Node node) {

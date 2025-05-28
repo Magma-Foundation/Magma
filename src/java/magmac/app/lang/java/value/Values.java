@@ -6,9 +6,6 @@ import magmac.app.compile.error.CompileResult;
 import magmac.app.compile.error.CompileResults;
 import magmac.app.compile.node.Node;
 import magmac.app.lang.java.Deserializers;
-import magmac.app.lang.java.Invokable;
-import magmac.app.lang.java.StringNode;
-import magmac.app.lang.java.Symbol;
 
 public class Values {
     public static CompileResult<Value> deserializeError(Node node) {

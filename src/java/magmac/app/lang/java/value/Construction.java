@@ -1,9 +1,9 @@
-package magmac.app.lang.java;
+package magmac.app.lang.java.value;
 
 import magmac.api.Option;
 import magmac.app.compile.error.CompileResult;
 import magmac.app.compile.node.Node;
-import magmac.app.lang.java.value.Caller;
+import magmac.app.lang.java.Type;
 
 public record Construction(Type type) implements Caller {
     public static Option<CompileResult<Caller>> deserialize(Node node) {

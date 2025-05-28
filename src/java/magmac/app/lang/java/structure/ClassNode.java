@@ -1,4 +1,4 @@
-package magmac.app.lang.java;
+package magmac.app.lang.java.structure;
 
 import magmac.api.Option;
 import magmac.api.Tuple2;
@@ -8,7 +8,7 @@ import magmac.app.compile.node.InitialDeserializer;
 import magmac.app.compile.node.Node;
 import magmac.app.lang.java.root.JavaRootSegment;
 
-record ClassNode(String name, List<ClassMember> members) implements JavaRootSegment {
+public record ClassNode(String name, List<ClassMember> members) implements JavaRootSegment {
     public static Option<CompileResult<JavaRootSegment>> deserialize(Node node) {
         return node.deserializeWithType("class").map((InitialDeserializer deserializer) -> deserializer
                 .withString("name")

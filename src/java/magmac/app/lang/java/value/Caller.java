@@ -3,7 +3,6 @@ package magmac.app.lang.java.value;
 import magmac.api.collect.list.Lists;
 import magmac.app.compile.error.CompileResult;
 import magmac.app.compile.node.Node;
-import magmac.app.lang.java.Construction;
 import magmac.app.lang.java.Deserializers;
 
 public interface Caller {

@@ -8,13 +8,12 @@ import magmac.app.compile.rule.NodeRule;
 import magmac.app.compile.rule.Rule;
 import magmac.app.compile.rule.TypeRule;
 import magmac.app.lang.LazyRule;
-import magmac.app.lang.java.Symbol;
 
 public record DataAccess(String property, Value caller) implements Value {
     public static Option<CompileResult<Value>> deserialize(Node node) {
         return node.deserializeWithType("data-access").map(deserializer -> {
             return deserializer.withString("property")
-                    .node("instance", Values::deserializeError)
+                    .withNode("instance", Values::deserializeError)
                     .complete(tuple -> new DataAccess(tuple.left(), tuple.right()));
         });
     }

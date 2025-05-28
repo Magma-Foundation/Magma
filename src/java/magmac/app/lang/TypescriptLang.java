@@ -12,7 +12,8 @@ import magmac.app.compile.rule.StripRule;
 import magmac.app.compile.rule.SuffixRule;
 import magmac.app.compile.rule.TypeRule;
 import magmac.app.compile.rule.fold.DelimitedFolder;
-import magmac.app.lang.java.Symbol;
+import magmac.app.lang.java.function.Parameters;
+import magmac.app.lang.java.value.Symbol;
 
 public final class TypescriptLang {
     public static Rule createRule() {
@@ -64,7 +65,7 @@ public final class TypescriptLang {
     }
 
     private static Rule createConstructorRule(Rule definition) {
-        NodeListRule parametersRule = CommonLang.createParametersRule(definition);
+        NodeListRule parametersRule = Parameters.createParametersRule(definition);
         return new TypeRule("constructor", new PrefixRule("constructor(", new SuffixRule(parametersRule, ")")));
     }
 
@@ -72,7 +73,7 @@ public final class TypescriptLang {
         LazyRule definition = new MutableLazyRule();
         Rule modifiers = CommonLang.createModifiersRule();
 
-        Rule parameters = CommonLang.createParametersRule(definition);
+        Rule parameters = Parameters.createParametersRule(definition);
         Rule name = new StringRule("name");
         Rule leftRule = new OptionNodeListRule("parameters",
                 new SuffixRule(LocatingRule.First(name, "(", parameters), ")"),

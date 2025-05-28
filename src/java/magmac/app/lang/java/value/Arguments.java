@@ -7,7 +7,6 @@ import magmac.app.compile.rule.NodeListRule;
 import magmac.app.compile.rule.OrRule;
 import magmac.app.compile.rule.Rule;
 import magmac.app.lang.CommonLang;
-import magmac.app.lang.java.Argument;
 import magmac.app.lang.java.Deserializers;
 import magmac.app.lang.java.Whitespace;
 

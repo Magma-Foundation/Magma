@@ -18,6 +18,7 @@ import magmac.app.compile.rule.divide.Divider;
 import magmac.app.compile.rule.divide.FoldingDivider;
 import magmac.app.compile.rule.fold.DelimitedFolder;
 import magmac.app.compile.rule.split.DividingSplitter;
+import magmac.app.lang.java.function.Parameters;
 import magmac.app.lang.java.value.Arguments;
 
 public final class JavaLang {
@@ -83,7 +84,7 @@ public final class JavaLang {
                 new TypeRule("constructor", new StripRule(FilterRule.Symbol(new StringRule("name"))))
         )));
 
-        Rule parameters = CommonLang.createParametersRule(JavaLang.createDefinitionRule());
+        Rule parameters = Parameters.createParametersRule(JavaLang.createDefinitionRule());
         Rule content = CommonLang.Statements("children", childRule);
         Rule rightRule = new StripRule(new PrefixRule("{", new SuffixRule(new StripRule("", content, "after-children"), "}")));
         Rule withParams = new OptionNodeListRule("parameters",
@@ -113,6 +114,7 @@ public final class JavaLang {
         Divider divider = new FoldingDivider(new TypeSeparatorFolder());
         Splitter splitter = DividingSplitter.Last(divider, " ");
         Rule leftRule = new LocatingRule(leftRule1, splitter, rightRule);
-        return new StripRule(LocatingRule.Last(leftRule, " ", new StripRule(FilterRule.Symbol(new StringRule("name")))));
+        Rule stripRule = new StripRule(LocatingRule.Last(leftRule, " ", new StripRule(FilterRule.Symbol(new StringRule("name")))));
+        return new TypeRule("definition", stripRule);
     }
 }

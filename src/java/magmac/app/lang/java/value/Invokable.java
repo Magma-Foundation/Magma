@@ -1,4 +1,4 @@
-package magmac.app.lang.java;
+package magmac.app.lang.java.value;
 
 import magmac.api.Option;
 import magmac.api.collect.list.List;
@@ -18,9 +18,6 @@ import magmac.app.compile.rule.divide.FoldingDivider;
 import magmac.app.compile.rule.split.DividingSplitter;
 import magmac.app.lang.CommonLang;
 import magmac.app.lang.InvocationFolder;
-import magmac.app.lang.java.value.Arguments;
-import magmac.app.lang.java.value.Caller;
-import magmac.app.lang.java.value.Value;
 
 public record Invokable(Caller left, List<Argument> right) implements Value {
     public static Option<CompileResult<Value>> deserialize(Node node) {

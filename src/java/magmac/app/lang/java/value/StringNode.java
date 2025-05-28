@@ -1,9 +1,8 @@
-package magmac.app.lang.java;
+package magmac.app.lang.java.value;
 
 import magmac.api.Option;
 import magmac.app.compile.error.CompileResult;
 import magmac.app.compile.node.Node;
-import magmac.app.lang.java.value.Value;
 
 public record StringNode(String value) implements Value {
     public static Option<CompileResult<Value>> deserialize(Node node) {

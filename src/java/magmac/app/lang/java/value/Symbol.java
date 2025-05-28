@@ -1,4 +1,4 @@
-package magmac.app.lang.java;
+package magmac.app.lang.java.value;
 
 import magmac.api.Option;
 import magmac.app.compile.error.CompileResult;
@@ -8,7 +8,7 @@ import magmac.app.compile.rule.Rule;
 import magmac.app.compile.rule.StringRule;
 import magmac.app.compile.rule.StripRule;
 import magmac.app.compile.rule.TypeRule;
-import magmac.app.lang.java.value.Value;
+import magmac.app.lang.java.Type;
 
 public record Symbol(String value) implements Type, Value {
     public static Option<CompileResult<Symbol>> deserialize(Node node) {

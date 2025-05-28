@@ -18,9 +18,11 @@ import magmac.app.compile.rule.divide.FoldingDivider;
 import magmac.app.compile.rule.fold.DelimitedFolder;
 import magmac.app.compile.rule.fold.StatementFolder;
 import magmac.app.compile.rule.split.DividingSplitter;
-import magmac.app.lang.java.Invokable;
-import magmac.app.lang.java.Symbol;
+import magmac.app.lang.java.value.Symbol;
+import magmac.app.lang.java.define.Assignment;
+import magmac.app.lang.java.function.FunctionSegment;
 import magmac.app.lang.java.value.DataAccess;
+import magmac.app.lang.java.value.Invokable;
 
 public final class CommonLang {
     public static Rule createWhitespaceRule() {
@@ -31,25 +33,8 @@ public final class CommonLang {
         return new TypeRule("template", new StripRule(new SuffixRule(LocatingRule.First(new StripRule(new StringRule("base")), "<", new StringRule("arguments")), ">")));
     }
 
-    static NodeListRule createParametersRule(Rule definition) {
-        return new NodeListRule("parameters", new ValueFolder(), new OrRule(Lists.of(
-                CommonLang.createWhitespaceRule(),
-                definition
-        )));
-    }
-
     public static NodeListRule Statements(String key, Rule childRule) {
         return new NodeListRule(key, new StatementFolder(), childRule);
-    }
-
-    private static Rule createAssignmentRule(Rule definition, Rule value) {
-        Rule before = new OrRule(Lists.of(
-                new NodeRule("definition", definition),
-                new NodeRule("destination", value)
-        ));
-
-        Rule source = new NodeRule("source", value);
-        return new TypeRule("assignment", LocatingRule.First(before, "=", source));
     }
 
     static LazyRule initValueRule(Rule segment, LazyRule value, String lambdaInfix, Rule definition) {
@@ -116,7 +101,7 @@ public final class CommonLang {
     }
 
     static Rule initFunctionSegmentRule(LazyRule functionSegmentRule, Rule value, Rule definition) {
-        Rule functionSegmentValueRule = CommonLang.createFunctionSegmentValueRule(value, definition);
+        Rule functionSegmentValueRule = FunctionSegment.createFunctionSegmentValueRule(value, definition);
 
         Rule rule = new OrRule(Lists.of(
                 CommonLang.createWhitespaceRule(),
@@ -154,24 +139,8 @@ public final class CommonLang {
         return new StripRule(new PrefixRule(prefix, new StripRule(new PrefixRule("(", new SuffixRule(new NodeRule("condition", value), ")")))));
     }
 
-    private static Rule createFunctionSegmentValueRule(Rule value, Rule definition) {
-        return new OrRule(Lists.of(
-                Invokable.createInvokableRule(value),
-                CommonLang.createAssignmentRule(definition, value),
-                CommonLang.createReturnRule(value),
-                CommonLang.createPostRule("post-increment", "++", value),
-                CommonLang.createPostRule("post-decrement", "--", value),
-                new TypeRule("break", new ExactRule("break")),
-                new TypeRule("continue", new ExactRule("continue"))
-        ));
-    }
-
-    private static Rule createPostRule(String type, String suffix, Rule value) {
+    public static Rule createPostRule(String type, String suffix, Rule value) {
         return new TypeRule(type, new StripRule(new SuffixRule(new NodeRule("child", value), suffix)));
-    }
-
-    private static Rule createReturnRule(Rule value) {
-        return new TypeRule("return", new StripRule(new PrefixRule("return ", new NodeRule("value", value))));
     }
 
     public static Rule createTypeRule() {
@@ -194,10 +163,10 @@ public final class CommonLang {
         return new TypeRule("variadic", new StripRule(new SuffixRule(child, "...")));
     }
 
-    static Rule createStructureStatementRule(Rule definition1, LazyRule value) {
+    static Rule createStructureStatementRule(Rule definitionRule, LazyRule valueRule) {
         Rule definition = new NodeRule("value", new OrRule(Lists.of(
-                definition1,
-                CommonLang.createAssignmentRule(definition1, value))
+                definitionRule,
+                Assignment.createAssignmentRule(definitionRule, valueRule))
         ));
 
         return new TypeRule("statement", new StripRule(new SuffixRule(definition, ";")));
