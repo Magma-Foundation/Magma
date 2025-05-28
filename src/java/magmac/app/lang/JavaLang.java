@@ -94,7 +94,13 @@ public final class JavaLang {
         )));
 
         Rule parameters = CommonLang.createParametersRule(JavaLang.createDefinitionRule());
-        Rule withParams = LocatingRule.First(parameters, ")", new StringRule("with-braces"));
+        Rule content = new StringRule("content");
+        Rule rightRule = new StripRule(new PrefixRule("{", new SuffixRule(content, "}")));
+        Rule withParams = new OrRule(Lists.of(
+                new SuffixRule(parameters, ");"),
+                LocatingRule.First(parameters, ")", rightRule)
+        ));
+
         return new TypeRule("method", LocatingRule.First(header, "(", withParams));
     }
 
