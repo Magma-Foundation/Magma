@@ -61,12 +61,12 @@ public final class JavaLang {
     private static OrRule createStructureMemberRule() {
         return new OrRule(Lists.of(
                 CommonLang.createWhitespaceRule(),
-                JavaLang.createStatementRule(),
+                JavaLang.createStructureStatementRule(),
                 JavaLang.createMethodRule()
         ));
     }
 
-    private static Rule createStatementRule() {
+    private static Rule createStructureStatementRule() {
         Rule definition = new OrRule(Lists.of(
                 new NodeRule("value", new TypeRule("definition", JavaLang.createDefinitionRule())),
                 JavaLang.createAssignmentRule())
@@ -84,14 +84,37 @@ public final class JavaLang {
     private static Rule createValueRule() {
         LazyRule value = new LazyRule();
         value.set(new OrRule(Lists.of(
-                new StripRule(new PrefixRule("\"", new SuffixRule(new StringRule("value"), "\""))),
+                JavaLang.createCharRule(),
+                JavaLang.createStringRule(),
                 JavaLang.createInvocationRule(value),
-                new StripRule(FilterRule.Number(new StringRule("value")))
+                JavaLang.createNumberRule(),
+                JavaLang.createAccessRule(value),
+                JavaLang.createSymbolValueRule()
         )));
         return value;
     }
 
-    private static StripRule createInvocationRule(Rule value) {
+    private static StripRule createSymbolValueRule() {
+        return new StripRule(FilterRule.Symbol(new StringRule("value")));
+    }
+
+    private static Rule createAccessRule(LazyRule value) {
+        return LocatingRule.Last(new NodeRule("instance", value), ".", new StripRule(new StringRule("property")));
+    }
+
+    private static StripRule createNumberRule() {
+        return new StripRule(FilterRule.Number(new StringRule("value")));
+    }
+
+    private static TypeRule createStringRule() {
+        return new TypeRule("string", new StripRule(new PrefixRule("\"", new SuffixRule(new StringRule("value"), "\""))));
+    }
+
+    private static TypeRule createCharRule() {
+        return new TypeRule("char", new StripRule(new PrefixRule("'", new SuffixRule(new StringRule("value"), "'"))));
+    }
+
+    private static Rule createInvocationRule(Rule value) {
         Rule caller = new OrRule(Lists.of(
                 new StripRule(new PrefixRule("new ", new NodeRule("type", JavaLang.createTypeRule()))),
                 new NodeRule("caller", value)
@@ -102,7 +125,7 @@ public final class JavaLang {
                 value
         )));
 
-        return new StripRule(new SuffixRule(LocatingRule.First(caller, "(", arguments), ")"));
+        return new TypeRule("invocation", new StripRule(new SuffixRule(LocatingRule.First(caller, "(", arguments), ")")));
     }
 
     private static Rule createMethodRule() {
@@ -124,12 +147,14 @@ public final class JavaLang {
 
     private static OrRule createFunctionSegmentRule() {
         return new OrRule(Lists.of(
+                CommonLang.createWhitespaceRule(),
                 new StripRule(new SuffixRule(JavaLang.createFunctionSegmentValueRule(), ";"))
         ));
     }
 
     private static Rule createFunctionSegmentValueRule() {
         return new OrRule(Lists.of(
+                JavaLang.createAssignmentRule(),
                 new TypeRule("return", new StripRule(new PrefixRule("return ", new NodeRule("value", JavaLang.createValueRule()))))
         ));
     }
