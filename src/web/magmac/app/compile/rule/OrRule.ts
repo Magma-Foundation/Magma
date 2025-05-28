@@ -7,12 +7,12 @@ import { Node } from "../../../../magmac/app/compile/node/Node";
 import { List } from "../../../../magmac/api/collect/list/List";
 import { Function } from "../../../../java/util/function/Function";
 export class OrRule {
-	foldElement : OrState<T> {
+	foldElement(state : OrState<T>, rule : Rule, mapper : Function<Rule, CompileResult<T>>) : OrState<T> {
 	}
-	foldAll : CompileResult<T> {
+	foldAll(mapper : Function<Rule, CompileResult<T>>, context : Context) : CompileResult<T> {
 	}
-	lex : CompileResult<Node> {
+	lex(input : String) : CompileResult<Node> {
 	}
-	generate : CompileResult<String> {
+	generate(node : Node) : CompileResult<String> {
 	}
 }

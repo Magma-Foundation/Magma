@@ -6,10 +6,10 @@ import { SingleHead } from "../../../magmac/api/head/SingleHead";
 export class Iters {
 	fromArray : Iter<T> {
 	}
-	fromOption : Iter<T> {
+	fromOption(option : Option<T>) : Iter<T> {
 	}
 	fromValues : Iter<T> {
 	}
-	empty : Iter<T> {
+	empty() : Iter<T> {
 	}
 }

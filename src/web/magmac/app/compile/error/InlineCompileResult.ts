@@ -6,22 +6,22 @@ import { Function } from "../../../../java/util/function/Function";
 import { Supplier } from "../../../../java/util/function/Supplier";
 export class InlineCompileResult {
 	temp : ?;
-	InlineCompileResult : private {
+	InlineCompileResult(result : Result<T, CompileError>) : private {
 	}
-	fromResult : CompileResult<T> {
+	fromResult(result : Result<T, CompileError>) : CompileResult<T> {
 	}
-	mapValue : CompileResult<R> {
+	mapValue(mapper : Function<T, R>) : CompileResult<R> {
 	}
-	match : R {
+	match(whenOk : Function<T, R>, whenErr : Function<CompileError, R>) : R {
 	}
-	mapErr : CompileResult<T> {
+	mapErr(mapper : Function<CompileError, CompileError>) : CompileResult<T> {
 	}
-	flatMapValue : CompileResult<R> {
+	flatMapValue(mapper : Function<T, CompileResult<R>>) : CompileResult<R> {
 	}
-	and : CompileResult<Tuple2<T, R>> {
+	and(supplier : Supplier<CompileResult<R>>) : CompileResult<Tuple2<T, R>> {
 	}
-	result : Result<T, CompileError> {
+	result() : Result<T, CompileError> {
 	}
-	merge : CompileResult<T> {
+	merge(other : Supplier<CompileResult<T>>, merger : BiFunction<T, T, T>) : CompileResult<T> {
 	}
 }

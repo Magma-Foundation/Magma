@@ -2,10 +2,10 @@ import { None } from "../../../../magmac/api/None";
 import { Option } from "../../../../magmac/api/Option";
 import { Some } from "../../../../magmac/api/Some";
 export class Joiner {
-	Joiner : public {
+	Joiner() : public {
 	}
-	createInitial : Option<String> {
+	createInitial() : Option<String> {
 	}
-	fold : Option<String> {
+	fold(current : Option<String>, element : String) : Option<String> {
 	}
 }

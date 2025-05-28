@@ -13,14 +13,14 @@ import { PassResult } from "../../../magmac/app/stage/PassResult";
 import { Passer } from "../../../magmac/app/stage/Passer";
 import { ParseState } from "../../../magmac/app/stage/parse/ParseState";
 export class PlantUMLAfterPasser {
-	createInherits : Option<Node> {
+	createInherits(child : Node, key : String) : Option<Node> {
 	}
-	findValue : String {
+	findValue(type : Node) : String {
 	}
-	replaceRootChild : Iter<Node> {
+	replaceRootChild(child : Node) : Iter<Node> {
 	}
-	replaceRootChildren : NodeList {
+	replaceRootChildren(node : Node) : NodeList {
 	}
-	pass : PassResult {
+	pass(state : ParseState, node : Node) : PassResult {
 	}
 }

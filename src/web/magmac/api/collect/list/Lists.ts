@@ -3,8 +3,8 @@ import { Arrays } from "../../../../java/util/Arrays";
 export class Lists {
 	of : List<T> {
 	}
-	empty : List<T> {
+	empty() : List<T> {
 	}
-	repeat : List<T> {
+	repeat(element : T, size : int) : List<T> {
 	}
 }

@@ -2,14 +2,14 @@ import { Tuple2 } from "../../../magmac/api/Tuple2";
 import { Function } from "../../../java/util/function/Function";
 import { Supplier } from "../../../java/util/function/Supplier";
 export class Err {
-	mapValue : Result<R, X> {
+	mapValue(mapper : Function<T, R>) : Result<R, X> {
 	}
-	and : Result<Tuple2<T, R>, X> {
+	and(supplier : Supplier<Result<R, X>>) : Result<Tuple2<T, R>, X> {
 	}
-	match : R {
+	match(whenOk : Function<T, R>, whenErr : Function<X, R>) : R {
 	}
-	flatMapValue : Result<R, X> {
+	flatMapValue(mapper : Function<T, Result<R, X>>) : Result<R, X> {
 	}
-	mapErr : Result<T, R> {
+	mapErr(mapper : Function<X, R>) : Result<T, R> {
 	}
 }

@@ -7,14 +7,14 @@ import { SymbolFilter } from "../../../../magmac/app/compile/rule/filter/SymbolF
 export class FilterRule {
 	temp : ?;
 	temp : ?;
-	FilterRule : private {
+	FilterRule(filter : Filter, childRule : Rule) : private {
 	}
-	Symbol : Rule {
+	Symbol(childRule : Rule) : Rule {
 	}
-	Number : Rule {
+	Number(childRule : Rule) : Rule {
 	}
-	lex : CompileResult<Node> {
+	lex(input : String) : CompileResult<Node> {
 	}
-	generate : CompileResult<String> {
+	generate(node : Node) : CompileResult<String> {
 	}
 }

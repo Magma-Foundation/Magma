@@ -18,6 +18,6 @@ import { Parser } from "../../magmac/app/stage/parse/Parser";
 import { TreeParser } from "../../magmac/app/stage/parse/TreeParser";
 import { Path } from "../../java/nio/file/Path";
 export class ApplicationBuilder {
-	run : Option<Error> {
+	run(platform : TargetPlatform, sources : Sources) : Option<Error> {
 	}
 }

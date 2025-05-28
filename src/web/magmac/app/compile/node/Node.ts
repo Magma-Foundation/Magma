@@ -4,23 +4,23 @@ import { Option } from "../../../../magmac/api/Option";
 export interface Node {
 	temp : ?;
 	temp : ?;
-	format : String {
+	format(depth : int) : String {
 	}
 	temp : ?;
 	temp : ?;
-	findString : Option<String> {
+	findString(key : String) : Option<String> {
 	}
-	merge : Node {
+	merge(other : Node) : Node {
 	}
-	is : boolean {
+	is(type : String) : boolean {
 	}
-	retype : Node {
-	}
-	temp : ?;
-	findNodeList : Option<NodeList> {
+	retype(type : String) : Node {
 	}
 	temp : ?;
-	findNode : Option<Node> {
+	findNodeList(key : String) : Option<NodeList> {
+	}
+	temp : ?;
+	findNode(key : String) : Option<Node> {
 	}
 	temp : ?;
 }

@@ -9,26 +9,26 @@ import { ListCollector } from "../../../../magmac/api/iter/collect/ListCollector
 import { ArrayList } from "../../../../java/util/ArrayList";
 import { BiFunction } from "../../../../java/util/function/BiFunction";
 export class JVMList {
-	JVMList : public {
+	JVMList() : public {
 	}
-	add : List<T> {
+	add(element : T) : List<T> {
 	}
-	iter : Iter<T> {
+	iter() : Iter<T> {
 	}
-	addAll : List<T> {
+	addAll(others : List<T>) : List<T> {
 	}
-	removeAll : List<T> {
+	removeAll(others : List<T>) : List<T> {
 	}
-	get : T {
+	get(index : int) : T {
 	}
-	sort : List<T> {
+	sort(sorter : BiFunction<T, T, Integer>) : List<T> {
 	}
-	getLast : T {
+	getLast() : T {
 	}
-	contains : boolean {
+	contains(element : T) : boolean {
 	}
-	size : int {
+	size() : int {
 	}
-	popLast : Option<Tuple2<List<T>, T>> {
+	popLast() : Option<Tuple2<List<T>, T>> {
 	}
 }

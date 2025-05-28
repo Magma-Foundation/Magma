@@ -1,6 +1,6 @@
 export class SymbolFilter {
-	test : boolean {
+	test(input : String) : boolean {
 	}
-	createMessage : String {
+	createMessage() : String {
 	}
 }

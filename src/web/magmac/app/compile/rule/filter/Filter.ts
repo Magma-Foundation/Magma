@@ -1,5 +1,5 @@
 export interface Filter {
-	test : boolean {
+	test(input : String) : boolean {
 	}
 	temp : ?;
 }

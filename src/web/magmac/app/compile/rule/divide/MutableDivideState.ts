@@ -11,28 +11,28 @@ export class MutableDivideState {
 	temp : ?;
 	temp : ?;
 	temp : ?;
-	MutableDivideState : private {
+	MutableDivideState(segments : List<String>, buffer : StringBuilder, input : String) : private {
 	}
-	MutableDivideState : public {
+	MutableDivideState(input : String) : public {
 	}
-	append : DivideState {
+	append(c : char) : DivideState {
 	}
-	advance : DivideState {
+	advance() : DivideState {
 	}
-	iter : Iter<String> {
+	iter() : Iter<String> {
 	}
-	isLevel : boolean {
+	isLevel() : boolean {
 	}
-	enter : DivideState {
+	enter() : DivideState {
 	}
-	exit : DivideState {
+	exit() : DivideState {
 	}
-	isShallow : boolean {
+	isShallow() : boolean {
 	}
-	pop : Option<Tuple2<DivideState, Character>> {
+	pop() : Option<Tuple2<DivideState, Character>> {
 	}
-	popAndAppendToTuple : Option<Tuple2<DivideState, Character>> {
+	popAndAppendToTuple() : Option<Tuple2<DivideState, Character>> {
 	}
-	popAndAppendToOption : Option<DivideState> {
+	popAndAppendToOption() : Option<DivideState> {
 	}
 }

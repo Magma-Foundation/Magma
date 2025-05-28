@@ -17,16 +17,16 @@ export class TreeParser {
 	temp : ?;
 	temp : ?;
 	temp : ?;
-	TreeParser : public {
+	TreeParser(beforeChild : Passer, afterChild : Passer, afterAllChildren : AfterAll) : public {
 	}
-	parseNodeLists : Tuple2<ParseState, Node> {
+	parseNodeLists(state : ParseState, root : Node) : Tuple2<ParseState, Node> {
 	}
-	parseNodeList : Tuple2<ParseState, Node> {
+	parseNodeList(current : Tuple2<ParseState, Node>, entry : Tuple2<String, NodeList>) : Tuple2<ParseState, Node> {
 	}
-	parse : Tuple2<Location, Node> {
+	parse(location : Location, root : Node) : Tuple2<Location, Node> {
 	}
-	parseTree : Tuple2<ParseState, Node> {
+	parseTree(state : ParseState, root : Node) : Tuple2<ParseState, Node> {
 	}
-	apply : CompileResult<Roots> {
+	apply(initial : Roots) : CompileResult<Roots> {
 	}
 }

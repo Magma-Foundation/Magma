@@ -10,12 +10,12 @@ import { StripRule } from "../../../magmac/app/compile/rule/StripRule";
 import { SuffixRule } from "../../../magmac/app/compile/rule/SuffixRule";
 import { TypeRule } from "../../../magmac/app/compile/rule/TypeRule";
 export class CommonLang {
-	createWhitespaceRule : Rule {
+	createWhitespaceRule() : Rule {
 	}
-	createSymbolTypeRule : Rule {
+	createSymbolTypeRule() : Rule {
 	}
-	createTemplateRule : Rule {
+	createTemplateRule() : Rule {
 	}
-	createParametersRule : DivideRule {
+	createParametersRule(definition : Rule) : DivideRule {
 	}
 }

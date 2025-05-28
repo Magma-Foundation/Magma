@@ -5,8 +5,8 @@ import { Node } from "../../../magmac/app/compile/node/Node";
 import { ParseState } from "../../../magmac/app/stage/parse/ParseState";
 import { Supplier } from "../../../java/util/function/Supplier";
 export class InlinePassResult {
-	empty : PassResult {
+	empty() : PassResult {
 	}
-	orElseGet : Tuple2<ParseState, Node> {
+	orElseGet(other : Supplier<Tuple2<ParseState, Node>>) : Tuple2<ParseState, Node> {
 	}
 }

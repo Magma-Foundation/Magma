@@ -16,12 +16,6 @@ import magmac.app.stage.Passer;
 import magmac.app.stage.parse.ParseState;
 
 public class TypeScriptAfterPasser implements Passer {
-    @Override
-    public PassResult pass(ParseState state, Node node) {
-        return TypeScriptAfterPasser.passImport(state, node)
-                .orElseGet(() -> InlinePassResult.empty());
-    }
-
     private static Option<PassResult> passImport(ParseState state, Node node) {
         if (!node.is("import")) {
             return new None<>();
@@ -43,5 +37,23 @@ public class TypeScriptAfterPasser implements Passer {
         });
 
         return new Some<>(new InlinePassResult(map));
+    }
+
+    @Override
+    public PassResult pass(ParseState state, Node node) {
+        return TypeScriptAfterPasser.passImport(state, node)
+                .or(() -> this.passMethod(state, node))
+                .orElseGet(() -> InlinePassResult.empty());
+    }
+
+    private Option<PassResult> passMethod(ParseState state, Node node) {
+        if (node.is("method")) {
+            Node header = node.findNode("header").orElse(new MapNode());
+            NodeList parameters = node.findNodeList("parameters").orElse(InlineNodeList.empty());
+            Node withParameters = header.withNodeList("parameters", parameters);
+            return new Some<>(new InlinePassResult(new Some<>(new Tuple2<>(state, node.withNode("header", withParameters)))));
+        }
+
+        return new None<>();
     }
 }

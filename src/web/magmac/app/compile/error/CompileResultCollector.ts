@@ -1,8 +1,8 @@
 import { Collector } from "../../../../magmac/api/iter/collect/Collector";
 import { Ok } from "../../../../magmac/api/result/Ok";
 export class CompileResultCollector {
-	createInitial : CompileResult<C> {
+	createInitial() : CompileResult<C> {
 	}
-	fold : CompileResult<C> {
+	fold(maybeCurrent : CompileResult<C>, maybeElement : CompileResult<T>) : CompileResult<C> {
 	}
 }

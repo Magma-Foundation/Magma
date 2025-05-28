@@ -6,9 +6,9 @@ export interface Map {
 	temp : ?;
 	temp : ?;
 	temp : ?;
-	containsKey : boolean {
+	containsKey(key : K) : boolean {
 	}
-	get : V {
+	get(key : K) : V {
 	}
 	temp : ?;
 	temp : ?;

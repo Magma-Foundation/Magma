@@ -6,8 +6,8 @@ export class FlatMapHead {
 	temp : ?;
 	temp : ?;
 	temp : ?;
-	FlatMapHead : public {
+	FlatMapHead(head : Head<T>, mapper : Function<T, Iter<R>>, initial : Iter<R>) : public {
 	}
-	next : Option<R> {
+	next() : Option<R> {
 	}
 }

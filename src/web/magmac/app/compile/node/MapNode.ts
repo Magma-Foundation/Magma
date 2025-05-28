@@ -14,52 +14,52 @@ export class MapNode {
 	temp : ?;
 	temp : ?;
 	temp : ?;
-	MapNode : public {
+	MapNode() : public {
 	}
-	MapNode : private {
+	MapNode(maybeType : Option<String>, strings : Map<String, String>, nodes : Map<String, Node>, nodeLists : Map<String, NodeList>) : private {
 	}
-	MapNode : public {
+	MapNode(type : String) : public {
 	}
-	fold : Node {
+	fold(node : Node, iter : Iter<Tuple2<String, T>>, mapper : Function<Node, BiFunction<String, T, Node>>) : Node {
 	}
-	iterNodes : Iter<Tuple2<String, Node>> {
+	iterNodes() : Iter<Tuple2<String, Node>> {
 	}
-	display : String {
+	display() : String {
 	}
-	format : String {
+	format(depth : int) : String {
 	}
-	toStream : Iter<String> {
+	toStream(depth : int, map : Map<String, T>, mapper : Function<T, String>) : Iter<String> {
 	}
-	formatNodeList : String {
+	formatNodeList(depth : int, nodeList : NodeList) : String {
 	}
-	formatEntry : String {
+	formatEntry(depth : int, key : String, value : String) : String {
 	}
-	createIndent : String {
+	createIndent(depth : int) : String {
 	}
-	withString : Node {
+	withString(key : String, value : String) : Node {
 	}
-	findString : Option<String> {
+	findString(key : String) : Option<String> {
 	}
-	strings : Map<String, String> {
+	strings() : Map<String, String> {
 	}
-	is : boolean {
+	is(type : String) : boolean {
 	}
-	retype : Node {
+	retype(type : String) : Node {
 	}
-	withNode : Node {
+	withNode(key : String, value : Node) : Node {
 	}
-	findNode : Option<Node> {
+	findNode(key : String) : Option<Node> {
 	}
-	merge : Node {
+	merge(other : Node) : Node {
 	}
-	iterStrings : Iter<Tuple2<String, String>> {
+	iterStrings() : Iter<Tuple2<String, String>> {
 	}
-	iterNodeLists : Iter<Tuple2<String, NodeList>> {
+	iterNodeLists() : Iter<Tuple2<String, NodeList>> {
 	}
-	withNodeList : Node {
+	withNodeList(key : String, values : NodeList) : Node {
 	}
-	toString : String {
+	toString() : String {
 	}
-	findNodeList : Option<NodeList> {
+	findNodeList(key : String) : Option<NodeList> {
 	}
 }

@@ -3,22 +3,22 @@ import { Function } from "../../java/util/function/Function";
 import { Predicate } from "../../java/util/function/Predicate";
 import { Supplier } from "../../java/util/function/Supplier";
 export class Some {
-	map : Option<R> {
+	map(mapper : Function<T, R>) : Option<R> {
 	}
-	isPresent : boolean {
+	isPresent() : boolean {
 	}
-	orElseGet : T {
+	orElseGet(other : Supplier<T>) : T {
 	}
-	isEmpty : boolean {
+	isEmpty() : boolean {
 	}
-	flatMap : Option<R> {
+	flatMap(mapper : Function<T, Option<R>>) : Option<R> {
 	}
-	orElse : T {
+	orElse(other : T) : T {
 	}
-	filter : Option<T> {
+	filter(predicate : Predicate<T>) : Option<T> {
 	}
-	or : Option<T> {
+	or(other : Supplier<Option<T>>) : Option<T> {
 	}
-	ifPresent : void {
+	ifPresent(consumer : Consumer<T>) : void {
 	}
 }
