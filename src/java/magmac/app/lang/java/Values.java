@@ -6,7 +6,7 @@ import magmac.app.compile.error.CompileResult;
 import magmac.app.compile.error.CompileResults;
 import magmac.app.compile.node.Node;
 
-public class Values {
+class Values {
     public static CompileResult<Value> deserializeError(Node node) {
         return Values.deserialize(node).orElseGet(() -> CompileResults.NodeErr("Cannot deserialize", node));
     }

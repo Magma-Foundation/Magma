@@ -5,7 +5,7 @@ import magmac.api.collect.list.List;
 import magmac.app.compile.error.CompileResult;
 import magmac.app.compile.node.Node;
 
-public record Invokable(Caller left, List<Value> right) implements Value {
+record Invokable(Caller left, List<Value> right) implements Value {
     public static Option<CompileResult<Value>> deserialize(Node node) {
         return node.deserializeWithType("invokable").map(deserializer -> {
             return deserializer.node("caller", Caller::deserialize)

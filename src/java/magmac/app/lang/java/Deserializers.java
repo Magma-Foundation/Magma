@@ -7,7 +7,7 @@ import magmac.app.compile.error.CompileResult;
 import magmac.app.compile.error.CompileResults;
 import magmac.app.compile.node.Node;
 
-public class Deserializers {
+class Deserializers {
     static <T> CompileResult<T> orError(Node node, List<Deserializer<T>> deserializers) {
         return Deserializers.or(node, deserializers)
                 .orElseGet(() -> CompileResults.NodeErr("Cannot deserialize", node));
