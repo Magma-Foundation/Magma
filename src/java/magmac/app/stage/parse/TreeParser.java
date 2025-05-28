@@ -14,6 +14,7 @@ import magmac.app.compile.node.NodeList;
 import magmac.app.io.Location;
 import magmac.app.stage.AfterAll;
 import magmac.app.stage.MapUnitSet;
+import magmac.app.stage.ParseUnit;
 import magmac.app.stage.Passer;
 import magmac.app.stage.UnitSet;
 
@@ -28,12 +29,12 @@ public class TreeParser implements Parser {
         this.afterAllChildren = afterAllChildren;
     }
 
-    private CompileResult<Tuple2<ParseState, Node>> parseNodeLists(ParseState state, Node root) {
-        Tuple2<ParseState, Node> parseStateNodeTuple2 = new Tuple2<>(state, root);
-        return root.iterNodeLists().fold(CompileResults.fromOk(parseStateNodeTuple2), (CompileResult<Tuple2<ParseState, Node>> current, Tuple2<String, NodeList> entry) -> current.flatMapValue((Tuple2<ParseState, Node> inner) -> this.parseNodeList(inner, entry)));
+    private CompileResult<ParseUnit> parseNodeLists(ParseState state, Node root) {
+        ParseUnit parseStateNodeTuple2 = new ParseUnit(state, root);
+        return root.iterNodeLists().fold(CompileResults.fromOk(parseStateNodeTuple2), (CompileResult<ParseUnit> current, Tuple2<String, NodeList> entry) -> current.flatMapValue((ParseUnit inner) -> this.parseNodeList(inner, entry)));
     }
 
-    private CompileResult<Tuple2<ParseState, Node>> parseNodeList(Tuple2<ParseState, Node> current, Tuple2<String, NodeList> entry) {
+    private CompileResult<ParseUnit> parseNodeList(ParseUnit current, Tuple2<String, NodeList> entry) {
         ParseState currentState = current.left();
         Node currentNode = current.right();
 
@@ -44,25 +45,25 @@ public class TreeParser implements Parser {
             ParseState currentState1 = currentTuple.left();
             NodeList currentElements = currentTuple.right();
 
-            return this.parseTree(currentState1, node).mapValue((Tuple2<ParseState, Node> parsed) -> {
+            return this.parseTree(currentState1, node).mapValue((ParseUnit parsed) -> {
                 ParseState newState = parsed.left();
                 Node newElement = parsed.right();
 
                 return new Tuple2<>(newState, currentElements.add(newElement));
             });
-        })).mapValue((Tuple2<ParseState, NodeList> newTuple) -> new Tuple2<>(newTuple.left(), currentNode.withNodeList(key, newTuple.right())));
+        })).mapValue((Tuple2<ParseState, NodeList> newTuple) -> new ParseUnit(newTuple.left(), currentNode.withNodeList(key, newTuple.right())));
     }
 
     private CompileResult<Tuple2<Location, Node>> parse(Location location, Node root) {
         ParseState initial = new ImmutableParseState(location);
-        return this.parseTree(initial, root).mapValue((Tuple2<ParseState, Node> parsed) -> new Tuple2<>(parsed.left().findLocation(), parsed.right()));
+        return this.parseTree(initial, root).mapValue((ParseUnit parsed) -> new Tuple2<>(parsed.left().findLocation(), parsed.right()));
     }
 
-    private CompileResult<Tuple2<ParseState, Node>> parseTree(ParseState state, Node root) {
-        return this.beforeChild.pass(state, root).orElseGet(() -> new Tuple2<>(state, root)).flatMapValue((Tuple2<ParseState, Node> beforeTuple) -> this.parseNodeLists(beforeTuple.left(), beforeTuple.right()).flatMapValue((Tuple2<ParseState, Node> nodeListsTuple) -> {
+    private CompileResult<ParseUnit> parseTree(ParseState state, Node root) {
+        return this.beforeChild.pass(state, root).orElseGet(() -> new ParseUnit(state, root)).flatMapValue((ParseUnit beforeTuple) -> this.parseNodeLists(beforeTuple.left(), beforeTuple.right()).flatMapValue((ParseUnit nodeListsTuple) -> {
             ParseState state1 = nodeListsTuple.left();
             Node node = nodeListsTuple.right();
-            return this.afterChild.pass(state1, node).orElseGet(() -> new Tuple2<>(state1, node));
+            return this.afterChild.pass(state1, node).orElseGet(() -> new ParseUnit(state1, node));
         }));
     }
 

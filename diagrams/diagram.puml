@@ -13,6 +13,8 @@ interface List
 
 interface TargetPlatform
 
+class ParseUnit
+
 class Joiner
 Collector <|-- Joiner
 
@@ -25,8 +27,6 @@ Passer <|-- FlattenJava
 class Maps
 
 class Tuple2
-
-interface PassResult
 
 class ApplicationError
 Error <|-- ApplicationError
@@ -72,7 +72,7 @@ UnitSet <|-- MapUnitSet
 class OrState
 
 class InlinePassResult
-PassResult <|-- InlinePassResult
+ParseResult <|-- InlinePassResult
 
 interface ParseState
 
@@ -123,6 +123,8 @@ interface Result
 interface AfterAll
 
 class PlantUMLLang
+
+interface ParseResult
 
 class Main
 
@@ -440,6 +442,7 @@ TreeParser --> NodeList
 TreeParser --> Location
 TreeParser --> AfterAll
 TreeParser --> MapUnitSet
+TreeParser --> ParseUnit
 TreeParser --> Passer
 InlineNodeList --> Some
 InlineNodeList --> List
@@ -600,12 +603,8 @@ FlattenJava --> CompileResults
 FlattenJava --> InlineNodeList
 FlattenJava --> NodeList
 FlattenJava --> InlinePassResult
-FlattenJava --> PassResult
-PassResult --> Tuple2
-PassResult --> CompileResult
-PassResult --> Node
-PassResult --> ParseState
-PassResult --> Supplier
+FlattenJava --> ParseResult
+FlattenJava --> ParseUnit
 FilterRule --> CompileErrors
 FilterRule --> Filter
 FilterRule --> NumberFilter
@@ -637,6 +636,8 @@ ApplicationBuilder --> Parser
 ApplicationBuilder --> TreeParser
 ApplicationBuilder --> Path
 Maps --> HashMap
+ParseUnit --> Node
+ParseUnit --> ParseState
 List --> Option
 List --> Tuple2
 List --> Iter
@@ -691,6 +692,8 @@ InlinePassResult --> Option
 InlinePassResult --> Some
 InlinePassResult --> Ok
 InlinePassResult --> CompileResults
+InlinePassResult --> Node
+InlinePassResult --> ParseState
 Source --> IOResult
 Source --> Location
 PathSources --> Tuple2
@@ -728,6 +731,8 @@ LastLocator --> None
 LastLocator --> Some
 Splitter --> Option
 Splitter --> Tuple2
+ParseResult --> CompileResult
+ParseResult --> Supplier
 ImmutableCompileError --> List
 ImmutableCompileError --> Lists
 ImmutableCompileError --> Iter
@@ -767,7 +772,8 @@ TypeScriptAfterPasser --> MapNode
 TypeScriptAfterPasser --> NodeList
 TypeScriptAfterPasser --> NodeListCollector
 TypeScriptAfterPasser --> InlinePassResult
-TypeScriptAfterPasser --> PassResult
+TypeScriptAfterPasser --> ParseResult
+TypeScriptAfterPasser --> ParseUnit
 NodeRule --> Ok
 NodeRule --> CompileResults
 NodeRule --> CompileErrors
@@ -820,5 +826,6 @@ PlantUMLAfterPasser --> NodeList
 PlantUMLAfterPasser --> NodeListCollector
 PlantUMLAfterPasser --> StringRule
 PlantUMLAfterPasser --> InlinePassResult
-PlantUMLAfterPasser --> PassResult
+PlantUMLAfterPasser --> ParseResult
+PlantUMLAfterPasser --> ParseUnit
 @enduml

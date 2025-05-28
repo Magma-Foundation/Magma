@@ -13,12 +13,13 @@ import magmac.app.compile.node.Node;
 import magmac.app.compile.node.NodeList;
 import magmac.app.compile.node.NodeListCollector;
 import magmac.app.stage.InlinePassResult;
-import magmac.app.stage.PassResult;
+import magmac.app.stage.ParseResult;
+import magmac.app.stage.ParseUnit;
 import magmac.app.stage.Passer;
 import magmac.app.stage.parse.ParseState;
 
 public class TypeScriptAfterPasser implements Passer {
-    private static Option<PassResult> passImport(ParseState state, Node node) {
+    private static Option<ParseResult> passImport(ParseState state, Node node) {
         if (!node.is("import")) {
             return new None<>();
         }
@@ -31,17 +32,17 @@ public class TypeScriptAfterPasser implements Passer {
         NodeList segments = node.findNodeList("segments")
                 .orElse(InlineNodeList.empty());
 
-        Option<CompileResult<Tuple2<ParseState, Node>>> map = segments.findLast().map((Node last) -> {
+        Option<CompileResult<ParseUnit>> map = segments.findLast().map((Node last) -> {
             String value = last.findString("value").orElse("");
             NodeList values = copy.addAll(segments);
             Node node1 = node.withString("child", value).withNodeList("segments", values);
-            return CompileResults.fromOk(new Tuple2<>(state, node1));
+            return CompileResults.fromOk(new ParseUnit(state, node1));
         });
 
         return new Some<>(new InlinePassResult(map));
     }
 
-    private static Option<PassResult> passMethod(ParseState state, Node node) {
+    private static Option<ParseResult> passMethod(ParseState state, Node node) {
         if (node.is("method")) {
             Node header = node.findNode("header").orElse(new MapNode());
             NodeList parameters = node.findNodeList("parameters").orElse(InlineNodeList.empty());
@@ -54,7 +55,7 @@ public class TypeScriptAfterPasser implements Passer {
     }
 
     @Override
-    public PassResult pass(ParseState state, Node node) {
+    public ParseResult pass(ParseState state, Node node) {
         return TypeScriptAfterPasser.passImport(state, node)
                 .or(() -> TypeScriptAfterPasser.passMethod(state, node))
                 .or(() -> TypeScriptAfterPasser.format(state, node))
@@ -62,7 +63,7 @@ public class TypeScriptAfterPasser implements Passer {
                 .orElseGet(() -> InlinePassResult.empty());
     }
 
-    private static Option<PassResult> passVariadic(ParseState state, Node node) {
+    private static Option<ParseResult> passVariadic(ParseState state, Node node) {
         if (node.is("variadic")) {
             return new Some<>(InlinePassResult.from(state, node.retype("array")));
         }
@@ -71,7 +72,7 @@ public class TypeScriptAfterPasser implements Passer {
         }
     }
 
-    private static Option<PassResult> format(ParseState state, Node node) {
+    private static Option<ParseResult> format(ParseState state, Node node) {
         if (node.is("statement") || node.is("block")) {
             Node before = node.withString("before", "\n\t\t");
             return new Some<>(InlinePassResult.from(state, before));
