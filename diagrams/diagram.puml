@@ -67,6 +67,9 @@ interface ParseState
 
 interface Rule
 
+class CompileResultCollector
+Collector <|-- CompileResultCollector
+
 interface Error
 
 class PathTargets
@@ -350,8 +353,7 @@ OrState --> ImmutableCompileError
 DivideRule --> Option
 DivideRule --> Joiner
 DivideRule --> ListCollector
-DivideRule --> ResultCollector
-DivideRule --> InlineCompileResult
+DivideRule --> CompileResultCollector
 DivideRule --> CompileErrors
 DivideRule --> InlineNodeList
 DivideRule --> MapNode
@@ -422,6 +424,7 @@ Application --> Option
 Generator --> Location
 Generator --> Roots
 Generator --> Map
+CompileResultCollector --> Ok
 Max --> Optional
 TypescriptLang --> Lists
 TypescriptLang --> DivideRule

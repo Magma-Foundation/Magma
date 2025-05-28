@@ -3,9 +3,8 @@ package magmac.app.compile.rule;
 import magmac.api.Option;
 import magmac.api.iter.collect.Joiner;
 import magmac.api.iter.collect.ListCollector;
-import magmac.api.iter.collect.ResultCollector;
 import magmac.app.compile.error.CompileResult;
-import magmac.app.compile.error.InlineCompileResult;
+import magmac.app.compile.error.CompileResultCollector;
 import magmac.app.compile.error.error.CompileErrors;
 import magmac.app.compile.node.InlineNodeList;
 import magmac.app.compile.node.MapNode;
@@ -21,17 +20,17 @@ public record DivideRule(String key, Folder folder, Rule childRule) implements R
     }
 
     private CompileResult<Option<String>> join(NodeList list) {
-        return InlineCompileResult.fromResult(list.iter()
-                .map(node -> this.childRule.generate(node).result())
-                .collect(new ResultCollector<>(new Joiner())));
+        return list.iter()
+                .map(node -> this.childRule.generate(node))
+                .collect(new CompileResultCollector<>(new Joiner()));
     }
 
     @Override
     public CompileResult<Node> lex(String input) {
-        return InlineCompileResult.fromResult(new FoldingDivider(this.folder).divide(input)
-                .map(segment -> this.childRule.lex(segment).result())
-                .collect(new ResultCollector<>(new ListCollector<>()))
-                .mapValue(children -> new MapNode().withNodeList(this.key(), new InlineNodeList(children))));
+        return new FoldingDivider(this.folder).divide(input)
+                .map(segment -> this.childRule.lex(segment))
+                .collect(new CompileResultCollector<>(new ListCollector<>()))
+                .mapValue(children -> new MapNode().withNodeList(this.key(), new InlineNodeList(children)));
     }
 
     @Override

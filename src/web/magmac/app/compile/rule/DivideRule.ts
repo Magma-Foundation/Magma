@@ -1,9 +1,8 @@
 import { Option } from "magmacapiOption";
 import { Joiner } from "magmacapiitercollectJoiner";
 import { ListCollector } from "magmacapiitercollectListCollector";
-import { ResultCollector } from "magmacapiitercollectResultCollector";
 import { CompileResult } from "magmacappcompileerrorCompileResult";
-import { InlineCompileResult } from "magmacappcompileerrorInlineCompileResult";
+import { CompileResultCollector } from "magmacappcompileerrorCompileResultCollector";
 import { CompileErrors } from "magmacappcompileerrorerrorCompileErrors";
 import { InlineNodeList } from "magmacappcompilenodeInlineNodeList";
 import { MapNode } from "magmacappcompilenodeMapNode";
