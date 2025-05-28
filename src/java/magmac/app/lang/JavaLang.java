@@ -88,10 +88,18 @@ public final class JavaLang {
     }
 
     private static Rule createMethodRule() {
-        return new TypeRule("method", LocatingRule.First(new NodeRule("header", new OrRule(Lists.of(
+        NodeRule header = new NodeRule("header", new OrRule(Lists.of(
                 JavaLang.createDefinitionRule(),
                 new StringRule("name")
-        ))), "(", new StringRule("with-params")));
+        )));
+
+        Rule parameters = new DivideRule("parameters", new ValueFolder(), new OrRule(Lists.of(
+                CommonLang.createWhitespaceRule(),
+                JavaLang.createDefinitionRule()
+        )));
+
+        Rule withParams = LocatingRule.First(parameters, ")", new StringRule("with-braces"));
+        return new TypeRule("method", LocatingRule.First(header, "(", withParams));
     }
 
     private static Rule createDefinitionRule() {
@@ -103,11 +111,26 @@ public final class JavaLang {
         return new StripRule(LocatingRule.Last(leftRule, " ", new StringRule("name")));
     }
 
-    private static OrRule createTypeRule() {
-        return new OrRule(Lists.of(
+    private static Rule createTypeRule() {
+        LazyRule orRule = new LazyRule();
+        orRule.set(new OrRule(Lists.of(
+                JavaLang.createVariadicRule(orRule),
+                JavaLang.createArrayRule(orRule),
                 JavaLang.createTemplateRule(),
                 JavaLang.createSymbolTypeRule()
-        ));
+        )));
+        return orRule;
+    }
+
+    private static TypeRule createArrayRule(Rule rule) {
+        NodeRule child = new NodeRule("child", rule);
+        return new TypeRule("array", new StripRule(new SuffixRule(child, "[]")));
+    }
+
+
+    private static TypeRule createVariadicRule(Rule rule) {
+        NodeRule child = new NodeRule("child", rule);
+        return new TypeRule("variadic", new StripRule(new SuffixRule(child, "...")));
     }
 
     private static Rule createSymbolTypeRule() {

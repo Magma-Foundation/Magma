@@ -41,4 +41,8 @@ export class JavaLang {
 	}
 	temp(){
 	}
+	temp(){
+	}
+	temp(){
+	}
 }

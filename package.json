@@ -15,7 +15,7 @@
   "type": "commonjs",
   "main": "./src/index.ts",
   "scripts": {
-    "start": "ts-node ./src/ts/magma/app/Main.ts",
+    "start": "ts-node ./src/web/magmac/Main.ts",
     "dev": "nodemon",
     "test": "echo \"Error: no test specified\" && exit 1"
   },

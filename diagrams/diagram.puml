@@ -32,6 +32,9 @@ Error <|-- ApplicationError
 class StagedCompiler
 Compiler <|-- StagedCompiler
 
+class LazyRule
+Rule <|-- LazyRule
+
 interface Compiler
 
 class MapCollector
@@ -291,6 +294,9 @@ Result <|-- Err
 
 class PlantUMLAfterPasser
 Passer <|-- PlantUMLAfterPasser
+
+class ValueFolder
+Folder <|-- ValueFolder
 
 class SafeFiles
 
@@ -597,6 +603,10 @@ OrRule --> NodeContext
 OrRule --> StringContext
 OrRule --> List
 OrRule --> Function
+LazyRule --> None
+LazyRule --> Option
+LazyRule --> Some
+LazyRule --> CompileErrors
 PathSource --> List
 PathSource --> Lists
 PathSource --> SafeFiles
