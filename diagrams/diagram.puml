@@ -190,6 +190,9 @@ Splitter <|-- DividingSplitter
 class EmptyHead
 Head <|-- EmptyHead
 
+class NodeListCollector
+Collector <|-- NodeListCollector
+
 class NumberFilter
 Filter <|-- NumberFilter
 
@@ -669,8 +672,11 @@ TypeScriptAfterPasser --> None
 TypeScriptAfterPasser --> Option
 TypeScriptAfterPasser --> Some
 TypeScriptAfterPasser --> Tuple2
+TypeScriptAfterPasser --> Lists
 TypeScriptAfterPasser --> InlineNodeList
+TypeScriptAfterPasser --> MapNode
 TypeScriptAfterPasser --> NodeList
+TypeScriptAfterPasser --> NodeListCollector
 TypeScriptAfterPasser --> InlinePassResult
 TypeScriptAfterPasser --> PassResult
 NodeRule --> Ok

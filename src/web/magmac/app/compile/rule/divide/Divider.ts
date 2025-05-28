@@ -1,3 +1,3 @@
-import { Iter } from "magmac/api/iter/Iter";
+import { Iter } from "../../../../../magmac/api/iter/Iter";
 export interface ? {
 }

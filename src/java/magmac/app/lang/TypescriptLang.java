@@ -30,7 +30,7 @@ public final class TypescriptLang {
     }
 
     private static Rule createClassRule() {
-        DivideRule children = DivideRule.Statements("children", TypescriptLang.createStructureMemberRule());
+        Rule children = DivideRule.Statements("children", TypescriptLang.createStructureMemberRule());
         Rule name = LocatingRule.First(new StringRule("name"), " {", new SuffixRule(children, "\n}\n"));
         return new TypeRule("class", new PrefixRule("export class ", name));
     }
