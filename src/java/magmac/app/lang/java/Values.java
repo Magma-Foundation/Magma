@@ -6,8 +6,9 @@ import magmac.app.compile.node.Node;
 
 public class Values {
     public static CompileResult<Value> deserialize(Node node) {
-        return Deserializers.or(node, Lists.of(
-                Invokable::deserialize
+        return Deserializers.or(node, Lists.<Deserializer<Value>>of(
+                Invokable::deserialize,
+                StringNode::deserialize
         ));
     }
 }
