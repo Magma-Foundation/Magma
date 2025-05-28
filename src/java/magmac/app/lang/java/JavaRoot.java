@@ -6,14 +6,15 @@ import magmac.app.compile.node.MapNode;
 import magmac.app.compile.node.Node;
 import magmac.app.lang.java.root.JavaRootSegment;
 
-public record JavaRoot(List<JavaRootSegment> children) {
+public record JavaRoot(List<JavaRootSegment> children) implements Serializable {
     public static CompileResult<JavaRoot> deserialize(Node node) {
         return node.destroy()
-                .nodeList("children", JavaRootSegments::deserialize)
-                .complete(segments -> new JavaRoot(segments));
+                .nodeList("children", (Node node1) -> JavaRootSegments.deserialize(node1))
+                .complete((List<JavaRootSegment> segments) -> new JavaRoot(segments));
     }
 
+    @Override
     public Node serialize() {
-        return new MapNode().withNodeListFromElements(this.children, JavaRootSegments::serialize);
+        return new MapNode().withNodeListFromElements("children", this.children, (JavaRootSegment segment) -> JavaRootSegments.serialize(segment));
     }
 }

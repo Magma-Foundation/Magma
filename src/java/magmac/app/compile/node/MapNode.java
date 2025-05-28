@@ -4,6 +4,7 @@ import magmac.api.None;
 import magmac.api.Option;
 import magmac.api.Some;
 import magmac.api.Tuple2;
+import magmac.api.collect.list.List;
 import magmac.api.collect.map.Map;
 import magmac.api.collect.map.Maps;
 import magmac.api.iter.Iter;
@@ -68,6 +69,18 @@ public final class MapNode implements Node {
         return indent + key + ": " + value;
     }
 
+    private static <T> Iter<String> toStream(int depth, Map<String, T> map, Function<T, String> mapper) {
+        if (map.isEmpty()) {
+            return Iters.empty();
+        }
+
+        return map.iter().map((Tuple2<String, T> entry) -> {
+            String key = entry.left();
+            T value = entry.right();
+            return MapNode.formatEntry(depth, key, mapper.apply(value));
+        });
+    }
+
     @Override
     public Iter<Tuple2<String, Node>> iterNodes() {
         return this.nodes.iter();
@@ -94,18 +107,6 @@ public final class MapNode implements Node {
                 .orElse("");
 
         return typeString + "{" + joined + MapNode.createIndent(depth) + "}";
-    }
-
-    private static <T> Iter<String> toStream(int depth, Map<String, T> map, Function<T, String> mapper) {
-        if (map.isEmpty()) {
-            return Iters.empty();
-        }
-
-        return map.iter().map((Tuple2<String, T> entry) -> {
-            String key = entry.left();
-            T value = entry.right();
-            return MapNode.formatEntry(depth, key, mapper.apply(value));
-        });
     }
 
     @Override
@@ -178,13 +179,22 @@ public final class MapNode implements Node {
 
     @Override
     public CompileResult<Tuple2<Node, NodeList>> removeNodeList(String key) {
-        nodeLists.removeKey(key);
-        return null;
+        this.nodeLists.removeKey(key);
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public boolean isEmpty() {
-        return strings.isEmpty() && nodes.isEmpty() && nodeLists.isEmpty();
+        return this.strings.isEmpty() && this.nodes.isEmpty() && this.nodeLists.isEmpty();
+    }
+
+    @Override
+    public <T> Node withNodeListFromElements(String key, List<T> list, Function<T, Node> serializer) {
+        NodeList nodeList = list.iter()
+                .map(serializer)
+                .collect(new NodeListCollector());
+
+        return this.withNodeList(key, nodeList);
     }
 
     @Override
@@ -215,15 +225,15 @@ public final class MapNode implements Node {
 
     @Override
     public CompileResult<Node> findNodeOrError(String key) {
-        return findNode(key)
+        return this.findNode(key)
                 .map((Node node1) -> CompileResults.fromResult(new Ok<>(node1)))
                 .orElseGet(() -> CompileErrors.createNodeError("Node '" + key + "' not present", this));
     }
 
     @Override
     public CompileResult<NodeList> findNodeListOrError(String key) {
-        return findNodeList(key)
-                .map(list -> CompileResults.fromOk(list))
+        return this.findNodeList(key)
+                .map((NodeList list) -> CompileResults.fromOk(list))
                 .orElseGet(() -> CompileErrors.createNodeError("Node list '" + key + "' not present", this));
     }
 }

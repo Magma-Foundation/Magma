@@ -49,5 +49,5 @@ public interface Node {
 
     boolean isEmpty();
 
-    <T> Node withNodeListFromElements(List<T> list, Function<T, Node> serialize);
+    <T> Node withNodeListFromElements(String key, List<T> list, Function<T, Node> serializer);
 }

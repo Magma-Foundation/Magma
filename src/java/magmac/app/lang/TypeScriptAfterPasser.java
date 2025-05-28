@@ -97,7 +97,7 @@ public class TypeScriptAfterPasser implements Passer {
         if (value.is("assignment")) {
             return value.findNodeOrError("destination")
                     .mapValue((Node destination) -> this.getNode(destination))
-                    .mapValue(result -> new ParseUnitImpl<>(state, result));
+                    .mapValue((Node result) -> new ParseUnitImpl<>(state, result));
         }
 
         return CompileResults.fromOk(new ParseUnitImpl<>(state, value));

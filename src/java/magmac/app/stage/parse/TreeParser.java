@@ -15,7 +15,7 @@ import magmac.app.stage.Passer;
 import magmac.app.stage.unit.Unit;
 import magmac.app.stage.unit.UnitSet;
 
-public class TreeParser implements Parser {
+public class TreeParser implements Parser<Node, Node> {
     private final Passer beforeChild;
     private final Passer afterChild;
     private final AfterAll afterAllChildren;
@@ -33,18 +33,18 @@ public class TreeParser implements Parser {
         CompileResult<ParseUnit<NodeList>> initial = CompileResults.fromOk(current.retainWithList());
         return entry.right()
                 .iter()
-                .fold(initial, (CompileResult<ParseUnit<NodeList>> currentTupleResult, Node node) -> currentTupleResult.flatMapValue((ParseUnit<NodeList> currentTuple) -> currentTuple.merge((currentState2, currentElements1) -> this.getParseUnitCompileResult(node, currentState2, currentElements1))))
+                .fold(initial, (CompileResult<ParseUnit<NodeList>> currentTupleResult, Node node) -> currentTupleResult.flatMapValue((ParseUnit<NodeList> currentTuple) -> currentTuple.merge((ParseState currentState2, NodeList currentElements1) -> this.getParseUnitCompileResult(node, currentState2, currentElements1))))
                 .mapValue((ParseUnit<NodeList> newTuple) -> newTuple.merge((ParseState state, NodeList nodeList) -> new ParseUnitImpl<>(state, currentNode.withNodeList(key, nodeList))));
     }
 
     private CompileResult<ParseUnit<NodeList>> getParseUnitCompileResult(Node node, ParseState currentState1, NodeList currentElements) {
-        return this.parseTree(currentState1, node).mapValue((ParseUnit<Node> parsed) -> parsed.merge((state, node1) -> new ParseUnitImpl<>(state, currentElements.add(node1))));
+        return this.parseTree(currentState1, node).mapValue((ParseUnit<Node> parsed) -> parsed.merge((ParseState state, Node node1) -> new ParseUnitImpl<>(state, currentElements.add(node1))));
     }
 
     private CompileResult<ParseUnit<Node>> parseTree(ParseState state, Node root) {
         return this.beforeChild.pass(state, root).orElseGet(() -> new ParseUnitImpl<Node>(state, root))
                 .flatMapValue((ParseUnit<Node> beforeTuple) -> this.parseNodeLists(beforeTuple))
-                .flatMapValue(withNodeLists -> this.parseNodes(withNodeLists))
+                .flatMapValue((ParseUnit<Node> withNodeLists) -> this.parseNodes(withNodeLists))
                 .flatMapValue((ParseUnit<Node> nodeListsTuple) -> {
                     ParseState state1 = nodeListsTuple.left();
                     Node node = nodeListsTuple.right();
@@ -54,7 +54,7 @@ public class TreeParser implements Parser {
 
     private CompileResult<ParseUnit<Node>> parseNodes(ParseUnit<Node> withNodeLists) {
         return withNodeLists.right().iterNodes().fold(CompileResults.fromOk(withNodeLists),
-                (current, entry) -> current.flatMapValue((ParseUnit<Node> inner) -> this.parseNodeEntry(inner, entry)));
+                (CompileResult<ParseUnit<Node>> current, Tuple2<String, Node> entry) -> current.flatMapValue((ParseUnit<Node> inner) -> this.parseNodeEntry(inner, entry)));
 
     }
 
@@ -63,7 +63,7 @@ public class TreeParser implements Parser {
         String key = entry.left();
 
         CompileResult<ParseUnit<Node>> parsed = this.parseTree(current.left(), entry.right());
-        return parsed.mapValue(value -> new ParseUnitImpl<>(value.left(), currentNode.withNode(key, value.right())));
+        return parsed.mapValue((ParseUnit<Node> value) -> new ParseUnitImpl<>(value.left(), currentNode.withNode(key, value.right())));
     }
 
     private CompileResult<ParseUnit<Node>> parseNodeLists(ParseUnit<Node> beforeTuple) {

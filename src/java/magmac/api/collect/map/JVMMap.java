@@ -1,14 +1,19 @@
 package magmac.api.collect.map;
 
+import magmac.api.None;
+import magmac.api.Option;
+import magmac.api.Some;
 import magmac.api.Tuple2;
 import magmac.api.collect.list.JVMList;
 import magmac.api.iter.Iter;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-public record JVMMap<K, V>(java.util.Map<K, V> map) implements Map<K, V> {
+public
+record JVMMap<K, V>(java.util.Map<K, V> map) implements Map<K, V> {
     @Override
     public V getOrDefault(K key, V other) {
         return this.map.getOrDefault(key, other);
@@ -52,5 +57,16 @@ public record JVMMap<K, V>(java.util.Map<K, V> map) implements Map<K, V> {
         }
 
         return this;
+    }
+
+    @Override
+    public Option<Tuple2<Map<K, V>, V>> removeKey(K key) {
+        if (this.map.containsKey(key)) {
+            return new None<>();
+        }
+
+        java.util.Map<K, V> copy = new HashMap<>(this.map);
+        V removed = copy.remove(key);
+        return new Some<>(new Tuple2<>(new JVMMap<>(copy), removed));
     }
 }

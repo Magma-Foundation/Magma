@@ -17,7 +17,7 @@ public final class ParseUnitImpl<T> implements ParseUnit<T> {
 
     @Override
     public Unit<T> toLocationUnit() {
-        return this.merge((state, node) -> new SimpleUnit<>(state.findLocation(), node));
+        return this.merge((ParseState state, T node) -> new SimpleUnit<>(state.findLocation(), node));
     }
 
     @Override
