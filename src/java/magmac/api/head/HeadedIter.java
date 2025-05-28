@@ -13,12 +13,12 @@ import java.util.function.Predicate;
 public record HeadedIter<T>(Head<T> head) implements Iter<T> {
     @Override
     public <R, X> Result<R, X> foldToResult(R initial, BiFunction<R, T, Result<R, X>> folder) {
-        return this.fold(this.createInitial(initial),
-                (rxResult, t) -> rxResult.flatMapValue(
-                        r -> folder.apply(r, t)));
+        return this.fold(HeadedIter.createInitial(initial),
+                (Result<R, X> rxResult, T t) -> rxResult.flatMapValue(
+                        (R r) -> folder.apply(r, t)));
     }
 
-    private <R, X> Result<R, X> createInitial(R initial) {
+    private static <R, X> Result<R, X> createInitial(R initial) {
         return new Ok<>(initial);
     }
 
@@ -32,7 +32,7 @@ public record HeadedIter<T>(Head<T> head) implements Iter<T> {
         R current = initial;
         while (true) {
             R finalCurrent = current;
-            Option<R> option = this.head.next().map(next -> folder.apply(finalCurrent, next));
+            Option<R> option = this.head.next().map((T next) -> folder.apply(finalCurrent, next));
             if (option.isPresent()) {
                 current = option.orElse(null);
             }
@@ -44,12 +44,12 @@ public record HeadedIter<T>(Head<T> head) implements Iter<T> {
 
     @Override
     public <C> C collect(Collector<T, C> collector) {
-        return this.fold(collector.createInitial(), (current, element) -> collector.fold(current, element));
+        return this.fold(collector.createInitial(), (C current, T element) -> collector.fold(current, element));
     }
 
     @Override
     public Iter<T> filter(Predicate<T> predicate) {
-        return this.flatMap(value -> {
+        return this.flatMap((T value) -> {
             if (predicate.test(value)) {
                 return new HeadedIter<>(new SingleHead<>(value));
             }
@@ -66,7 +66,7 @@ public record HeadedIter<T>(Head<T> head) implements Iter<T> {
     public <R> Iter<R> flatMap(Function<T, Iter<R>> mapper) {
         return new HeadedIter<>(this.head.next()
                 .map(mapper)
-                .<Head<R>>map(initial -> new FlatMapHead<>(this.head, mapper, initial))
+                .<Head<R>>map((Iter<R> initial) -> new FlatMapHead<>(this.head, mapper, initial))
                 .orElse(new EmptyHead<>()));
     }
 

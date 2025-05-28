@@ -13,7 +13,7 @@ public record InlineIOResult<T>(Result<T, IOException> result) implements IOResu
 
     @Override
     public <R> IOResult<R> flatMapValue(Function<T, IOResult<R>> mapper) {
-        return new InlineIOResult<>(this.result.flatMapValue(value -> mapper.apply(value).result()));
+        return new InlineIOResult<>(this.result.flatMapValue((T value) -> mapper.apply(value).result()));
     }
 
     @Override

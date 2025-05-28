@@ -87,8 +87,8 @@ public final class JavaLang {
     }
 
     private static Rule createValueRule(Rule functionSegment) {
-        LazyRule value = new LazyRule();
-        value.set(new OrRule(Lists.of(
+        LazyRule value = new MutableLazyRule();
+        return value.set(new OrRule(Lists.of(
                 JavaLang.createLambdaRule(value, functionSegment),
                 new StripRule(new PrefixRule("!", new NodeRule("child", value))),
                 JavaLang.createCharRule(),
@@ -107,7 +107,6 @@ public final class JavaLang {
                 JavaLang.createOperationRule(value, "greater-than", ">"),
                 JavaLang.createIndexRule(value)
         )));
-        return value;
     }
 
     private static TypeRule createIndexRule(LazyRule value) {
@@ -181,14 +180,12 @@ public final class JavaLang {
     }
 
     private static Rule createFunctionSegmentRule() {
-        LazyRule functionSegmentRule = new LazyRule();
-        functionSegmentRule.set(new OrRule(Lists.of(
+        LazyRule functionSegmentRule = new MutableLazyRule();
+        return functionSegmentRule.set(new OrRule(Lists.of(
                 CommonLang.createWhitespaceRule(),
                 new TypeRule("statement", new StripRule(new SuffixRule(JavaLang.createFunctionSegmentValueRule(functionSegmentRule), ";"))),
                 JavaLang.createBlockRule(functionSegmentRule)
         )));
-
-        return functionSegmentRule;
     }
 
     private static Rule createBlockRule(LazyRule functionSegmentRule) {
@@ -243,14 +240,13 @@ public final class JavaLang {
     }
 
     private static Rule createTypeRule() {
-        LazyRule orRule = new LazyRule();
-        orRule.set(new OrRule(Lists.of(
+        LazyRule orRule = new MutableLazyRule();
+        return orRule.set(new OrRule(Lists.of(
                 JavaLang.createVariadicRule(orRule),
                 JavaLang.createArrayRule(orRule),
                 CommonLang.createTemplateRule(),
                 CommonLang.createSymbolTypeRule()
         )));
-        return orRule;
     }
 
     private static TypeRule createArrayRule(Rule rule) {

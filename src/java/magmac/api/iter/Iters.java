@@ -7,13 +7,13 @@ import magmac.api.head.RangeHead;
 import magmac.api.head.SingleHead;
 
 public final class Iters {
-    public static <T> Iter<T> fromArray(T[] array) {
-        return new HeadedIter<>(new RangeHead(array.length)).map(index -> array[index]);
+    private static <T> Iter<T> fromArray(T[] array) {
+        return new HeadedIter<>(new RangeHead(array.length)).map((Integer index) -> array[index]);
     }
 
     public static <T> Iter<T> fromOption(Option<T> option) {
         return option
-                .<Iter<T>>map(t -> new HeadedIter<>(new SingleHead<>(t)))
+                .<Iter<T>>map((T t) -> new HeadedIter<>(new SingleHead<>(t)))
                 .orElseGet(() -> new HeadedIter<>(new EmptyHead<>()));
     }
 

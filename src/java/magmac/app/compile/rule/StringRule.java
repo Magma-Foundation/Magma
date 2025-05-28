@@ -16,7 +16,7 @@ public record StringRule(String key) implements Rule {
     @Override
     public CompileResult<String> generate(Node node) {
         return node.findString(this.key)
-                .map(value -> InlineCompileResult.fromResult(new Ok<>(value)))
+                .map((String value) -> InlineCompileResult.fromResult(new Ok<>(value)))
                 .orElseGet(() -> CompileErrors.createNodeError("String '" + this.key + "' not present", node));
     }
 }

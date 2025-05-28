@@ -1,4 +1,5 @@
 import { Option } from "../../../../magmac/api/Option";
+import { List } from "../../../../magmac/api/collect/list/List";
 import { Joiner } from "../../../../magmac/api/iter/collect/Joiner";
 import { ListCollector } from "../../../../magmac/api/iter/collect/ListCollector";
 import { CompileResult } from "../../../../magmac/app/compile/error/CompileResult";

@@ -17,6 +17,6 @@ public record PrefixRule(String prefix, Rule childRule) implements Rule {
 
     @Override
     public CompileResult<String> generate(Node node) {
-        return this.childRule.generate(node).mapValue(value -> this.prefix + value);
+        return this.childRule.generate(node).mapValue((String value) -> this.prefix + value);
     }
 }

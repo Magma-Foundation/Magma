@@ -22,7 +22,7 @@ public class FlattenJava implements Passer {
             NodeList values = new InlineNodeList(node.findNodeList("children")
                     .orElse(InlineNodeList.empty())
                     .iter()
-                    .filter(child -> !child.is("package"))
+                    .filter((Node child) -> !child.is("package"))
                     .collect(new ListCollector<>()));
 
             return FlattenJava.getChildren(state, node.withNodeList("children", values));

@@ -40,7 +40,7 @@ public final class MapNode implements Node {
     }
 
     private static <T> Node fold(Node node, Iter<Tuple2<String, T>> iter, Function<Node, BiFunction<String, T, Node>> mapper) {
-        return iter.fold(node, (current, tuple) -> {
+        return iter.fold(node, (Node current, Tuple2<String, T> tuple) -> {
             String left = tuple.left();
             T right = tuple.right();
 
@@ -50,7 +50,7 @@ public final class MapNode implements Node {
 
     private static String formatNodeList(int depth, NodeList nodeList) {
         return nodeList.iter()
-                .map(child -> child.format(depth + 1))
+                .map((Node child) -> child.format(depth + 1))
                 .collect(new Joiner(", "))
                 .orElse("");
     }
@@ -72,12 +72,12 @@ public final class MapNode implements Node {
     @Override
     public String format(int depth) {
         String typeString = this.maybeType
-                .map(type -> type + " ")
+                .map((String type) -> type + " ")
                 .orElse("");
 
-        Iter<String> stringsStream = this.toStream(depth, this.strings, value -> "\"" + value + "\"");
-        Iter<String> nodesStream = this.toStream(depth, this.nodes, value -> value.format(depth + 1));
-        Iter<String> nodeListsStream = this.toStream(depth, this.nodeLists, values -> "[" + MapNode.formatNodeList(depth, values) + "]");
+        Iter<String> stringsStream = this.toStream(depth, this.strings, (String value) -> "\"" + value + "\"");
+        Iter<String> nodesStream = this.toStream(depth, this.nodes, (Node value) -> value.format(depth + 1));
+        Iter<String> nodeListsStream = this.toStream(depth, this.nodeLists, (NodeList values) -> "[" + MapNode.formatNodeList(depth, values) + "]");
 
         String joined = stringsStream.concat(nodesStream)
                 .concat(nodeListsStream)
@@ -92,14 +92,14 @@ public final class MapNode implements Node {
             return Iters.empty();
         }
 
-        return map.iterEntries().map(entry -> {
+        return map.iterEntries().map((Tuple2<String, T> entry) -> {
             String key = entry.left();
             T value = entry.right();
-            return this.formatEntry(depth, key, mapper.apply(value));
+            return MapNode.formatEntry(depth, key, mapper.apply(value));
         });
     }
 
-    private String formatEntry(int depth, String key, String value) {
+    private static String formatEntry(int depth, String key, String value) {
         String indent = MapNode.createIndent(depth + 1);
         return indent + key + ": " + value;
     }
@@ -126,7 +126,7 @@ public final class MapNode implements Node {
 
     @Override
     public boolean is(String type) {
-        return this.maybeType.filter(inner -> inner.equals(type)).isPresent();
+        return this.maybeType.filter((String inner) -> inner.equals(type)).isPresent();
     }
 
     @Override
@@ -152,9 +152,9 @@ public final class MapNode implements Node {
 
     @Override
     public Node merge(Node other) {
-        var withStrings = MapNode.fold(this, other.iterStrings(), current -> (key2, value1) -> current.withString(key2, value1));
-        var withNodes = MapNode.fold(withStrings, other.iterNodes(), current -> (key1, value) -> current.withNode(key1, value));
-        return MapNode.fold(withNodes, other.iterNodeLists(), current -> (key, values) -> current.withNodeList(key, values));
+        var withStrings = MapNode.fold(this, other.iterStrings(), (Node current) -> (String key2, String value1) -> current.withString(key2, value1));
+        var withNodes = MapNode.fold(withStrings, other.iterNodes(), (Node current) -> (String key1, Node value) -> current.withNode(key1, value));
+        return MapNode.fold(withNodes, other.iterNodeLists(), (Node current) -> (String key, NodeList values) -> current.withNodeList(key, values));
     }
 
     @Override

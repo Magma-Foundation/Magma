@@ -19,14 +19,14 @@ public record TypeRule(String type, Rule childRule) implements Rule {
     @Override
     public CompileResult<Node> lex(String input) {
         return InlineCompileResult.fromResult(this.childRule.lex(input).result()
-                .mapValue(node -> node.retype(this.type))
-                .mapErr(err -> this.createError(new StringContext(input), err)));
+                .mapValue((Node node) -> node.retype(this.type))
+                .mapErr((CompileError err) -> this.createError(new StringContext(input), err)));
     }
 
     @Override
     public CompileResult<String> generate(Node node) {
         if (node.is(this.type)) {
-            return InlineCompileResult.fromResult(this.childRule.generate(node).result().mapErr(err -> this.createError(new NodeContext(node), err)));
+            return InlineCompileResult.fromResult(this.childRule.generate(node).result().mapErr((CompileError err) -> this.createError(new NodeContext(node), err)));
         }
 
         return CompileErrors.createNodeError("Type '" + this.type + "' not present", node);

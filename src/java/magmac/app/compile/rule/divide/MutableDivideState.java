@@ -80,7 +80,7 @@ public class MutableDivideState implements DivideState {
 
     @Override
     public Option<Tuple2<DivideState, Character>> popAndAppendToTuple() {
-        return this.pop().map(popped -> {
+        return this.pop().map((Tuple2<DivideState, Character> popped) -> {
             DivideState append = popped.left().append(popped.right());
             return new Tuple2<>(append, popped.right());
         });
@@ -88,7 +88,7 @@ public class MutableDivideState implements DivideState {
 
     @Override
     public Option<DivideState> popAndAppendToOption() {
-        return this.popAndAppendToTuple().map(divideStateCharacterTuple2 -> divideStateCharacterTuple2.left());
+        return this.popAndAppendToTuple().map((Tuple2<DivideState, Character> divideStateCharacterTuple2) -> divideStateCharacterTuple2.left());
     }
 
     @Override

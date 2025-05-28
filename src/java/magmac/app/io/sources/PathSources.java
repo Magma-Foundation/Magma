@@ -16,15 +16,15 @@ import magmac.api.collect.map.Map;
 public record PathSources(Path root) implements Sources {
     @Override
     public IOResult<Map<Location, String>> readAll() {
-        return SafeFiles.walk(this.root).flatMapValue(sources -> this.apply(sources));
+        return SafeFiles.walk(this.root).flatMapValue((Iter<Path> sources) -> this.apply(sources));
     }
 
     private IOResult<Map<Location, String>> apply(Iter<Path> sources) {
-        return new InlineIOResult<>(sources.filter(path1 -> Files.isRegularFile(path1))
-                .filter(file -> file.toString().endsWith(".java"))
-                .map(path -> new PathSource(this.root, path))
-                .map(source -> source.read().mapValue(input -> new Tuple2<>(source.computeLocation(), input)))
-                .map(tuple2IOResult -> tuple2IOResult.result())
+        return new InlineIOResult<>(sources.filter((Path path1) -> Files.isRegularFile(path1))
+                .filter((Path file) -> file.toString().endsWith(".java"))
+                .map((Path path) -> new PathSource(this.root, path))
+                .map((PathSource source) -> source.read().mapValue((String input) -> new Tuple2<>(source.computeLocation(), input)))
+                .map((IOResult<Tuple2<Location, String>> tuple2IOResult) -> tuple2IOResult.result())
                 .collect(new ResultCollector<>(new MapCollector<>())));
     }
 }

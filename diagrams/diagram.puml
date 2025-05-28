@@ -32,7 +32,7 @@ class ApplicationError
 class StagedCompiler
 ? <|-- StagedCompiler
 
-class LazyRule
+interface LazyRule
 ? <|-- LazyRule
 
 interface Compiler
@@ -219,6 +219,9 @@ interface DivideState
 class PlantUMLTargetPlatform
 ? <|-- PlantUMLTargetPlatform
 
+class MutableLazyRule
+? <|-- MutableLazyRule
+
 class MapRoots
 ? <|-- MapRoots
 
@@ -336,6 +339,8 @@ Iters --> RangeHead
 Iters --> SingleHead
 RangeHead --> None
 RangeHead --> Some
+MergeDiagram --> Option
+MergeDiagram --> Tuple2
 MergeDiagram --> List
 MergeDiagram --> Lists
 MergeDiagram --> Map
@@ -365,6 +370,13 @@ JVMList --> HeadedIter
 JVMList --> RangeHead
 JVMList --> ListCollector
 JVMList --> ArrayList
+MutableLazyRule --> None
+MutableLazyRule --> Option
+MutableLazyRule --> Some
+MutableLazyRule --> CompileResult
+MutableLazyRule --> CompileErrors
+MutableLazyRule --> Node
+MutableLazyRule --> Rule
 OrState --> None
 OrState --> Option
 OrState --> Some
@@ -378,6 +390,7 @@ OrState --> Context
 OrState --> CompileError
 OrState --> ImmutableCompileError
 DivideRule --> Option
+DivideRule --> List
 DivideRule --> Joiner
 DivideRule --> ListCollector
 DivideRule --> CompileResult
@@ -459,6 +472,7 @@ RuleGenerator --> MapCollector
 RuleGenerator --> ResultCollector
 RuleGenerator --> CompileResult
 RuleGenerator --> InlineCompileResult
+RuleGenerator --> Node
 RuleGenerator --> Rule
 RuleGenerator --> Location
 RuleGenerator --> Roots
@@ -541,6 +555,7 @@ Targets --> Map
 Targets --> Option
 StagedCompiler --> CompileResult
 StagedCompiler --> Location
+StagedCompiler --> Roots
 StagedCompiler --> Generator
 StagedCompiler --> Lexer
 StagedCompiler --> Parser
@@ -555,6 +570,7 @@ MutableDivideState --> Iter
 CompileApplication --> Some
 CompileApplication --> Error
 CompileApplication --> Compiler
+CompileApplication --> CompileError
 CompileApplication --> ApplicationError
 CompileApplication --> ThrowableError
 CompileApplication --> Location
@@ -562,9 +578,11 @@ CompileApplication --> Sources
 CompileApplication --> Targets
 CompileApplication --> Map
 CompileApplication --> Option
+CompileApplication --> IOException
 ContextRule --> Lists
 ContextRule --> CompileResult
 ContextRule --> NodeContext
+ContextRule --> CompileError
 ContextRule --> Node
 ContextRule --> StringContext
 ContextRule --> ImmutableCompileError
@@ -576,6 +594,7 @@ PlantUMLTargetPlatform --> AfterAll
 PlantUMLTargetPlatform --> Passer
 PlantUMLTargetPlatform --> Path
 PlantUMLTargetPlatform --> Paths
+LocatingRule --> Tuple2
 LocatingRule --> CompileResult
 LocatingRule --> CompileErrors
 LocatingRule --> Node
@@ -674,6 +693,7 @@ List --> Option
 List --> Tuple2
 List --> Iter
 List --> BiFunction
+ResultCollector --> Tuple2
 ResultCollector --> Ok
 ResultCollector --> Result
 Compiler --> CompileResult
@@ -684,15 +704,10 @@ OrRule --> CompileResult
 OrRule --> Context
 OrRule --> NodeContext
 OrRule --> StringContext
+OrRule --> CompileError
 OrRule --> Node
 OrRule --> List
 OrRule --> Function
-LazyRule --> None
-LazyRule --> Option
-LazyRule --> Some
-LazyRule --> CompileResult
-LazyRule --> CompileErrors
-LazyRule --> Node
 LazyRule --> Rule
 PathSource --> List
 PathSource --> Lists
@@ -701,6 +716,7 @@ PathSource --> Location
 PathSource --> SafeFiles
 PathSource --> Path
 PathTargets --> Option
+PathTargets --> Tuple2
 PathTargets --> Map
 PathTargets --> Iters
 PathTargets --> Location
@@ -833,10 +849,12 @@ DividingSplitter --> List
 DividingSplitter --> ListCollector
 DividingSplitter --> Splitter
 DividingSplitter --> Divider
+Main --> Option
 Main --> Iters
 Main --> ApplicationBuilder
 Main --> Error
 Main --> PlantUMLTargetPlatform
+Main --> TargetPlatform
 Main --> TypeScriptTargetPlatform
 Main --> PathSources
 Main --> Sources

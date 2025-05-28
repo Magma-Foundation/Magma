@@ -3,6 +3,7 @@ import { CompileResult } from "../../../../magmac/app/compile/error/CompileResul
 import { Context } from "../../../../magmac/app/compile/error/context/Context";
 import { NodeContext } from "../../../../magmac/app/compile/error/context/NodeContext";
 import { StringContext } from "../../../../magmac/app/compile/error/context/StringContext";
+import { CompileError } from "../../../../magmac/app/compile/error/error/CompileError";
 import { Node } from "../../../../magmac/app/compile/node/Node";
 import { List } from "../../../../magmac/api/collect/list/List";
 import { Function } from "../../../../java/util/function/Function";

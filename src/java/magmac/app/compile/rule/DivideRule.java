@@ -1,6 +1,7 @@
 package magmac.app.compile.rule;
 
 import magmac.api.Option;
+import magmac.api.collect.list.List;
 import magmac.api.iter.collect.Joiner;
 import magmac.api.iter.collect.ListCollector;
 import magmac.app.compile.error.CompileResult;
@@ -16,23 +17,23 @@ import magmac.app.compile.rule.fold.Folder;
 public record DivideRule(String key, Folder folder, Rule childRule) implements Rule {
     private CompileResult<Option<String>> join(NodeList list) {
         return list.iter()
-                .map(node -> this.childRule.generate(node))
+                .map((Node node) -> this.childRule.generate(node))
                 .collect(new CompileResultCollector<>(new Joiner(this.folder.createDelimiter())));
     }
 
     @Override
     public CompileResult<Node> lex(String input) {
         return new FoldingDivider(this.folder).divide(input)
-                .map(segment -> this.childRule.lex(segment))
+                .map((String segment) -> this.childRule.lex(segment))
                 .collect(new CompileResultCollector<>(new ListCollector<>()))
-                .mapValue(children -> new MapNode().withNodeList(this.key(), new InlineNodeList(children)));
+                .mapValue((List<Node> children) -> new MapNode().withNodeList(this.key(), new InlineNodeList(children)));
     }
 
     @Override
     public CompileResult<String> generate(Node node) {
         return node.findNodeList(this.key)
-                .map(list -> this.join(list))
+                .map((NodeList list) -> this.join(list))
                 .orElseGet(() -> CompileErrors.createNodeError("Node list '" + this.key + "' not present", node))
-                .mapValue(value -> value.orElse(""));
+                .mapValue((Option<String> value) -> value.orElse(""));
     }
 }

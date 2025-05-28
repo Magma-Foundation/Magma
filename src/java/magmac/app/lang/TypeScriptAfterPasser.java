@@ -24,12 +24,12 @@ public class TypeScriptAfterPasser implements Passer {
         int namespaceSize = state.findLocation().namespace().size();
         NodeList copy = Lists.repeat("..", namespaceSize)
                 .iter()
-                .map(value -> new MapNode().withString("value", value))
+                .map((String value) -> new MapNode().withString("value", value))
                 .collect(new NodeListCollector());
         NodeList segments = node.findNodeList("segments")
                 .orElse(InlineNodeList.empty());
 
-        Option<Tuple2<ParseState, Node>> map = segments.findLast().map(last -> {
+        Option<Tuple2<ParseState, Node>> map = segments.findLast().map((Node last) -> {
             String value = last.findString("value").orElse("");
             NodeList values = copy.addAll(segments);
             Node node1 = node.withString("child", value).withNodeList("segments", values);
@@ -42,11 +42,11 @@ public class TypeScriptAfterPasser implements Passer {
     @Override
     public PassResult pass(ParseState state, Node node) {
         return TypeScriptAfterPasser.passImport(state, node)
-                .or(() -> this.passMethod(state, node))
+                .or(() -> TypeScriptAfterPasser.passMethod(state, node))
                 .orElseGet(() -> InlinePassResult.empty());
     }
 
-    private Option<PassResult> passMethod(ParseState state, Node node) {
+    private static Option<PassResult> passMethod(ParseState state, Node node) {
         if (node.is("method")) {
             Node header = node.findNode("header").orElse(new MapNode());
             NodeList parameters = node.findNodeList("parameters").orElse(InlineNodeList.empty());

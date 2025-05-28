@@ -17,6 +17,6 @@ public record SuffixRule(Rule childRule, String suffix) implements Rule {
 
     @Override
     public CompileResult<String> generate(Node node) {
-        return this.childRule.generate(node).mapValue(result -> result + this.suffix);
+        return this.childRule.generate(node).mapValue((String result) -> result + this.suffix);
     }
 }

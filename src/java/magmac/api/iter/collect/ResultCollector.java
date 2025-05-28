@@ -1,5 +1,6 @@
 package magmac.api.iter.collect;
 
+import magmac.api.Tuple2;
 import magmac.api.result.Ok;
 import magmac.api.result.Result;
 
@@ -14,6 +15,6 @@ public record ResultCollector<T, C, X>(
     @Override
     public Result<C, X> fold(Result<C, X> currentResult, Result<T, X> element) {
         return currentResult.and(() -> element)
-                .mapValue(tuple -> this.collector.fold(tuple.left(), tuple.right()));
+                .mapValue((Tuple2<C, T> tuple) -> this.collector.fold(tuple.left(), tuple.right()));
     }
 }

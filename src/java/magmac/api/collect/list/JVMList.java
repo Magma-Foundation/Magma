@@ -26,12 +26,12 @@ public record JVMList<T>(java.util.List<T> elements) implements List<T> {
 
     @Override
     public Iter<T> iter() {
-        return new HeadedIter<>(new RangeHead(this.elements.size())).map(index -> this.get(index));
+        return new HeadedIter<>(new RangeHead(this.elements.size())).map((Integer index) -> this.get(index));
     }
 
     @Override
     public List<T> addAll(List<T> others) {
-        return others.iter().fold(this.createInitial(), (tList, element) -> tList.add(element));
+        return others.iter().fold(this.createInitial(), (List<T> tList, T element) -> tList.add(element));
     }
 
     private List<T> createInitial() {
@@ -41,7 +41,7 @@ public record JVMList<T>(java.util.List<T> elements) implements List<T> {
     @Override
     public List<T> removeAll(List<T> others) {
         return this.iter()
-                .filter(value -> !others.contains(value))
+                .filter((T value) -> !others.contains(value))
                 .collect(new ListCollector<>());
     }
 
@@ -53,7 +53,7 @@ public record JVMList<T>(java.util.List<T> elements) implements List<T> {
     @Override
     public List<T> sort(BiFunction<T, T, Integer> sorter) {
         ArrayList<T> copy = new ArrayList<>(this.elements);
-        copy.sort((t, u) -> sorter.apply(t, u));
+        copy.sort((T t, T u) -> sorter.apply(t, u));
         return new JVMList<>(copy);
     }
 

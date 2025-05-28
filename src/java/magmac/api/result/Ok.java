@@ -13,7 +13,7 @@ public record Ok<T, X>(T value) implements Result<T, X> {
 
     @Override
     public <R> Result<Tuple2<T, R>, X> and(Supplier<Result<R, X>> supplier) {
-        return supplier.get().mapValue(otherValue -> new Tuple2<>(this.value, otherValue));
+        return supplier.get().mapValue((R otherValue) -> new Tuple2<>(this.value, otherValue));
     }
 
     @Override

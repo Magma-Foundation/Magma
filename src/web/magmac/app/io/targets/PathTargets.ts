@@ -1,4 +1,5 @@
 import { Option } from "../../../../magmac/api/Option";
+import { Tuple2 } from "../../../../magmac/api/Tuple2";
 import { Map } from "../../../../magmac/api/collect/map/Map";
 import { Iters } from "../../../../magmac/api/iter/Iters";
 import { Location } from "../../../../magmac/app/io/Location";

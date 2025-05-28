@@ -18,7 +18,7 @@ public record JVMMap<K, V>(java.util.Map<K, V> map) implements Map<K, V> {
     public Iter<Tuple2<K, V>> iterEntries() {
         return new JVMList<>(new ArrayList<>(this.map.entrySet()))
                 .iter()
-                .map(entry -> new Tuple2<>(entry.getKey(), entry.getValue()));
+                .map((java.util.Map.Entry<K, V> entry) -> new Tuple2<>(entry.getKey(), entry.getValue()));
     }
 
     @Override

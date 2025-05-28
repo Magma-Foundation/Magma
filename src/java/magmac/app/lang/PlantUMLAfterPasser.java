@@ -17,7 +17,7 @@ import magmac.app.stage.parse.ParseState;
 
 public class PlantUMLAfterPasser implements Passer {
     private static Option<Node> createInherits(Node child, String key) {
-        return child.findNode(key).map(implemented -> new MapNode("inherits")
+        return child.findNode(key).map((Node implemented) -> new MapNode("inherits")
                 .withString("child", child.findString("name").orElse(""))
                 .withString("parent", PlantUMLAfterPasser.findValue(implemented)));
     }
@@ -46,7 +46,7 @@ public class PlantUMLAfterPasser implements Passer {
         return new InlineNodeList(node.findNodeList("children")
                 .orElse(InlineNodeList.empty())
                 .iter()
-                .flatMap(child -> PlantUMLAfterPasser.replaceRootChild(child))
+                .flatMap((Node child) -> PlantUMLAfterPasser.replaceRootChild(child))
                 .collect(new ListCollector<>()));
     }
 

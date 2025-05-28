@@ -36,7 +36,7 @@ public final class InlineCompileResult<T> implements CompileResult<T> {
 
     @Override
     public <R> CompileResult<R> flatMapValue(Function<T, CompileResult<R>> mapper) {
-        return InlineCompileResult.fromResult(this.result.flatMapValue(t -> mapper.apply(t).result()));
+        return InlineCompileResult.fromResult(this.result.flatMapValue((T t) -> mapper.apply(t).result()));
     }
 
     @Override
@@ -51,7 +51,7 @@ public final class InlineCompileResult<T> implements CompileResult<T> {
 
     @Override
     public CompileResult<T> merge(Supplier<CompileResult<T>> other, BiFunction<T, T, T> merger) {
-        return this.and(other).mapValue(tuple -> this.merge(merger, tuple));
+        return this.and(other).mapValue((Tuple2<T, T> tuple) -> this.merge(merger, tuple));
     }
 
     private T merge(BiFunction<T, T, T> merger, Tuple2<T, T> tuple) {

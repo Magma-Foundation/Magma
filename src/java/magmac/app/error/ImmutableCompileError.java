@@ -26,15 +26,15 @@ public record ImmutableCompileError(String message, Context context,
 
     @Override
     public String format(int depth) {
-        List<CompileError> copy = this.errors.sort((first, second) -> first.computeMaxDepth() - second.computeMaxDepth());
-        String joined = this.joinSorted(depth, copy);
+        List<CompileError> copy = this.errors.sort((CompileError first, CompileError second) -> first.computeMaxDepth() - second.computeMaxDepth());
+        String joined = ImmutableCompileError.joinSorted(depth, copy);
         return this.message + ": " + this.context.display() + joined;
     }
 
-    private String joinSorted(int depth, List<CompileError> copy) {
+    private static String joinSorted(int depth, List<CompileError> copy) {
         return copy.iter()
-                .map(compileError -> compileError.format(depth + 1))
-                .map(display -> ImmutableCompileError.formatEntry(depth, display))
+                .map((CompileError compileError) -> compileError.format(depth + 1))
+                .map((String display) -> ImmutableCompileError.formatEntry(depth, display))
                 .collect(new Joiner())
                 .orElse("");
     }
@@ -42,7 +42,7 @@ public record ImmutableCompileError(String message, Context context,
     @Override
     public int computeMaxDepth() {
         Iter<CompileError> compileErrorIter = this.errors.iter();
-        return 1 + compileErrorIter.map(compileError -> compileError.computeMaxDepth())
+        return 1 + compileErrorIter.map((CompileError compileError) -> compileError.computeMaxDepth())
                 .collect(new Max())
                 .orElse(0);
     }

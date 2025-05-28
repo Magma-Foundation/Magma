@@ -1,5 +1,6 @@
 package magmac.app.compile.rule;
 
+import magmac.api.Tuple2;
 import magmac.app.compile.error.CompileResult;
 import magmac.app.compile.error.error.CompileErrors;
 import magmac.app.compile.node.Node;
@@ -26,16 +27,16 @@ public final class LocatingRule implements Rule {
         return LocatingRule.createLocatingRule(leftRule, infix, rightRule, new LastLocator());
     }
 
-    public static Rule createLocatingRule(Rule leftRule, String infix, Rule rightRule, Locator locator) {
+    private static Rule createLocatingRule(Rule leftRule, String infix, Rule rightRule, Locator locator) {
         return new LocatingRule(leftRule, new LocatingSplitter(infix, locator), rightRule);
     }
 
     @Override
     public CompileResult<Node> lex(String input) {
-        return this.splitter.split(input).map(tuple -> {
+        return this.splitter.split(input).map((Tuple2<String, String> tuple) -> {
             String left = tuple.left();
             String right = tuple.right();
-            return this.leftRule.lex(left).merge(() -> this.rightRule.lex(right), (node, other) -> node.merge(other));
+            return this.leftRule.lex(left).merge(() -> this.rightRule.lex(right), (Node node, Node other) -> node.merge(other));
         }).orElseGet(() -> CompileErrors.createStringError(this.splitter.createMessage(), input));
     }
 
@@ -43,6 +44,6 @@ public final class LocatingRule implements Rule {
     public CompileResult<String> generate(Node node) {
         return this.leftRule.generate(node).merge(
                 () -> this.rightRule.generate(node),
-                (leftString, rightString) -> this.splitter.merge(leftString, rightString));
+                (String leftString, String rightString) -> this.splitter.merge(leftString, rightString));
     }
 }

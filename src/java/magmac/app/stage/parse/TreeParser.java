@@ -29,7 +29,7 @@ public class TreeParser implements Parser {
     }
 
     private Tuple2<ParseState, Node> parseNodeLists(ParseState state, Node root) {
-        return root.iterNodeLists().fold(new Tuple2<>(state, root), (current, entry) -> this.parseNodeList(current, entry));
+        return root.iterNodeLists().fold(new Tuple2<>(state, root), (Tuple2<ParseState, Node> current, Tuple2<String, NodeList> entry) -> this.parseNodeList(current, entry));
     }
 
     private Tuple2<ParseState, Node> parseNodeList(Tuple2<ParseState, Node> current, Tuple2<String, NodeList> entry) {
@@ -39,7 +39,7 @@ public class TreeParser implements Parser {
         String key = entry.left();
 
         Tuple2<ParseState, NodeList> initial = new Tuple2<>(currentState, InlineNodeList.empty());
-        Tuple2<ParseState, NodeList> newTuple = entry.right().iter().fold(initial, (currentTuple, node) -> {
+        Tuple2<ParseState, NodeList> newTuple = entry.right().iter().fold(initial, (Tuple2<ParseState, NodeList> currentTuple, Node node) -> {
             ParseState currentState1 = currentTuple.left();
             NodeList currentElements = currentTuple.right();
 
@@ -70,7 +70,7 @@ public class TreeParser implements Parser {
     @Override
     public CompileResult<Roots> apply(Roots initial) {
         Map<Location, Node> parsed = initial.iter()
-                .map(tuple -> this.parse(tuple.left(), tuple.right()))
+                .map((Tuple2<Location, Node> tuple) -> this.parse(tuple.left(), tuple.right()))
                 .collect(new MapCollector<>());
 
         return InlineCompileResult.fromResult(new Ok<Roots, CompileError>(new MapRoots(this.afterAllChildren.afterAll(parsed))));

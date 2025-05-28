@@ -24,15 +24,15 @@ public class RuleLexer implements Lexer {
         Location location = tuple.left();
         String input = tuple.right();
 
-        return this.rootRule.lex(input).mapValue(root -> new Tuple2<>(location, root));
+        return this.rootRule.lex(input).mapValue((Node root) -> new Tuple2<>(location, root));
     }
 
     @Override
     public CompileResult<Roots> apply(Map<Location, String> initial) {
         return InlineCompileResult.fromResult(initial.iterEntries()
-                .map(entry -> this.foldEntry(entry))
-                .map(tuple2CompileResult -> tuple2CompileResult.result())
+                .map((Tuple2<Location, String> entry) -> this.foldEntry(entry))
+                .map((CompileResult<Tuple2<Location, Node>> tuple2CompileResult) -> tuple2CompileResult.result())
                 .collect(new ResultCollector<>(new MapCollector<>()))
-                .mapValue(roots -> new MapRoots(roots)));
+                .mapValue((Map<Location, Node> roots) -> new MapRoots(roots)));
     }
 }

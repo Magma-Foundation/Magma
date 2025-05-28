@@ -3,6 +3,7 @@ import { MapCollector } from "../../../../magmac/api/collect/map/MapCollector";
 import { ResultCollector } from "../../../../magmac/api/iter/collect/ResultCollector";
 import { CompileResult } from "../../../../magmac/app/compile/error/CompileResult";
 import { InlineCompileResult } from "../../../../magmac/app/compile/error/InlineCompileResult";
+import { Node } from "../../../../magmac/app/compile/node/Node";
 import { Rule } from "../../../../magmac/app/compile/rule/Rule";
 import { Location } from "../../../../magmac/app/io/Location";
 import { Roots } from "../../../../magmac/app/stage/Roots";

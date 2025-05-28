@@ -27,7 +27,7 @@ record OrState<T>(Option<T> maybeValue, List<CompileError> errors) {
 
     CompileResult<T> toResult(Context context) {
         return this.maybeValue
-                .map(value -> InlineCompileResult.fromResult(new Ok<>(value)))
+                .map((T value) -> InlineCompileResult.fromResult(new Ok<>(value)))
                 .orElseGet(() -> InlineCompileResult.fromResult(new Err<>(new ImmutableCompileError("Invalid combination", context, this.errors))));
     }
 
