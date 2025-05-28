@@ -34,10 +34,7 @@ public final class JavaLang {
 
     private static Rule createStructureRule(String keyword) {
         Rule name = new StripRule(FilterRule.Symbol(new StringRule("name")));
-        Rule beforeContent = new OrRule(Lists.of(
-                new StripRule(new SuffixRule(LocatingRule.First(name, "<", new StringRule("type-params")), ">")),
-                name
-        ));
+        Rule beforeContent = CommonLang.attachTypeParams(name);
 
         Rule withParameters = new OrRule(Lists.of(
                 new StripRule(new SuffixRule(LocatingRule.First(beforeContent, "(", new StringRule("parameters")), ")")),

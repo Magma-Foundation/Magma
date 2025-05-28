@@ -2,7 +2,7 @@ import { InlineNodeList } from "../../../../magmac/app/compile/node/InlineNodeLi
 import { NodeList } from "../../../../magmac/app/compile/node/NodeList";
 import { ParseState } from "../../../../magmac/app/stage/parse/ParseState";
 import { BiFunction } from "../../../../java/util/function/BiFunction";
-export class ParseUnitImpl {private final state : ParseState;private final node : T;
+export class ParseUnitImpl<T> {private final state : ParseState;private final node : T;
 	 ParseUnitImpl( state : ParseState,  node : T) : public {
 		this.state=state;
 		this.node=node;

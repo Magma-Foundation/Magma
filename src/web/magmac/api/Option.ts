@@ -2,7 +2,7 @@ import { Consumer } from "../../java/util/function/Consumer";
 import { Function } from "../../java/util/function/Function";
 import { Predicate } from "../../java/util/function/Predicate";
 import { Supplier } from "../../java/util/function/Supplier";
-export interface Option {
+export interface Option<T> {
 	 map( mapper : Function<T, R>) : Option<R>;
 	 isPresent() : boolean;
 	 orElseGet( other : Supplier<T>) : T;

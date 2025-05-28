@@ -1,7 +1,7 @@
 import { Tuple2 } from "../../../magmac/api/Tuple2";
 import { Function } from "../../../java/util/function/Function";
 import { Supplier } from "../../../java/util/function/Supplier";
-export class Ok {
+export class Ok<T,  X> {
 	public mapValue( mapper : Function<T, R>) : Result<R, X> {
 		return new Ok<>( mapper.apply( this.value));
 	}

@@ -4,7 +4,7 @@ import { Result } from "../../../magmac/api/result/Result";
 import { BiFunction } from "../../../java/util/function/BiFunction";
 import { Function } from "../../../java/util/function/Function";
 import { Predicate } from "../../../java/util/function/Predicate";
-export interface Iter {
+export interface Iter<T> {
 	 foldToResult( initial : R,  folder : BiFunction<R, T, Result<R, X>>) : Result<R, X>;
 	 map( mapper : Function<T, R>) : Iter<R>;
 	 fold( initial : R,  folder : BiFunction<R, T, R>) : R;

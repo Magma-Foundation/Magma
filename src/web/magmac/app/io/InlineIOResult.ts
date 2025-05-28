@@ -1,7 +1,7 @@
 import { Result } from "../../../magmac/api/result/Result";
 import { IOException } from "../../../java/io/IOException";
 import { Function } from "../../../java/util/function/Function";
-export class InlineIOResult {
+export class InlineIOResult<T> {
 	public mapValue( mapper : Function<T, R>) : IOResult<R> {
 		return new InlineIOResult<>( this.result.mapValue( mapper));
 	}

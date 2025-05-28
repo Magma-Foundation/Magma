@@ -4,7 +4,7 @@ import { CompileError } from "../../../../magmac/app/compile/error/error/Compile
 import { BiFunction } from "../../../../java/util/function/BiFunction";
 import { Function } from "../../../../java/util/function/Function";
 import { Supplier } from "../../../../java/util/function/Supplier";
-export class InlineCompileResult {
+export class InlineCompileResult<T> {
 	public mapValue( mapper : Function<T, R>) : CompileResult<R> {
 		return CompileResults.fromResult( this.result.mapValue( mapper));
 	}

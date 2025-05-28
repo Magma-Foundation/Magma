@@ -2,7 +2,7 @@ import { CompileResult } from "../../../../magmac/app/compile/error/CompileResul
 import { Location } from "../../../../magmac/app/io/Location";
 import { BiFunction } from "../../../../java/util/function/BiFunction";
 import { Function } from "../../../../java/util/function/Function";
-export interface Unit {
+export interface Unit<T> {
 	 deconstruct( merger : BiFunction<Location, T, R>) : R;
 	 mapValue( mapper : Function<T, CompileResult<R>>) : CompileResult<Unit<R>>;
 }

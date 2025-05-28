@@ -6,7 +6,7 @@ import { Result } from "../../../magmac/api/result/Result";
 import { BiFunction } from "../../../java/util/function/BiFunction";
 import { Function } from "../../../java/util/function/Function";
 import { Predicate } from "../../../java/util/function/Predicate";
-export class HeadedIter {
+export class HeadedIter<T> {
 	public foldToResult( initial : R,  folder : BiFunction<R, T, Result<R, X>>) : Result<R, X> {
 		return this.fold( HeadedIter.createInitial( initial), ( rxResult : Result<R, X>,  t : T) => rxResult.flatMapValue( ( r : R) => folder.apply( r, t)));
 	}

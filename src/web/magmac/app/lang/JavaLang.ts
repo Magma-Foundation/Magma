@@ -22,7 +22,7 @@ export class JavaLang {
 	}
 	private static createStructureRule( keyword : String) : Rule {
 		 name : Rule=new StripRule( FilterRule.Symbol( new StringRule( "name")));
-		 beforeContent : Rule=new OrRule( Lists.of( new StripRule( new SuffixRule( LocatingRule.First( name, "<", new StringRule( "type-params")), ">")), name));
+		 beforeContent : Rule=CommonLang.attachTypeParams( name);
 		 withParameters : Rule=new OrRule( Lists.of( new StripRule( new SuffixRule( LocatingRule.First( beforeContent, "(", new StringRule( "parameters")), ")")), beforeContent));
 		 withEnds : Rule=new OrRule( Lists.of( LocatingRule.First( withParameters, " extends ", new NodeRule( "extended", CommonLang.createTypeRule( ))), withParameters));
 		 withImplements : Rule=new OrRule( Lists.of( new ContextRule( "With implements", LocatingRule.First( withEnds, " implements ", new NodeRule( "implemented", CommonLang.createTypeRule( )))), new ContextRule( "Without implements", withEnds)));

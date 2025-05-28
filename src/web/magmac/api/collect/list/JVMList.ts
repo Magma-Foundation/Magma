@@ -8,7 +8,7 @@ import { Iter } from "../../../../magmac/api/iter/Iter";
 import { ListCollector } from "../../../../magmac/api/iter/collect/ListCollector";
 import { ArrayList } from "../../../../java/util/ArrayList";
 import { BiFunction } from "../../../../java/util/function/BiFunction";
-export class JVMList {
+export class JVMList<T> {
 	 JVMList() : public {
 		this( new ArrayList<>( ));
 	}

@@ -3,7 +3,7 @@ import { Map } from "../../../../magmac/api/collect/map/Map";
 import { Maps } from "../../../../magmac/api/collect/map/Maps";
 import { Iter } from "../../../../magmac/api/iter/Iter";
 import { Location } from "../../../../magmac/app/io/Location";
-export class MapUnitSet {
+export class MapUnitSet<T> {
 	 MapUnitSet() : public {
 		this( Maps.empty( ));
 	}

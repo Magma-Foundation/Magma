@@ -2,7 +2,7 @@ import { Option } from "../../../../magmac/api/Option";
 import { Tuple2 } from "../../../../magmac/api/Tuple2";
 import { Iter } from "../../../../magmac/api/iter/Iter";
 import { BiFunction } from "../../../../java/util/function/BiFunction";
-export interface List {
+export interface List<T> {
 	 add( element : T) : List<T>;
 	 iter() : Iter<T>;
 	 addAll( others : List<T>) : List<T>;

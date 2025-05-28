@@ -4,7 +4,7 @@ import { Iter } from "../../../../magmac/api/iter/Iter";
 import { ArrayList } from "../../../../java/util/ArrayList";
 import { Function } from "../../../../java/util/function/Function";
 import { Supplier } from "../../../../java/util/function/Supplier";
-export class JVMMap {
+export class JVMMap<K,  V> {
 	public getOrDefault( key : K,  other : V) : V {
 		return this.map.getOrDefault( key, other);
 	}

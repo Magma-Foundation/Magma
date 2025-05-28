@@ -1,6 +1,6 @@
 import { Collector } from "../../../../magmac/api/iter/collect/Collector";
 import { Ok } from "../../../../magmac/api/result/Ok";
-export class CompileResultCollector {
+export class CompileResultCollector<T,  C> {
 	public createInitial() : CompileResult<C> {
 		return CompileResults.fromResult( new Ok<>( this.joiner.createInitial( )));
 	}

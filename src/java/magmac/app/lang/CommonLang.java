@@ -223,10 +223,9 @@ final class CommonLang {
 
     static Rule attachTypeParams(Rule beforeTypeParams) {
         Rule typeParams = new DivideRule("type-parameters", new ValueFolder(), new StringRule("value"));
-        Rule leftRule1 = new OrRule(Lists.of(
+        return new OptionNodeListRule("type-parameters",
                 new StripRule(new SuffixRule(LocatingRule.First(beforeTypeParams, "<", typeParams), ">")),
                 beforeTypeParams
-        ));
-        return leftRule1;
+        );
     }
 }

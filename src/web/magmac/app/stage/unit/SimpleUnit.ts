@@ -2,7 +2,7 @@ import { CompileResult } from "../../../../magmac/app/compile/error/CompileResul
 import { Location } from "../../../../magmac/app/io/Location";
 import { BiFunction } from "../../../../java/util/function/BiFunction";
 import { Function } from "../../../../java/util/function/Function";
-export class SimpleUnit {private final location : Location;private final value : T;
+export class SimpleUnit<T> {private final location : Location;private final value : T;
 	 SimpleUnit( location : Location,  value : T) : public {
 		this.location=location;
 		this.value=value;

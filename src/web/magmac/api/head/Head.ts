@@ -1,4 +1,4 @@
 import { Option } from "../../../magmac/api/Option";
-export interface Head {
+export interface Head<T> {
 	 next() : Option<T>;
 }
