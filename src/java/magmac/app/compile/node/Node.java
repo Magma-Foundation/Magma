@@ -2,10 +2,15 @@ package magmac.app.compile.node;
 
 import magmac.api.Option;
 import magmac.api.Tuple2;
+import magmac.api.collect.list.List;
 import magmac.api.iter.Iter;
 import magmac.app.compile.error.CompileResult;
 
+import java.util.function.Function;
+
 public interface Node {
+    CompileResult<NodeList> findNodeListOrError(String key);
+
     CompileResult<Node> findNodeOrError(String key);
 
     Iter<Tuple2<String, Node>> iterNodes();
@@ -37,4 +42,12 @@ public interface Node {
     Iter<Tuple2<String, String>> iterStrings();
 
     boolean hasNodeList(String key);
+
+    EmptyDestroyer destroy();
+
+    CompileResult<Tuple2<Node, NodeList>> removeNodeList(String key);
+
+    boolean isEmpty();
+
+    <T> Node withNodeListFromElements(List<T> list, Function<T, Node> serialize);
 }

@@ -172,6 +172,22 @@ public final class MapNode implements Node {
     }
 
     @Override
+    public EmptyDestroyer destroy() {
+        return new EmptyDestroyer(this);
+    }
+
+    @Override
+    public CompileResult<Tuple2<Node, NodeList>> removeNodeList(String key) {
+        nodeLists.removeKey(key);
+        return null;
+    }
+
+    @Override
+    public boolean isEmpty() {
+        return strings.isEmpty() && nodes.isEmpty() && nodeLists.isEmpty();
+    }
+
+    @Override
     public Iter<Tuple2<String, NodeList>> iterNodeLists() {
         return this.nodeLists.iter();
     }
@@ -202,5 +218,12 @@ public final class MapNode implements Node {
         return findNode(key)
                 .map((Node node1) -> CompileResults.fromResult(new Ok<>(node1)))
                 .orElseGet(() -> CompileErrors.createNodeError("Node '" + key + "' not present", this));
+    }
+
+    @Override
+    public CompileResult<NodeList> findNodeListOrError(String key) {
+        return findNodeList(key)
+                .map(list -> CompileResults.fromOk(list))
+                .orElseGet(() -> CompileErrors.createNodeError("Node list '" + key + "' not present", this));
     }
 }

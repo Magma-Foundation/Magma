@@ -1,5 +1,6 @@
 package magmac.api.collect.map;
 
+import magmac.api.Option;
 import magmac.api.Tuple2;
 import magmac.api.iter.Iter;
 
@@ -20,4 +21,6 @@ public interface Map<K, V> {
     boolean isEmpty();
 
     Map<K, V> mapOrPut(K key, Function<V, V> mapper, Supplier<V> supplier);
+
+    Option<Tuple2<Map<K, V>, V>> removeKey(K key);
 }

@@ -5,7 +5,6 @@ import magmac.app.compile.node.MapNode;
 import magmac.app.compile.node.Node;
 
 public record NodeRule(String key, Rule childRule) implements Rule {
-
     @Override
     public CompileResult<Node> lex(String input) {
         return this.childRule.lex(input)

@@ -68,6 +68,8 @@ Lexer <|-- RuleLexer
 class CompileApplication
 Application <|-- CompileApplication
 
+interface JavaRootSegment
+
 class OrState
 
 interface ParseState
@@ -196,6 +198,8 @@ class ResultCollector
 Collector <|-- ResultCollector
 
 interface Head
+
+class JavaRoot
 
 interface ParseResult
 
@@ -534,6 +538,9 @@ SafeFiles --> Files
 SafeFiles --> Path
 SafeFiles --> Collectors
 SafeFiles --> Stream
+JavaRoot --> List
+JavaRoot --> Lists
+JavaRoot --> JavaRootSegment
 Targets --> IOException
 Targets --> Option
 Targets --> UnitSet
