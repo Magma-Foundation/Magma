@@ -76,8 +76,12 @@ public final class JavaLang {
     }
 
     private static Rule createAssignmentRule() {
-        Rule definition = new NodeRule("definition", JavaLang.createDefinitionRule());
-        Rule value = new NodeRule("value", JavaLang.createValueRule());
+        Rule definition = new OrRule(Lists.of(
+                new NodeRule("definition", JavaLang.createDefinitionRule()),
+                new NodeRule("destination", JavaLang.createValueRule())
+        ));
+
+        Rule value = new NodeRule("source", JavaLang.createValueRule());
         return new TypeRule("assignment", LocatingRule.First(definition, "=", value));
     }
 
@@ -89,7 +93,8 @@ public final class JavaLang {
                 JavaLang.createInvocationRule(value),
                 JavaLang.createNumberRule(),
                 JavaLang.createAccessRule(value),
-                JavaLang.createSymbolValueRule()
+                JavaLang.createSymbolValueRule(),
+                LocatingRule.First(new NodeRule("left", value), "+", new NodeRule("right", value))
         )));
         return value;
     }
@@ -149,7 +154,7 @@ public final class JavaLang {
         LazyRule functionSegmentRule = new LazyRule();
         functionSegmentRule.set(new OrRule(Lists.of(
                 CommonLang.createWhitespaceRule(),
-                new StripRule(new SuffixRule(JavaLang.createFunctionSegmentValueRule(), ";")),
+                new TypeRule("statement", new StripRule(new SuffixRule(JavaLang.createFunctionSegmentValueRule(), ";"))),
                 new StripRule(new SuffixRule(LocatingRule.First(new NodeRule("header", JavaLang.createBlockHeaderRule()), "{", CommonLang.Statements("children", functionSegmentRule)), "}"))
         )));
 
