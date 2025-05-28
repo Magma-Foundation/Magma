@@ -5,7 +5,7 @@ export class PrefixRule {
 	lex(input : String) : CompileResult<Node> {
 		if(!input.startsWith( this.prefix( ))){ 
 		return CompileErrors.createStringError( "Prefix '" + this.prefix + "' not present", input);}
-		 String sliced=input.substring( this.prefix.length( ));
+		sliced : String=input.substring( this.prefix.length( ));
 		return this.childRule.lex( sliced);
 	}
 	generate(node : Node) : CompileResult<String> {

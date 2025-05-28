@@ -16,40 +16,40 @@ export class TypescriptLang {
 		return new TypeRule( "root", CommonLang.Statements( "children", new OrRule( Lists.of( CommonLang.createWhitespaceRule( ), TypescriptLang.createImportRule( ), TypescriptLang.createClassRule( "class"), TypescriptLang.createClassRule( "interface")))));
 	}
 	createImportRule() : TypeRule {
-		 Rule segments=new SuffixRule( new DivideRule( "segments", new DelimitedFolder( '/'), new StringRule( "value")), "\";\n");
-		 Rule first=LocatingRule.First( new StringRule( "child"), " } from \"", segments);
+		segments : Rule=new SuffixRule( new DivideRule( "segments", new DelimitedFolder( '/'), new StringRule( "value")), "\";\n");
+		first : Rule=LocatingRule.First( new StringRule( "child"), " } from \"", segments);
 		return new TypeRule( "import", new PrefixRule( "import { ", first));
 	}
 	createClassRule(type : String) : Rule {
-		 Rule children=CommonLang.Statements( "children", TypescriptLang.createStructureMemberRule( ));
-		 Rule name=LocatingRule.First( new StringRule( "name"), " {", new SuffixRule( children, "\n}\n"));
+		children : Rule=CommonLang.Statements( "children", TypescriptLang.createStructureMemberRule( ));
+		name : Rule=LocatingRule.First( new StringRule( "name"), " {", new SuffixRule( children, "\n}\n"));
 		return new TypeRule( type, new PrefixRule( "export " + type + " ", name));
 	}
 	createStructureMemberRule() : Rule {
 		return new OrRule( Lists.of( CommonLang.createWhitespaceRule( ), TypescriptLang.createMethodRule( ), new TypeRule( "statement", new ExactRule( "\n\ttemp : ?;"))));
 	}
 	createMethodRule() : TypeRule {
-		 Rule header=new OrRule( Lists.of( TypescriptLang.createDefinitionRule( ), TypescriptLang.createConstructorRule( )));
-		 PrefixRule header1=new PrefixRule( "\n\t", new NodeRule( "header", header));
-		 DivideRule children=CommonLang.Statements( "children", TypescriptLang.createFunctionSegmentRule( ));
-		 SuffixRule childRule=new SuffixRule( LocatingRule.First( header1, " {", new StripRule( "", children, "after-children")), "}");
+		header : Rule=new OrRule( Lists.of( TypescriptLang.createDefinitionRule( ), TypescriptLang.createConstructorRule( )));
+		header1 : PrefixRule=new PrefixRule( "\n\t", new NodeRule( "header", header));
+		children : DivideRule=CommonLang.Statements( "children", TypescriptLang.createFunctionSegmentRule( ));
+		childRule : SuffixRule=new SuffixRule( LocatingRule.First( header1, " {", new StripRule( "", children, "after-children")), "}");
 		return new TypeRule( "method", new OptionNodeListRule( "children", childRule, new SuffixRule( header1, ";")));
 	}
 	createFunctionSegmentRule() : Rule {
-		 LazyRule functionSegmentRule=new MutableLazyRule( );
-		 LazyRule valueLazy=new MutableLazyRule( );
-		 LazyRule value=CommonLang.initValueRule( functionSegmentRule, valueLazy, " => ", TypescriptLang.createDefinitionRule( ));
-		return CommonLang.initFunctionSegmentRule( functionSegmentRule, value);
+		functionSegmentRule : LazyRule=new MutableLazyRule( );
+		valueLazy : LazyRule=new MutableLazyRule( );
+		value : LazyRule=CommonLang.initValueRule( functionSegmentRule, valueLazy, " => ", TypescriptLang.createDefinitionRule( ));
+		return CommonLang.initFunctionSegmentRule( functionSegmentRule, value, TypescriptLang.createDefinitionRule( ));
 	}
 	createConstructorRule() : TypeRule {
-		 DivideRule parametersRule=CommonLang.createParametersRule( TypescriptLang.createDefinitionRule( ));
+		parametersRule : DivideRule=CommonLang.createParametersRule( TypescriptLang.createDefinitionRule( ));
 		return new TypeRule( "constructor", new PrefixRule( "constructor(", new SuffixRule( parametersRule, ")")));
 	}
 	createDefinitionRule() : Rule {
-		 LazyRule definition=new MutableLazyRule( );
-		 DivideRule parameters=CommonLang.createParametersRule( definition);
-		 Rule name=new StringRule( "name");
-		 Rule leftRule=new OrRule( Lists.of( new SuffixRule( LocatingRule.First( name, "(", parameters), ")"), name));
+		definition : LazyRule=new MutableLazyRule( );
+		parameters : DivideRule=CommonLang.createParametersRule( definition);
+		name : Rule=new StringRule( "name");
+		leftRule : Rule=new OrRule( Lists.of( new SuffixRule( LocatingRule.First( name, "(", parameters), ")"), name));
 		return definition.set( LocatingRule.First( leftRule, " : ", new NodeRule( "type", TypescriptLang.createTypeRule( ))));
 	}
 	createTypeRule() : Rule {

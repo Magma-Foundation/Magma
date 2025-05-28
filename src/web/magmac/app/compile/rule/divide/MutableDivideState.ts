@@ -48,14 +48,14 @@ export class MutableDivideState {
 	}
 	pop() : Option<Tuple2<DivideState, Character>> {
 		if(this.index<this.input.length( )){ 
-		 char c=this.input.charAt( this.index);
+		c : char=this.input.charAt( this.index);
 		this.index++;
 		return new Some<>( new Tuple2<DivideState, Character>( this, c));}
 		else{ 
 		return new None<>( );}
 	}
 	popAndAppendToTuple() : Option<Tuple2<DivideState, Character>> {
-		return this.pop( ).map( (popped : Tuple2<DivideState, Character>) => { DivideState append=popped.left( ).append( popped.right( ));return new Tuple2<>( append, popped.right( ));});
+		return this.pop( ).map( (popped : Tuple2<DivideState, Character>) => {append : DivideState=popped.left( ).append( popped.right( ));return new Tuple2<>( append, popped.right( ));});
 	}
 	popAndAppendToOption() : Option<DivideState> {
 		return this.popAndAppendToTuple( ).map( (divideStateCharacterTuple2 : Tuple2<DivideState, Character>) => divideStateCharacterTuple2.left( ));

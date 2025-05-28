@@ -18,7 +18,7 @@ export class DividingSplitter {
 		return new DividingSplitter( divider, new FirstSelector( delimiter));
 	}
 	split(input : String) : Option<Tuple2<String, String>> {
-		 List<String> list=this.divider.divide( input).collect( new ListCollector<>( ));
+		list : List<String>=this.divider.divide( input).collect( new ListCollector<>( ));
 		return this.selector.select( list);
 	}
 	createMessage() : String {

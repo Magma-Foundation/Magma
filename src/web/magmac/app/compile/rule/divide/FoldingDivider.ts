@@ -19,12 +19,12 @@ export class FoldingDivider {
 	foldDoubleQuotes(state : DivideState, c : char) : Option<DivideState> {
 		if('\"'!=c){ 
 		return new None<>( );}
-		 DivideState current=state.append( '\"');
+		current : DivideState=state.append( '\"');
 		if(true){ 
-		 Option<Tuple2<DivideState, Character>> maybePopped=current.popAndAppendToTuple( );
+		maybePopped : Option<Tuple2<DivideState, Character>>=current.popAndAppendToTuple( );
 		if(maybePopped.isEmpty( )){ 
 		break;}
-		 Tuple2<DivideState, Character> poppedTuple=maybePopped.orElse( null);
+		poppedTuple : Tuple2<DivideState, Character>=maybePopped.orElse( null);
 		current=poppedTuple.left( );
 		if('\\'==poppedTuple.right( )){ 
 		current=current.popAndAppendToOption( ).orElse( current);}
@@ -33,14 +33,14 @@ export class FoldingDivider {
 		return new Some<>( current);
 	}
 	divide(input : String) : Iter<String> {
-		 DivideState current=new MutableDivideState( input);
+		current : DivideState=new MutableDivideState( input);
 		if(true){ 
-		 Option<Tuple2<DivideState, Character>> maybePopped=current.pop( );
+		maybePopped : Option<Tuple2<DivideState, Character>>=current.pop( );
 		if(maybePopped.isEmpty( )){ 
 		break;}
 		current=maybePopped.orElse( null).left( );
-		 char c=maybePopped.orElse( null).right( );
-		 DivideState finalCurrent=current;
+		c : char=maybePopped.orElse( null).right( );
+		finalCurrent : DivideState=current;
 		current=FoldingDivider.foldSingleQuotes( current, c).or( ( )->FoldingDivider.foldDoubleQuotes( finalCurrent, c)).orElseGet( ( )->this.folder.fold( finalCurrent, c));}
 		return current.advance( ).iter( );
 	}

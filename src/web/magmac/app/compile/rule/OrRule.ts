@@ -12,8 +12,8 @@ export class OrRule {
 		return mapper.apply( rule).match( (value : T) => state.withValue( value), (error : CompileError) => state.withError( error));
 	}
 	foldAll(mapper : Function<Rule, CompileResult<T>>, context : Context) : CompileResult<T> {
-		 Iter<Rule> ruleIter=this.rules.iter( );
-		 OrState<T> initial=new OrState<T>( );
+		ruleIter : Iter<Rule>=this.rules.iter( );
+		initial : OrState<T>=new OrState<T>( );
 		return ruleIter.fold( initial, (state : OrState<T>, rule : Rule) => OrRule.foldElement( state, rule, mapper)).toResult( context);
 	}
 	lex(input : String) : CompileResult<Node> {

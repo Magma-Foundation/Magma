@@ -25,8 +25,8 @@ export class PlantUMLAfterPasser {
 		return "?";
 	}
 	replaceRootChild(child : Node) : Iter<Node> {
-		 Option<Node> extended=PlantUMLAfterPasser.createInherits( child, "extended");
-		 Option<Node> implemented=PlantUMLAfterPasser.createInherits( child, "implemented");
+		extended : Option<Node>=PlantUMLAfterPasser.createInherits( child, "extended");
+		implemented : Option<Node>=PlantUMLAfterPasser.createInherits( child, "implemented");
 		return Iters.fromValues( child).concat( Iters.fromOption( extended)).concat( Iters.fromOption( implemented));
 	}
 	replaceRootChildren(node : Node) : NodeList {
@@ -34,13 +34,13 @@ export class PlantUMLAfterPasser {
 	}
 	pass(state : ParseState, node : Node) : PassResult {
 		if(node.is( "root")){ 
-		 NodeList values=PlantUMLAfterPasser.replaceRootChildren( node);
-		 Tuple2<ParseState, Node> tuple=new Tuple2<>( state, node.withNodeList( "children", values));
+		values : NodeList=PlantUMLAfterPasser.replaceRootChildren( node);
+		tuple : Tuple2<ParseState, Node>=new Tuple2<>( state, node.withNodeList( "children", values));
 		return new InlinePassResult( new Some<>( InlineCompileResult.fromOk( tuple)));}
 		if(node.is( "import")){ 
-		 String child=node.findNodeList( "segments").orElse( InlineNodeList.empty( )).findLast( ).orElse( null).findString( "value").orElse( "");
-		 Node dependency=new MapNode( "dependency").withString( "parent", state.findLocation( ).name( )).withString( "child", child);
-		 Tuple2<ParseState, Node> tuple=new Tuple2<>( state, dependency);
+		child : String=node.findNodeList( "segments").orElse( InlineNodeList.empty( )).findLast( ).orElse( null).findString( "value").orElse( "");
+		dependency : Node=new MapNode( "dependency").withString( "parent", state.findLocation( ).name( )).withString( "child", child);
+		tuple : Tuple2<ParseState, Node>=new Tuple2<>( state, dependency);
 		return new InlinePassResult( new Some<>( InlineCompileResult.fromOk( tuple)));}
 		return InlinePassResult.empty( );
 	}

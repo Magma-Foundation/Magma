@@ -6,8 +6,8 @@ import { SafeFiles } from "../../../../magmac/app/io/SafeFiles";
 import { Path } from "../../../../java/nio/file/Path";
 export class PathSource {
 	computeName() : String {
-		 String fileName=this.child.getFileName( ).toString( );
-		 int fileSeparator=fileName.lastIndexOf( '.');
+		fileName : String=this.child.getFileName( ).toString( );
+		fileSeparator : int=fileName.lastIndexOf( '.');
 		return fileName.substring( 0, fileSeparator);
 	}
 	read() : IOResult<String> {
@@ -17,12 +17,12 @@ export class PathSource {
 		return new Location( this.computeNamespace( ), this.computeName( ));
 	}
 	computeNamespace() : List<String> {
-		 List<String> segments=Lists.empty( );
-		 Path relative=this.root.relativize( this.child).getParent( );
+		segments : List<String>=Lists.empty( );
+		relative : Path=this.root.relativize( this.child).getParent( );
 		if(null==relative){ 
 		return Lists.empty( );}
-		 int nameCount=relative.getNameCount( );
-		 int i=0;
+		nameCount : int=relative.getNameCount( );
+		i : int=0;
 		if(i<nameCount){ 
 		segments=segments.add( relative.getName( i).toString( ));
 		i++;}

@@ -1,9 +1,9 @@
 export class NumberFilter {
 	test(input : String) : boolean {
-		 int length=input.length( );
-		 int i=0;
+		length : int=input.length( );
+		i : int=0;
 		if(i<length){ 
-		 char c=input.charAt( i);
+		c : char=input.charAt( i);
 		if(Character.isDigit( c)){ 
 		i++;
 		continue;}

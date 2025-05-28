@@ -21,43 +21,43 @@ export class JavaLang {
 		return new TypeRule( "root", CommonLang.Statements( "children", new OrRule( Lists.of( CommonLang.createWhitespaceRule( ), JavaLang.createNamespacedRule( "package"), JavaLang.createNamespacedRule( "import"), JavaLang.createStructureRule( "record"), JavaLang.createStructureRule( "interface"), JavaLang.createStructureRule( "class"), JavaLang.createStructureRule( "enum")))));
 	}
 	createStructureRule(keyword : String) : Rule {
-		 Rule name=new StripRule( FilterRule.Symbol( new StringRule( "name")));
-		 Rule beforeContent=new OrRule( Lists.of( new StripRule( new SuffixRule( LocatingRule.First( name, "<", new StringRule( "type-params")), ">")), name));
-		 Rule withParameters=new OrRule( Lists.of( new StripRule( new SuffixRule( LocatingRule.First( beforeContent, "(", new StringRule( "parameters")), ")")), beforeContent));
-		 Rule withEnds=new OrRule( Lists.of( LocatingRule.First( withParameters, " extends ", new NodeRule( "extended", CommonLang.createTypeRule( ))), withParameters));
-		 Rule withImplements=new OrRule( Lists.of( new ContextRule( "With implements", LocatingRule.First( withEnds, " implements ", new NodeRule( "implemented", CommonLang.createTypeRule( )))), new ContextRule( "Without implements", withEnds)));
-		 Rule afterKeyword=LocatingRule.First( withImplements, "{", new StripRule( new SuffixRule( CommonLang.Statements( "children", JavaLang.createStructureMemberRule( )), "}")));
+		name : Rule=new StripRule( FilterRule.Symbol( new StringRule( "name")));
+		beforeContent : Rule=new OrRule( Lists.of( new StripRule( new SuffixRule( LocatingRule.First( name, "<", new StringRule( "type-params")), ">")), name));
+		withParameters : Rule=new OrRule( Lists.of( new StripRule( new SuffixRule( LocatingRule.First( beforeContent, "(", new StringRule( "parameters")), ")")), beforeContent));
+		withEnds : Rule=new OrRule( Lists.of( LocatingRule.First( withParameters, " extends ", new NodeRule( "extended", CommonLang.createTypeRule( ))), withParameters));
+		withImplements : Rule=new OrRule( Lists.of( new ContextRule( "With implements", LocatingRule.First( withEnds, " implements ", new NodeRule( "implemented", CommonLang.createTypeRule( )))), new ContextRule( "Without implements", withEnds)));
+		afterKeyword : Rule=LocatingRule.First( withImplements, "{", new StripRule( new SuffixRule( CommonLang.Statements( "children", JavaLang.createStructureMemberRule( )), "}")));
 		return new TypeRule( keyword, LocatingRule.First( new StringRule( "before-keyword"), keyword+" ", afterKeyword));
 	}
 	createStructureMemberRule() : OrRule {
-		 LazyRule functionSegmentRule=new MutableLazyRule( );
-		 LazyRule valueLazy=new MutableLazyRule( );
-		 LazyRule value=CommonLang.initValueRule( functionSegmentRule, valueLazy, "->", JavaLang.createDefinitionRule( ));
-		 Rule functionSegment=CommonLang.initFunctionSegmentRule( functionSegmentRule, value);
+		functionSegmentRule : LazyRule=new MutableLazyRule( );
+		valueLazy : LazyRule=new MutableLazyRule( );
+		value : LazyRule=CommonLang.initValueRule( functionSegmentRule, valueLazy, "->", JavaLang.createDefinitionRule( ));
+		functionSegment : Rule=CommonLang.initFunctionSegmentRule( functionSegmentRule, value, createDefinitionRule( ));
 		return new OrRule( Lists.of( CommonLang.createWhitespaceRule( ), JavaLang.createStructureStatementRule( value), JavaLang.createMethodRule( functionSegment)));
 	}
 	createStructureStatementRule(value1 : LazyRule) : Rule {
-		 Rule definition=new OrRule( Lists.of( new NodeRule( "value", new TypeRule( "definition", JavaLang.createDefinitionRule( ))), CommonLang.createAssignmentRule( value1)));
+		definition : Rule=new OrRule( Lists.of( new NodeRule( "value", new TypeRule( "definition", JavaLang.createDefinitionRule( ))), CommonLang.createAssignmentRule( value1, createDefinitionRule( ))));
 		return new TypeRule( "statement", new StripRule( new SuffixRule( definition, ";")));
 	}
 	createMethodRule(childRule : Rule) : Rule {
-		 NodeRule header=new NodeRule( "header", new OrRule( Lists.of( JavaLang.createDefinitionRule( ), new TypeRule( "constructor", new StripRule( FilterRule.Symbol( new StringRule( "name")))))));
-		 Rule parameters=CommonLang.createParametersRule( JavaLang.createDefinitionRule( ));
-		 Rule content=CommonLang.Statements( "children", childRule);
-		 Rule rightRule=new StripRule( new PrefixRule( "{", new SuffixRule( new StripRule( "", content, "after-children"), "}")));
-		 Rule withParams=new OrRule( Lists.of( new SuffixRule( parameters, ");"), LocatingRule.First( parameters, ")", rightRule)));
+		header : NodeRule=new NodeRule( "header", new OrRule( Lists.of( JavaLang.createDefinitionRule( ), new TypeRule( "constructor", new StripRule( FilterRule.Symbol( new StringRule( "name")))))));
+		parameters : Rule=CommonLang.createParametersRule( JavaLang.createDefinitionRule( ));
+		content : Rule=CommonLang.Statements( "children", childRule);
+		rightRule : Rule=new StripRule( new PrefixRule( "{", new SuffixRule( new StripRule( "", content, "after-children"), "}")));
+		withParams : Rule=new OrRule( Lists.of( new SuffixRule( parameters, ");"), LocatingRule.First( parameters, ")", rightRule)));
 		return new TypeRule( "method", LocatingRule.First( header, "(", withParams));
 	}
 	createNamespacedRule(type : String) : Rule {
-		 Rule childRule=new DivideRule( "segments", new DelimitedFolder( '.'), new StringRule( "value"));
+		childRule : Rule=new DivideRule( "segments", new DelimitedFolder( '.'), new StringRule( "value"));
 		return new TypeRule( type, new StripRule( new SuffixRule( new PrefixRule( type+" ", childRule), ";")));
 	}
 	createDefinitionRule() : Rule {
-		 Rule leftRule1=new StringRule( "before-type");
-		 Rule rightRule=new NodeRule( "type", CommonLang.createTypeRule( ));
-		 Divider divider=new FoldingDivider( new TypeSeparatorFolder( ));
-		 Splitter splitter=DividingSplitter.Last( divider, " ");
-		 Rule leftRule=new LocatingRule( leftRule1, splitter, rightRule);
+		leftRule1 : Rule=new StringRule( "before-type");
+		rightRule : Rule=new NodeRule( "type", CommonLang.createTypeRule( ));
+		divider : Divider=new FoldingDivider( new TypeSeparatorFolder( ));
+		splitter : Splitter=DividingSplitter.Last( divider, " ");
+		leftRule : Rule=new LocatingRule( leftRule1, splitter, rightRule);
 		return new StripRule( LocatingRule.Last( leftRule, " ", new StringRule( "name")));
 	}
 }

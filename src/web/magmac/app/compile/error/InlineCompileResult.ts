@@ -38,8 +38,8 @@ export class InlineCompileResult {
 		return this.and( other).mapValue( (tuple : Tuple2<T, T>) => this.merge( merger, tuple));
 	}
 	merge(merger : BiFunction<T, T, T>, tuple : Tuple2<T, T>) : T {
-		 T left0=tuple.left( );
-		 T right0=tuple.right( );
+		left0 : T=tuple.left( );
+		right0 : T=tuple.right( );
 		return merger.apply( left0, right0);
 	}
 }

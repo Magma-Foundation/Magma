@@ -10,7 +10,7 @@ export class RangeHead {
 	}
 	next() : Option<Integer> {
 		if(this.counter<this.length){ 
-		 int value=this.counter;
+		value : int=this.counter;
 		this.counter++;
 		return new Some<>( value);}
 		else{ 

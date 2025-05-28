@@ -13,7 +13,7 @@ export class JVMList {
 		this( new ArrayList<>( ));
 	}
 	add(element : T) : List<T> {
-		 ArrayList<T> copy=new ArrayList<>( this.elements);
+		copy : ArrayList<T>=new ArrayList<>( this.elements);
 		copy.add( element);
 		return new JVMList<>( copy);
 	}
@@ -33,7 +33,7 @@ export class JVMList {
 		return this.elements.get( index);
 	}
 	sort(sorter : BiFunction<T, T, Integer>) : List<T> {
-		 ArrayList<T> copy=new ArrayList<>( this.elements);
+		copy : ArrayList<T>=new ArrayList<>( this.elements);
 		copy.sort( (t : T, u : T) => sorter.apply( t, u));
 		return new JVMList<>( copy);
 	}
@@ -49,13 +49,13 @@ export class JVMList {
 	popLast() : Option<Tuple2<List<T>, T>> {
 		if(this.elements.isEmpty( )){ 
 		return new None<>( );}
-		 java.util.List<T> slice=this.elements.subList( 0, this.elements.size( )-1);
+		slice : java.util.List<T>=this.elements.subList( 0, this.elements.size( )-1);
 		return new Some<>( new Tuple2<>( new JVMList<>( slice), this.elements.getLast( )));
 	}
 	popFirst() : Option<Tuple2<T, List<T>>> {
 		if(this.elements.isEmpty( )){ 
 		return new None<>( );}
-		 java.util.List<T> slice=this.elements.subList( 1, this.elements.size( ));
+		slice : java.util.List<T>=this.elements.subList( 1, this.elements.size( ));
 		return new Some<>( new Tuple2<>( this.elements.getFirst( ), new JVMList<>( slice)));
 	}
 }

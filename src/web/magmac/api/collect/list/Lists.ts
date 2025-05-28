@@ -8,8 +8,8 @@ export class Lists {
 		return new JVMList<>( );
 	}
 	repeat(element : T, size : int) : List<T> {
-		 List<T> copy=Lists.empty( );
-		 int i=0;
+		copy : List<T>=Lists.empty( );
+		i : int=0;
 		if(i<size){ 
 		copy=copy.add( element);
 		i++;}

@@ -17,10 +17,10 @@ export class HeadedIter {
 		return new HeadedIter<>( ( )->this.head.next( ).map( mapper));
 	}
 	fold(initial : R, folder : BiFunction<R, T, R>) : R {
-		 R current=initial;
+		current : R=initial;
 		if(true){ 
-		 R finalCurrent=current;
-		 Option<R> option=this.head.next( ).map( (next : T) => folder.apply( finalCurrent, next));
+		finalCurrent : R=current;
+		option : Option<R>=this.head.next( ).map( (next : T) => folder.apply( finalCurrent, next));
 		if(option.isPresent( )){ 
 		current=option.orElse( null);}
 		else{ 

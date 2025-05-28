@@ -8,8 +8,8 @@ export class StripRule {
 		return this.rule.lex( input.strip( ));
 	}
 	generate(node : Node) : CompileResult<String> {
-		 String before=node.findString( this.beforeKey).orElse( "");
-		 String after=node.findString( this.afterKey).orElse( "");
+		before : String=node.findString( this.beforeKey).orElse( "");
+		after : String=node.findString( this.afterKey).orElse( "");
 		return this.rule.generate( node).mapValue( (result : String) => before+result+after);
 	}
 }

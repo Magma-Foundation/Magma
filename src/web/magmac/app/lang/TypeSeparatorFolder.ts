@@ -4,7 +4,7 @@ export class TypeSeparatorFolder {
 	fold(state : DivideState, c : char) : DivideState {
 		if(' '==c&&state.isLevel( )){ 
 		return state.advance( );}
-		 DivideState appended=state.append( c);
+		appended : DivideState=state.append( c);
 		if('<'==c){ 
 		return appended.enter( );}
 		if('>'==c){ 

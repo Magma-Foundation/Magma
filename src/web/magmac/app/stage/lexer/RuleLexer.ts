@@ -15,8 +15,8 @@ export class RuleLexer {
 		this.rootRule=rootRule;
 	}
 	foldEntry(tuple : Tuple2<Location, String>) : CompileResult<Tuple2<Location, Node>> {
-		 Location location=tuple.left( );
-		 String input=tuple.right( );
+		location : Location=tuple.left( );
+		input : String=tuple.right( );
 		System.out.println( "Lexing: "+location);
 		return this.rootRule.lex( input).mapValue( (root : Node) => new Tuple2<>( location, root));
 	}

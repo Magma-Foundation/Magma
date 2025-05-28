@@ -9,12 +9,12 @@ import { Files } from "../../../../java/nio/file/Files";
 import { Path } from "../../../../java/nio/file/Path";
 export class PathTargets {
 	write(location : Location, output : String) : Option<IOException> {
-		 Path targetParent=location.namespace( ).iter( ).fold( this.root( ), (path : Path, other : String) => path.resolve( other));
+		targetParent : Path=location.namespace( ).iter( ).fold( this.root( ), (path : Path, other : String) => path.resolve( other));
 		if(!Files.exists( targetParent)){ 
-		 Option<IOException> maybeError=SafeFiles.createDirectories( targetParent);
+		maybeError : Option<IOException>=SafeFiles.createDirectories( targetParent);
 		if(maybeError.isPresent( )){ 
 		return maybeError;}}
-		 Path target=targetParent.resolve( location.name( )+"."+this.extension);
+		target : Path=targetParent.resolve( location.name( )+"."+this.extension);
 		return SafeFiles.writeString( target, output);
 	}
 	writeAll(outputs : Map<Location, String>) : Option<IOException> {

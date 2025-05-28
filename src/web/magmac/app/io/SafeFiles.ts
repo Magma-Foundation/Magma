@@ -15,27 +15,27 @@ export class SafeFiles {
 		try{ 
 		Files.writeString( target, output);
 		return new None<>( );}
-		catch( IOException e){ 
+		catch(e : IOException){ 
 		return new Some<>( e);}
 	}
 	walk(sourceDirectory : Path) : IOResult<Iter<Path>> {
 		try{ 
-		 Stream<Path> stream=Files.walk( sourceDirectory);
+		stream : Stream<Path>=Files.walk( sourceDirectory);
 		return new InlineIOResult<>( new Ok<>( new JVMList<>( stream.collect( Collectors.toList( ))).iter( )));}
-		catch( IOException e){ 
+		catch(e : IOException){ 
 		return new InlineIOResult<>( new Err<>( e));}
 	}
 	readString(source : Path) : IOResult<String> {
 		try{ 
 		return new InlineIOResult<>( new Ok<>( Files.readString( source)));}
-		catch( IOException e){ 
+		catch(e : IOException){ 
 		return new InlineIOResult<>( new Err<>( e));}
 	}
 	createDirectories(targetParent : Path) : Option<IOException> {
 		try{ 
 		Files.createDirectories( targetParent);
 		return new None<>( );}
-		catch( IOException e){ 
+		catch(e : IOException){ 
 		return new Some<>( e);}
 	}
 }

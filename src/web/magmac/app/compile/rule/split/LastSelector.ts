@@ -11,7 +11,7 @@ export class LastSelector {
 		return list.popLast( ).map( (tuple : Tuple2<List<String>, String>) => this.merge( tuple));
 	}
 	merge(tuple : Tuple2<List<String>, String>) : Tuple2<String, String> {
-		 String joined=tuple.left( ).iter( ).collect( new Joiner( this.delimiter)).orElse( "");
+		joined : String=tuple.left( ).iter( ).collect( new Joiner( this.delimiter)).orElse( "");
 		return new Tuple2<String, String>( joined, tuple.right( ));
 	}
 }

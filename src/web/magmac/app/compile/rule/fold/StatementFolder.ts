@@ -1,7 +1,7 @@
 import { DivideState } from "../../../../../magmac/app/compile/rule/divide/DivideState";
 export class StatementFolder {
 	fold(state : DivideState, c : char) : DivideState {
-		 DivideState appended=state.append( c);
+		appended : DivideState=state.append( c);
 		if(';'==c&&appended.isLevel( )){ 
 		return appended.advance( );}
 		if('}'==c&&appended.isShallow( )){ 

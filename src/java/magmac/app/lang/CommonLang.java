@@ -43,14 +43,14 @@ final class CommonLang {
         return new DivideRule(key, new StatementFolder(), childRule);
     }
 
-    static Rule createAssignmentRule(Rule value) {
-        Rule definition = new OrRule(Lists.of(
-                new NodeRule("definition", JavaLang.createDefinitionRule()),
+    static Rule createAssignmentRule(Rule value, Rule definition) {
+        Rule before = new OrRule(Lists.of(
+                new NodeRule("definition", definition),
                 new NodeRule("destination", value)
         ));
 
         Rule source = new NodeRule("source", value);
-        return new TypeRule("assignment", LocatingRule.First(definition, "=", source));
+        return new TypeRule("assignment", LocatingRule.First(before, "=", source));
     }
 
     static LazyRule initValueRule(Rule segment, LazyRule value, String lambdaInfix, Rule definition) {
@@ -128,13 +128,13 @@ final class CommonLang {
         return new TypeRule("invocation", new StripRule(new SuffixRule(new LocatingRule(caller, splitter, arguments), ")")));
     }
 
-    static Rule initFunctionSegmentRule(LazyRule functionSegmentRule, Rule value) {
-        Rule functionSegmentValueRule = CommonLang.createFunctionSegmentValueRule(value);
+    static Rule initFunctionSegmentRule(LazyRule functionSegmentRule, Rule value, Rule definition) {
+        Rule functionSegmentValueRule = CommonLang.createFunctionSegmentValueRule(value, definition);
 
         Rule rule = new OrRule(Lists.of(
                 CommonLang.createWhitespaceRule(),
                 CommonLang.createStatementRule(functionSegmentValueRule),
-                CommonLang.createBlockRule(functionSegmentRule, value)
+                CommonLang.createBlockRule(functionSegmentRule, value, definition)
         ));
 
         return functionSegmentRule.set(new StripRule("before", rule, ""));
@@ -145,21 +145,21 @@ final class CommonLang {
         return new TypeRule("statement", new StripRule(new SuffixRule(child, ";")));
     }
 
-    private static Rule createBlockRule(LazyRule functionSegmentRule, Rule value) {
-        Rule header = new NodeRule("header", CommonLang.createBlockHeaderRule(value));
+    private static Rule createBlockRule(LazyRule functionSegmentRule, Rule value, Rule definition) {
+        Rule header = new NodeRule("header", CommonLang.createBlockHeaderRule(value, definition));
         Rule children = CommonLang.Statements("children", functionSegmentRule);
         Splitter first = DividingSplitter.First(new FoldingDivider(new BlockFolder()), "");
         Rule childRule = new LocatingRule(new SuffixRule(header, "{"), first, children);
         return new TypeRule("block", new StripRule(new SuffixRule(childRule, "}")));
     }
 
-    private static Rule createBlockHeaderRule(Rule value) {
+    private static Rule createBlockHeaderRule(Rule value, Rule definition) {
         return new OrRule(Lists.of(
                 new TypeRule("else", new StripRule(new ExactRule("else"))),
                 new TypeRule("try", new StripRule(new ExactRule("try"))),
                 CommonLang.createConditionalRule("if", value),
                 CommonLang.createConditionalRule("while", value),
-                new StripRule(new PrefixRule("catch", new StripRule(new PrefixRule("(", new SuffixRule(new NodeRule("definition", JavaLang.createDefinitionRule()), ")")))))
+                new StripRule(new PrefixRule("catch", new StripRule(new PrefixRule("(", new SuffixRule(new NodeRule("definition", definition), ")")))))
         ));
     }
 
@@ -167,10 +167,10 @@ final class CommonLang {
         return new StripRule(new PrefixRule(prefix, new StripRule(new PrefixRule("(", new SuffixRule(new NodeRule("condition", value), ")")))));
     }
 
-    private static Rule createFunctionSegmentValueRule(Rule value) {
+    private static Rule createFunctionSegmentValueRule(Rule value, Rule definition) {
         return new OrRule(Lists.of(
                 CommonLang.createInvokableRule(value),
-                CommonLang.createAssignmentRule(value),
+                CommonLang.createAssignmentRule(value, definition),
                 CommonLang.createReturnRule(value),
                 CommonLang.createPostRule("post-increment", "++", value),
                 CommonLang.createPostRule("post-decrement", "--", value),

@@ -5,7 +5,7 @@ export class SuffixRule {
 	lex(input : String) : CompileResult<Node> {
 		if(!input.endsWith( this.suffix( ))){ 
 		return CompileErrors.createStringError( "Suffix '" + this.suffix + "' not present", input);}
-		 String slice=input.substring( 0, input.length( )-this.suffix.length( ));
+		slice : String=input.substring( 0, input.length( )-this.suffix.length( ));
 		return this.childRule.lex( slice);
 	}
 	generate(node : Node) : CompileResult<String> {

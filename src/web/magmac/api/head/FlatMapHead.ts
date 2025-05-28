@@ -13,10 +13,10 @@ export class FlatMapHead {
 	}
 	next() : Option<R> {
 		if(true){ 
-		 Option<R> maybeInner=this.current.next( );
+		maybeInner : Option<R>=this.current.next( );
 		if(maybeInner.isPresent( )){ 
 		return maybeInner;}
-		 Option<T> maybeOuter=this.head.next( );
+		maybeOuter : Option<T>=this.head.next( );
 		if(maybeOuter.isEmpty( )){ 
 		return new None<>( );}
 		this.current=this.mapper.apply( maybeOuter.orElse( null));}
