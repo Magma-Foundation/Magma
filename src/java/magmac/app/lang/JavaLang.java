@@ -145,15 +145,26 @@ public final class JavaLang {
         return new TypeRule("method", LocatingRule.First(header, "(", withParams));
     }
 
-    private static OrRule createFunctionSegmentRule() {
-        return new OrRule(Lists.of(
+    private static Rule createFunctionSegmentRule() {
+        LazyRule functionSegmentRule = new LazyRule();
+        functionSegmentRule.set(new OrRule(Lists.of(
                 CommonLang.createWhitespaceRule(),
-                new StripRule(new SuffixRule(JavaLang.createFunctionSegmentValueRule(), ";"))
+                new StripRule(new SuffixRule(JavaLang.createFunctionSegmentValueRule(), ";")),
+                new StripRule(new SuffixRule(LocatingRule.First(new NodeRule("header", JavaLang.createBlockHeaderRule()), "{", CommonLang.Statements("children", functionSegmentRule)), "}"))
+        )));
+
+        return functionSegmentRule;
+    }
+
+    private static Rule createBlockHeaderRule() {
+        return new OrRule(Lists.of(
+                new StripRule(new PrefixRule("if", new StripRule(new PrefixRule("(", new SuffixRule(new NodeRule("condition", JavaLang.createValueRule()), ")")))))
         ));
     }
 
     private static Rule createFunctionSegmentValueRule() {
         return new OrRule(Lists.of(
+                JavaLang.createInvocationRule(JavaLang.createValueRule()),
                 JavaLang.createAssignmentRule(),
                 new TypeRule("return", new StripRule(new PrefixRule("return ", new NodeRule("value", JavaLang.createValueRule()))))
         ));
