@@ -26,7 +26,7 @@ public class TreeParser implements Parser {
         this.afterAllChildren = afterAllChildren;
     }
 
-    private CompileResult<ParseUnit<Node>> parseNodeList(ParseUnit<Node> current, Tuple2<String, NodeList> entry) {
+    private CompileResult<ParseUnit<Node>> parseNodeListEntry(ParseUnit<Node> current, Tuple2<String, NodeList> entry) {
         Node currentNode = current.right();
         String key = entry.left();
 
@@ -44,6 +44,7 @@ public class TreeParser implements Parser {
     private CompileResult<ParseUnit<Node>> parseTree(ParseState state, Node root) {
         return this.beforeChild.pass(state, root).orElseGet(() -> new ParseUnitImpl<Node>(state, root))
                 .flatMapValue((ParseUnit<Node> beforeTuple) -> this.parseNodeLists(beforeTuple))
+                .flatMapValue(withNodeLists -> this.parseNodes(withNodeLists))
                 .flatMapValue((ParseUnit<Node> nodeListsTuple) -> {
                     ParseState state1 = nodeListsTuple.left();
                     Node node = nodeListsTuple.right();
@@ -51,9 +52,23 @@ public class TreeParser implements Parser {
                 });
     }
 
+    private CompileResult<ParseUnit<Node>> parseNodes(ParseUnit<Node> withNodeLists) {
+        return withNodeLists.right().iterNodes().fold(CompileResults.fromOk(withNodeLists),
+                (current, entry) -> current.flatMapValue((ParseUnit<Node> inner) -> this.parseNodeEntry(inner, entry)));
+
+    }
+
+    private CompileResult<ParseUnit<Node>> parseNodeEntry(ParseUnit<Node> current, Tuple2<String, Node> entry) {
+        Node currentNode = current.right();
+        String key = entry.left();
+
+        CompileResult<ParseUnit<Node>> parsed = this.parseTree(current.left(), entry.right());
+        return parsed.mapValue(value -> new ParseUnitImpl<>(value.left(), currentNode.withNode(key, value.right())));
+    }
+
     private CompileResult<ParseUnit<Node>> parseNodeLists(ParseUnit<Node> beforeTuple) {
         return beforeTuple.right().iterNodeLists().fold(CompileResults.fromOk(beforeTuple),
-                (CompileResult<ParseUnit<Node>> current, Tuple2<String, NodeList> entry) -> current.flatMapValue((ParseUnit<Node> inner) -> this.parseNodeList(inner, entry)));
+                (CompileResult<ParseUnit<Node>> current, Tuple2<String, NodeList> entry) -> current.flatMapValue((ParseUnit<Node> inner) -> this.parseNodeListEntry(inner, entry)));
     }
 
     @Override
