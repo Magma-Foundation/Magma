@@ -16,8 +16,8 @@ public final class DividingSplitter implements Splitter {
         this.selector = selector;
     }
 
-    public static Splitter Last(Divider divider) {
-        return new DividingSplitter(divider, new LastSelector());
+    public static Splitter Last(Divider divider, String delimiter) {
+        return new DividingSplitter(divider, new LastSelector(delimiter));
     }
 
     public static Splitter First(Divider divider) {

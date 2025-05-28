@@ -8,7 +8,7 @@ public class InvocationFolder implements Folder {
     public DivideState fold(DivideState state, char c) {
         DivideState appended = state.append(c);
         if ('(' == c && appended.isLevel()) {
-            return appended.advance();
+            return appended.enter().advance();
         }
         if ('(' == c) {
             return appended.enter();

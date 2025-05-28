@@ -1,7 +1,6 @@
 package magmac.app.lang;
 
 import magmac.api.collect.list.Lists;
-import magmac.app.compile.node.Node;
 import magmac.app.compile.rule.ContextRule;
 import magmac.app.compile.rule.DivideRule;
 import magmac.app.compile.rule.FilterRule;
@@ -97,13 +96,14 @@ public final class JavaLang {
                 JavaLang.createNumberRule(),
                 JavaLang.createAccessRule(value),
                 JavaLang.createSymbolValueRule(),
-                JavaLang.createAddRule(value)
+                JavaLang.createOperationRule(value, "add", "+"),
+                JavaLang.createOperationRule(value, "subtract", "-")
         )));
         return value;
     }
 
-    private static TypeRule createAddRule(LazyRule value) {
-        return new TypeRule("add", LocatingRule.First(new NodeRule("left", value), "+", new NodeRule("right", value)));
+    private static TypeRule createOperationRule(Rule value, String type, String infix) {
+        return new TypeRule(type, LocatingRule.First(new NodeRule("left", value), infix, new NodeRule("right", value)));
     }
 
     private static StripRule createSymbolValueRule() {
@@ -128,17 +128,17 @@ public final class JavaLang {
     }
 
     private static Rule createInvokableRule(Rule value) {
-        Rule caller = new SuffixRule(new OrRule(Lists.of(
+        Rule caller = new ContextRule("With caller", new SuffixRule(new OrRule(Lists.of(
                 new ContextRule("As construction", new StripRule(new PrefixRule("new ", new NodeRule("type", JavaLang.createTypeRule())))),
                 new ContextRule("As invocation", new NodeRule("caller", value))
-        )), "(");
+        )), "("));
 
         DivideRule arguments = new DivideRule("arguments", new ValueFolder(), new OrRule(Lists.of(
                 CommonLang.createWhitespaceRule(),
                 value
         )));
 
-        Splitter splitter = DividingSplitter.First(new FoldingDivider(new InvocationFolder()));
+        Splitter splitter = DividingSplitter.Last(new FoldingDivider(new InvocationFolder()), "");
         return new TypeRule("invocation", new StripRule(new SuffixRule(new LocatingRule(caller, splitter, arguments), ")")));
     }
 
@@ -188,7 +188,7 @@ public final class JavaLang {
         Rule leftRule1 = new StringRule("before-type");
         Rule rightRule = new NodeRule("type", JavaLang.createTypeRule());
         Divider divider = new FoldingDivider(new TypeSeparatorFolder());
-        Splitter splitter = DividingSplitter.Last(divider);
+        Splitter splitter = DividingSplitter.Last(divider, " ");
         Rule leftRule = new LocatingRule(leftRule1, splitter, rightRule);
         return new StripRule(LocatingRule.Last(leftRule, " ", new StringRule("name")));
     }
