@@ -8,16 +8,16 @@ import { IOException } from "../../../../java/io/IOException";
 import { Files } from "../../../../java/nio/file/Files";
 import { Path } from "../../../../java/nio/file/Path";
 export class PathTargets {
-	write(location : Location, output : String) : Option<IOException> {
-		targetParent : Path=location.namespace( ).iter( ).fold( this.root( ), (path : Path, other : String) => path.resolve( other));
+	private write( location : Location,  output : String) : Option<IOException> {
+		 targetParent : Path=location.namespace( ).iter( ).fold( this.root( ), ( path : Path,  other : String) => path.resolve( other));
 		if(!Files.exists( targetParent)){ 
-		maybeError : Option<IOException>=SafeFiles.createDirectories( targetParent);
+		 maybeError : Option<IOException>=SafeFiles.createDirectories( targetParent);
 		if(maybeError.isPresent( )){ 
 		return maybeError;}}
-		target : Path=targetParent.resolve( location.name( )+"."+this.extension);
+		 target : Path=targetParent.resolve( location.name( )+"."+this.extension);
 		return SafeFiles.writeString( target, output);
 	}
-	writeAll(outputs : Map<Location, String>) : Option<IOException> {
-		return outputs.iterEntries( ).map( (entry : Tuple2<Location, String>) => this.write( entry.left( ), entry.right( ))).flatMap( (option : Option<IOException>) => Iters.fromOption( option)).next( );
+	public writeAll( outputs : Map<Location, String>) : Option<IOException> {
+		return outputs.iterEntries( ).map( ( entry : Tuple2<Location, String>) => this.write( entry.left( ), entry.right( ))).flatMap( ( option : Option<IOException>) => Iters.fromOption( option)).next( );
 	}
 }

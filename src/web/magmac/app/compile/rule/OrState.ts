@@ -14,15 +14,15 @@ export class OrState {
 	constructor() {
 		this( new None<T>( ), Lists.empty( ));
 	}
-	withValue(value : T) : OrState<T> {
+	 withValue( value : T) : OrState<T> {
 		if(this.maybeValue.isPresent( )){ 
 		return this;}
 		return new OrState<>( new Some<T>( value), this.errors);
 	}
-	toResult(context : Context) : CompileResult<T> {
-		return this.maybeValue.map( (value : T) => InlineCompileResult.fromResult( new Ok<>( value))).orElseGet( ( )->InlineCompileResult.fromResult( new Err<>( new ImmutableCompileError( "Invalid combination", context, this.errors))));
+	 toResult( context : Context) : CompileResult<T> {
+		return this.maybeValue.map( ( value : T) => InlineCompileResult.fromResult( new Ok<>( value))).orElseGet( ( )->InlineCompileResult.fromResult( new Err<>( new ImmutableCompileError( "Invalid combination", context, this.errors))));
 	}
-	withError(error : CompileError) : OrState<T> {
+	 withError( error : CompileError) : OrState<T> {
 		return new OrState<>( this.maybeValue, this.errors.add( error));
 	}
 }

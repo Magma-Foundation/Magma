@@ -10,8 +10,8 @@ import { PathSources } from "../magmac/app/io/sources/PathSources";
 import { Sources } from "../magmac/app/io/sources/Sources";
 import { Paths } from "../java/nio/file/Paths";
 export class Main {
-	main() : void {
-		sources : Sources=new PathSources( Paths.get( ".", "src", "java"));
-		Iters.fromValues( new PlantUMLTargetPlatform( ), new TypeScriptTargetPlatform( )).map( (platform : TargetPlatform) => ApplicationBuilder.run( platform, sources)).flatMap( (option : Option<Error>) => Iters.fromOption( option)).next( ).ifPresent( (error : Error) => Console.handleError( error.display( )));
+	public static main() : void {
+		 sources : Sources=new PathSources( Paths.get( ".", "src", "java"));
+		Iters.fromValues( new PlantUMLTargetPlatform( ), new TypeScriptTargetPlatform( )).map( ( platform : TargetPlatform) => ApplicationBuilder.run( platform, sources)).flatMap( ( option : Option<Error>) => Iters.fromOption( option)).next( ).ifPresent( ( error : Error) => Console.handleError( error.display( )));
 	}
 }

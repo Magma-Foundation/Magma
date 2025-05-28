@@ -1,6 +1,6 @@
 import { Node } from "../../../../../magmac/app/compile/node/Node";
 export class NodeContext {
-	display() : String {
+	public display() : String {
 		return this.node.display( );
 	}
 }

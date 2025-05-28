@@ -12,6 +12,7 @@ import magmac.app.compile.rule.StripRule;
 import magmac.app.compile.rule.SuffixRule;
 import magmac.app.compile.rule.TypeRule;
 import magmac.app.compile.rule.fold.DelimitedFolder;
+import magmac.app.compile.rule.locate.LastLocator;
 
 public final class TypescriptLang {
     public static Rule createRule() {
@@ -73,14 +74,17 @@ public final class TypescriptLang {
 
     private static Rule createDefinitionRule() {
         LazyRule definition = new MutableLazyRule();
-        DivideRule parameters = CommonLang.createParametersRule(definition);
+        Rule modifiers = CommonLang.createModifiersRule();
+
+        Rule parameters = CommonLang.createParametersRule(definition);
         Rule name = new StringRule("name");
         Rule leftRule = new OrRule(Lists.of(
                 new SuffixRule(LocatingRule.First(name, "(", parameters), ")"),
                 name
         ));
 
-        return definition.set(LocatingRule.First(leftRule, " : ", new NodeRule("type", TypescriptLang.createTypeRule())));
+        Rule first = LocatingRule.First(leftRule, " : ", new NodeRule("type", TypescriptLang.createTypeRule()));
+        return definition.set(new OptionNodeListRule("modifiers", LocatingRule.Last(modifiers, " ", first), first));
     }
 
     private static Rule createTypeRule() {

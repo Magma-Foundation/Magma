@@ -1,14 +1,14 @@
 import { DivideState } from "../../../../../magmac/app/compile/rule/divide/DivideState";
-export class DelimitedFolder {delimter : char;
-	DelimitedFolder(delimter : char) : public {
+export class DelimitedFolder {private final delimter : char;
+	 DelimitedFolder( delimter : char) : public {
 		this.delimter=delimter;
 	}
-	fold(state : DivideState, c : char) : DivideState {
+	public fold( state : DivideState,  c : char) : DivideState {
 		if(this.delimter==c){ 
 		return state.advance( );}
 		return state.append( c);
 	}
-	createDelimiter() : String {
+	public createDelimiter() : String {
 		return String.valueOf( this.delimter);
 	}
 }

@@ -5,10 +5,10 @@ import { CompileErrors } from "../../../../magmac/app/compile/error/error/Compil
 import { MapNode } from "../../../../magmac/app/compile/node/MapNode";
 import { Node } from "../../../../magmac/app/compile/node/Node";
 export class StringRule {
-	lex(input : String) : CompileResult<Node> {
+	public lex( input : String) : CompileResult<Node> {
 		return InlineCompileResult.fromResult( new Ok<>( new MapNode( ).withString( this.key, input)));
 	}
-	generate(node : Node) : CompileResult<String> {
-		return node.findString( this.key).map( (value : String) => InlineCompileResult.fromResult( new Ok<>( value))).orElseGet( ( )->CompileErrors.createNodeError( "String '" + this.key + "' not present", node));
+	public generate( node : Node) : CompileResult<String> {
+		return node.findString( this.key).map( ( value : String) => InlineCompileResult.fromResult( new Ok<>( value))).orElseGet( ( )->CompileErrors.createNodeError( "String '" + this.key + "' not present", node));
 	}
 }

@@ -1,5 +1,5 @@
 export class StringContext {
-	display() : String {
+	public display() : String {
 		return this.value;
 	}
 }

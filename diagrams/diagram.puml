@@ -509,6 +509,7 @@ TypescriptLang --> StripRule
 TypescriptLang --> SuffixRule
 TypescriptLang --> TypeRule
 TypescriptLang --> DelimitedFolder
+TypescriptLang --> LastLocator
 MapNode --> None
 MapNode --> Option
 MapNode --> Some
@@ -843,6 +844,7 @@ CommonLang --> StripRule
 CommonLang --> SuffixRule
 CommonLang --> TypeRule
 CommonLang --> FoldingDivider
+CommonLang --> DelimitedFolder
 CommonLang --> StatementFolder
 CommonLang --> DividingSplitter
 TypeScriptAfterPasser --> None

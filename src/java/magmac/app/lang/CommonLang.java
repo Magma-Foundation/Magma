@@ -16,6 +16,7 @@ import magmac.app.compile.rule.StripRule;
 import magmac.app.compile.rule.SuffixRule;
 import magmac.app.compile.rule.TypeRule;
 import magmac.app.compile.rule.divide.FoldingDivider;
+import magmac.app.compile.rule.fold.DelimitedFolder;
 import magmac.app.compile.rule.fold.StatementFolder;
 import magmac.app.compile.rule.split.DividingSplitter;
 
@@ -214,5 +215,9 @@ final class CommonLang {
         ));
 
         return new TypeRule("statement", new StripRule(new SuffixRule(definition, ";")));
+    }
+
+    static Rule createModifiersRule() {
+        return new StripRule(new DivideRule("modifiers", new DelimitedFolder(' '), new StringRule("value")));
     }
 }

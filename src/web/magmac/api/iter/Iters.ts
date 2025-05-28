@@ -4,16 +4,16 @@ import { HeadedIter } from "../../../magmac/api/head/HeadedIter";
 import { RangeHead } from "../../../magmac/api/head/RangeHead";
 import { SingleHead } from "../../../magmac/api/head/SingleHead";
 export class Iters {
-	fromArray : Iter<T> {
-		return new HeadedIter<>( new RangeHead( array.length)).map( (index : Integer) => array[index]);
+	private static fromArray : Iter<T> {
+		return new HeadedIter<>( new RangeHead( array.length)).map( ( index : Integer) => array[index]);
 	}
-	fromOption(option : Option<T>) : Iter<T> {
-		return option.<Iter<T>>map( (t : T) => new HeadedIter<>( new SingleHead<>( t))).orElseGet( ( )->new HeadedIter<>( new EmptyHead<>( )));
+	public static fromOption( option : Option<T>) : Iter<T> {
+		return option.<Iter<T>>map( ( t : T) => new HeadedIter<>( new SingleHead<>( t))).orElseGet( ( )->new HeadedIter<>( new EmptyHead<>( )));
 	}
-	fromValues : Iter<T> {
+	public static fromValues : Iter<T> {
 		return Iters.fromArray( values);
 	}
-	empty() : Iter<T> {
+	public static empty() : Iter<T> {
 		return new HeadedIter<>( new EmptyHead<>( ));
 	}
 }

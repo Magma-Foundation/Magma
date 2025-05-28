@@ -1,4 +1,4 @@
 import { Node } from "../../../magmac/app/compile/node/Node";
 import { ParseState } from "../../../magmac/app/stage/parse/ParseState";
-export interface Passer {node) : Node;
+export interface Passer {PassResult pass(ParseState state, node) : Node;
 }

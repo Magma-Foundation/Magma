@@ -7,19 +7,19 @@ import { Passer } from "../../../magmac/app/stage/Passer";
 import { Path } from "../../../java/nio/file/Path";
 import { Paths } from "../../../java/nio/file/Paths";
 export class PlantUMLTargetPlatform {
-	createAfterChild() : Passer {
+	public createAfterChild() : Passer {
 		return new PlantUMLAfterPasser( );
 	}
-	createTargetPath() : Path {
+	public createTargetPath() : Path {
 		return Paths.get( ".", "diagrams");
 	}
-	createAfterAll() : AfterAll {
+	public createAfterAll() : AfterAll {
 		return new MergeDiagram( );
 	}
-	createExtension() : String {
+	public createExtension() : String {
 		return "puml";
 	}
-	createRule() : Rule {
+	public createRule() : Rule {
 		return PlantUMLLang.createRule( );
 	}
 }

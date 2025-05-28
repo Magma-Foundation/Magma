@@ -4,7 +4,7 @@ import { Node } from "../../../magmac/app/compile/node/Node";
 import { Location } from "../../../magmac/app/io/Location";
 import { Map } from "../../../magmac/api/collect/map/Map";
 export class MapRoots {
-	iter() : Iter<Tuple2<Location, Node>> {
+	public iter() : Iter<Tuple2<Location, Node>> {
 		return this.roots.iterEntries( );
 	}
 }

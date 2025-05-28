@@ -14,31 +14,31 @@ import { AfterAll } from "../../../../magmac/app/stage/AfterAll";
 import { MapRoots } from "../../../../magmac/app/stage/MapRoots";
 import { Passer } from "../../../../magmac/app/stage/Passer";
 import { Roots } from "../../../../magmac/app/stage/Roots";
-export class TreeParser {beforeChild : Passer;afterChild : Passer;afterAllChildren : AfterAll;
-	TreeParser(beforeChild : Passer, afterChild : Passer, afterAllChildren : AfterAll) : public {
+export class TreeParser {private final beforeChild : Passer;private final afterChild : Passer;private final afterAllChildren : AfterAll;
+	 TreeParser( beforeChild : Passer,  afterChild : Passer,  afterAllChildren : AfterAll) : public {
 		this.beforeChild=beforeChild;
 		this.afterChild=afterChild;
 		this.afterAllChildren=afterAllChildren;
 	}
-	parseNodeLists(state : ParseState, root : Node) : CompileResult<Tuple2<ParseState, Node>> {
-		parseStateNodeTuple2 : Tuple2<ParseState, Node>=new Tuple2<>( state, root);
-		return root.iterNodeLists( ).fold( InlineCompileResult.fromOk( parseStateNodeTuple2), (current : CompileResult<Tuple2<ParseState, Node>>, entry : Tuple2<String, NodeList>) => current.flatMapValue( (inner : Tuple2<ParseState, Node>) => this.parseNodeList( inner, entry)));
+	private parseNodeLists( state : ParseState,  root : Node) : CompileResult<Tuple2<ParseState, Node>> {
+		 parseStateNodeTuple2 : Tuple2<ParseState, Node>=new Tuple2<>( state, root);
+		return root.iterNodeLists( ).fold( InlineCompileResult.fromOk( parseStateNodeTuple2), ( current : CompileResult<Tuple2<ParseState, Node>>,  entry : Tuple2<String, NodeList>) => current.flatMapValue( ( inner : Tuple2<ParseState, Node>) => this.parseNodeList( inner, entry)));
 	}
-	parseNodeList(current : Tuple2<ParseState, Node>, entry : Tuple2<String, NodeList>) : CompileResult<Tuple2<ParseState, Node>> {
-		currentState : ParseState=current.left( );
-		currentNode : Node=current.right( );
-		key : String=entry.left( );
-		initial : CompileResult<Tuple2<ParseState, NodeList>>=InlineCompileResult.fromOk( new Tuple2<>( currentState, InlineNodeList.empty( )));
-		return entry.right( ).iter( ).fold( initial, (currentTupleResult : CompileResult<Tuple2<ParseState, NodeList>>, node : Node) => currentTupleResult.flatMapValue( (currentTuple : Tuple2<ParseState, NodeList>) => {currentState1 : ParseState=currentTuple.left( );currentElements : NodeList=currentTuple.right( );return this.parseTree( currentState1, node).mapValue( (parsed : Tuple2<ParseState, Node>) => {newState : ParseState=parsed.left( );newElement : Node=parsed.right( );return new Tuple2<>( newState, currentElements.add( newElement));});})).mapValue( (newTuple : Tuple2<ParseState, NodeList>) => new Tuple2<>( newTuple.left( ), currentNode.withNodeList( key, newTuple.right( ))));
+	private parseNodeList( current : Tuple2<ParseState, Node>,  entry : Tuple2<String, NodeList>) : CompileResult<Tuple2<ParseState, Node>> {
+		 currentState : ParseState=current.left( );
+		 currentNode : Node=current.right( );
+		 key : String=entry.left( );
+		 initial : CompileResult<Tuple2<ParseState, NodeList>>=InlineCompileResult.fromOk( new Tuple2<>( currentState, InlineNodeList.empty( )));
+		return entry.right( ).iter( ).fold( initial, ( currentTupleResult : CompileResult<Tuple2<ParseState, NodeList>>,  node : Node) => currentTupleResult.flatMapValue( ( currentTuple : Tuple2<ParseState, NodeList>) => { currentState1 : ParseState=currentTuple.left( ); currentElements : NodeList=currentTuple.right( );return this.parseTree( currentState1, node).mapValue( ( parsed : Tuple2<ParseState, Node>) => { newState : ParseState=parsed.left( ); newElement : Node=parsed.right( );return new Tuple2<>( newState, currentElements.add( newElement));});})).mapValue( ( newTuple : Tuple2<ParseState, NodeList>) => new Tuple2<>( newTuple.left( ), currentNode.withNodeList( key, newTuple.right( ))));
 	}
-	parse(location : Location, root : Node) : CompileResult<Tuple2<Location, Node>> {
-		initial : ParseState=new ImmutableParseState( location);
-		return this.parseTree( initial, root).mapValue( (parsed : Tuple2<ParseState, Node>) => new Tuple2<>( parsed.left( ).findLocation( ), parsed.right( )));
+	private parse( location : Location,  root : Node) : CompileResult<Tuple2<Location, Node>> {
+		 initial : ParseState=new ImmutableParseState( location);
+		return this.parseTree( initial, root).mapValue( ( parsed : Tuple2<ParseState, Node>) => new Tuple2<>( parsed.left( ).findLocation( ), parsed.right( )));
 	}
-	parseTree(state : ParseState, root : Node) : CompileResult<Tuple2<ParseState, Node>> {
-		return this.beforeChild.pass( state, root).orElseGet( ( )->new Tuple2<>( state, root)).flatMapValue( (beforeTuple : Tuple2<ParseState, Node>) => this.parseNodeLists( beforeTuple.left( ), beforeTuple.right( )).flatMapValue( (nodeListsTuple : Tuple2<ParseState, Node>) => {state1 : ParseState=nodeListsTuple.left( );node : Node=nodeListsTuple.right( );return this.afterChild.pass( state1, node).orElseGet( ( )->new Tuple2<>( state1, node));}));
+	private parseTree( state : ParseState,  root : Node) : CompileResult<Tuple2<ParseState, Node>> {
+		return this.beforeChild.pass( state, root).orElseGet( ( )->new Tuple2<>( state, root)).flatMapValue( ( beforeTuple : Tuple2<ParseState, Node>) => this.parseNodeLists( beforeTuple.left( ), beforeTuple.right( )).flatMapValue( ( nodeListsTuple : Tuple2<ParseState, Node>) => { state1 : ParseState=nodeListsTuple.left( ); node : Node=nodeListsTuple.right( );return this.afterChild.pass( state1, node).orElseGet( ( )->new Tuple2<>( state1, node));}));
 	}
-	apply(initial : Roots) : CompileResult<Roots> {
-		return initial.iter( ).map( (tuple : Tuple2<Location, Node>) => this.parse( tuple.left( ), tuple.right( ))).collect( new CompileResultCollector<>( new MapCollector<>( ))).flatMapValue( (parsed : Map<Location, Node>) => InlineCompileResult.fromResult( new Ok<Roots, CompileError>( new MapRoots( this.afterAllChildren.afterAll( parsed)))));
+	public apply( initial : Roots) : CompileResult<Roots> {
+		return initial.iter( ).map( ( tuple : Tuple2<Location, Node>) => this.parse( tuple.left( ), tuple.right( ))).collect( new CompileResultCollector<>( new MapCollector<>( ))).flatMapValue( ( parsed : Map<Location, Node>) => InlineCompileResult.fromResult( new Ok<Roots, CompileError>( new MapRoots( this.afterAllChildren.afterAll( parsed)))));
 	}
 }

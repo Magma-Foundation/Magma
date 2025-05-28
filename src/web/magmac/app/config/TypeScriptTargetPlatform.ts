@@ -7,19 +7,19 @@ import { Passer } from "../../../magmac/app/stage/Passer";
 import { Path } from "../../../java/nio/file/Path";
 import { Paths } from "../../../java/nio/file/Paths";
 export class TypeScriptTargetPlatform {
-	createAfterChild() : Passer {
+	public createAfterChild() : Passer {
 		return new TypeScriptAfterPasser( );
 	}
-	createTargetPath() : Path {
+	public createTargetPath() : Path {
 		return Paths.get( ".", "src", "web");
 	}
-	createAfterAll() : AfterAll {
+	public createAfterAll() : AfterAll {
 		return new EmptyAfterAll( );
 	}
-	createExtension() : String {
+	public createExtension() : String {
 		return "ts";
 	}
-	createRule() : Rule {
+	public createRule() : Rule {
 		return TypescriptLang.createRule( );
 	}
 }

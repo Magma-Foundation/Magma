@@ -93,14 +93,14 @@ public final class JavaLang {
     }
 
     static Rule createDefinitionRule() {
-        Rule modifiers = new StripRule(new DivideRule("modifiers", new DelimitedFolder(' '), new StringRule("value")));
+        Rule modifiers = CommonLang.createModifiersRule();
         Rule annotations = new DivideRule("annotations", new DelimitedFolder('\n'), new StripRule(new PrefixRule("@", new StringRule("value"))));
         Rule beforeTypeParams = new OrRule(Lists.of(
                 LocatingRule.Last(annotations, "\n", modifiers),
                 modifiers
         ));
 
-        DivideRule typeParams = new DivideRule("type-parameters", new ValueFolder(), new StringRule("value"));
+        Rule typeParams = new DivideRule("type-parameters", new ValueFolder(), new StringRule("value"));
         Rule leftRule1 = new OrRule(Lists.of(
                 new StripRule(new SuffixRule(LocatingRule.First(beforeTypeParams, "<", typeParams), ">")),
                 beforeTypeParams
@@ -112,4 +112,5 @@ public final class JavaLang {
         Rule leftRule = new LocatingRule(leftRule1, splitter, rightRule);
         return new StripRule(LocatingRule.Last(leftRule, " ", new StringRule("name")));
     }
+
 }

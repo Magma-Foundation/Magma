@@ -9,13 +9,13 @@ import { Node } from "../../../magmac/app/compile/node/Node";
 import { ParseState } from "../../../magmac/app/stage/parse/ParseState";
 import { Supplier } from "../../../java/util/function/Supplier";
 export class InlinePassResult {
-	empty() : PassResult {
+	public static empty() : PassResult {
 		return new InlinePassResult( new None<>( ));
 	}
-	from(state : ParseState, node : Node) : PassResult {
+	public static from( state : ParseState,  node : Node) : PassResult {
 		return new InlinePassResult( new Some<>( InlineCompileResult.fromOk( new Tuple2<>( state, node))));
 	}
-	orElseGet(other : Supplier<Tuple2<ParseState, Node>>) : CompileResult<Tuple2<ParseState, Node>> {
+	public orElseGet( other : Supplier<Tuple2<ParseState, Node>>) : CompileResult<Tuple2<ParseState, Node>> {
 		return this.option.orElseGet( ( )->InlineCompileResult.fromResult( new Ok<>( other.get( ))));
 	}
 }
