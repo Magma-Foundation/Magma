@@ -80,9 +80,9 @@ public final class MapNode implements Node {
                 .map((String type) -> type + " ")
                 .orElse("");
 
-        Iter<String> stringsStream = this.toStream(depth, this.strings, (String value) -> "\"" + value + "\"");
-        Iter<String> nodesStream = this.toStream(depth, this.nodes, (Node value) -> value.format(depth + 1));
-        Iter<String> nodeListsStream = this.toStream(depth, this.nodeLists, (NodeList values) -> "[" + MapNode.formatNodeList(depth, values) + "]");
+        Iter<String> stringsStream = MapNode.toStream(depth, this.strings, (String value) -> "\"" + value + "\"");
+        Iter<String> nodesStream = MapNode.toStream(depth, this.nodes, (Node value) -> value.format(depth + 1));
+        Iter<String> nodeListsStream = MapNode.toStream(depth, this.nodeLists, (NodeList values) -> "[" + MapNode.formatNodeList(depth, values) + "]");
 
         String joined = stringsStream.concat(nodesStream)
                 .concat(nodeListsStream)
@@ -92,7 +92,7 @@ public final class MapNode implements Node {
         return typeString + "{" + joined + MapNode.createIndent(depth) + "}";
     }
 
-    private <T> Iter<String> toStream(int depth, Map<String, T> map, Function<T, String> mapper) {
+    private static <T> Iter<String> toStream(int depth, Map<String, T> map, Function<T, String> mapper) {
         if (map.isEmpty()) {
             return Iters.empty();
         }

@@ -27,9 +27,7 @@ public class PlantUMLAfterPasser implements Passer {
     }
 
     private static CompileResult<NodeList> getNodeListCompileResult(Node child, Node implemented) {
-        return StringRule.findString(child, "name").flatMapValue((String name) -> {
-            return PlantUMLAfterPasser.createInherits0(implemented, name);
-        });
+        return StringRule.findString(child, "name").flatMapValue((String name) -> PlantUMLAfterPasser.createInherits0(implemented, name));
     }
 
     private static CompileResult<NodeList> createInherits0(Node type, String child) {
@@ -57,21 +55,15 @@ public class PlantUMLAfterPasser implements Passer {
     private static CompileResult<NodeList> replaceRootChild(Node child) {
         CompileResult<NodeList> maybeExtended = PlantUMLAfterPasser.createInherits(child, "extended");
         CompileResult<NodeList> maybeImplemented = PlantUMLAfterPasser.createInherits(child, "implemented");
-        return maybeExtended.flatMapValue((NodeList extendedResult) -> {
-            return maybeImplemented.mapValue((NodeList implementedResult) -> {
-                return InlineNodeList.of(child)
-                        .addAll(extendedResult)
-                        .addAll(implementedResult);
-            });
-        });
+        return maybeExtended.flatMapValue((NodeList extendedResult) -> maybeImplemented.mapValue((NodeList implementedResult) -> InlineNodeList.of(child)
+                .addAll(extendedResult)
+                .addAll(implementedResult)));
     }
 
     private static CompileResult<NodeList> replaceRootChildren(Node node) {
-        return PlantUMLAfterPasser.replaceChildrenToList(node).mapValue((List<NodeList> lists) -> {
-            return lists.iter()
-                    .flatMap((NodeList list) -> list.iter())
-                    .collect(new NodeListCollector());
-        });
+        return PlantUMLAfterPasser.replaceChildrenToList(node).mapValue((List<NodeList> lists) -> lists.iter()
+                .flatMap((NodeList list) -> list.iter())
+                .collect(new NodeListCollector()));
     }
 
     private static CompileResult<List<NodeList>> replaceChildrenToList(Node node) {
@@ -86,7 +78,7 @@ public class PlantUMLAfterPasser implements Passer {
     public PassResult pass(ParseState state, Node node) {
         if (node.is("root")) {
             CompileResult<Tuple2<ParseState, Node>> result = PlantUMLAfterPasser.replaceRootChildren(node)
-                    .flatMapValue((NodeList values) -> this.getTuple2CompileResult(state, node, values));
+                    .flatMapValue((NodeList values) -> PlantUMLAfterPasser.getTuple2CompileResult(state, node, values));
 
             return new InlinePassResult(new Some<>(result));
         }
@@ -108,8 +100,7 @@ public class PlantUMLAfterPasser implements Passer {
         return InlinePassResult.empty();
     }
 
-    private CompileResult<Tuple2<ParseState, Node>> getTuple2CompileResult(ParseState state, Node node, NodeList values) {
-        Tuple2<ParseState, Node> tuple = new Tuple2<>(state, node.withNodeList("children", values));
-        return CompileResults.fromOk(tuple);
+    private static CompileResult<Tuple2<ParseState, Node>> getTuple2CompileResult(ParseState state, Node node, NodeList values) {
+        return CompileResults.fromOk(new Tuple2<ParseState, Node>(state, node.withNodeList("children", values)));
     }
 }

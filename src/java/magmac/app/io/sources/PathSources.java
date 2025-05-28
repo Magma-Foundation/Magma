@@ -30,12 +30,12 @@ public record PathSources(Path root) implements Sources {
     private Result<Map<Location, String>, IOException> getCollect(Iter<Path> sources) {
         return this.getCollected(sources)
                 .iter()
-                .map((PathSource source) -> this.getTuple2IOResult(source))
+                .map((PathSource source) -> PathSources.getTuple2IOResult(source))
                 .map((IOResult<Tuple2<Location, String>> tuple2IOResult) -> tuple2IOResult.result())
                 .collect(new ResultCollector<>(new MapCollector<>()));
     }
 
-    private IOResult<Tuple2<Location, String>> getTuple2IOResult(PathSource source) {
+    private static IOResult<Tuple2<Location, String>> getTuple2IOResult(PathSource source) {
         return source.read().mapValue((String input) -> new Tuple2<>(source.computeLocation(), input));
     }
 

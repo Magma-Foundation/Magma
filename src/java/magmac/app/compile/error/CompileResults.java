@@ -4,7 +4,7 @@ import magmac.api.result.Ok;
 import magmac.api.result.Result;
 import magmac.app.compile.error.error.CompileError;
 
-public class CompileResults {
+public final class CompileResults {
     public static <T> CompileResult<T> fromResult(Result<T, CompileError> result) {
         return new InlineCompileResult<T>(result);
     }

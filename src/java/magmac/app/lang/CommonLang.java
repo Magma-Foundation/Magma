@@ -44,7 +44,7 @@ final class CommonLang {
         return new DivideRule(key, new StatementFolder(), childRule);
     }
 
-    static Rule createAssignmentRule(Rule definition, Rule value) {
+    private static Rule createAssignmentRule(Rule definition, Rule value) {
         Rule before = new OrRule(Lists.of(
                 new NodeRule("definition", definition),
                 new NodeRule("destination", value)

@@ -57,7 +57,7 @@ public class TypeScriptAfterPasser implements Passer {
     public PassResult pass(ParseState state, Node node) {
         return TypeScriptAfterPasser.passImport(state, node)
                 .or(() -> TypeScriptAfterPasser.passMethod(state, node))
-                .or(() -> this.format(state, node))
+                .or(() -> TypeScriptAfterPasser.format(state, node))
                 .or(() -> TypeScriptAfterPasser.passVariadic(state, node))
                 .orElseGet(() -> InlinePassResult.empty());
     }
@@ -71,7 +71,7 @@ public class TypeScriptAfterPasser implements Passer {
         }
     }
 
-    private Option<PassResult> format(ParseState state, Node node) {
+    private static Option<PassResult> format(ParseState state, Node node) {
         if (node.is("statement") || node.is("block")) {
             Node before = node.withString("before", "\n\t\t");
             return new Some<>(InlinePassResult.from(state, before));

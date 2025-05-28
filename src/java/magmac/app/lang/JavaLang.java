@@ -92,7 +92,7 @@ public final class JavaLang {
         return new TypeRule(type, new StripRule(new SuffixRule(new PrefixRule(type + " ", childRule), ";")));
     }
 
-    static Rule createDefinitionRule() {
+    private static Rule createDefinitionRule() {
         Rule modifiers = CommonLang.createModifiersRule();
         Rule annotations = new DivideRule("annotations", new DelimitedFolder('\n'), new StripRule(new PrefixRule("@", new StringRule("value"))));
         Rule beforeTypeParams = new OrRule(Lists.of(
