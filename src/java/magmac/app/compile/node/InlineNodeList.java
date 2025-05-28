@@ -17,6 +17,10 @@ public final class InlineNodeList implements NodeList {
         return new InlineNodeList(Lists.empty());
     }
 
+    public static NodeList of(Node... elements) {
+        return new InlineNodeList(Lists.of(elements));
+    }
+
     @Override
     public Iter<Node> iter() {
         return this.elements.iter();

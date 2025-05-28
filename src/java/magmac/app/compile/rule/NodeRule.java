@@ -8,11 +8,10 @@ import magmac.app.compile.node.MapNode;
 import magmac.app.compile.node.Node;
 
 public record NodeRule(String key, Rule childRule) implements Rule {
-
-    private CompileResult<Node> findNode(Node node) {
-        return node.findNode(this.key)
+    public static CompileResult<Node> findNode(Node node, String key) {
+        return node.findNode(key)
                 .map((Node node1) -> InlineCompileResult.fromResult(new Ok<>(node1)))
-                .orElseGet(() -> CompileErrors.createNodeError("Node '" + this.key + "' not present", node));
+                .orElseGet(() -> CompileErrors.createNodeError("Node '" + key + "' not present", node));
     }
 
     @Override
@@ -23,6 +22,6 @@ public record NodeRule(String key, Rule childRule) implements Rule {
 
     @Override
     public CompileResult<String> generate(Node node) {
-        return this.findNode(node).flatMapValue((Node child) -> this.childRule.generate(child));
+        return NodeRule.findNode(node, this.key).flatMapValue((Node child) -> this.childRule.generate(child));
     }
 }
