@@ -14,7 +14,9 @@ export class CompileApplication {
 	temp : ?;
 	temp : ?;
 	temp : ?;
-	CompileApplication(sources : Sources, compiler : Compiler, targets : Targets) : public;
-	run() : Option<Error>;
-	compileAndWrite(units : Map<Location, String>) : Option<Error>;
+	CompileApplication(sources : Sources, compiler : Compiler, targets : Targets) : public {this.sources=sources;this.targets=targets;this.compiler=compiler;}
+	run() : Option<Error> {return this.sources.readAll( ).mapErr( (IOException throwable) ->new ThrowableError( throwable)).mapErr( (ThrowableError error) ->new ApplicationError( error)).match( (Map<Location, String> units) ->this.compileAndWrite( units),  (ApplicationError value) ->new Some<>( value));}
+	compileAndWrite(units : Map<Location, String>) : Option<Error> {return this.compiler.compile(units).result()
+                .mapErr((CompileError error1) -> new ApplicationError(error1))
+                .match((Map<Location, String> outputs) -> this.targets.writeAll(outputs).map((IOException throwable) -> new ThrowableError(throwable)).map((ThrowableError error) ->new ApplicationError( error)), (ApplicationError err) ->new Some<>( err));}
 }

@@ -184,7 +184,7 @@ public final class JavaLang {
         Rule functionSegmentValueRule = JavaLang.createFunctionSegmentValueRule(functionSegmentRule);
         return functionSegmentRule.set(new OrRule(Lists.of(
                 CommonLang.createWhitespaceRule(),
-                new TypeRule("statement", new StripRule(new SuffixRule(functionSegmentValueRule, ";"))),
+                new StripRule(new SuffixRule(functionSegmentValueRule, ";")),
                 JavaLang.createBlockRule(functionSegmentRule)
         )));
     }

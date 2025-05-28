@@ -9,6 +9,6 @@ import { PathSources } from "../magmac/app/io/sources/PathSources";
 import { Sources } from "../magmac/app/io/sources/Sources";
 import { Paths } from "../java/nio/file/Paths";
 export class Main {
-	main() : void;
-	handleError(error : Error) : void;
+	main() : void { Sources sources=new PathSources( Paths.get( ".", "src", "java"));Iters.fromValues( new PlantUMLTargetPlatform( ), new TypeScriptTargetPlatform( )).map( (TargetPlatform platform) ->ApplicationBuilder.run( platform, sources)).flatMap( (Option<Error> option) ->Iters.fromOption( option)).next( ).ifPresent( (Error error) ->Main.handleError( error));}
+	handleError(error : Error) : void {System.err.println( error.display( ));}
 }

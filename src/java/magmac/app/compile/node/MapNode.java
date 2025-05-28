@@ -59,6 +59,11 @@ public final class MapNode implements Node {
         return "\n" + "\t".repeat(depth);
     }
 
+    private static String formatEntry(int depth, String key, String value) {
+        String indent = MapNode.createIndent(depth + 1);
+        return indent + key + ": " + value;
+    }
+
     @Override
     public Iter<Tuple2<String, Node>> iterNodes() {
         return this.nodes.iterEntries();
@@ -97,11 +102,6 @@ public final class MapNode implements Node {
             T value = entry.right();
             return MapNode.formatEntry(depth, key, mapper.apply(value));
         });
-    }
-
-    private static String formatEntry(int depth, String key, String value) {
-        String indent = MapNode.createIndent(depth + 1);
-        return indent + key + ": " + value;
     }
 
     @Override
@@ -160,6 +160,11 @@ public final class MapNode implements Node {
     @Override
     public Iter<Tuple2<String, String>> iterStrings() {
         return this.strings().iterEntries();
+    }
+
+    @Override
+    public boolean hasNodeList(String key) {
+        return this.nodeLists.containsKey(key);
     }
 
     @Override

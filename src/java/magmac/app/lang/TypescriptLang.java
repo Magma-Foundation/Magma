@@ -52,10 +52,10 @@ public final class TypescriptLang {
         PrefixRule header1 = new PrefixRule("\n\t", new NodeRule("header", header));
         DivideRule children = CommonLang.Statements("children", TypescriptLang.createFunctionSegmentRule());
         SuffixRule childRule = new SuffixRule(LocatingRule.First(header1, " {", children), "}");
-        return new TypeRule("method", new OrRule(Lists.of(
+        return new TypeRule("method", new OptionNodeListRule("children",
                 childRule,
                 new SuffixRule(header1, ";")
-        )));
+        ));
     }
 
     private static Rule createFunctionSegmentRule() {

@@ -18,5 +18,5 @@ import { Parser } from "../../magmac/app/stage/parse/Parser";
 import { TreeParser } from "../../magmac/app/stage/parse/TreeParser";
 import { Path } from "../../java/nio/file/Path";
 export class ApplicationBuilder {
-	run(platform : TargetPlatform, sources : Sources) : Option<Error>;
+	run(platform : TargetPlatform, sources : Sources) : Option<Error> { Path targetPath=platform.createTargetPath( ); String extension=platform.createExtension( ); Targets targets=new PathTargets( targetPath, extension); Lexer lexer=new RuleLexer( JavaLang.createRule( )); AfterAll afterAllChildren=platform.createAfterAll( ); Passer afterChild=platform.createAfterChild( ); Parser parser=new TreeParser( new FlattenJava( ), afterChild, afterAllChildren); Generator generator=new RuleGenerator( platform.createRule( )); Compiler compiler=new StagedCompiler( lexer, parser, generator); Application application=new CompileApplication( sources, compiler, targets);return application.run( );}
 }

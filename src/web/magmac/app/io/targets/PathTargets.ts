@@ -8,6 +8,6 @@ import { IOException } from "../../../../java/io/IOException";
 import { Files } from "../../../../java/nio/file/Files";
 import { Path } from "../../../../java/nio/file/Path";
 export class PathTargets {
-	write(location : Location, output : String) : Option<IOException>;
-	writeAll(outputs : Map<Location, String>) : Option<IOException>;
+	write(location : Location, output : String) : Option<IOException> { Path targetParent=location.namespace( ).iter( ).fold( this.root( ),  (Path path, String other) ->path.resolve( other));if(!Files.exists( targetParent)){  Option<IOException> maybeError=SafeFiles.createDirectories( targetParent);if(maybeError.isPresent( )){ return maybeError;}} Path target=targetParent.resolve( location.name( )+"."+this.extension);return SafeFiles.writeString( target, output);}
+	writeAll(outputs : Map<Location, String>) : Option<IOException> {return outputs.iterEntries( ).map( (Tuple2<Location, String> entry) ->this.write( entry.left( ), entry.right( ))).flatMap( (Option<IOException> option) ->Iters.fromOption( option)).next( );}
 }

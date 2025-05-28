@@ -309,6 +309,9 @@ class TreeParser
 class Err
 Result <|-- Err
 
+class OptionNodeListRule
+? <|-- OptionNodeListRule
+
 class PlantUMLAfterPasser
 ? <|-- PlantUMLAfterPasser
 
@@ -358,9 +361,9 @@ Roots --> Tuple2
 Roots --> Iter
 Roots --> Node
 Roots --> Location
+Node --> Option
 Node --> Tuple2
 Node --> Iter
-Node --> Option
 ParseState --> Location
 FlatMapHead --> None
 FlatMapHead --> Iter
@@ -877,6 +880,11 @@ Main --> PathSources
 Main --> Sources
 Main --> Paths
 Divider --> Iter
+OptionNodeListRule --> Lists
+OptionNodeListRule --> CompileResult
+OptionNodeListRule --> Node
+OptionNodeListRule --> OrRule
+OptionNodeListRule --> Rule
 RuleLexer --> Tuple2
 RuleLexer --> Map
 RuleLexer --> MapCollector

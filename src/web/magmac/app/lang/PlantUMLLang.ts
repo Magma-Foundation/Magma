@@ -10,7 +10,7 @@ import { SuffixRule } from "../../../magmac/app/compile/rule/SuffixRule";
 import { TypeRule } from "../../../magmac/app/compile/rule/TypeRule";
 import { StatementFolder } from "../../../magmac/app/compile/rule/fold/StatementFolder";
 export class PlantUMLLang {
-	createRule() : Rule;
-	createRootSegmentRule() : SuffixRule;
-	createStructureRule(type : String) : Rule;
+	createRule() : Rule {return new DivideRule( "children", new StatementFolder( ), PlantUMLLang.createRootSegmentRule( ));}
+	createRootSegmentRule() : SuffixRule {return new SuffixRule( new OrRule( Lists.of( CommonLang.createWhitespaceRule( ), new TypeRule( "start", new ExactRule( "@startuml\nskinparam linetype ortho")), new TypeRule( "end", new ExactRule( "@enduml")), PlantUMLLang.createStructureRule( "class"), PlantUMLLang.createStructureRule( "interface"), PlantUMLLang.createStructureRule( "enum"), new TypeRule( "inherits", LocatingRule.First( new StringRule( "parent"), " <|-- ", new StringRule( "child"))), new TypeRule( "dependency", LocatingRule.First( new StringRule( "child"), " --> ", new StringRule( "parent"))))), "\n");}
+	createStructureRule(type : String) : Rule {return new TypeRule( type, new PrefixRule( type+" ", new StringRule( "name")));}
 }

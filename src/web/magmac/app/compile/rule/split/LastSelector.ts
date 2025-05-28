@@ -4,7 +4,7 @@ import { List } from "../../../../../magmac/api/collect/list/List";
 import { Joiner } from "../../../../../magmac/api/iter/collect/Joiner";
 export class LastSelector {
 	temp : ?;
-	LastSelector(delimiter : String) : public;
-	select(list : List<String>) : Option<Tuple2<String, String>>;
-	merge(tuple : Tuple2<List<String>, String>) : Tuple2<String, String>;
+	LastSelector(delimiter : String) : public {this.delimiter=delimiter;}
+	select(list : List<String>) : Option<Tuple2<String, String>> {return list.popLast( ).map( (Tuple2<List<String>, String> tuple) ->this.merge( tuple));}
+	merge(tuple : Tuple2<List<String>, String>) : Tuple2<String, String> { String joined=tuple.left( ).iter( ).collect( new Joiner( this.delimiter)).orElse( "");return new Tuple2<String, String>( joined, tuple.right( ));}
 }

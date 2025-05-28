@@ -11,9 +11,9 @@ import { SuffixRule } from "../../../magmac/app/compile/rule/SuffixRule";
 import { TypeRule } from "../../../magmac/app/compile/rule/TypeRule";
 import { StatementFolder } from "../../../magmac/app/compile/rule/fold/StatementFolder";
 export class CommonLang {
-	createWhitespaceRule() : Rule;
-	createSymbolTypeRule() : Rule;
-	createTemplateRule() : Rule;
-	createParametersRule(definition : Rule) : DivideRule;
-	Statements(key : String, childRule : Rule) : DivideRule;
+	createWhitespaceRule() : Rule {return new TypeRule( "whitespace", new StripRule( new ExactRule( "")));}
+	createSymbolTypeRule() : Rule {return new TypeRule( "symbol-type", new StripRule( FilterRule.Symbol( new StringRule( "value"))));}
+	createTemplateRule() : Rule {return new TypeRule( "template", new StripRule( new SuffixRule( LocatingRule.First( new StripRule( new StringRule( "base")), "<", new StringRule( "arguments")), ">")));}
+	createParametersRule(definition : Rule) : DivideRule {return new DivideRule( "parameters", new ValueFolder( ), new OrRule( Lists.of( CommonLang.createWhitespaceRule( ), definition)));}
+	Statements(key : String, childRule : Rule) : DivideRule {return new DivideRule( key, new StatementFolder( ), childRule);}
 }

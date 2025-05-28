@@ -1,9 +1,8 @@
 package magmac.app.compile.node;
 
+import magmac.api.Option;
 import magmac.api.Tuple2;
 import magmac.api.iter.Iter;
-
-import magmac.api.Option;
 
 public interface Node {
     Iter<Tuple2<String, Node>> iterNodes();
@@ -33,4 +32,6 @@ public interface Node {
     Option<Node> findNode(String key);
 
     Iter<Tuple2<String, String>> iterStrings();
+
+    boolean hasNodeList(String key);
 }

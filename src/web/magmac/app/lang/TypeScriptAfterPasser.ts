@@ -15,7 +15,7 @@ import { PassResult } from "../../../magmac/app/stage/PassResult";
 import { Passer } from "../../../magmac/app/stage/Passer";
 import { ParseState } from "../../../magmac/app/stage/parse/ParseState";
 export class TypeScriptAfterPasser {
-	passImport(state : ParseState, node : Node) : Option<PassResult>;
-	passMethod(state : ParseState, node : Node) : Option<PassResult>;
-	pass(state : ParseState, node : Node) : PassResult;
+	passImport(state : ParseState, node : Node) : Option<PassResult> {if(!node.is( "import")){ return new None<>( );} int namespaceSize=state.findLocation( ).namespace( ).size( ); NodeList copy=Lists.repeat( "..", namespaceSize).iter( ).map( (String value) ->new MapNode( ).withString( "value", value)).collect( new NodeListCollector( )); NodeList segments=node.findNodeList( "segments").orElse( InlineNodeList.empty( )); Option<CompileResult<Tuple2<ParseState, Node>>> map=segments.findLast( ).map( (Node last) ->{ String value=last.findString( "value").orElse( ""); NodeList values=copy.addAll( segments); Node node1=node.withString( "child", value).withNodeList( "segments", values);return InlineCompileResult.fromOk( new Tuple2<>( state, node1));});return new Some<>( new InlinePassResult( map));}
+	passMethod(state : ParseState, node : Node) : Option<PassResult> {if(node.is( "method")){  Node header=node.findNode( "header").orElse( new MapNode( )); NodeList parameters=node.findNodeList( "parameters").orElse( InlineNodeList.empty( )); Node withParameters=header.withNodeList( "parameters", parameters);return new Some<>( new InlinePassResult( new Some<>( InlineCompileResult.fromOk( new Tuple2<>( state, node.withNode( "header", withParameters))))));}return new None<>( );}
+	pass(state : ParseState, node : Node) : PassResult {return TypeScriptAfterPasser.passImport( state, node).or( () ->TypeScriptAfterPasser.passMethod( state, node)).orElseGet( () ->InlinePassResult.empty( ));}
 }

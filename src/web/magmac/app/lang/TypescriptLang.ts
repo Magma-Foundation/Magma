@@ -11,13 +11,13 @@ import { SuffixRule } from "../../../magmac/app/compile/rule/SuffixRule";
 import { TypeRule } from "../../../magmac/app/compile/rule/TypeRule";
 import { DelimitedFolder } from "../../../magmac/app/compile/rule/fold/DelimitedFolder";
 export class TypescriptLang {
-	createRule() : Rule;
-	createImportRule() : TypeRule;
-	createClassRule(type : String) : Rule;
-	createStructureMemberRule() : Rule;
-	createMethodRule() : TypeRule;
-	createFunctionSegmentRule() : Rule;
-	createConstructorRule() : TypeRule;
-	createDefinitionRule() : Rule;
-	createTypeRule() : Rule;
+	createRule() : Rule {return new TypeRule( "root", CommonLang.Statements( "children", new OrRule( Lists.of( CommonLang.createWhitespaceRule( ), TypescriptLang.createImportRule( ), TypescriptLang.createClassRule( "class"), TypescriptLang.createClassRule( "interface")))));}
+	createImportRule() : TypeRule { Rule segments=new SuffixRule( new DivideRule( "segments", new DelimitedFolder( '/'), new StringRule( "value")), "\";\n"); Rule first=LocatingRule.First( new StringRule( "child"), " } from \"", segments);return new TypeRule( "import", new PrefixRule( "import { ", first));}
+	createClassRule(type : String) : Rule { Rule children=CommonLang.Statements( "children", TypescriptLang.createStructureMemberRule( )); Rule name=LocatingRule.First( new StringRule( "name"), " {", new SuffixRule( children, "\n}\n"));return new TypeRule( type, new PrefixRule( "export " + type + " ", name));}
+	createStructureMemberRule() : Rule {return new OrRule( Lists.of( CommonLang.createWhitespaceRule( ), TypescriptLang.createMethodRule( ), new TypeRule( "statement", new ExactRule( "\n\ttemp : ?;"))));}
+	createMethodRule() : TypeRule { Rule header=new OrRule( Lists.of( TypescriptLang.createDefinitionRule( ), TypescriptLang.createConstructorRule( ))); PrefixRule header1=new PrefixRule( "\n\t", new NodeRule( "header", header)); DivideRule children=CommonLang.Statements( "children", TypescriptLang.createFunctionSegmentRule( )); SuffixRule childRule=new SuffixRule( LocatingRule.First( header1, " {", children), "}");return new TypeRule( "method", new OptionNodeListRule( "children", childRule, new SuffixRule( header1, ";")));}
+	createFunctionSegmentRule() : Rule {return JavaLang.createFunctionSegmentRule( );}
+	createConstructorRule() : TypeRule { DivideRule parametersRule=CommonLang.createParametersRule( TypescriptLang.createDefinitionRule( ));return new TypeRule( "constructor", new PrefixRule( "constructor(", new SuffixRule( parametersRule, ")")));}
+	createDefinitionRule() : Rule { LazyRule definition=new MutableLazyRule( ); DivideRule parameters=CommonLang.createParametersRule( definition); Rule name=new StringRule( "name"); Rule leftRule=new OrRule( Lists.of( new SuffixRule( LocatingRule.First( name, "(", parameters), ")"), name));return definition.set( LocatingRule.First( leftRule, " : ", new NodeRule( "type", TypescriptLang.createTypeRule( ))));}
+	createTypeRule() : Rule {return new OrRule( Lists.of( CommonLang.createSymbolTypeRule( ), CommonLang.createTemplateRule( )));}
 }
