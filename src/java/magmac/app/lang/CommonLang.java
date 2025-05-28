@@ -19,18 +19,12 @@ import magmac.app.compile.rule.divide.FoldingDivider;
 import magmac.app.compile.rule.fold.DelimitedFolder;
 import magmac.app.compile.rule.fold.StatementFolder;
 import magmac.app.compile.rule.split.DividingSplitter;
+import magmac.app.lang.java.Symbol;
+import magmac.app.lang.java.value.DataAccess;
 
-final class CommonLang {
+public final class CommonLang {
     static Rule createWhitespaceRule() {
         return new TypeRule("whitespace", new StripRule(new ExactRule("")));
-    }
-
-    static Rule createSymbolTypeRule() {
-        return new TypeRule("symbol-type", CommonLang.createSymbolRule("value"));
-    }
-
-    private static StripRule createSymbolRule(String name) {
-        return new StripRule(FilterRule.Symbol(new StringRule(name)));
     }
 
     static Rule createTemplateRule() {
@@ -66,9 +60,9 @@ final class CommonLang {
                 CommonLang.createStringRule(),
                 CommonLang.createInvokableRule(value),
                 CommonLang.createNumberRule(),
-                CommonLang.createAccessRule(".", value, "data-access"),
-                CommonLang.createAccessRule("::", value, "method-access"),
-                CommonLang.createSymbolValueRule(),
+                DataAccess.createAccessRule(".", value, "data-access"),
+                DataAccess.createAccessRule("::", value, "method-access"),
+                Symbol.createSymbolValueRule(),
                 CommonLang.createOperationRule(value, "add", "+"),
                 CommonLang.createOperationRule(value, "subtract", "-"),
                 CommonLang.createOperationRule(value, "equals", "=="),
@@ -93,13 +87,13 @@ final class CommonLang {
 
         NodeListRule parameters = new NodeListRule("parameters", new ValueFolder(), new OrRule(Lists.of(
                 definition,
-                CommonLang.createSymbolRule("param")
+                Symbol.createSymbolRule("param")
         )));
 
         PrefixRule rule = new PrefixRule("(", new SuffixRule(parameters, ")"));
         OrRule rule1 = new OrRule(Lists.of(
                 rule,
-                CommonLang.createSymbolRule("param")
+                Symbol.createSymbolRule("param")
         ));
 
         return new TypeRule("lambda", LocatingRule.First(new StripRule(rule1), infix, value1));
@@ -107,15 +101,6 @@ final class CommonLang {
 
     private static Rule createOperationRule(Rule value, String type, String infix) {
         return new TypeRule(type, LocatingRule.First(new NodeRule("left", value), infix, new NodeRule("right", value)));
-    }
-
-    private static Rule createSymbolValueRule() {
-        return CommonLang.createSymbolRule("value");
-    }
-
-    private static Rule createAccessRule(String infix, LazyRule value, String type) {
-        Rule property = CommonLang.createSymbolRule("property");
-        return new TypeRule(type, LocatingRule.Last(new NodeRule("instance", value), infix, property));
     }
 
     private static Rule createNumberRule() {
@@ -217,7 +202,7 @@ final class CommonLang {
                 CommonLang.createVariadicRule(orRule),
                 CommonLang.createArrayRule(orRule),
                 CommonLang.createTemplateRule(),
-                CommonLang.createSymbolTypeRule()
+                Symbol.createSymbolTypeRule()
         )));
     }
 

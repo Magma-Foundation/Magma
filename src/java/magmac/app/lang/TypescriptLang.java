@@ -12,6 +12,7 @@ import magmac.app.compile.rule.StripRule;
 import magmac.app.compile.rule.SuffixRule;
 import magmac.app.compile.rule.TypeRule;
 import magmac.app.compile.rule.fold.DelimitedFolder;
+import magmac.app.lang.java.Symbol;
 
 public final class TypescriptLang {
     public static Rule createRule() {
@@ -85,7 +86,7 @@ public final class TypescriptLang {
     private static Rule createTypeRule() {
         LazyRule orRule = new MutableLazyRule();
         orRule.set(new OrRule(Lists.of(
-                CommonLang.createSymbolTypeRule(),
+                Symbol.createSymbolTypeRule(),
                 CommonLang.createTemplateRule(),
                 new TypeRule("array", new SuffixRule(new NodeRule("child", orRule), "[]"))
         )));

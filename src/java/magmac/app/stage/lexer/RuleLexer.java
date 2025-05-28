@@ -16,6 +16,7 @@ public class RuleLexer implements Lexer {
     }
 
     private CompileResult<Unit<Node>> foldEntry(Unit<String> unit) {
+        System.out.println(unit.display());
         return unit.mapValue((String input) -> this.rootRule.lex(input));
     }
 

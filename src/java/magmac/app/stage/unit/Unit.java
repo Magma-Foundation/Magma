@@ -10,4 +10,6 @@ public interface Unit<T> {
     <R> R deconstruct(BiFunction<Location, T, R> merger);
 
     <R> CompileResult<Unit<R>> mapValue(Function<T, CompileResult<R>> mapper);
+
+    String display();
 }

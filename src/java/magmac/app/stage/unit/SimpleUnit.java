@@ -24,4 +24,9 @@ public final class SimpleUnit<T> implements Unit<T> {
     public <R> CompileResult<Unit<R>> mapValue(Function<T, CompileResult<R>> mapper) {
         return mapper.apply(this.value).mapValue((R root) -> new SimpleUnit<>(this.location, root));
     }
+
+    @Override
+    public String display() {
+        return this.location.toString();
+    }
 }

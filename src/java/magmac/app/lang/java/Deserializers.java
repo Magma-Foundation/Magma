@@ -7,8 +7,8 @@ import magmac.app.compile.error.CompileResult;
 import magmac.app.compile.error.CompileResults;
 import magmac.app.compile.node.Node;
 
-class Deserializers {
-    static <T> CompileResult<T> orError(Node node, List<Deserializer<T>> deserializers) {
+public class Deserializers {
+    public static <T> CompileResult<T> orError(Node node, List<Deserializer<T>> deserializers) {
         return Deserializers.or(node, deserializers)
                 .orElseGet(() -> CompileResults.NodeErr("Cannot deserialize", node));
     }
@@ -18,5 +18,9 @@ class Deserializers {
                 .map(deserializer -> deserializer.deserialize(node))
                 .flatMap(Iters::fromOption)
                 .next();
+    }
+
+    public static <T extends R, R> Deserializer<R> wrap(Deserializer<T> deserializer) {
+        return node -> deserializer.deserialize(node).map(result -> result.mapValue(value -> value));
     }
 }
