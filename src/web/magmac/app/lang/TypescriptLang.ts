@@ -21,8 +21,9 @@ export class TypescriptLang {
 	}
 	private static createClassRule( type : String) : Rule {
 		 children : Rule=CommonLang.Statements( "children", TypescriptLang.createStructureMemberRule( ));
-		 name : Rule=LocatingRule.First( new StringRule( "name"), " {", new SuffixRule( children, "\n}\n"));
-		return new TypeRule( type, new PrefixRule( "export " + type + " ", name));
+		 name : Rule=new StringRule( "name");
+		 afterKeyword : Rule=LocatingRule.First( CommonLang.attachTypeParams( name), " {", new SuffixRule( children, "\n}\n"));
+		return new TypeRule( type, new PrefixRule( "export " + type + " ", afterKeyword));
 	}
 	private static createStructureMemberRule() : Rule {
 		 definitionRule : Rule=TypescriptLang.createDefinitionRule( );

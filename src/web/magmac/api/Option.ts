@@ -2,6 +2,14 @@ import { Consumer } from "../../java/util/function/Consumer";
 import { Function } from "../../java/util/function/Function";
 import { Predicate } from "../../java/util/function/Predicate";
 import { Supplier } from "../../java/util/function/Supplier";
-export interface Option { mapper) : map(Function<T, R>; isPresent() : boolean;T other) : orElseGet(Supplier<T>; isEmpty() : boolean; mapper) : flatMap(Function<T, Option<R>>;
-	 orElse( other : T) : T;Option predicate) : filter(Predicate<T>;Option other) : or(Supplier<Option<T>>;void consumer) : ifPresent(Consumer<T>;
+export interface Option {
+	 map( mapper : Function<T, R>) : Option<R>;
+	 isPresent() : boolean;
+	 orElseGet( other : Supplier<T>) : T;
+	 isEmpty() : boolean;
+	 flatMap( mapper : Function<T, Option<R>>) : Option<R>;
+	 orElse( other : T) : T;
+	 filter( predicate : Predicate<T>) : Option<T>;
+	 or( other : Supplier<Option<T>>) : Option<T>;
+	 ifPresent( consumer : Consumer<T>) : void;
 }

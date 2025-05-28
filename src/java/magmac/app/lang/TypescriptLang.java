@@ -31,8 +31,9 @@ public final class TypescriptLang {
 
     private static Rule createClassRule(String type) {
         Rule children = CommonLang.Statements("children", TypescriptLang.createStructureMemberRule());
-        Rule name = LocatingRule.First(new StringRule("name"), " {", new SuffixRule(children, "\n}\n"));
-        return new TypeRule(type, new PrefixRule("export " + type + " ", name));
+        Rule name = new StringRule("name");
+        Rule afterKeyword = LocatingRule.First(CommonLang.attachTypeParams(name), " {", new SuffixRule(children, "\n}\n"));
+        return new TypeRule(type, new PrefixRule("export " + type + " ", afterKeyword));
     }
 
     private static Rule createStructureMemberRule() {

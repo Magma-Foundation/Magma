@@ -1,3 +1,4 @@
 import { Option } from "../../../../../magmac/api/Option";
-export interface Locator {Option<Integer> locate(String input, infix) : String;
+export interface Locator {
+	 locate( input : String,  infix : String) : Option<Integer>;
 }

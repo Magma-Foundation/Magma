@@ -52,12 +52,11 @@ export class JavaLang {
 		 modifiers : Rule=CommonLang.createModifiersRule( );
 		 annotations : Rule=new DivideRule( "annotations", new DelimitedFolder( '\n'), new StripRule( new PrefixRule( "@", new StringRule( "value"))));
 		 beforeTypeParams : Rule=new OrRule( Lists.of( LocatingRule.Last( annotations, "\n", modifiers), modifiers));
-		 typeParams : Rule=new DivideRule( "type-parameters", new ValueFolder( ), new StringRule( "value"));
-		 leftRule1 : Rule=new OrRule( Lists.of( new StripRule( new SuffixRule( LocatingRule.First( beforeTypeParams, "<", typeParams), ">")), beforeTypeParams));
+		 leftRule1 : Rule=CommonLang.attachTypeParams( beforeTypeParams);
 		 rightRule : Rule=new NodeRule( "type", CommonLang.createTypeRule( ));
 		 divider : Divider=new FoldingDivider( new TypeSeparatorFolder( ));
 		 splitter : Splitter=DividingSplitter.Last( divider, " ");
 		 leftRule : Rule=new LocatingRule( leftRule1, splitter, rightRule);
-		return new StripRule( LocatingRule.Last( leftRule, " ", new StringRule( "name")));
+		return new StripRule( LocatingRule.Last( leftRule, " ", new StripRule( FilterRule.Symbol( new StringRule( "name")))));
 	}
 }

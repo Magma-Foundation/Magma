@@ -1,2 +1,3 @@
-export interface Error { display() : String;
+export interface Error {
+	 display() : String;
 }

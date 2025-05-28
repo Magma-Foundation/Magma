@@ -1,2 +1,3 @@
-export interface Context { display() : String;
+export interface Context {
+	 display() : String;
 }

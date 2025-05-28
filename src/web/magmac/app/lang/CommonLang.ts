@@ -123,4 +123,9 @@ export class CommonLang {
 	static createModifiersRule() : Rule {
 		return new StripRule( new DivideRule( "modifiers", new DelimitedFolder( ' '), new StringRule( "value")));
 	}
+	static attachTypeParams( beforeTypeParams : Rule) : Rule {
+		 typeParams : Rule=new DivideRule( "type-parameters", new ValueFolder( ), new StringRule( "value"));
+		 leftRule1 : Rule=new OrRule( Lists.of( new StripRule( new SuffixRule( LocatingRule.First( beforeTypeParams, "<", typeParams), ">")), beforeTypeParams));
+		return leftRule1;
+	}
 }

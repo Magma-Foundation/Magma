@@ -220,4 +220,13 @@ final class CommonLang {
     static Rule createModifiersRule() {
         return new StripRule(new DivideRule("modifiers", new DelimitedFolder(' '), new StringRule("value")));
     }
+
+    static Rule attachTypeParams(Rule beforeTypeParams) {
+        Rule typeParams = new DivideRule("type-parameters", new ValueFolder(), new StringRule("value"));
+        Rule leftRule1 = new OrRule(Lists.of(
+                new StripRule(new SuffixRule(LocatingRule.First(beforeTypeParams, "<", typeParams), ">")),
+                beforeTypeParams
+        ));
+        return leftRule1;
+    }
 }

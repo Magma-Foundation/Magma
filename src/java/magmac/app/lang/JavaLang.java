@@ -100,17 +100,12 @@ public final class JavaLang {
                 modifiers
         ));
 
-        Rule typeParams = new DivideRule("type-parameters", new ValueFolder(), new StringRule("value"));
-        Rule leftRule1 = new OrRule(Lists.of(
-                new StripRule(new SuffixRule(LocatingRule.First(beforeTypeParams, "<", typeParams), ">")),
-                beforeTypeParams
-        ));
+        Rule leftRule1 = CommonLang.attachTypeParams(beforeTypeParams);
 
         Rule rightRule = new NodeRule("type", CommonLang.createTypeRule());
         Divider divider = new FoldingDivider(new TypeSeparatorFolder());
         Splitter splitter = DividingSplitter.Last(divider, " ");
         Rule leftRule = new LocatingRule(leftRule1, splitter, rightRule);
-        return new StripRule(LocatingRule.Last(leftRule, " ", new StringRule("name")));
+        return new StripRule(LocatingRule.Last(leftRule, " ", new StripRule(FilterRule.Symbol(new StringRule("name")))));
     }
-
 }
