@@ -1,7 +1,7 @@
 package magmac.app.lang;
 
 import magmac.api.collect.list.Lists;
-import magmac.app.compile.rule.DivideRule;
+import magmac.app.compile.rule.NodeListRule;
 import magmac.app.compile.rule.LocatingRule;
 import magmac.app.compile.rule.NodeRule;
 import magmac.app.compile.rule.OrRule;
@@ -24,7 +24,7 @@ public final class TypescriptLang {
     }
 
     private static Rule createImportRule() {
-        Rule segments = new SuffixRule(new DivideRule("segments", new DelimitedFolder('/'), new StringRule("value")), "\";\n");
+        Rule segments = new SuffixRule(new NodeListRule("segments", new DelimitedFolder('/'), new StringRule("value")), "\";\n");
         Rule first = LocatingRule.First(new StringRule("child"), " } from \"", segments);
         return new TypeRule("import", new PrefixRule("import { ", first));
     }
@@ -63,7 +63,7 @@ public final class TypescriptLang {
     }
 
     private static Rule createConstructorRule(Rule definition) {
-        DivideRule parametersRule = CommonLang.createParametersRule(definition);
+        NodeListRule parametersRule = CommonLang.createParametersRule(definition);
         return new TypeRule("constructor", new PrefixRule("constructor(", new SuffixRule(parametersRule, ")")));
     }
 

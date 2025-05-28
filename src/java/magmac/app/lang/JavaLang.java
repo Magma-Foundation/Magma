@@ -2,9 +2,9 @@ package magmac.app.lang;
 
 import magmac.api.collect.list.Lists;
 import magmac.app.compile.rule.ContextRule;
-import magmac.app.compile.rule.DivideRule;
 import magmac.app.compile.rule.FilterRule;
 import magmac.app.compile.rule.LocatingRule;
+import magmac.app.compile.rule.NodeListRule;
 import magmac.app.compile.rule.NodeRule;
 import magmac.app.compile.rule.OrRule;
 import magmac.app.compile.rule.PrefixRule;
@@ -51,11 +51,11 @@ public final class JavaLang {
                 new ContextRule("Without implements", withEnds)
         ));
 
-        Rule afterKeyword = LocatingRule.First(withImplements, "{", new StripRule(new SuffixRule(CommonLang.Statements("children", JavaLang.createStructureMemberRule()), "}")));
+        Rule afterKeyword = LocatingRule.First(withImplements, "{", new StripRule(new SuffixRule(CommonLang.Statements("children", JavaLang.createClassMemberRule()), "}")));
         return new TypeRule(keyword, LocatingRule.First(new StringRule("before-keyword"), keyword + " ", afterKeyword));
     }
 
-    private static OrRule createStructureMemberRule() {
+    private static Rule createClassMemberRule() {
         LazyRule functionSegmentRule = new MutableLazyRule();
         LazyRule valueLazy = new MutableLazyRule();
         LazyRule value = CommonLang.initValueRule(functionSegmentRule, valueLazy, "->", JavaLang.createDefinitionRule());
@@ -63,8 +63,15 @@ public final class JavaLang {
         return new OrRule(Lists.of(
                 CommonLang.createWhitespaceRule(),
                 CommonLang.createStructureStatementRule(new TypeRule("definition", JavaLang.createDefinitionRule()), value),
-                JavaLang.createMethodRule(functionSegment)
+                JavaLang.createMethodRule(functionSegment),
+                JavaLang.createEnumValuesRule(value)
         ));
+    }
+
+    private static TypeRule createEnumValuesRule(Rule value) {
+        Rule name = new StripRule(FilterRule.Symbol(new StringRule("name")));
+        Rule enumValue = new StripRule(new SuffixRule(LocatingRule.First(name, "(", CommonLang.createArgumentsRule(value)), ")"));
+        return new TypeRule("enum-values", new StripRule(new SuffixRule(new NodeListRule("children", new ValueFolder(), enumValue), ";")));
     }
 
     private static Rule createMethodRule(Rule childRule) {
@@ -85,13 +92,13 @@ public final class JavaLang {
     }
 
     private static Rule createNamespacedRule(String type) {
-        Rule childRule = new DivideRule("segments", new DelimitedFolder('.'), new StringRule("value"));
+        Rule childRule = new NodeListRule("segments", new DelimitedFolder('.'), new StringRule("value"));
         return new TypeRule(type, new StripRule(new SuffixRule(new PrefixRule(type + " ", childRule), ";")));
     }
 
     private static Rule createDefinitionRule() {
         Rule modifiers = CommonLang.createModifiersRule();
-        Rule annotations = new DivideRule("annotations", new DelimitedFolder('\n'), new StripRule(new PrefixRule("@", new StringRule("value"))));
+        Rule annotations = new NodeListRule("annotations", new DelimitedFolder('\n'), new StripRule(new PrefixRule("@", new StringRule("value"))));
         Rule beforeTypeParams = new OrRule(Lists.of(
                 LocatingRule.Last(annotations, "\n", modifiers),
                 modifiers

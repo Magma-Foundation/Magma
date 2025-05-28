@@ -1,7 +1,7 @@
 package magmac.app.lang;
 
 import magmac.api.collect.list.Lists;
-import magmac.app.compile.rule.DivideRule;
+import magmac.app.compile.rule.NodeListRule;
 import magmac.app.compile.rule.ExactRule;
 import magmac.app.compile.rule.LocatingRule;
 import magmac.app.compile.rule.OrRule;
@@ -14,7 +14,7 @@ import magmac.app.compile.rule.fold.StatementFolder;
 
 public final class PlantUMLLang {
     public static Rule createRule() {
-        return new DivideRule("children", new StatementFolder(), PlantUMLLang.createRootSegmentRule());
+        return new NodeListRule("children", new StatementFolder(), PlantUMLLang.createRootSegmentRule());
     }
 
     private static SuffixRule createRootSegmentRule() {

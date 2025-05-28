@@ -9,7 +9,7 @@ import magmac.app.compile.node.NodeListCollector;
 import magmac.app.compile.rule.divide.FoldingDivider;
 import magmac.app.compile.rule.fold.Folder;
 
-public record DivideRule(String key, Folder folder, Rule childRule) implements Rule {
+public record NodeListRule(String key, Folder folder, Rule childRule) implements Rule {
     @Override
     public CompileResult<Node> lex(String input) {
         return new FoldingDivider(this.folder).divide(input)

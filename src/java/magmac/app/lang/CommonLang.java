@@ -2,10 +2,10 @@ package magmac.app.lang;
 
 import magmac.api.collect.list.Lists;
 import magmac.app.compile.rule.ContextRule;
-import magmac.app.compile.rule.DivideRule;
 import magmac.app.compile.rule.ExactRule;
 import magmac.app.compile.rule.FilterRule;
 import magmac.app.compile.rule.LocatingRule;
+import magmac.app.compile.rule.NodeListRule;
 import magmac.app.compile.rule.NodeRule;
 import magmac.app.compile.rule.OrRule;
 import magmac.app.compile.rule.PrefixRule;
@@ -33,15 +33,15 @@ final class CommonLang {
         return new TypeRule("template", new StripRule(new SuffixRule(LocatingRule.First(new StripRule(new StringRule("base")), "<", new StringRule("arguments")), ">")));
     }
 
-    static DivideRule createParametersRule(Rule definition) {
-        return new DivideRule("parameters", new ValueFolder(), new OrRule(Lists.of(
+    static NodeListRule createParametersRule(Rule definition) {
+        return new NodeListRule("parameters", new ValueFolder(), new OrRule(Lists.of(
                 CommonLang.createWhitespaceRule(),
                 definition
         )));
     }
 
-    public static DivideRule Statements(String key, Rule childRule) {
-        return new DivideRule(key, new StatementFolder(), childRule);
+    public static NodeListRule Statements(String key, Rule childRule) {
+        return new NodeListRule(key, new StatementFolder(), childRule);
     }
 
     private static Rule createAssignmentRule(Rule definition, Rule value) {
@@ -86,19 +86,19 @@ final class CommonLang {
                 new NodeRule("value", value)
         ));
 
-        return new TypeRule("lambda", LocatingRule.First(new StripRule(new PrefixRule("(", new SuffixRule(new DivideRule("parameters", new ValueFolder(), definition), ")"))), infix, value1));
+        return new TypeRule("lambda", LocatingRule.First(new StripRule(new PrefixRule("(", new SuffixRule(new NodeListRule("parameters", new ValueFolder(), definition), ")"))), infix, value1));
     }
 
     private static Rule createOperationRule(Rule value, String type, String infix) {
         return new TypeRule(type, LocatingRule.First(new NodeRule("left", value), infix, new NodeRule("right", value)));
     }
 
-    private static StripRule createSymbolValueRule() {
+    private static Rule createSymbolValueRule() {
         return new StripRule(FilterRule.Symbol(new StringRule("value")));
     }
 
     private static Rule createAccessRule(LazyRule value) {
-        StripRule property = new StripRule(FilterRule.Symbol(new StringRule("property")));
+        Rule property = new StripRule(FilterRule.Symbol(new StringRule("property")));
         return new TypeRule("access", LocatingRule.Last(new NodeRule("instance", value), ".", property));
     }
 
@@ -120,13 +120,16 @@ final class CommonLang {
                 new ContextRule("As invocation", new NodeRule("caller", value))
         )), "("));
 
-        DivideRule arguments = new DivideRule("arguments", new ValueFolder(), new OrRule(Lists.of(
+        NodeListRule arguments = CommonLang.createArgumentsRule(value);
+        Splitter splitter = DividingSplitter.Last(new FoldingDivider(new InvocationFolder()), "");
+        return new TypeRule("invocation", new StripRule(new SuffixRule(new LocatingRule(caller, splitter, arguments), ")")));
+    }
+
+    public static NodeListRule createArgumentsRule(Rule value) {
+        return new NodeListRule("arguments", new ValueFolder(), new OrRule(Lists.of(
                 CommonLang.createWhitespaceRule(),
                 value
         )));
-
-        Splitter splitter = DividingSplitter.Last(new FoldingDivider(new InvocationFolder()), "");
-        return new TypeRule("invocation", new StripRule(new SuffixRule(new LocatingRule(caller, splitter, arguments), ")")));
     }
 
     static Rule initFunctionSegmentRule(LazyRule functionSegmentRule, Rule value, Rule definition) {
@@ -164,7 +167,7 @@ final class CommonLang {
         ));
     }
 
-    private static StripRule createConditionalRule(String prefix, Rule value) {
+    private static Rule createConditionalRule(String prefix, Rule value) {
         return new StripRule(new PrefixRule(prefix, new StripRule(new PrefixRule("(", new SuffixRule(new NodeRule("condition", value), ")")))));
     }
 
@@ -218,11 +221,11 @@ final class CommonLang {
     }
 
     static Rule createModifiersRule() {
-        return new StripRule(new DivideRule("modifiers", new DelimitedFolder(' '), new StringRule("value")));
+        return new StripRule(new NodeListRule("modifiers", new DelimitedFolder(' '), new StringRule("value")));
     }
 
     static Rule attachTypeParams(Rule beforeTypeParams) {
-        Rule typeParams = new DivideRule("type-parameters", new ValueFolder(), new StringRule("value"));
+        Rule typeParams = new NodeListRule("type-parameters", new ValueFolder(), new StringRule("value"));
         return new OptionNodeListRule("type-parameters",
                 new StripRule(new SuffixRule(LocatingRule.First(beforeTypeParams, "<", typeParams), ">")),
                 beforeTypeParams
