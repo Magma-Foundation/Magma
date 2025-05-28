@@ -60,7 +60,9 @@ public final class TypescriptLang {
     }
 
     private static Rule createFunctionSegmentRule() {
-        return JavaLang.createFunctionSegmentRule();
+        final MutableLazyRule functionSegmentRule = new MutableLazyRule();
+        final MutableLazyRule valueLazy = new MutableLazyRule();
+        return CommonLang.initFunctionSegmentRule(functionSegmentRule, CommonLang.initValueRule(functionSegmentRule, valueLazy));
     }
 
     private static TypeRule createConstructorRule() {
