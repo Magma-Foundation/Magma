@@ -1,4 +1,5 @@
 import { Iter } from "../../../../../magmac/api/iter/Iter";
 export interface Divider {
-	temp : ?;
+	divide : Iter<String>{
+	}
 }

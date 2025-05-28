@@ -6,12 +6,12 @@ import { Max } from "../../../magmac/api/iter/collect/Max";
 import { Context } from "../../../magmac/app/compile/error/context/Context";
 import { CompileError } from "../../../magmac/app/compile/error/error/CompileError";
 export class ImmutableCompileError {
-	ImmutableCompileError : ?{
+	ImmutableCompileError : public{
 	}
-	display : ?{
+	display : String{
 	}
-	format : ?{
+	format : String{
 	}
-	computeMaxDepth : ?{
+	computeMaxDepth : int{
 	}
 }

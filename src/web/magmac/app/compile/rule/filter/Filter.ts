@@ -1,4 +1,5 @@
 export interface Filter {
-	temp : ?;
+	test : boolean{
+	}
 	temp : ?;
 }

@@ -12,12 +12,12 @@ import { FoldingDivider } from "../../../../magmac/app/compile/rule/divide/Foldi
 import { Folder } from "../../../../magmac/app/compile/rule/fold/Folder";
 import { StatementFolder } from "../../../../magmac/app/compile/rule/fold/StatementFolder";
 export class DivideRule {
-	Statements : ?{
+	Statements : DivideRule{
 	}
-	join : ?{
+	join : CompileResult<Option<String>>{
 	}
-	lex : ?{
+	lex : CompileResult<Node>{
 	}
-	generate : ?{
+	generate : CompileResult<String>{
 	}
 }

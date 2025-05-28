@@ -116,16 +116,10 @@ public final class JavaLang {
         orRule.set(new OrRule(Lists.of(
                 JavaLang.createVariadicRule(orRule),
                 JavaLang.createArrayRule(orRule),
-                JavaLang.createTemplateRule(),
-                JavaLang.createSymbolTypeRule(),
-                JavaLang.createQualifiedRule()
+                CommonLang.createTemplateRule(),
+                CommonLang.createSymbolTypeRule()
         )));
         return orRule;
-    }
-
-    private static Rule createQualifiedRule() {
-        Rule childRule = new DivideRule("segments", new DelimitedFolder('.'), new StringRule("value"));
-        return new TypeRule("qualified", childRule);
     }
 
     private static TypeRule createArrayRule(Rule rule) {
@@ -133,18 +127,9 @@ public final class JavaLang {
         return new TypeRule("array", new StripRule(new SuffixRule(child, "[]")));
     }
 
-
     private static TypeRule createVariadicRule(Rule rule) {
         NodeRule child = new NodeRule("child", rule);
         return new TypeRule("variadic", new StripRule(new SuffixRule(child, "...")));
-    }
-
-    private static Rule createSymbolTypeRule() {
-        return new TypeRule("symbol", new StripRule(FilterRule.Symbol(new StringRule("value"))));
-    }
-
-    private static Rule createTemplateRule() {
-        return new TypeRule("template", new StripRule(new SuffixRule(LocatingRule.First(new StripRule(new StringRule("base")), "<", new StringRule("arguments")), ">")));
     }
 
     private static Rule createNamespacedRule(String type) {

@@ -1,10 +1,10 @@
 import { ArrayList } from "../../../../java/util/ArrayList";
 import { Arrays } from "../../../../java/util/Arrays";
 export class Lists {
-	of : ?{
+	of : List<T>{
 	}
-	empty : ?{
+	empty : List<T>{
 	}
-	repeat : ?{
+	repeat : List<T>{
 	}
 }

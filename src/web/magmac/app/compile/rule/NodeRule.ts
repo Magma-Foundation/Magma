@@ -5,10 +5,10 @@ import { CompileErrors } from "../../../../magmac/app/compile/error/error/Compil
 import { MapNode } from "../../../../magmac/app/compile/node/MapNode";
 import { Node } from "../../../../magmac/app/compile/node/Node";
 export class NodeRule {
-	findNode : ?{
+	findNode : CompileResult<Node>{
 	}
-	lex : ?{
+	lex : CompileResult<Node>{
 	}
-	generate : ?{
+	generate : CompileResult<String>{
 	}
 }

@@ -7,8 +7,8 @@ import { IOException } from "../../../../java/io/IOException";
 import { Files } from "../../../../java/nio/file/Files";
 import { Path } from "../../../../java/nio/file/Path";
 export class PathTargets {
-	write : ?{
+	write : Option<IOException>{
 	}
-	writeAll : ?{
+	writeAll : Option<IOException>{
 	}
 }

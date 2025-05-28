@@ -1,4 +1,4 @@
 export class StringContext {
-	display : ?{
+	display : String{
 	}
 }

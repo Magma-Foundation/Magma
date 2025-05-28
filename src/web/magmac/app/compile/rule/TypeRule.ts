@@ -9,10 +9,10 @@ import { CompileErrors } from "../../../../magmac/app/compile/error/error/Compil
 import { Node } from "../../../../magmac/app/compile/node/Node";
 import { ImmutableCompileError } from "../../../../magmac/app/error/ImmutableCompileError";
 export class TypeRule {
-	createError : ?{
+	createError : CompileError{
 	}
-	lex : ?{
+	lex : CompileResult<Node>{
 	}
-	generate : ?{
+	generate : CompileResult<String>{
 	}
 }

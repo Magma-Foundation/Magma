@@ -6,8 +6,8 @@ import { StringContext } from "../../../../../magmac/app/compile/error/context/S
 import { Node } from "../../../../../magmac/app/compile/node/Node";
 import { ImmutableCompileError } from "../../../../../magmac/app/error/ImmutableCompileError";
 export class CompileErrors {
-	createNodeError : ?{
+	createNodeError : CompileResult<T>{
 	}
-	createStringError : ?{
+	createStringError : CompileResult<T>{
 	}
 }

@@ -1,6 +1,6 @@
 export class NumberFilter {
-	test : ?{
+	test : boolean{
 	}
-	createMessage : ?{
+	createMessage : String{
 	}
 }

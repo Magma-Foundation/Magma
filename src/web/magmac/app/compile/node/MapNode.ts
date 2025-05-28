@@ -14,52 +14,52 @@ export class MapNode {
 	temp : ?;
 	temp : ?;
 	temp : ?;
-	MapNode : ?{
+	MapNode : public{
 	}
-	MapNode : ?{
+	MapNode : private{
 	}
-	MapNode : ?{
+	MapNode : public{
 	}
-	fold : ?{
+	fold : Node{
 	}
-	iterNodes : ?{
+	iterNodes : Iter<Tuple2<String, Node>>{
 	}
-	display : ?{
+	display : String{
 	}
-	format : ?{
+	format : String{
 	}
-	toStream : ?{
+	toStream : Iter<String>{
 	}
-	formatNodeList : ?{
+	formatNodeList : String{
 	}
-	formatEntry : ?{
+	formatEntry : String{
 	}
-	createIndent : ?{
+	createIndent : String{
 	}
-	withString : ?{
+	withString : Node{
 	}
-	findString : ?{
+	findString : Option<String>{
 	}
-	strings : ?{
+	strings : Map<String, String>{
 	}
-	is : ?{
+	is : boolean{
 	}
-	retype : ?{
+	retype : Node{
 	}
-	withNode : ?{
+	withNode : Node{
 	}
-	findNode : ?{
+	findNode : Option<Node>{
 	}
-	merge : ?{
+	merge : Node{
 	}
-	iterStrings : ?{
+	iterStrings : Iter<Tuple2<String, String>>{
 	}
-	iterNodeLists : ?{
+	iterNodeLists : Iter<Tuple2<String, NodeList>>{
 	}
-	withNodeList : ?{
+	withNodeList : Node{
 	}
-	toString : ?{
+	toString : String{
 	}
-	findNodeList : ?{
+	findNodeList : Option<NodeList>{
 	}
 }

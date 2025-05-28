@@ -13,8 +13,6 @@ import magmac.app.compile.rule.SuffixRule;
 import magmac.app.compile.rule.TypeRule;
 import magmac.app.compile.rule.fold.DelimitedFolder;
 
-import java.util.List;
-
 public final class TypescriptLang {
     public static Rule createRule() {
         return new TypeRule("root", DivideRule.Statements("children", new OrRule(Lists.of(
@@ -40,7 +38,7 @@ public final class TypescriptLang {
     private static Rule createStructureMemberRule() {
         return new OrRule(Lists.of(
                 CommonLang.createWhitespaceRule(),
-                createMethodRule(),
+                TypescriptLang.createMethodRule(),
                 new TypeRule("statement", new ExactRule("\n\ttemp : ?;"))
         ));
     }
@@ -58,7 +56,10 @@ public final class TypescriptLang {
         return LocatingRule.First(new StringRule("name"), " : ", new NodeRule("type", TypescriptLang.createTypeRule()));
     }
 
-    private static ExactRule createTypeRule() {
-        return new ExactRule("?");
+    private static Rule createTypeRule() {
+        return new OrRule(Lists.of(
+                CommonLang.createSymbolTypeRule(),
+                CommonLang.createTemplateRule()
+        ));
     }
 }

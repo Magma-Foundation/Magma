@@ -11,12 +11,12 @@ import { Path } from "../../../java/nio/file/Path";
 import { Collectors } from "../../../java/util/stream/Collectors";
 import { Stream } from "../../../java/util/stream/Stream";
 export class SafeFiles {
-	writeString : ?{
+	writeString : Option<IOException>{
 	}
-	walk : ?{
+	walk : IOResult<Iter<Path>>{
 	}
-	readString : ?{
+	readString : IOResult<String>{
 	}
-	createDirectories : ?{
+	createDirectories : Option<IOException>{
 	}
 }

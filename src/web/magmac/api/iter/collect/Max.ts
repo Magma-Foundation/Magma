@@ -1,7 +1,7 @@
 import { Optional } from "../../../../java/util/Optional";
 export class Max {
-	createInitial : ?{
+	createInitial : Optional<Integer>{
 	}
-	fold : ?{
+	fold : Optional<Integer>{
 	}
 }

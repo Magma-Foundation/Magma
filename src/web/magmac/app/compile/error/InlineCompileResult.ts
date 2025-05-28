@@ -6,22 +6,22 @@ import { Function } from "../../../../java/util/function/Function";
 import { Supplier } from "../../../../java/util/function/Supplier";
 export class InlineCompileResult {
 	temp : ?;
-	InlineCompileResult : ?{
+	InlineCompileResult : private{
 	}
-	fromResult : ?{
+	fromResult : CompileResult<T>{
 	}
-	mapValue : ?{
+	mapValue : CompileResult<R>{
 	}
-	match : ?{
+	match : R{
 	}
-	mapErr : ?{
+	mapErr : CompileResult<T>{
 	}
-	flatMapValue : ?{
+	flatMapValue : CompileResult<R>{
 	}
-	and : ?{
+	and : CompileResult<Tuple2<T, R>>{
 	}
-	result : ?{
+	result : Result<T, CompileError>{
 	}
-	merge : ?{
+	merge : CompileResult<T>{
 	}
 }

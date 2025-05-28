@@ -10,20 +10,19 @@ import { StringRule } from "../../../magmac/app/compile/rule/StringRule";
 import { SuffixRule } from "../../../magmac/app/compile/rule/SuffixRule";
 import { TypeRule } from "../../../magmac/app/compile/rule/TypeRule";
 import { DelimitedFolder } from "../../../magmac/app/compile/rule/fold/DelimitedFolder";
-import { List } from "../../../java/util/List";
 export class TypescriptLang {
-	createRule : ?{
+	createRule : Rule{
 	}
-	createImportRule : ?{
+	createImportRule : TypeRule{
 	}
-	createClassRule : ?{
+	createClassRule : Rule{
 	}
-	createStructureMemberRule : ?{
+	createStructureMemberRule : Rule{
 	}
-	createMethodRule : ?{
+	createMethodRule : TypeRule{
 	}
-	createDefinitionRule : ?{
+	createDefinitionRule : Rule{
 	}
-	createTypeRule : ?{
+	createTypeRule : Rule{
 	}
 }

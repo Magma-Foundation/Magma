@@ -13,10 +13,10 @@ import { ImmutableCompileError } from "../../../../magmac/app/error/ImmutableCom
 export class OrState {
 	constructor{
 	}
-	withValue : ?{
+	withValue : OrState<T>{
 	}
-	toResult : ?{
+	toResult : CompileResult<T>{
 	}
-	withError : ?{
+	withError : OrState<T>{
 	}
 }

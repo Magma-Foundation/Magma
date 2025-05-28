@@ -8,7 +8,8 @@ export interface Option {
 	temp : ?;
 	temp : ?;
 	temp : ?;
-	temp : ?;
+	orElse : T{
+	}
 	temp : ?;
 	temp : ?;
 	temp : ?;

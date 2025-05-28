@@ -7,14 +7,14 @@ import { Passer } from "../../../magmac/app/stage/Passer";
 import { Path } from "../../../java/nio/file/Path";
 import { Paths } from "../../../java/nio/file/Paths";
 export class PlantUMLTargetPlatform {
-	createAfterChild : ?{
+	createAfterChild : Passer{
 	}
-	createTargetPath : ?{
+	createTargetPath : Path{
 	}
-	createAfterAll : ?{
+	createAfterAll : AfterAll{
 	}
-	createExtension : ?{
+	createExtension : String{
 	}
-	createRule : ?{
+	createRule : Rule{
 	}
 }

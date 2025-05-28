@@ -4,8 +4,8 @@ import { Some } from "../../../magmac/api/Some";
 export class SingleHead {
 	temp : ?;
 	temp : ?;
-	SingleHead : ?{
+	SingleHead : public{
 	}
-	next : ?{
+	next : Option<T>{
 	}
 }
