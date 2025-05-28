@@ -91,13 +91,17 @@ public final class JavaLang {
                 new StripRule(new PrefixRule("!", new NodeRule("child", value))),
                 JavaLang.createCharRule(),
                 JavaLang.createStringRule(),
-                JavaLang.createInvocationRule(value),
+                JavaLang.createInvokableRule(value),
                 JavaLang.createNumberRule(),
                 JavaLang.createAccessRule(value),
                 JavaLang.createSymbolValueRule(),
-                LocatingRule.First(new NodeRule("left", value), "+", new NodeRule("right", value))
+                JavaLang.createAddRule(value)
         )));
         return value;
+    }
+
+    private static TypeRule createAddRule(LazyRule value) {
+        return new TypeRule("add", LocatingRule.First(new NodeRule("left", value), "+", new NodeRule("right", value)));
     }
 
     private static StripRule createSymbolValueRule() {
@@ -105,11 +109,12 @@ public final class JavaLang {
     }
 
     private static Rule createAccessRule(LazyRule value) {
-        return LocatingRule.Last(new NodeRule("instance", value), ".", new StripRule(new StringRule("property")));
+        StripRule property = new StripRule(FilterRule.Symbol(new StringRule("property")));
+        return new TypeRule("access", LocatingRule.Last(new NodeRule("instance", value), ".", property));
     }
 
-    private static StripRule createNumberRule() {
-        return new StripRule(FilterRule.Number(new StringRule("value")));
+    private static Rule createNumberRule() {
+        return new TypeRule("number", new StripRule(FilterRule.Number(new StringRule("value"))));
     }
 
     private static TypeRule createStringRule() {
@@ -120,18 +125,19 @@ public final class JavaLang {
         return new TypeRule("char", new StripRule(new PrefixRule("'", new SuffixRule(new StringRule("value"), "'"))));
     }
 
-    private static Rule createInvocationRule(Rule value) {
-        Rule caller = new OrRule(Lists.of(
-                new StripRule(new PrefixRule("new ", new NodeRule("type", JavaLang.createTypeRule()))),
-                new NodeRule("caller", value)
-        ));
+    private static Rule createInvokableRule(Rule value) {
+        Rule caller = new SuffixRule(new OrRule(Lists.of(
+                new ContextRule("As construction", new StripRule(new PrefixRule("new ", new NodeRule("type", JavaLang.createTypeRule())))),
+                new ContextRule("As invocation", new NodeRule("caller", value))
+        )), "(");
 
         DivideRule arguments = new DivideRule("arguments", new ValueFolder(), new OrRule(Lists.of(
                 CommonLang.createWhitespaceRule(),
                 value
         )));
 
-        return new TypeRule("invocation", new StripRule(new SuffixRule(LocatingRule.First(caller, "(", arguments), ")")));
+        Splitter splitter = DividingSplitter.First(new FoldingDivider(new InvocationFolder()));
+        return new TypeRule("invocation", new StripRule(new SuffixRule(new LocatingRule(caller, splitter, arguments), ")")));
     }
 
     private static Rule createMethodRule() {
@@ -170,7 +176,7 @@ public final class JavaLang {
 
     private static Rule createFunctionSegmentValueRule() {
         return new OrRule(Lists.of(
-                JavaLang.createInvocationRule(JavaLang.createValueRule()),
+                JavaLang.createInvokableRule(JavaLang.createValueRule()),
                 JavaLang.createAssignmentRule(),
                 new TypeRule("return", new StripRule(new PrefixRule("return ", new NodeRule("value", JavaLang.createValueRule()))))
         ));
@@ -180,7 +186,7 @@ public final class JavaLang {
         Rule leftRule1 = new StringRule("before-type");
         Rule rightRule = new NodeRule("type", JavaLang.createTypeRule());
         Divider divider = new FoldingDivider(new TypeSeparatorFolder());
-        Splitter splitter = new DividingSplitter(divider);
+        Splitter splitter = DividingSplitter.Last(divider);
         Rule leftRule = new LocatingRule(leftRule1, splitter, rightRule);
         return new StripRule(LocatingRule.Last(leftRule, " ", new StringRule("name")));
     }

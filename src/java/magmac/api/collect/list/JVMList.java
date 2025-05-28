@@ -77,4 +77,14 @@ public record JVMList<T>(java.util.List<T> elements) implements List<T> {
         java.util.List<T> slice = this.elements.subList(0, this.elements.size() - 1);
         return new Some<>(new Tuple2<>(new JVMList<>(slice), this.elements.getLast()));
     }
+
+    @Override
+    public Option<Tuple2<T, List<T>>> popFirst() {
+        if (this.elements.isEmpty()) {
+            return new None<>();
+        }
+
+        java.util.List<T> slice = this.elements.subList(1, this.elements.size());
+        return new Some<>(new Tuple2<>(this.elements.getFirst(), new JVMList<>(slice)));
+    }
 }

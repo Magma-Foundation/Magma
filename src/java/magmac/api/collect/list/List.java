@@ -26,4 +26,6 @@ public interface List<T> {
     int size();
 
     Option<Tuple2<List<T>, T>> popLast();
+
+    Option<Tuple2<T, List<T>>> popFirst();
 }

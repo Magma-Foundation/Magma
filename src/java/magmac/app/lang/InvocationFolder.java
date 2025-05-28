@@ -3,24 +3,17 @@ package magmac.app.lang;
 import magmac.app.compile.rule.divide.DivideState;
 import magmac.app.compile.rule.fold.Folder;
 
-public class ValueFolder implements Folder {
+public class InvocationFolder implements Folder {
     @Override
     public DivideState fold(DivideState state, char c) {
-        if (',' == c && state.isLevel()) {
-            return state.advance();
-        }
-
         DivideState appended = state.append(c);
-        if ('-' == c) {
-            if ('>' == state.peek()) {
-                return state.popAndAppendToOption().orElse(state);
-            }
+        if ('(' == c && appended.isLevel()) {
+            return appended.advance();
         }
-
-        if ('<' == c || '(' == c || '{' == c) {
+        if ('(' == c) {
             return appended.enter();
         }
-        if ('>' == c || ')' == c || '}' == c) {
+        if (')' == c) {
             return appended.exit();
         }
         return appended;
@@ -28,6 +21,6 @@ public class ValueFolder implements Folder {
 
     @Override
     public String createDelimiter() {
-        return ", ";
+        return "";
     }
 }

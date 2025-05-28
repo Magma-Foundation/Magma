@@ -25,7 +25,7 @@ public record ImmutableCompileError(String message, Context context,
 
         String joined = copy.iter()
                 .map(compileError -> compileError.format(depth + 1))
-                .map(display -> "\n" + "\t".repeat(depth + 1) + display)
+                .map(display -> "\n" + "| ".repeat(depth + 1) + display)
                 .collect(new Joiner())
                 .orElse("");
 

@@ -25,4 +25,6 @@ public interface DivideState {
     Option<Tuple2<DivideState, Character>> popAndAppendToTuple();
 
     Option<DivideState> popAndAppendToOption();
+
+    char peek();
 }

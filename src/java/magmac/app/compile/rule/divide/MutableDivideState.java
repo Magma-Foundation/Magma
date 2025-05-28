@@ -9,8 +9,8 @@ import magmac.api.collect.list.Lists;
 import magmac.api.iter.Iter;
 
 public class MutableDivideState implements DivideState {
-    private List<String> segments;
     private final String input;
+    private List<String> segments;
     private StringBuilder buffer;
     private int depth;
     private int index = 0;
@@ -89,5 +89,10 @@ public class MutableDivideState implements DivideState {
     @Override
     public Option<DivideState> popAndAppendToOption() {
         return this.popAndAppendToTuple().map(Tuple2::left);
+    }
+
+    @Override
+    public char peek() {
+        return this.input.charAt(this.index);
     }
 }
