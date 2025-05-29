@@ -20,7 +20,7 @@ import magmac.app.lang.java.value.Symbols;
 
 public record TemplateType(Base base, List<Type> right) implements Type {
     public static Option<CompileResult<TemplateType>> deserialize(Node node) {
-        return node.deserializeWithType("template").map(deserializer -> deserializer
+        return Deserializers.deserializeWithType(node, "template").map(deserializer -> deserializer
                 .withNode("base", TemplateType::deserializeBase)
                 .withNodeList("arguments", Types::deserialize)
                 .complete(tuple -> new TemplateType(tuple.left(), tuple.right())));

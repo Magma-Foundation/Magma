@@ -7,10 +7,11 @@ import magmac.app.compile.rule.Rule;
 import magmac.app.compile.rule.StringRule;
 import magmac.app.compile.rule.StripRule;
 import magmac.app.compile.rule.fold.DelimitedFolder;
+import magmac.app.lang.java.Deserializers;
 
 public record Modifier(String value) {
     public static CompileResult<Modifier> deserialize(Node node) {
-        return node.deserialize()
+        return Deserializers.deserialize(node)
                 .withString("value")
                 .complete(Modifier::new);
     }

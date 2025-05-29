@@ -15,6 +15,7 @@ import magmac.app.compile.rule.StripRule;
 import magmac.app.compile.rule.SuffixRule;
 import magmac.app.compile.rule.TypeRule;
 import magmac.app.lang.ValueFolder;
+import magmac.app.lang.java.Deserializers;
 import magmac.app.lang.java.value.Arguments;
 import magmac.app.lang.java.value.Symbols;
 
@@ -36,7 +37,7 @@ public record EnumValues(List<EnumValue> values) implements StructureMember {
     }
 
     public static Option<CompileResult<StructureMember>> deserialize(Node node) {
-        return node.deserializeWithType("enum-values").map(deserializer -> {
+        return Deserializers.deserializeWithType(node, "enum-values").map(deserializer -> {
             return deserializer.withNodeList("children", EnumValue::deserialize)
                     .complete(EnumValues::new);
         });

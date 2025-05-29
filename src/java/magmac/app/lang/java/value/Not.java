@@ -8,6 +8,7 @@ import magmac.app.compile.rule.PrefixRule;
 import magmac.app.compile.rule.StripRule;
 import magmac.app.compile.rule.TypeRule;
 import magmac.app.lang.LazyRule;
+import magmac.app.lang.java.Deserializers;
 
 public record Not(Value value) implements Value {
     public static TypeRule createNotRule(LazyRule value) {
@@ -15,7 +16,7 @@ public record Not(Value value) implements Value {
     }
 
     public static Option<CompileResult<Value>> deserialize(Node node) {
-        return node.deserializeWithType("not").map(deserializer -> {
+        return Deserializers.deserializeWithType(node, "not").map(deserializer -> {
             return deserializer.withNode("child", Values::deserializeOrError)
                     .complete(Not::new);
         });

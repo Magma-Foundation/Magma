@@ -18,12 +18,13 @@ import magmac.app.compile.rule.SuffixRule;
 import magmac.app.compile.rule.TypeRule;
 import magmac.app.lang.CommonLang;
 import magmac.app.lang.OptionNodeListRule;
+import magmac.app.lang.java.Deserializers;
 import magmac.app.lang.java.define.Definition;
 import magmac.app.lang.java.structure.StructureMember;
 
 public record MethodNode(MethodHeader methodHeader, Option<List<FunctionSegment>> maybeChildren, List<Parameter> right) implements StructureMember {
     public static Option<CompileResult<StructureMember>> deserialize(Node node) {
-        return node.deserializeWithType("method").map((InitialDeserializer deserializer) -> deserializer
+        return Deserializers.deserializeWithType(node, "method").map((InitialDeserializer deserializer) -> deserializer
                 .withNode("header", MethodHeader::deserializeError)
                 .withNodeListOptionally("children", FunctionSegment::deserialize)
                 .withNodeList("parameters", Parameters::deserialize)

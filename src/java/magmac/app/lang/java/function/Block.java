@@ -16,11 +16,12 @@ import magmac.app.compile.rule.split.DividingSplitter;
 import magmac.app.lang.BlockFolder;
 import magmac.app.lang.CommonLang;
 import magmac.app.lang.LazyRule;
+import magmac.app.lang.java.Deserializers;
 import magmac.app.lang.java.block.BlockHeader;
 
 public record Block(List<FunctionSegment> segments, BlockHeader header) implements FunctionSegment {
     public static Option<CompileResult<Block>> deserialize(Node node) {
-        return node.deserializeWithType("block").map(deserializer -> {
+        return Deserializers.deserializeWithType(node, "block").map(deserializer -> {
             return deserializer
                     .withNodeList("children", FunctionSegment::deserialize)
                     .withNode("header", BlockHeader::deserialize)

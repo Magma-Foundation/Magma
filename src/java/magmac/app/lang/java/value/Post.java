@@ -8,6 +8,7 @@ import magmac.app.compile.rule.Rule;
 import magmac.app.compile.rule.StripRule;
 import magmac.app.compile.rule.SuffixRule;
 import magmac.app.compile.rule.TypeRule;
+import magmac.app.lang.java.Deserializers;
 import magmac.app.lang.java.function.FunctionSegmentValue;
 
 public record Post(PostVariant variant, Value value) implements FunctionSegmentValue {
@@ -16,7 +17,7 @@ public record Post(PostVariant variant, Value value) implements FunctionSegmentV
     }
 
     public static Option<CompileResult<FunctionSegmentValue>> deserialize(PostVariant variant, Node node) {
-        return node.deserializeWithType(variant.type()).map(deserializer -> {
+        return Deserializers.deserializeWithType(node, variant.type()).map(deserializer -> {
             return deserializer
                     .withNode("child", Values::deserializeOrError)
                     .complete(child -> new Post(variant, child));

@@ -15,7 +15,7 @@ import magmac.app.lang.java.value.Argument;
 
 public class Whitespace implements Argument, FunctionSegment, Parameter, StructureMember, JavaRootSegment {
     public static Option<CompileResult<Whitespace>> deserialize(Node node) {
-        return node.deserializeWithType("whitespace").map(deserializer -> {
+        return Deserializers.deserializeWithType(node, "whitespace").map(deserializer -> {
             return deserializer.complete(Whitespace::new);
         });
     }

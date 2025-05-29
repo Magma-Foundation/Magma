@@ -9,13 +9,14 @@ import magmac.app.compile.rule.OrRule;
 import magmac.app.compile.rule.Rule;
 import magmac.app.compile.rule.TypeRule;
 import magmac.app.lang.CommonLang;
+import magmac.app.lang.java.Deserializers;
 import magmac.app.lang.java.Serializable;
 import magmac.app.lang.java.Whitespace;
 import magmac.app.lang.java.structure.Structures;
 
 public record JavaRoot(List<JavaRootSegment> children) implements Serializable {
     public static CompileResult<JavaRoot> deserialize(Node node) {
-        return node.deserialize()
+        return Deserializers.deserialize(node)
                 .withNodeList("children", (Node node1) -> JavaRootSegments.deserialize(node1))
                 .complete((List<JavaRootSegment> segments) -> new JavaRoot(segments));
     }

@@ -9,13 +9,14 @@ import magmac.app.compile.rule.NodeRule;
 import magmac.app.compile.rule.OrRule;
 import magmac.app.compile.rule.Rule;
 import magmac.app.compile.rule.TypeRule;
+import magmac.app.lang.java.Deserializers;
 import magmac.app.lang.java.function.FunctionSegmentValue;
 import magmac.app.lang.java.value.Value;
 import magmac.app.lang.java.value.Values;
 
 public record Assignment(Assignable assignable, Value value) implements FunctionSegmentValue {
     public static Option<CompileResult<FunctionSegmentValue>> deserialize(Node node) {
-        return node.deserializeWithType("assignment").map(deserializer -> deserializer
+        return Deserializers.deserializeWithType(node, "assignment").map(deserializer -> deserializer
                 .withNode("destination", Assignables::deserializeError)
                 .withNode("source", Values::deserializeOrError)
                 .complete(tuple -> new Assignment(tuple.left(), tuple.right())));

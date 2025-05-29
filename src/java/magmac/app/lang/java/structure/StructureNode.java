@@ -6,6 +6,7 @@ import magmac.api.collect.list.List;
 import magmac.app.compile.error.CompileResult;
 import magmac.app.compile.node.InitialDeserializer;
 import magmac.app.compile.node.Node;
+import magmac.app.lang.java.Deserializers;
 import magmac.app.lang.java.Type;
 import magmac.app.lang.java.define.Modifier;
 import magmac.app.lang.java.function.Parameter;
@@ -24,7 +25,7 @@ public record StructureNode(
         Option<List<Type>> extended
 ) implements JavaRootSegment {
     public static Option<CompileResult<JavaRootSegment>> deserialize(StructureType type, Node node) {
-        return node.deserializeWithType(type.name().toLowerCase())
+        return Deserializers.deserializeWithType(node, type.name().toLowerCase())
                 .map((InitialDeserializer deserializer) -> StructureNode.deserializeHelper(type, deserializer));
     }
 

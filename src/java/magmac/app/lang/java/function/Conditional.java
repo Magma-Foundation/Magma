@@ -9,13 +9,14 @@ import magmac.app.compile.rule.Rule;
 import magmac.app.compile.rule.StripRule;
 import magmac.app.compile.rule.SuffixRule;
 import magmac.app.compile.rule.TypeRule;
+import magmac.app.lang.java.Deserializers;
 import magmac.app.lang.java.block.BlockHeader;
 import magmac.app.lang.java.value.Value;
 import magmac.app.lang.java.value.Values;
 
 public record Conditional(ConditionalType type, Value condition) implements BlockHeader {
     public static Option<CompileResult<Conditional>> deserialize(ConditionalType type, Node node) {
-        return node.deserializeWithType(type.name().toLowerCase()).map(deserializer -> {
+        return Deserializers.deserializeWithType(node, type.name().toLowerCase()).map(deserializer -> {
             return deserializer.withNode("condition", Values::deserializeOrError)
                     .complete(value -> new Conditional(type, value));
         });

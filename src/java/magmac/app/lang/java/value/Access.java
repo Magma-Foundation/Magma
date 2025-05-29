@@ -8,10 +8,11 @@ import magmac.app.compile.rule.NodeRule;
 import magmac.app.compile.rule.Rule;
 import magmac.app.compile.rule.TypeRule;
 import magmac.app.lang.LazyRule;
+import magmac.app.lang.java.Deserializers;
 
 public record Access(AccessType type, String property, Value caller) implements Value {
     public static Option<CompileResult<Value>> deserialize(AccessType type, Node node) {
-        return node.deserializeWithType(type.type()).map(deserializer -> {
+        return Deserializers.deserializeWithType(node, type.type()).map(deserializer -> {
             return deserializer.withString("property")
                     .withNode("instance", Values::deserializeOrError)
                     .complete(tuple -> new Access(type, tuple.left(), tuple.right()));

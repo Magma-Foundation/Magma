@@ -5,7 +5,7 @@ import magmac.app.compile.node.Node;
 
 public record Segment(String value) {
     public static CompileResult<Segment> deserialize(Node node) {
-        return node.deserialize()
+        return Deserializers.deserialize(node)
                 .withString("value")
                 .complete(Segment::new);
     }

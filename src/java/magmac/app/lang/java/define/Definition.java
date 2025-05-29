@@ -25,6 +25,7 @@ import magmac.app.compile.rule.split.DividingSplitter;
 import magmac.app.lang.OptionNodeListRule;
 import magmac.app.lang.TypeSeparatorFolder;
 import magmac.app.lang.ValueFolder;
+import magmac.app.lang.java.Deserializers;
 import magmac.app.lang.java.Type;
 import magmac.app.lang.java.assign.Assignable;
 import magmac.app.lang.java.function.MethodHeader;
@@ -40,7 +41,7 @@ public record Definition(
         Option<List<TypeParam>> typeParams
 ) implements Parameter, Assignable, MethodHeader {
     public static CompileResult<Definition> deserializeError(Node node) {
-        return Definition.complete(node.deserialize());
+        return Definition.complete(Deserializers.deserialize(node));
     }
 
     private static CompileResult<Definition> complete(InitialDeserializer deserialize) {
@@ -58,7 +59,7 @@ public record Definition(
     }
 
     public static Option<CompileResult<Definition>> deserialize(Node node) {
-        return node.deserializeWithType("definition").map(Definition::complete);
+        return Deserializers.deserializeWithType(node, "definition").map(Definition::complete);
     }
 
     public static Rule createDefinitionRule() {

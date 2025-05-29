@@ -7,12 +7,13 @@ import magmac.app.compile.node.Node;
 import magmac.app.compile.rule.NodeListRule;
 import magmac.app.compile.rule.TypeRule;
 import magmac.app.compile.rule.fold.DelimitedFolder;
+import magmac.app.lang.java.Deserializers;
 import magmac.app.lang.java.Segment;
 import magmac.app.lang.java.type.Base;
 
 public record QualifiedType(List<Segment> segments) implements Base {
     public static Option<CompileResult<Base>> deserializeQualified(Node node) {
-        return node.deserializeWithType("qualified").map(deserializer -> {
+        return Deserializers.deserializeWithType(node, "qualified").map(deserializer -> {
             return deserializer.withNodeList("segments", Segment::deserialize).complete(QualifiedType::new);
         });
     }

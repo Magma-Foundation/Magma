@@ -11,11 +11,12 @@ import magmac.app.compile.rule.StripRule;
 import magmac.app.compile.rule.SuffixRule;
 import magmac.app.compile.rule.TypeRule;
 import magmac.app.lang.LazyRule;
+import magmac.app.lang.java.Deserializers;
 import magmac.app.lang.java.assign.Assignment;
 
 public record StructureStatement() implements StructureMember {
     public static Option<CompileResult<StructureMember>> deserialize(Node node) {
-        return node.deserializeWithType("structure-statement").map(deserializer -> {
+        return Deserializers.deserializeWithType(node, "structure-statement").map(deserializer -> {
             return deserializer.complete(() -> new StructureStatement());
         });
     }

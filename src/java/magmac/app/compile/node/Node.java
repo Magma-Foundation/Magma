@@ -43,8 +43,6 @@ public interface Node {
 
     boolean hasNodeList(String key);
 
-    Option<InitialDeserializer> deserializeWithType(String type);
-
     CompileResult<Tuple2<Node, NodeList>> removeNodeListOrError(String key);
 
     Option<Tuple2<Node, NodeList>> removeNodeList(String key);
@@ -54,8 +52,6 @@ public interface Node {
     <T> Node withNodeListFromElements(String key, List<T> list, Function<T, Node> serializer);
 
     CompileResult<Tuple2<Node, String>> removeString(String key);
-
-    InitialDeserializer deserialize();
 
     CompileResult<Tuple2<Node, Node>> removeNode(String key);
 }

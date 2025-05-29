@@ -9,10 +9,11 @@ import magmac.app.compile.rule.StringRule;
 import magmac.app.compile.rule.StripRule;
 import magmac.app.compile.rule.SuffixRule;
 import magmac.app.compile.rule.TypeRule;
+import magmac.app.lang.java.Deserializers;
 
 public record CharNode(String value) implements Value {
     public static Option<CompileResult<CharNode>> deserialize(Node node) {
-        return node.deserializeWithType("char").map(deserializer -> {
+        return Deserializers.deserializeWithType(node, "char").map(deserializer -> {
             return deserializer.withString("value").complete(CharNode::new);
         });
     }

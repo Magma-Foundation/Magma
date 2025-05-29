@@ -16,6 +16,7 @@ import magmac.app.compile.rule.TypeRule;
 import magmac.app.compile.rule.divide.FoldingDivider;
 import magmac.app.compile.rule.split.DividingSplitter;
 import magmac.app.lang.InvocationFolder;
+import magmac.app.lang.java.Deserializers;
 import magmac.app.lang.java.function.FunctionSegmentValue;
 import magmac.app.lang.java.value.Argument;
 import magmac.app.lang.java.value.Arguments;
@@ -24,7 +25,7 @@ import magmac.app.lang.java.value.Value;
 
 public record Invokable(Caller left, List<Argument> right) implements Value, FunctionSegmentValue {
     public static Option<CompileResult<Invokable>> deserialize(Node node) {
-        return node.deserializeWithType("invokable").map(deserializer -> deserializer.withNode("caller", Caller::deserialize)
+        return Deserializers.deserializeWithType(node, "invokable").map(deserializer -> deserializer.withNode("caller", Caller::deserialize)
                 .withNodeList("arguments", Arguments::deserialize)
                 .complete(tuple -> new Invokable(tuple.left(), tuple.right())));
     }

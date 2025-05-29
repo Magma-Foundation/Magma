@@ -173,16 +173,6 @@ public final class MapNode implements Node {
     }
 
     @Override
-    public Option<InitialDeserializer> deserializeWithType(String type) {
-        if (this.is(type)) {
-            return new Some<>(new InitialDeserializerImpl(this));
-        }
-        else {
-            return new None<>();
-        }
-    }
-
-    @Override
     public CompileResult<Tuple2<Node, NodeList>> removeNodeListOrError(String key) {
         return this.removeNodeList(key).map(CompileResults::Ok).orElseGet(() -> this.createNotPresent(key));
     }
@@ -216,11 +206,6 @@ public final class MapNode implements Node {
         return this.strings.removeByKey(key)
                 .map((Tuple2<Map<String, String>, String> tuple) -> CompileResults.Ok(new Tuple2<>(this.withStrings(tuple.left()), tuple.right())))
                 .orElseGet(() -> this.createNotPresent(key));
-    }
-
-    @Override
-    public InitialDeserializer deserialize() {
-        return new InitialDeserializerImpl(this);
     }
 
     @Override

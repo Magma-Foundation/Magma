@@ -16,10 +16,11 @@ import magmac.app.compile.rule.TypeRule;
 import magmac.app.lang.CommonLang;
 import magmac.app.lang.LazyRule;
 import magmac.app.lang.ValueFolder;
+import magmac.app.lang.java.Deserializers;
 
 public record Lambda() implements Value {
     public static Option<CompileResult<Lambda>> deserialize(Node node) {
-        return node.deserializeWithType("lambda").map(deserializer -> {
+        return Deserializers.deserializeWithType(node, "lambda").map(deserializer -> {
             return deserializer.complete(Lambda::new);
         });
     }

@@ -8,11 +8,12 @@ import magmac.app.compile.rule.Rule;
 import magmac.app.compile.rule.StripRule;
 import magmac.app.compile.rule.SuffixRule;
 import magmac.app.compile.rule.TypeRule;
+import magmac.app.lang.java.Deserializers;
 import magmac.app.lang.java.Type;
 
 public record VariadicType(Type node) implements Type {
     public static Option<CompileResult<Type>> deserialize(Node node) {
-        return node.deserializeWithType("variadic").map(deserializer -> {
+        return Deserializers.deserializeWithType(node, "variadic").map(deserializer -> {
             return deserializer.withNode("child", Types::deserialize)
                     .complete(VariadicType::new);
         });

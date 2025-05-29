@@ -2,10 +2,11 @@ package magmac.app.lang.java.structure;
 
 import magmac.app.compile.error.CompileResult;
 import magmac.app.compile.node.Node;
+import magmac.app.lang.java.Deserializers;
 
 public class EnumValue {
     public static CompileResult<EnumValue> deserialize(Node node) {
-        return node.deserialize()
+        return Deserializers.deserialize(node)
                 .complete(() -> new EnumValue());
     }
 }

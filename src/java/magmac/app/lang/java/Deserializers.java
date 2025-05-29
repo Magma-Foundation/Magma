@@ -1,6 +1,8 @@
 package magmac.app.lang.java;
 
+import magmac.api.None;
 import magmac.api.Option;
+import magmac.api.Some;
 import magmac.api.collect.list.List;
 import magmac.api.collect.list.Lists;
 import magmac.api.iter.Iters;
@@ -8,6 +10,8 @@ import magmac.app.compile.error.CompileResult;
 import magmac.app.compile.error.CompileResults;
 import magmac.app.compile.error.context.NodeContext;
 import magmac.app.compile.error.error.CompileError;
+import magmac.app.compile.node.InitialDeserializer;
+import magmac.app.compile.node.InitialDeserializerImpl;
 import magmac.app.compile.node.Node;
 import magmac.app.error.ImmutableCompileError;
 
@@ -31,5 +35,17 @@ public class Deserializers {
 
     public static <T extends R, R> Deserializer<R> wrap(Deserializer<T> deserializer) {
         return node -> deserializer.deserialize(node).map(result -> result.mapValue(value -> value));
+    }
+
+    public static Option<InitialDeserializer> deserializeWithType(Node node, String type) {
+        if (node.is(type)) {
+            return new Some<>(new InitialDeserializerImpl(node));
+        }
+
+        return new None<>();
+    }
+
+    public static InitialDeserializer deserialize(Node node) {
+        return new InitialDeserializerImpl(node);
     }
 }

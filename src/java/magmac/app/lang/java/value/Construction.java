@@ -8,13 +8,14 @@ import magmac.app.compile.rule.PrefixRule;
 import magmac.app.compile.rule.Rule;
 import magmac.app.compile.rule.StripRule;
 import magmac.app.compile.rule.TypeRule;
+import magmac.app.lang.java.Deserializers;
 import magmac.app.lang.java.Type;
 import magmac.app.lang.java.invoke.Caller;
 import magmac.app.lang.java.type.Types;
 
 public record Construction(Type type) implements Caller {
     public static Option<CompileResult<Caller>> deserialize(Node node) {
-        return node.deserializeWithType("construction").map(deserializer -> deserializer.withNode("type", Types::deserialize).complete(type -> new Construction(type)));
+        return Deserializers.deserializeWithType(node, "construction").map(deserializer -> deserializer.withNode("type", Types::deserialize).complete(type -> new Construction(type)));
     }
 
     public static Rule createConstructionRule() {

@@ -8,6 +8,7 @@ import magmac.app.compile.rule.Rule;
 import magmac.app.compile.rule.StripRule;
 import magmac.app.compile.rule.SuffixRule;
 import magmac.app.compile.rule.TypeRule;
+import magmac.app.lang.java.Deserializers;
 import magmac.app.lang.java.Type;
 
 public record ArrayType(Type type) implements Type {
@@ -17,7 +18,7 @@ public record ArrayType(Type type) implements Type {
     }
 
     public static Option<CompileResult<Type>> deserialize(Node node) {
-        return node.deserializeWithType("array").map(deserializer -> {
+        return Deserializers.deserializeWithType(node, "array").map(deserializer -> {
             return deserializer.withNode("child", Types::deserialize)
                     .complete(ArrayType::new);
         });
