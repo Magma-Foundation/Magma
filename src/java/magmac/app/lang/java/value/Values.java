@@ -17,7 +17,8 @@ public class Values {
         return Deserializers.or(node, Lists.of(
                 Deserializers.wrap(Invokable::deserialize),
                 StringNode::deserialize,
-                DataAccess::deserialize,
+                node1 -> Access.deserialize(AccessType.Data, node1),
+                node1 -> Access.deserialize(AccessType.Method, node1),
                 Deserializers.wrap(Symbols::deserialize),
                 Deserializers.wrap(CharNode::deserialize),
                 Deserializers.wrap(Lambda::deserialize)

@@ -9,16 +9,16 @@ import magmac.app.compile.rule.Rule;
 import magmac.app.compile.rule.TypeRule;
 import magmac.app.lang.LazyRule;
 
-public record DataAccess(String property, Value caller) implements Value {
-    public static Option<CompileResult<Value>> deserialize(Node node) {
-        return node.deserializeWithType("data-access").map(deserializer -> {
+public record Access(AccessType type, String property, Value caller) implements Value {
+    public static Option<CompileResult<Value>> deserialize(AccessType type, Node node) {
+        return node.deserializeWithType(type.type()).map(deserializer -> {
             return deserializer.withString("property")
                     .withNode("instance", Values::deserializeOrError)
-                    .complete(tuple -> new DataAccess(tuple.left(), tuple.right()));
+                    .complete(tuple -> new Access(type, tuple.left(), tuple.right()));
         });
     }
 
-    public static Rule createAccessRule(String infix, LazyRule value, String type) {
+    public static Rule createAccessRule(String type, String infix, LazyRule value) {
         Rule property = Symbols.createSymbolRule("property");
         return new TypeRule(type, LocatingRule.Last(new NodeRule("instance", value), infix, property));
     }

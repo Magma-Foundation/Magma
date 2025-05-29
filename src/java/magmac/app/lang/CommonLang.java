@@ -18,7 +18,7 @@ import magmac.app.lang.java.assign.Assignment;
 import magmac.app.lang.java.invoke.Invokable;
 import magmac.app.lang.java.type.TemplateType;
 import magmac.app.lang.java.value.CharNode;
-import magmac.app.lang.java.value.DataAccess;
+import magmac.app.lang.java.value.Access;
 import magmac.app.lang.java.value.Lambda;
 import magmac.app.lang.java.value.StringNode;
 import magmac.app.lang.java.value.Symbols;
@@ -38,8 +38,8 @@ public final class CommonLang {
                 CommonLang.createIndexRule(value),
                 CommonLang.createNumberRule(),
                 Symbols.createSymbolValueRule(),
-                DataAccess.createAccessRule(".", value, "data-access"),
-                DataAccess.createAccessRule("::", value, "method-access"),
+                Access.createAccessRule("data-access", ".", value),
+                Access.createAccessRule("method-access", "::", value),
                 CommonLang.createOperationRule(value, "add", "+"),
                 CommonLang.createOperationRule(value, "subtract", "-"),
                 CommonLang.createOperationRule(value, "equals", "=="),
