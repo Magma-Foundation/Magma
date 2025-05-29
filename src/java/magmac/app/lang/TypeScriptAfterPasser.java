@@ -79,13 +79,13 @@ public class TypeScriptAfterPasser implements Passer {
                 .or(() -> TypeScriptAfterPasser.format(state, node))
                 .or(() -> TypeScriptAfterPasser.passVariadic(state, node))
                 .or(() -> this.passTemp(state, node))
-                .orElseGet(() -> InlinePassResult.empty());
+                .orElseGet(InlinePassResult::empty);
     }
 
     private Option<ParseResult> passTemp(ParseState state, Node node) {
         if (node.is("statement")) {
             var value1 = node.findNodeOrError("value")
-                    .flatMapValue((Node value) -> this.getObjectCompileResult(state, value));
+                    .flatMapValue((Node value) -> TypeScriptAfterPasser.getObjectCompileResult(state, value));
 
             return new Some<>(new InlinePassResult(new Some<>(value1)));
         }
@@ -93,10 +93,10 @@ public class TypeScriptAfterPasser implements Passer {
         return new None<>();
     }
 
-    private CompileResult<ParseUnit<Node>> getObjectCompileResult(ParseState state, Node value) {
+    private static CompileResult<ParseUnit<Node>> getObjectCompileResult(ParseState state, Node value) {
         if (value.is("assignment")) {
             return value.findNodeOrError("destination")
-                    .mapValue((Node destination) -> TypeScriptAfterPasser.getNode(destination))
+                    .mapValue(TypeScriptAfterPasser::getNode)
                     .mapValue((Node result) -> new ParseUnitImpl<>(state, result));
         }
 

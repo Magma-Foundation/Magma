@@ -11,16 +11,14 @@ import magmac.app.lang.Deserializers;
 
 public record QualifiedType(List<Segment> segments) implements Base {
     public static Option<CompileResult<Base>> deserializeQualified(Node node) {
-        return Deserializers.deserializeWithType(node, "qualified").map(deserializer -> {
-            return deserializer.withNodeList("segments", Segment::deserialize).complete(QualifiedType::new);
-        });
+        return Deserializers.deserializeWithType(node, "qualified").map(deserializer -> deserializer.withNodeList("segments", Segment::deserialize).complete(QualifiedType::new));
     }
 
     public static TypeRule createQualifiedRule() {
-        return new TypeRule("qualified", createSegmentsRule("segments"));
+        return new TypeRule("qualified", QualifiedType.createSegmentsRule("segments"));
     }
 
-    public static NodeListRule createSegmentsRule(String key) {
+    private static NodeListRule createSegmentsRule(String key) {
         return new NodeListRule(key, new DelimitedFolder('.'), Symbols.createSymbolRule("value"));
     }
 }

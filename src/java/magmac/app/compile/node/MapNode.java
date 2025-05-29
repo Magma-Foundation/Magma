@@ -157,9 +157,9 @@ public final class MapNode implements Node {
 
     @Override
     public Node merge(Node other) {
-        var withStrings = MapNode.fold(this, other.iterStrings(), (Node current) -> (String key2, String value1) -> current.withString(key2, value1));
-        var withNodes = MapNode.fold(withStrings, other.iterNodes(), (Node current) -> (String key1, Node value) -> current.withNode(key1, value));
-        return MapNode.fold(withNodes, other.iterNodeLists(), (Node current) -> (String key, NodeList values) -> current.withNodeList(key, values));
+        var withStrings = MapNode.fold(this, other.iterStrings(), (Node current) -> current::withString);
+        var withNodes = MapNode.fold(withStrings, other.iterNodes(), (Node current) -> current::withNode);
+        return MapNode.fold(withNodes, other.iterNodeLists(), (Node current) -> current::withNodeList);
     }
 
     @Override
@@ -263,7 +263,7 @@ public final class MapNode implements Node {
     @Override
     public CompileResult<NodeList> findNodeListOrError(String key) {
         return this.findNodeList(key)
-                .map((NodeList list) -> CompileResults.Ok(list))
+                .map(CompileResults::Ok)
                 .orElseGet(() -> CompileErrors.createNodeError("Node list '" + key + "' not present", this));
     }
 }

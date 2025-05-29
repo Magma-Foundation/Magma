@@ -64,7 +64,7 @@ public record Definition(
                 modifiers
         ));
 
-        Rule leftRule1 = attachTypeParams(beforeTypeParams);
+        Rule leftRule1 = Definition.attachTypeParams(beforeTypeParams);
 
         Rule rightRule = new NodeRule("type", Types.createTypeRule());
         Divider divider = new FoldingDivider(new TypeSeparatorFolder());

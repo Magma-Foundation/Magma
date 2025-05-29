@@ -10,7 +10,7 @@ import magmac.app.compile.rule.SuffixRule;
 import magmac.app.compile.rule.TypeRule;
 import magmac.app.lang.Deserializers;
 
-public record FunctionStatement(FunctionSegmentValue value) implements FunctionSegment {
+record FunctionStatement(FunctionSegmentValue value) implements FunctionSegment {
     public static Option<CompileResult<FunctionSegment>> deserialize(Node node) {
         return Deserializers.deserializeWithType(node, "statement")
                 .map(deserializer -> deserializer.withNode("child", FunctionSegmentValues::deserialize)

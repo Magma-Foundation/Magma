@@ -5,10 +5,8 @@ import magmac.app.compile.error.CompileResult;
 import magmac.app.compile.node.Node;
 import magmac.app.lang.Deserializers;
 
-public class Else implements BlockHeader {
+class Else implements BlockHeader {
     public static Option<CompileResult<Else>> deserialize(Node node) {
-        return Deserializers.deserializeWithType(node, "else").map(deserializer -> {
-            return deserializer.complete(Else::new);
-        });
+        return Deserializers.deserializeWithType(node, "else").map(deserializer -> deserializer.complete(Else::new));
     }
 }

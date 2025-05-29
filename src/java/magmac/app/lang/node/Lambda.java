@@ -18,11 +18,9 @@ import magmac.app.lang.LazyRule;
 import magmac.app.lang.ValueFolder;
 import magmac.app.lang.Deserializers;
 
-public record Lambda() implements Value {
+record Lambda() implements Value {
     public static Option<CompileResult<Lambda>> deserialize(Node node) {
-        return Deserializers.deserializeWithType(node, "lambda").map(deserializer -> {
-            return deserializer.complete(Lambda::new);
-        });
+        return Deserializers.deserializeWithType(node, "lambda").map(deserializer -> deserializer.complete(Lambda::new));
     }
 
     public static Rule createLambdaRule(LazyRule value, Rule functionSegment, String infix, Rule definition) {

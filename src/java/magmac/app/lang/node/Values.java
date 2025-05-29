@@ -15,7 +15,7 @@ import magmac.app.lang.LazyRule;
 import magmac.app.lang.Deserializer;
 import magmac.app.lang.Deserializers;
 
-public class Values {
+public final class Values {
     public static CompileResult<Value> deserializeOrError(Node node) {
         return Values.deserialize(node).orElseGet(() -> CompileResults.NodeErr("Cannot deserialize value", node));
     }
@@ -41,7 +41,7 @@ public class Values {
     }
 
     public static LazyRule initValueRule(Rule segment, LazyRule value, String lambdaInfix, Rule definition) {
-        return value.set(new OrRule(getValueRules(segment, value, lambdaInfix, definition)));
+        return value.set(new OrRule(Values.getValueRules(segment, value, lambdaInfix, definition)));
     }
 
     private static List<Rule> getValueRules(Rule segment, LazyRule value, String lambdaInfix, Rule definition) {

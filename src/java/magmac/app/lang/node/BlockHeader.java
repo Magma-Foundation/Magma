@@ -13,7 +13,7 @@ import magmac.app.compile.rule.SuffixRule;
 import magmac.app.compile.rule.TypeRule;
 import magmac.app.lang.Deserializers;
 
-public interface BlockHeader {
+interface BlockHeader {
     static CompileResult<BlockHeader> deserialize(Node node) {
         return Deserializers.orError("header", node, Lists.of(
                 Deserializers.wrap(node1 -> Conditional.deserialize(ConditionalType.If, node1)),

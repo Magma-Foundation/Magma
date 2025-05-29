@@ -24,7 +24,7 @@ public record PathSources(Path root) implements Sources {
     @Override
     public IOResult<UnitSet<String>> readAll() {
         return SafeFiles.walk(this.root)
-                .flatMapValue((Iter<Path> sources) -> this.apply(sources));
+                .flatMapValue(this::apply);
     }
 
     private IOResult<UnitSet<String>> apply(Iter<Path> sources) {
@@ -34,13 +34,13 @@ public record PathSources(Path root) implements Sources {
     private Result<UnitSet<String>, IOException> getCollect(Iter<Path> sources) {
         return this.getCollected(sources)
                 .iter()
-                .map((PathSource source) -> PathSources.getTuple2IOResult(source))
-                .map((IOResult<Unit<String>> tuple2IOResult) -> tuple2IOResult.result())
+                .map(PathSources::getTuple2IOResult)
+                .map(IOResult::result)
                 .collect(new ResultCollector<>(new UnitSetCollector<>()));
     }
 
     private List<PathSource> getCollected(Iter<Path> sources) {
-        return sources.filter((Path path1) -> Files.isRegularFile(path1))
+        return sources.filter(Files::isRegularFile)
                 .filter((Path file) -> file.toString().endsWith(".java"))
                 .map((Path path) -> new PathSource(this.root, path))
                 .collect(new ListCollector<>());

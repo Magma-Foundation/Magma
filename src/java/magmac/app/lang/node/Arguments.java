@@ -8,7 +8,7 @@ import magmac.app.compile.rule.OrRule;
 import magmac.app.compile.rule.Rule;
 import magmac.app.lang.Deserializers;
 
-public final class Arguments {
+final class Arguments {
     public static CompileResult<Argument> deserialize(Node node) {
         return Deserializers.orError("argument", node, Lists.of(
                 Deserializers.wrap(Whitespace::deserialize),

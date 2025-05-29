@@ -27,7 +27,7 @@ public record NodeListRule(String key, Folder folder, Rule childRule) implements
     @Override
     public CompileResult<String> generate(Node node) {
         return node.findNodeListOrError(this.key)
-                .flatMapValue((NodeList list) -> list.join(this.folder.createDelimiter(), (Node child) -> this.childRule.generate(child)));
+                .flatMapValue((NodeList list) -> list.join(this.folder.createDelimiter(), this.childRule::generate));
     }
 
 }

@@ -20,7 +20,7 @@ import magmac.app.lang.CommonLang;
 import magmac.app.lang.OptionNodeListRule;
 import magmac.app.lang.Deserializers;
 
-public record MethodNode(MethodHeader methodHeader, Option<List<FunctionSegment>> maybeChildren, List<Parameter> right) implements StructureMember {
+record MethodNode(MethodHeader methodHeader, Option<List<FunctionSegment>> maybeChildren, List<Parameter> right) implements StructureMember {
     public static Option<CompileResult<StructureMember>> deserialize(Node node) {
         return Deserializers.deserializeWithType(node, "method").map((InitialDeserializer deserializer) -> deserializer
                 .withNode("header", MethodHeader::deserializeError)

@@ -5,7 +5,7 @@ import magmac.app.compile.error.CompileResult;
 import magmac.app.compile.node.Node;
 import magmac.app.lang.Deserializers;
 
-public interface Caller {
+interface Caller {
     static CompileResult<Caller> deserialize(Node node) {
         return Deserializers.orError("caller", node, Lists.of(
                 Construction::deserialize,

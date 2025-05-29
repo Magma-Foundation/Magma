@@ -9,7 +9,7 @@ import magmac.app.compile.rule.Rule;
 import magmac.app.lang.ValueFolder;
 import magmac.app.lang.Deserializers;
 
-public class Parameters {
+public final class Parameters {
     public static CompileResult<Parameter> deserialize(Node node) {
         return Deserializers.orError("parameter", node, Lists.of(
                 Deserializers.wrap(Whitespace::deserialize),

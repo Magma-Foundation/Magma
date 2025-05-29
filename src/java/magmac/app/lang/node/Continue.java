@@ -5,7 +5,7 @@ import magmac.app.compile.error.CompileResult;
 import magmac.app.compile.node.Node;
 import magmac.app.lang.Deserializers;
 
-public class Continue implements FunctionSegmentValue {
+class Continue implements FunctionSegmentValue {
     public static Option<CompileResult<FunctionSegmentValue>> deserialize(Node node) {
         return Deserializers.deserializeWithType(node, "continue").map(deserializer -> deserializer.complete(Continue::new));
     }

@@ -9,7 +9,7 @@ import magmac.app.compile.rule.Rule;
 import magmac.app.compile.rule.TypeRule;
 import magmac.app.lang.Deserializers;
 
-public final class FunctionSegmentValues {
+final class FunctionSegmentValues {
     public static CompileResult<FunctionSegmentValue> deserialize(Node node) {
         return Deserializers.orError("function-segment-value", node, Lists.of(
                 Deserializers.wrap(Return::deserialize),

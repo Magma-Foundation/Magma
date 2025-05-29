@@ -1,4 +1,4 @@
 package magmac.app.lang.node;
 
-public interface StructureMember {
+interface StructureMember {
 }

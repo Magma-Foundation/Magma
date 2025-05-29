@@ -63,7 +63,7 @@ public class PlantUMLAfterPasser implements Passer {
 
     private static CompileResult<NodeList> replaceRootChildren(Node node) {
         return PlantUMLAfterPasser.replaceChildrenToList(node).mapValue((List<NodeList> lists) -> lists.iter()
-                .flatMap((NodeList list) -> list.iter())
+                .flatMap(NodeList::iter)
                 .collect(new NodeListCollector()));
     }
 
@@ -71,7 +71,7 @@ public class PlantUMLAfterPasser implements Passer {
         return node.findNodeList("children")
                 .orElse(InlineNodeList.empty())
                 .iter()
-                .map((Node child) -> PlantUMLAfterPasser.replaceRootChild(child))
+                .map(PlantUMLAfterPasser::replaceRootChild)
                 .collect(new CompileResultCollector<>(new ListCollector<>()));
     }
 

@@ -11,7 +11,7 @@ import magmac.app.compile.rule.Rule;
 import magmac.app.compile.rule.TypeRule;
 import magmac.app.lang.Deserializers;
 
-public record Assignment(Assignable assignable, Value value) implements FunctionSegmentValue {
+record Assignment(Assignable assignable, Value value) implements FunctionSegmentValue {
     public static Option<CompileResult<FunctionSegmentValue>> deserialize(Node node) {
         return Deserializers.deserializeWithType(node, "assignment").map(deserializer -> deserializer
                 .withNode("destination", Assignables::deserializeError)

@@ -15,9 +15,7 @@ import magmac.app.lang.Deserializers;
 
 public record StructureStatement() implements StructureMember {
     public static Option<CompileResult<StructureMember>> deserialize(Node node) {
-        return Deserializers.deserializeWithType(node, "structure-statement").map(deserializer -> {
-            return deserializer.complete(() -> new StructureStatement());
-        });
+        return Deserializers.deserializeWithType(node, "structure-statement").map(deserializer -> deserializer.complete(StructureStatement::new));
     }
 
     public static Rule createStructureStatementRule(Rule definitionRule, LazyRule valueRule) {

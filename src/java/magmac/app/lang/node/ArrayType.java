@@ -17,9 +17,7 @@ public record ArrayType(Type type) implements Type {
     }
 
     public static Option<CompileResult<Type>> deserialize(Node node) {
-        return Deserializers.deserializeWithType(node, "array").map(deserializer -> {
-            return deserializer.withNode("child", Types::deserialize)
-                    .complete(ArrayType::new);
-        });
+        return Deserializers.deserializeWithType(node, "array").map(deserializer -> deserializer.withNode("child", Types::deserialize)
+                .complete(ArrayType::new));
     }
 }

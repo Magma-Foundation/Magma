@@ -44,7 +44,7 @@ public record HeadedIter<T>(Head<T> head) implements Iter<T> {
 
     @Override
     public <C> C collect(Collector<T, C> collector) {
-        return this.fold(collector.createInitial(), (C current, T element) -> collector.fold(current, element));
+        return this.fold(collector.createInitial(), collector::fold);
     }
 
     @Override
@@ -72,6 +72,6 @@ public record HeadedIter<T>(Head<T> head) implements Iter<T> {
 
     @Override
     public Iter<T> concat(Iter<T> other) {
-        return new HeadedIter<>(() -> this.head.next().or(() -> other.next()));
+        return new HeadedIter<>(() -> this.head.next().or(other::next));
     }
 }

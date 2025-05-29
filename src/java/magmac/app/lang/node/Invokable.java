@@ -18,7 +18,7 @@ import magmac.app.compile.rule.split.DividingSplitter;
 import magmac.app.lang.InvocationFolder;
 import magmac.app.lang.Deserializers;
 
-public record Invokable(Caller left, List<Argument> right) implements Value, FunctionSegmentValue {
+record Invokable(Caller left, List<Argument> right) implements Value, FunctionSegmentValue {
     public static Option<CompileResult<Invokable>> deserialize(Node node) {
         return Deserializers.deserializeWithType(node, "invokable").map(deserializer -> deserializer.withNode("caller", Caller::deserialize)
                 .withNodeList("arguments", Arguments::deserialize)

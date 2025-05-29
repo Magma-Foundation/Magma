@@ -9,7 +9,7 @@ import magmac.app.lang.LazyRule;
 import magmac.app.lang.MutableLazyRule;
 import magmac.app.lang.Deserializers;
 
-public class Types {
+final class Types {
     public static CompileResult<Type> deserialize(Node node) {
         return Deserializers.orError("type", node, Lists.of(
                 Deserializers.wrap(Symbols::deserialize),

@@ -10,13 +10,11 @@ import magmac.app.compile.rule.TypeRule;
 import magmac.app.lang.LazyRule;
 import magmac.app.lang.Deserializers;
 
-public record Access(AccessType type, String property, Value caller) implements Value {
+record Access(AccessType type, String property, Value caller) implements Value {
     public static Option<CompileResult<Value>> deserialize(AccessType type, Node node) {
-        return Deserializers.deserializeWithType(node, type.type()).map(deserializer -> {
-            return deserializer.withString("property")
-                    .withNode("instance", Values::deserializeOrError)
-                    .complete(tuple -> new Access(type, tuple.left(), tuple.right()));
-        });
+        return Deserializers.deserializeWithType(node, type.type()).map(deserializer -> deserializer.withString("property")
+                .withNode("instance", Values::deserializeOrError)
+                .complete(tuple -> new Access(type, tuple.left(), tuple.right())));
     }
 
     public static Rule createAccessRule(String type, String infix, LazyRule value) {

@@ -15,7 +15,7 @@ import magmac.app.compile.node.InitialDeserializerImpl;
 import magmac.app.compile.node.Node;
 import magmac.app.error.ImmutableCompileError;
 
-public class Deserializers {
+public final class Deserializers {
     public static <T> CompileResult<T> orError(String type, Node node, List<Deserializer<T>> deserializers) {
         return Deserializers.or(node, deserializers)
                 .map(result -> result.mapErr(err -> Deserializers.wrap(type, node, err)))

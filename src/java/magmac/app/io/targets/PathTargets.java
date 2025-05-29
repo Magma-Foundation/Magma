@@ -16,8 +16,8 @@ public record PathTargets(Path root, String extension) implements Targets {
     @Override
     public Option<IOException> writeAll(UnitSet<String> outputs) {
         return outputs.iter()
-                .map((Unit<String> entry) -> this.write(entry))
-                .flatMap((Option<IOException> option) -> Iters.fromOption(option))
+                .map(this::write)
+                .flatMap(Iters::fromOption)
                 .next();
     }
 
@@ -25,7 +25,7 @@ public record PathTargets(Path root, String extension) implements Targets {
         return entry.destruct((Location location, String output) -> {
             Path targetParent = location.namespace()
                     .iter()
-                    .fold(this.root, (Path path, String other) -> path.resolve(other));
+                    .fold(this.root, Path::resolve);
 
             if (!Files.exists(targetParent)) {
                 Option<IOException> maybeError = SafeFiles.createDirectories(targetParent);

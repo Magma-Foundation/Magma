@@ -10,7 +10,7 @@ import magmac.app.compile.rule.StripRule;
 import magmac.app.compile.rule.TypeRule;
 import magmac.app.lang.Deserializers;
 
-public class Symbols {
+public final class Symbols {
     public static Option<CompileResult<Symbol>> deserialize(Node node) {
         return Deserializers.deserializeWithType(node, "symbol").map(deserializer -> deserializer.withString("value")
                 .complete(Symbol::new)

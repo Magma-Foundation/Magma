@@ -2,7 +2,6 @@ package magmac.app.config;
 
 import magmac.app.compile.Compiler;
 import magmac.app.compile.StagedCompiler;
-import magmac.app.compile.node.Node;
 import magmac.app.compile.rule.Rule;
 import magmac.app.lang.TypeScriptAfterPasser;
 import magmac.app.lang.TypescriptLang;
@@ -48,6 +47,6 @@ public final class TypeScriptTargetPlatform implements TargetPlatform {
     public Compiler createCompiler(Lexer lexer) {
         Parser<JavaRoot, TypescriptRoot> parser = new JavaTypescriptParser();
         Generator generator = new RuleGenerator(this.createRule());
-        return new StagedCompiler<JavaRoot, TypescriptRoot>(lexer, (Node node) -> JavaRoot.deserialize(node), parser, generator);
+        return new StagedCompiler<JavaRoot, TypescriptRoot>(lexer, JavaRoot::deserialize, parser, generator);
     }
 }

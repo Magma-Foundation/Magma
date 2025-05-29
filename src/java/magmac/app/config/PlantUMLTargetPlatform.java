@@ -2,7 +2,6 @@ package magmac.app.config;
 
 import magmac.app.compile.Compiler;
 import magmac.app.compile.StagedCompiler;
-import magmac.app.compile.node.Node;
 import magmac.app.compile.rule.Rule;
 import magmac.app.lang.JavaPlantUMLParser;
 import magmac.app.lang.MergeDiagram;
@@ -48,6 +47,6 @@ public final class PlantUMLTargetPlatform implements TargetPlatform {
     @Override
     public Compiler createCompiler(Lexer lexer) {
         Generator generator = new RuleGenerator(this.createRule());
-        return new StagedCompiler<JavaRoot, PlantUMLRoot>(lexer, (Node node) -> JavaRoot.deserialize(node), new JavaPlantUMLParser(), generator);
+        return new StagedCompiler<JavaRoot, PlantUMLRoot>(lexer, JavaRoot::deserialize, new JavaPlantUMLParser(), generator);
     }
 }

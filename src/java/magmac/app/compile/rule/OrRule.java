@@ -5,7 +5,6 @@ import magmac.app.compile.error.CompileResult;
 import magmac.app.compile.error.context.Context;
 import magmac.app.compile.error.context.NodeContext;
 import magmac.app.compile.error.context.StringContext;
-import magmac.app.compile.error.error.CompileError;
 import magmac.app.compile.node.Node;
 
 import magmac.api.collect.list.List;
@@ -14,7 +13,7 @@ import java.util.function.Function;
 
 public record OrRule(List<Rule> rules) implements Rule {
     private static <T> OrState<T> foldElement(OrState<T> state, Rule rule, Function<Rule, CompileResult<T>> mapper) {
-        return mapper.apply(rule).match((T value) -> state.withValue(value), (CompileError error) -> state.withError(error));
+        return mapper.apply(rule).match(state::withValue, state::withError);
     }
 
     private <T> CompileResult<T> foldAll(Function<Rule, CompileResult<T>> mapper, Context context) {

@@ -13,6 +13,6 @@ public record NodeRule(String key, Rule childRule) implements Rule {
 
     @Override
     public CompileResult<String> generate(Node node) {
-        return node.findNodeOrError(this.key).flatMapValue((Node child) -> this.childRule.generate(child));
+        return node.findNodeOrError(this.key).flatMapValue(this.childRule::generate);
     }
 }

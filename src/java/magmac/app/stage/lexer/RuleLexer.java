@@ -17,13 +17,13 @@ public class RuleLexer implements Lexer {
 
     private CompileResult<Unit<Node>> foldEntry(Unit<String> unit) {
         System.out.println(unit.display());
-        return unit.mapValue((String input) -> this.rootRule.lex(input));
+        return unit.mapValue(this.rootRule::lex);
     }
 
     @Override
     public CompileResult<UnitSet<Node>> apply(UnitSet<String> initial) {
         return initial.iter()
-                .map((Unit<String> entry) -> this.foldEntry(entry))
+                .map(this::foldEntry)
                 .collect(new CompileResultCollector<>(new UnitSetCollector<>()));
     }
 }

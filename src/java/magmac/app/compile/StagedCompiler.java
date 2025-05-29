@@ -27,8 +27,8 @@ public final class StagedCompiler<T, R extends Serializable> implements Compiler
     public CompileResult<UnitSet<String>> compile(UnitSet<String> units) {
         return this.lexer.apply(units)
                 .flatMapValue((UnitSet<Node> roots) -> roots.mapValuesToResult(this.deserializer))
-                .flatMapValue((UnitSet<T> trees) -> this.parser.apply(trees))
-                .mapValue((UnitSet<R> roots) -> roots.mapValues((R node) -> node.serialize()))
-                .flatMapValue((UnitSet<Node> trees) -> this.generator.apply(trees));
+                .flatMapValue(this.parser::apply)
+                .mapValue((UnitSet<R> roots) -> roots.mapValues(Serializable::serialize))
+                .flatMapValue(this.generator::apply);
     }
 }

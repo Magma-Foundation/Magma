@@ -12,10 +12,8 @@ import magmac.app.lang.Deserializers;
 
 public record VariadicType(Type node) implements Type {
     public static Option<CompileResult<Type>> deserialize(Node node) {
-        return Deserializers.deserializeWithType(node, "variadic").map(deserializer -> {
-            return deserializer.withNode("child", Types::deserialize)
-                    .complete(VariadicType::new);
-        });
+        return Deserializers.deserializeWithType(node, "variadic").map(deserializer -> deserializer.withNode("child", Types::deserialize)
+                .complete(VariadicType::new));
     }
 
     public static Rule createVariadicRule(Rule rule) {

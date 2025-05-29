@@ -11,7 +11,7 @@ import magmac.app.compile.rule.SuffixRule;
 import magmac.app.compile.rule.TypeRule;
 import magmac.app.lang.Deserializers;
 
-public record StringNode(String value) implements Value {
+record StringNode(String value) implements Value {
     public static Option<CompileResult<Value>> deserialize(Node node) {
         return Deserializers.deserializeWithType(node, "string").map(deserializer -> deserializer.withString("value").complete(StringNode::new));
     }

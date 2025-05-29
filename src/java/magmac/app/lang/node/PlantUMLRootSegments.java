@@ -7,7 +7,7 @@ import magmac.app.compile.rule.Rule;
 import magmac.app.compile.rule.SuffixRule;
 import magmac.app.compile.rule.TypeRule;
 
-public final class PlantUMLRootSegments {
+final class PlantUMLRootSegments {
     public static Rule createRootSegmentRule() {
         return new SuffixRule(new OrRule(Lists.of(
                 new TypeRule("start", new ExactRule("@startuml\nskinparam linetype ortho")),

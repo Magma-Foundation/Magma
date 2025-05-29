@@ -11,12 +11,10 @@ import magmac.app.compile.rule.SuffixRule;
 import magmac.app.compile.rule.TypeRule;
 import magmac.app.lang.Deserializers;
 
-public record Conditional(ConditionalType type, Value condition) implements BlockHeader {
+record Conditional(ConditionalType type, Value condition) implements BlockHeader {
     public static Option<CompileResult<Conditional>> deserialize(ConditionalType type, Node node) {
-        return Deserializers.deserializeWithType(node, type.name().toLowerCase()).map(deserializer -> {
-            return deserializer.withNode("condition", Values::deserializeOrError)
-                    .complete(value -> new Conditional(type, value));
-        });
+        return Deserializers.deserializeWithType(node, type.name().toLowerCase()).map(deserializer -> deserializer.withNode("condition", Values::deserializeOrError)
+                .complete(value -> new Conditional(type, value)));
     }
 
     public static Rule createConditionalRule(String type, Rule value) {

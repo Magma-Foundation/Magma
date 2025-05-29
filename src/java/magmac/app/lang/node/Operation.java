@@ -10,17 +10,15 @@ import magmac.app.compile.rule.TypeRule;
 import magmac.app.lang.Deserializer;
 import magmac.app.lang.Deserializers;
 
-public record Operation(Value left, Operator operator, Value right) implements Value {
-    public static Option<CompileResult<Value>> deserialize(Operator operator, Node node) {
-        return Deserializers.deserializeWithType(node, operator.type()).map(deserializer -> {
-            return deserializer.withNode("left", Values::deserializeOrError)
-                    .withNode("right", Values::deserializeOrError)
-                    .complete(tuple -> new Operation(tuple.left(), operator, tuple.right()));
-        });
+record Operation(Value left, Operator operator, Value right) implements Value {
+    private static Option<CompileResult<Value>> deserialize(Operator operator, Node node) {
+        return Deserializers.deserializeWithType(node, operator.type()).map(deserializer -> deserializer.withNode("left", Values::deserializeOrError)
+                .withNode("right", Values::deserializeOrError)
+                .complete(tuple -> new Operation(tuple.left(), operator, tuple.right())));
     }
 
     static Deserializer<Value> deserializeAs(Operator operator) {
-        return Deserializers.wrap(node2 -> deserialize(operator, node2));
+        return Deserializers.wrap(node2 -> Operation.deserialize(operator, node2));
     }
 
     public static Rule createOperationRule(Rule value, String type, String infix) {

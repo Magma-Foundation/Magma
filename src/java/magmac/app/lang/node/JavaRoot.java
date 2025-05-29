@@ -15,8 +15,8 @@ import magmac.app.lang.Serializable;
 public record JavaRoot(List<JavaRootSegment> children) implements Serializable {
     public static CompileResult<JavaRoot> deserialize(Node node) {
         return Deserializers.deserialize(node)
-                .withNodeList("children", (Node node1) -> JavaRootSegments.deserialize(node1))
-                .complete((List<JavaRootSegment> segments) -> new JavaRoot(segments));
+                .withNodeList("children", JavaRootSegments::deserialize)
+                .complete(JavaRoot::new);
     }
 
     public static Rule createRule() {
@@ -33,6 +33,6 @@ public record JavaRoot(List<JavaRootSegment> children) implements Serializable {
 
     @Override
     public Node serialize() {
-        return new MapNode().withNodeListFromElements("children", this.children, (JavaRootSegment segment) -> JavaRootSegments.serialize(segment));
+        return new MapNode().withNodeListFromElements("children", this.children, JavaRootSegments::serialize);
     }
 }

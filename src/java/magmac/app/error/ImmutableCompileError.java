@@ -42,7 +42,7 @@ public record ImmutableCompileError(String message, Context context,
     @Override
     public int computeMaxDepth() {
         Iter<CompileError> compileErrorIter = this.errors.iter();
-        return 1 + compileErrorIter.map((CompileError compileError) -> compileError.computeMaxDepth())
+        return 1 + compileErrorIter.map(CompileError::computeMaxDepth)
                 .collect(new Max())
                 .orElse(0);
     }

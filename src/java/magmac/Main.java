@@ -1,7 +1,6 @@
 package magmac;
 
 import jvm.io.Console;
-import magmac.api.Option;
 import magmac.api.iter.Iters;
 import magmac.app.ApplicationBuilder;
 import magmac.api.error.Error;
@@ -19,7 +18,7 @@ final class Main {
 
         Iters.fromValues(new PlantUMLTargetPlatform(), new TypeScriptTargetPlatform())
                 .map((TargetPlatform platform) -> ApplicationBuilder.run(platform, sources))
-                .flatMap((Option<Error> option) -> Iters.fromOption(option))
+                .flatMap(Iters::fromOption)
                 .next()
                 .ifPresent((Error error) -> Console.handleError(error.display()));
     }

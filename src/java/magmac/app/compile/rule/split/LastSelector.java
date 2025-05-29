@@ -14,7 +14,7 @@ public class LastSelector implements Selector {
 
     @Override
     public Option<Tuple2<String, String>> select(List<String> list) {
-        return list.popLast().map((Tuple2<List<String>, String> tuple) -> this.merge(tuple));
+        return list.popLast().map(this::merge);
     }
 
     private Tuple2<String, String> merge(Tuple2<List<String>, String> tuple) {

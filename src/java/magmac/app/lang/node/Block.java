@@ -18,14 +18,12 @@ import magmac.app.lang.CommonLang;
 import magmac.app.lang.LazyRule;
 import magmac.app.lang.Deserializers;
 
-public record Block(List<FunctionSegment> segments, BlockHeader header) implements FunctionSegment {
+record Block(List<FunctionSegment> segments, BlockHeader header) implements FunctionSegment {
     public static Option<CompileResult<Block>> deserialize(Node node) {
-        return Deserializers.deserializeWithType(node, "block").map(deserializer -> {
-            return deserializer
-                    .withNodeList("children", FunctionSegment::deserialize)
-                    .withNode("header", BlockHeader::deserialize)
-                    .complete(tuple -> new Block(tuple.left(), tuple.right()));
-        });
+        return Deserializers.deserializeWithType(node, "block").map(deserializer -> deserializer
+                .withNodeList("children", FunctionSegment::deserialize)
+                .withNode("header", BlockHeader::deserialize)
+                .complete(tuple -> new Block(tuple.left(), tuple.right())));
     }
 
     public static Rule createBlockRule(LazyRule functionSegmentRule, Rule value, Rule definition) {

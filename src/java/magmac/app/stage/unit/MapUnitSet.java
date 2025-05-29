@@ -23,7 +23,7 @@ public record MapUnitSet<T>(Map<Location, T> roots) implements UnitSet<T> {
 
     @Override
     public UnitSet<T> add(Unit<T> element) {
-        return new MapUnitSet<>(element.destruct((Location key, T value) -> this.roots.put(key, value)));
+        return new MapUnitSet<>(element.destruct(this.roots::put));
     }
 
     @Override
@@ -31,7 +31,7 @@ public record MapUnitSet<T>(Map<Location, T> roots) implements UnitSet<T> {
         return this.roots.iter()
                 .map((Tuple2<Location, T> tuple) -> deserializer.apply(tuple.right()).mapValue((R apply) -> new Tuple2<>(tuple.left(), apply)))
                 .collect(new CompileResultCollector<>(new MapCollector<>()))
-                .mapValue((Map<Location, R> roots1) -> new MapUnitSet<R>(roots1));
+                .mapValue(MapUnitSet::new);
     }
 
     @Override
@@ -43,6 +43,6 @@ public record MapUnitSet<T>(Map<Location, T> roots) implements UnitSet<T> {
 
     @Override
     public Iter<T> iterValues() {
-        return this.roots.iter().map((Tuple2<Location, T> entry) -> entry.right());
+        return this.roots.iter().map(Tuple2::right);
     }
 }

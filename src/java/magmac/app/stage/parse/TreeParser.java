@@ -43,8 +43,8 @@ public class TreeParser implements Parser<Node, Node> {
 
     private CompileResult<ParseUnit<Node>> parseTree(ParseState state, Node root) {
         return this.beforeChild.pass(state, root).orElseGet(() -> new ParseUnitImpl<Node>(state, root))
-                .flatMapValue((ParseUnit<Node> beforeTuple) -> this.parseNodeLists(beforeTuple))
-                .flatMapValue((ParseUnit<Node> withNodeLists) -> this.parseNodes(withNodeLists))
+                .flatMapValue(this::parseNodeLists)
+                .flatMapValue(this::parseNodes)
                 .flatMapValue((ParseUnit<Node> nodeListsTuple) -> {
                     ParseState state1 = nodeListsTuple.left();
                     Node node = nodeListsTuple.right();
@@ -74,7 +74,7 @@ public class TreeParser implements Parser<Node, Node> {
     @Override
     public CompileResult<UnitSet<Node>> apply(UnitSet<Node> initial) {
         return initial.iter()
-                .map((Unit<Node> unit) -> this.parseUnit(unit))
+                .map(this::parseUnit)
                 .collect(new CompileResultCollector<>(new UnitSetCollector<>()))
                 .flatMapValue((UnitSet<Node> parsed) -> CompileResults.Ok(this.afterAllChildren.afterAll(parsed)));
     }
@@ -82,7 +82,7 @@ public class TreeParser implements Parser<Node, Node> {
     private CompileResult<Unit<Node>> parseUnit(Unit<Node> unit) {
         return unit.destruct((Location location, Node root) -> {
             ParseState initial = new ImmutableParseState(location);
-            return this.parseTree(initial, root).mapValue((ParseUnit<Node> parsed) -> parsed.toLocationUnit());
+            return this.parseTree(initial, root).mapValue(ParseUnit::toLocationUnit);
         });
     }
 }

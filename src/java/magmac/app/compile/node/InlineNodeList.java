@@ -42,7 +42,7 @@ public final class InlineNodeList implements NodeList {
 
     @Override
     public NodeList addAll(NodeList others) {
-        return others.iter().fold(this, (NodeList nodeList, Node element) -> nodeList.add(element));
+        return others.iter().fold(this, NodeList::add);
     }
 
     @Override
