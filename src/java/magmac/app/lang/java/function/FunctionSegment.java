@@ -6,13 +6,15 @@ import magmac.app.compile.node.Node;
 import magmac.app.compile.rule.ExactRule;
 import magmac.app.compile.rule.OrRule;
 import magmac.app.compile.rule.Rule;
+import magmac.app.compile.rule.StripRule;
 import magmac.app.compile.rule.TypeRule;
 import magmac.app.lang.CommonLang;
+import magmac.app.lang.LazyRule;
 import magmac.app.lang.java.Deserializers;
-import magmac.app.lang.java.invoke.Invokable;
-import magmac.app.lang.java.function.segment.Return;
 import magmac.app.lang.java.Whitespace;
 import magmac.app.lang.java.assign.Assignment;
+import magmac.app.lang.java.function.segment.Return;
+import magmac.app.lang.java.invoke.Invokable;
 
 public interface FunctionSegment {
     static CompileResult<FunctionSegment> deserialize(Node node) {
@@ -32,5 +34,17 @@ public interface FunctionSegment {
                 new TypeRule("break", new ExactRule("break")),
                 new TypeRule("continue", new ExactRule("continue"))
         ));
+    }
+
+    static Rule initFunctionSegmentRule(LazyRule functionSegmentRule, Rule value, Rule definition) {
+        Rule functionSegmentValueRule = FunctionSegment.createFunctionSegmentValueRule(value, definition);
+
+        Rule rule = new OrRule(Lists.of(
+                Whitespace.createWhitespaceRule(),
+                FunctionStatement.createStatementRule(functionSegmentValueRule),
+                CommonLang.createBlockRule(functionSegmentRule, value, definition)
+        ));
+
+        return functionSegmentRule.set(new StripRule("before", rule, ""));
     }
 }

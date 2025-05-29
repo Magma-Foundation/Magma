@@ -19,18 +19,13 @@ import magmac.app.compile.rule.fold.DelimitedFolder;
 import magmac.app.compile.rule.fold.StatementFolder;
 import magmac.app.compile.rule.split.DividingSplitter;
 import magmac.app.lang.java.assign.Assignment;
-import magmac.app.lang.java.function.FunctionSegment;
+import magmac.app.lang.java.invoke.Invokable;
 import magmac.app.lang.java.type.TemplateType;
 import magmac.app.lang.java.value.DataAccess;
-import magmac.app.lang.java.invoke.Invokable;
 import magmac.app.lang.java.value.Lambda;
 import magmac.app.lang.java.value.Symbols;
 
 public final class CommonLang {
-    public static Rule createWhitespaceRule() {
-        return new TypeRule("whitespace", new StripRule(new ExactRule("")));
-    }
-
     public static NodeListRule Statements(String key, Rule childRule) {
         return new NodeListRule(key, new StatementFolder(), childRule);
     }
@@ -78,24 +73,7 @@ public final class CommonLang {
         return new TypeRule("char", new StripRule(new PrefixRule("'", new SuffixRule(new StringRule("value"), "'"))));
     }
 
-    static Rule initFunctionSegmentRule(LazyRule functionSegmentRule, Rule value, Rule definition) {
-        Rule functionSegmentValueRule = FunctionSegment.createFunctionSegmentValueRule(value, definition);
-
-        Rule rule = new OrRule(Lists.of(
-                CommonLang.createWhitespaceRule(),
-                CommonLang.createStatementRule(functionSegmentValueRule),
-                CommonLang.createBlockRule(functionSegmentRule, value, definition)
-        ));
-
-        return functionSegmentRule.set(new StripRule("before", rule, ""));
-    }
-
-    private static Rule createStatementRule(Rule rule) {
-        NodeRule child = new NodeRule("child", rule);
-        return new TypeRule("statement", new StripRule(new SuffixRule(child, ";")));
-    }
-
-    private static Rule createBlockRule(LazyRule functionSegmentRule, Rule value, Rule definition) {
+    public static Rule createBlockRule(LazyRule functionSegmentRule, Rule value, Rule definition) {
         Rule header = new NodeRule("header", CommonLang.createBlockHeaderRule(value, definition));
         Rule children = CommonLang.Statements("children", functionSegmentRule);
         Splitter first = DividingSplitter.First(new FoldingDivider(new BlockFolder()), "");

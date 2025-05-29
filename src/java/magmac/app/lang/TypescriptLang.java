@@ -12,6 +12,8 @@ import magmac.app.compile.rule.StripRule;
 import magmac.app.compile.rule.SuffixRule;
 import magmac.app.compile.rule.TypeRule;
 import magmac.app.compile.rule.fold.DelimitedFolder;
+import magmac.app.lang.java.Whitespace;
+import magmac.app.lang.java.function.FunctionSegment;
 import magmac.app.lang.java.function.Parameters;
 import magmac.app.lang.java.type.TemplateType;
 import magmac.app.lang.java.value.Symbols;
@@ -19,7 +21,7 @@ import magmac.app.lang.java.value.Symbols;
 public final class TypescriptLang {
     public static Rule createRule() {
         return new TypeRule("root", CommonLang.Statements("children", new OrRule(Lists.of(
-                CommonLang.createWhitespaceRule(),
+                Whitespace.createWhitespaceRule(),
                 TypescriptLang.createImportRule(),
                 TypescriptLang.createClassRule("class"),
                 TypescriptLang.createClassRule("interface")
@@ -43,7 +45,7 @@ public final class TypescriptLang {
         Rule definitionRule = TypescriptLang.createDefinitionRule();
         LazyRule valueLazy = new MutableLazyRule();
         return new OrRule(Lists.of(
-                CommonLang.createWhitespaceRule(),
+                Whitespace.createWhitespaceRule(),
                 TypescriptLang.createMethodRule(definitionRule, valueLazy),
                 CommonLang.createStructureStatementRule(definitionRule, valueLazy)
         ));
@@ -57,7 +59,7 @@ public final class TypescriptLang {
 
         LazyRule functionSegmentRule = new MutableLazyRule();
         LazyRule value = CommonLang.initValueRule(functionSegmentRule, valueLazy, " => ", definition);
-        Rule children = CommonLang.Statements("children", CommonLang.initFunctionSegmentRule(functionSegmentRule, value, definition));
+        Rule children = CommonLang.Statements("children", FunctionSegment.initFunctionSegmentRule(functionSegmentRule, value, definition));
         Rule childRule = new SuffixRule(LocatingRule.First(header, " {", new StripRule("", children, "after-children")), "}");
         return new TypeRule("method", new OptionNodeListRule("children",
                 childRule,

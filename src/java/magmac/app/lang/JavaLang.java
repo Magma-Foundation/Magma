@@ -18,6 +18,8 @@ import magmac.app.compile.rule.divide.Divider;
 import magmac.app.compile.rule.divide.FoldingDivider;
 import magmac.app.compile.rule.fold.DelimitedFolder;
 import magmac.app.compile.rule.split.DividingSplitter;
+import magmac.app.lang.java.Whitespace;
+import magmac.app.lang.java.function.FunctionSegment;
 import magmac.app.lang.java.function.Parameters;
 import magmac.app.lang.java.value.Arguments;
 import magmac.app.lang.java.value.Symbols;
@@ -25,7 +27,7 @@ import magmac.app.lang.java.value.Symbols;
 public final class JavaLang {
     public static Rule createRule() {
         return new TypeRule("root", CommonLang.Statements("children", new OrRule(Lists.of(
-                CommonLang.createWhitespaceRule(),
+                Whitespace.createWhitespaceRule(),
                 JavaLang.createNamespacedRule("package"),
                 JavaLang.createNamespacedRule("import"),
                 JavaLang.createStructureRule("record"),
@@ -64,9 +66,9 @@ public final class JavaLang {
         LazyRule functionSegmentRule = new MutableLazyRule();
         LazyRule valueLazy = new MutableLazyRule();
         LazyRule value = CommonLang.initValueRule(functionSegmentRule, valueLazy, "->", JavaLang.createDefinitionRule());
-        Rule functionSegment = CommonLang.initFunctionSegmentRule(functionSegmentRule, value, JavaLang.createDefinitionRule());
+        Rule functionSegment = FunctionSegment.initFunctionSegmentRule(functionSegmentRule, value, JavaLang.createDefinitionRule());
         return new OrRule(Lists.of(
-                CommonLang.createWhitespaceRule(),
+                Whitespace.createWhitespaceRule(),
                 CommonLang.createStructureStatementRule(new TypeRule("definition", JavaLang.createDefinitionRule()), value),
                 JavaLang.createMethodRule(functionSegment),
                 JavaLang.createEnumValuesRule(value)

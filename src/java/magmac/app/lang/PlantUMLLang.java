@@ -11,6 +11,7 @@ import magmac.app.compile.rule.StringRule;
 import magmac.app.compile.rule.SuffixRule;
 import magmac.app.compile.rule.TypeRule;
 import magmac.app.compile.rule.fold.StatementFolder;
+import magmac.app.lang.java.Whitespace;
 
 public final class PlantUMLLang {
     public static Rule createRule() {
@@ -19,7 +20,7 @@ public final class PlantUMLLang {
 
     private static SuffixRule createRootSegmentRule() {
         return new SuffixRule(new OrRule(Lists.of(
-                CommonLang.createWhitespaceRule(),
+                Whitespace.createWhitespaceRule(),
                 new TypeRule("start", new ExactRule("@startuml\nskinparam linetype ortho")),
                 new TypeRule("end", new ExactRule("@enduml")),
                 PlantUMLLang.createStructureRule("class"),

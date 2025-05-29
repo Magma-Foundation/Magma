@@ -6,7 +6,6 @@ import magmac.app.compile.node.Node;
 import magmac.app.compile.rule.NodeListRule;
 import magmac.app.compile.rule.OrRule;
 import magmac.app.compile.rule.Rule;
-import magmac.app.lang.CommonLang;
 import magmac.app.lang.java.Deserializers;
 import magmac.app.lang.java.Whitespace;
 
@@ -20,7 +19,7 @@ public final class Arguments {
 
     public static NodeListRule createArgumentsRule(Rule value) {
         return NodeListRule.Values("arguments", new OrRule(Lists.of(
-                CommonLang.createWhitespaceRule(),
+                Whitespace.createWhitespaceRule(),
                 value
         )));
     }
