@@ -19,8 +19,10 @@ import magmac.app.compile.rule.divide.FoldingDivider;
 import magmac.app.compile.rule.fold.DelimitedFolder;
 import magmac.app.compile.rule.split.DividingSplitter;
 import magmac.app.lang.java.Whitespace;
+import magmac.app.lang.java.define.Modifier;
 import magmac.app.lang.java.function.FunctionSegment;
 import magmac.app.lang.java.function.Parameters;
+import magmac.app.lang.java.structure.StructureStatement;
 import magmac.app.lang.java.value.Arguments;
 import magmac.app.lang.java.value.Symbols;
 
@@ -59,7 +61,7 @@ public final class JavaLang {
         ));
 
         Rule afterKeyword = LocatingRule.First(withImplements, "{", new StripRule(new SuffixRule(CommonLang.Statements("children", JavaLang.createClassMemberRule()), "}")));
-        return new TypeRule(keyword, LocatingRule.First(CommonLang.createModifiersRule(), keyword + " ", afterKeyword));
+        return new TypeRule(keyword, LocatingRule.First(Modifier.createModifiersRule(), keyword + " ", afterKeyword));
     }
 
     private static Rule createClassMemberRule() {
@@ -69,7 +71,7 @@ public final class JavaLang {
         Rule functionSegment = FunctionSegment.initFunctionSegmentRule(functionSegmentRule, value, JavaLang.createDefinitionRule());
         return new OrRule(Lists.of(
                 Whitespace.createWhitespaceRule(),
-                CommonLang.createStructureStatementRule(new TypeRule("definition", JavaLang.createDefinitionRule()), value),
+                StructureStatement.createStructureStatementRule(new TypeRule("definition", JavaLang.createDefinitionRule()), value),
                 JavaLang.createMethodRule(functionSegment),
                 JavaLang.createEnumValuesRule(value)
         ));
@@ -114,7 +116,7 @@ public final class JavaLang {
     }
 
     private static Rule createDefinitionRule() {
-        Rule modifiers = CommonLang.createModifiersRule();
+        Rule modifiers = Modifier.createModifiersRule();
         Rule annotations = new NodeListRule("annotations", new DelimitedFolder('\n'), new StripRule(new PrefixRule("@", new StringRule("value"))));
         Rule beforeTypeParams = new OrRule(Lists.of(
                 LocatingRule.Last(annotations, "\n", modifiers),

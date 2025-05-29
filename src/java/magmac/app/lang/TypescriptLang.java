@@ -13,8 +13,10 @@ import magmac.app.compile.rule.SuffixRule;
 import magmac.app.compile.rule.TypeRule;
 import magmac.app.compile.rule.fold.DelimitedFolder;
 import magmac.app.lang.java.Whitespace;
+import magmac.app.lang.java.define.Modifier;
 import magmac.app.lang.java.function.FunctionSegment;
 import magmac.app.lang.java.function.Parameters;
+import magmac.app.lang.java.structure.StructureStatement;
 import magmac.app.lang.java.type.TemplateType;
 import magmac.app.lang.java.value.Symbols;
 
@@ -47,7 +49,7 @@ public final class TypescriptLang {
         return new OrRule(Lists.of(
                 Whitespace.createWhitespaceRule(),
                 TypescriptLang.createMethodRule(definitionRule, valueLazy),
-                CommonLang.createStructureStatementRule(definitionRule, valueLazy)
+                StructureStatement.createStructureStatementRule(definitionRule, valueLazy)
         ));
     }
 
@@ -74,7 +76,7 @@ public final class TypescriptLang {
 
     private static Rule createDefinitionRule() {
         LazyRule definition = new MutableLazyRule();
-        Rule modifiers = CommonLang.createModifiersRule();
+        Rule modifiers = Modifier.createModifiersRule();
 
         Rule parameters = Parameters.createParametersRule(definition);
         Rule name = new StringRule("name");

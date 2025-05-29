@@ -9,9 +9,10 @@ import magmac.app.lang.java.function.MethodNode;
 
 final class StructureMembers {
     public static CompileResult<StructureMember> deserialize(Node node) {
-        return Deserializers.orError("class-member", node, Lists.of(
+        return Deserializers.orError("structure-member", node, Lists.of(
                 Deserializers.wrap(Whitespace::deserialize),
-                MethodNode::deserialize
+                Deserializers.wrap(MethodNode::deserialize),
+                Deserializers.wrap(StructureStatement::deserialize)
         ));
     }
 }

@@ -12,9 +12,7 @@ import magmac.app.compile.rule.StringRule;
 import magmac.app.compile.rule.StripRule;
 import magmac.app.compile.rule.SuffixRule;
 import magmac.app.compile.rule.TypeRule;
-import magmac.app.compile.rule.fold.DelimitedFolder;
 import magmac.app.compile.rule.fold.StatementFolder;
-import magmac.app.lang.java.assign.Assignment;
 import magmac.app.lang.java.invoke.Invokable;
 import magmac.app.lang.java.type.TemplateType;
 import magmac.app.lang.java.value.CharNode;
@@ -86,19 +84,6 @@ public final class CommonLang {
     private static Rule createVariadicRule(Rule rule) {
         NodeRule child = new NodeRule("child", rule);
         return new TypeRule("variadic", new StripRule(new SuffixRule(child, "...")));
-    }
-
-    static Rule createStructureStatementRule(Rule definitionRule, LazyRule valueRule) {
-        Rule definition = new NodeRule("value", new OrRule(Lists.of(
-                definitionRule,
-                Assignment.createAssignmentRule(definitionRule, valueRule))
-        ));
-
-        return new TypeRule("statement", new StripRule(new SuffixRule(definition, ";")));
-    }
-
-    static Rule createModifiersRule() {
-        return new StripRule(new NodeListRule("modifiers", new DelimitedFolder(' '), new StringRule("value")));
     }
 
     static Rule attachTypeParams(Rule beforeTypeParams) {
