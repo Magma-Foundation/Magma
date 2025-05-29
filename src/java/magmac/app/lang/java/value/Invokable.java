@@ -22,7 +22,7 @@ import magmac.app.lang.InvocationFolder;
 public record Invokable(Caller left, List<Argument> right) implements Value {
     public static Option<CompileResult<Value>> deserialize(Node node) {
         return node.deserializeWithType("invokable").map(deserializer -> deserializer.withNode("caller", Caller::deserialize)
-                .nodeList("arguments", Arguments::deserialize)
+                .withNodeList("arguments", Arguments::deserialize)
                 .complete(tuple -> new Invokable(tuple.left(), tuple.right())));
     }
 

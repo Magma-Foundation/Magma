@@ -12,8 +12,8 @@ public record MethodNode(Definition definition, List<FunctionSegment> children, 
     public static Option<CompileResult<ClassMember>> deserialize(Node node) {
         return node.deserializeWithType("method").map((InitialDeserializer deserializer) -> deserializer
                 .withNode("header", Definition::deserializeError)
-                .nodeList("children", FunctionSegment::deserialize)
-                .nodeList("parameters", Parameters::deserialize)
+                .withNodeList("children", FunctionSegment::deserialize)
+                .withNodeList("parameters", Parameters::deserialize)
                 .complete((tuple) -> new MethodNode(tuple.left().left(), tuple.left().right(), tuple.right()))
                 .mapValue((MethodNode type) -> type));
     }

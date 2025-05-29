@@ -17,7 +17,7 @@ public record Definition(String name, Type type, List<Modifier> modifiers) imple
     private static CompileResult<Definition> complete(InitialDeserializer deserialize) {
         return deserialize.withString("name")
                 .withNode("type", Type::deserialize)
-                .nodeList("modifiers", Modifier::deserialize)
+                .withNodeList("modifiers", Modifier::deserialize)
                 .complete(result -> new Definition(result.left().left(), result.left().right(), result.right()));
     }
 
