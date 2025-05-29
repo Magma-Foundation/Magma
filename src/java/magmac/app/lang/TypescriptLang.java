@@ -96,7 +96,7 @@ public final class TypescriptLang {
         return type.set(new OrRule(Lists.of(
                 TemplateType.createTemplateRule(type),
                 TypescriptLang.createArrayRule(type),
-                Symbols.createSymbolTypeRule()
+                Symbols.createSymbolRule()
         )));
     }
 

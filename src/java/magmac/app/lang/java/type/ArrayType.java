@@ -10,16 +10,16 @@ import magmac.app.compile.rule.SuffixRule;
 import magmac.app.compile.rule.TypeRule;
 import magmac.app.lang.java.Type;
 
-public record Variadic(Type node) implements Type {
-    public static Option<CompileResult<Type>> deserialize(Node node) {
-        return node.deserializeWithType("variadic").map(deserializer -> {
-            return deserializer.withNode("child", Types::deserialize)
-                    .complete(Variadic::new);
-        });
+public record ArrayType(Type type) implements Type {
+    public static Rule createArrayRule(Rule rule) {
+        NodeRule child = new NodeRule("child", rule);
+        return new TypeRule("array", new StripRule(new SuffixRule(child, "[]")));
     }
 
-    public static Rule createVariadicRule(Rule rule) {
-        NodeRule child = new NodeRule("child", rule);
-        return new TypeRule("variadic", new StripRule(new SuffixRule(child, "...")));
+    public static Option<CompileResult<Type>> deserialize(Node node) {
+        return node.deserializeWithType("array").map(deserializer -> {
+            return deserializer.withNode("child", Types::deserialize)
+                    .complete(ArrayType::new);
+        });
     }
 }

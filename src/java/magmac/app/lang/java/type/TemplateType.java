@@ -15,7 +15,7 @@ import magmac.app.compile.rule.SuffixRule;
 import magmac.app.compile.rule.TypeRule;
 import magmac.app.lang.java.Deserializers;
 import magmac.app.lang.java.Type;
-import magmac.app.lang.java.value.Qualified;
+import magmac.app.lang.java.value.QualifiedType;
 import magmac.app.lang.java.value.Symbols;
 
 public record TemplateType(Base base, List<Type> right) implements Type {
@@ -28,15 +28,15 @@ public record TemplateType(Base base, List<Type> right) implements Type {
 
     private static CompileResult<Base> deserializeBase(Node node) {
         return Deserializers.orError("base", node, Lists.of(
-                Deserializers.wrap(Symbols::deserializeSymbol),
-                Deserializers.wrap(Qualified::deserializeQualified)
+                Deserializers.wrap(Symbols::deserialize),
+                Deserializers.wrap(QualifiedType::deserializeQualified)
         ));
     }
 
     public static Rule createTemplateRule(Rule type) {
         Rule base = new NodeRule("base", new OrRule(Lists.of(
-                Symbols.createSymbolTypeRule(),
-                Symbols.createQualifiedRule()
+                Symbols.createSymbolRule(),
+                QualifiedType.createQualifiedRule()
         )));
 
         Rule arguments = NodeListRule.Values("arguments", type);

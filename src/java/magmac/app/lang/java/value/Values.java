@@ -27,7 +27,7 @@ public class Values {
                 StringNode::deserialize,
                 node1 -> Access.deserialize(AccessType.Data, node1),
                 node1 -> Access.deserialize(AccessType.Method, node1),
-                Deserializers.wrap(Symbols::deserializeSymbol),
+                Deserializers.wrap(Symbols::deserialize),
                 Deserializers.wrap(CharNode::deserialize),
                 Deserializers.wrap(Lambda::deserialize),
                 Deserializers.wrap(NumberNode::deserialize),
@@ -54,7 +54,7 @@ public class Values {
                 Invokable.createInvokableRule(value),
                 CommonLang.createIndexRule(value),
                 NumberNode.createNumberRule(),
-                Symbols.createSymbolValueRule(),
+                Symbols.createSymbolRule(),
                 Access.createAccessRule("data-access", ".", value),
                 Access.createAccessRule("method-access", "::", value)
         );
