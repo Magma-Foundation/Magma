@@ -19,7 +19,7 @@ import magmac.app.compile.rule.fold.DelimitedFolder;
 import magmac.app.compile.rule.fold.StatementFolder;
 import magmac.app.compile.rule.split.DividingSplitter;
 import magmac.app.lang.java.value.Symbol;
-import magmac.app.lang.java.define.Assignment;
+import magmac.app.lang.java.assign.Assignment;
 import magmac.app.lang.java.function.FunctionSegment;
 import magmac.app.lang.java.value.DataAccess;
 import magmac.app.lang.java.value.Invokable;

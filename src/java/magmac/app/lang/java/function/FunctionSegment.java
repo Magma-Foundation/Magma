@@ -12,7 +12,7 @@ import magmac.app.lang.java.Deserializers;
 import magmac.app.lang.java.value.Invokable;
 import magmac.app.lang.java.function.segment.Return;
 import magmac.app.lang.java.Whitespace;
-import magmac.app.lang.java.define.Assignment;
+import magmac.app.lang.java.assign.Assignment;
 
 public interface FunctionSegment {
     static CompileResult<FunctionSegment> deserialize(Node node) {

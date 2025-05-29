@@ -1,4 +1,4 @@
-package magmac.app.lang.java.define;
+package magmac.app.lang.java.assign;
 
 import magmac.api.Option;
 import magmac.api.collect.list.Lists;
@@ -13,10 +13,10 @@ import magmac.app.lang.java.function.FunctionSegmentValue;
 import magmac.app.lang.java.value.Value;
 import magmac.app.lang.java.value.Values;
 
-public record Assignment(Value assignable, Value value) implements FunctionSegmentValue {
+public record Assignment(Assignable assignable, Value value) implements FunctionSegmentValue {
     public static Option<CompileResult<FunctionSegmentValue>> deserialize(Node node) {
         return node.deserializeWithType("assignment").map(deserializer -> deserializer
-                .withNode("destination", Values::deserializeError)
+                .withNode("destination", Assignables::deserializeError)
                 .withNode("source", Values::deserializeError)
                 .complete(tuple -> new Assignment(tuple.left(), tuple.right())));
     }
