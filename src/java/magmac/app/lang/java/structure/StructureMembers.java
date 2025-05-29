@@ -7,8 +7,8 @@ import magmac.app.lang.java.Deserializers;
 import magmac.app.lang.java.Whitespace;
 import magmac.app.lang.java.function.MethodNode;
 
-final class ClassMembers {
-    public static CompileResult<ClassMember> deserialize(Node node) {
+final class StructureMembers {
+    public static CompileResult<StructureMember> deserialize(Node node) {
         return Deserializers.orError("class-member", node, Lists.of(
                 Deserializers.wrap(Whitespace::deserialize),
                 MethodNode::deserialize

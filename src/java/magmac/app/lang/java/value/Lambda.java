@@ -20,7 +20,7 @@ import magmac.app.lang.ValueFolder;
 public record Lambda() implements Value {
     public static Option<CompileResult<Lambda>> deserialize(Node node) {
         return node.deserializeWithType("lambda").map(deserializer -> {
-            return deserializer.complete(() -> new Lambda());
+            return deserializer.complete(Lambda::new);
         });
     }
 

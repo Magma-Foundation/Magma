@@ -6,10 +6,10 @@ import magmac.app.compile.error.CompileResult;
 import magmac.app.compile.node.InitialDeserializer;
 import magmac.app.compile.node.Node;
 import magmac.app.lang.java.define.Definition;
-import magmac.app.lang.java.structure.ClassMember;
+import magmac.app.lang.java.structure.StructureMember;
 
-public record MethodNode(Definition definition, List<FunctionSegment> children, List<Parameter> right) implements ClassMember {
-    public static Option<CompileResult<ClassMember>> deserialize(Node node) {
+public record MethodNode(Definition definition, List<FunctionSegment> children, List<Parameter> right) implements StructureMember {
+    public static Option<CompileResult<StructureMember>> deserialize(Node node) {
         return node.deserializeWithType("method").map((InitialDeserializer deserializer) -> deserializer
                 .withNode("header", Definition::deserializeError)
                 .withNodeList("children", FunctionSegment::deserialize)
