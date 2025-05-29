@@ -80,7 +80,7 @@ public class TreeParser implements Parser<Node, Node> {
     }
 
     private CompileResult<Unit<Node>> parseUnit(Unit<Node> unit) {
-        return unit.deconstruct((Location location, Node root) -> {
+        return unit.destruct((Location location, Node root) -> {
             ParseState initial = new ImmutableParseState(location);
             return this.parseTree(initial, root).mapValue((ParseUnit<Node> parsed) -> parsed.toLocationUnit());
         });

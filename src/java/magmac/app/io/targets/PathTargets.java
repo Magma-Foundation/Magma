@@ -22,7 +22,7 @@ public record PathTargets(Path root, String extension) implements Targets {
     }
 
     private Option<IOException> write(Unit<String> entry) {
-        return entry.deconstruct((Location location, String output) -> {
+        return entry.destruct((Location location, String output) -> {
             Path targetParent = location.namespace()
                     .iter()
                     .fold(this.root, (Path path, String other) -> path.resolve(other));

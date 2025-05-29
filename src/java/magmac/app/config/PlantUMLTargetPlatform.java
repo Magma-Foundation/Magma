@@ -7,7 +7,7 @@ import magmac.app.compile.rule.Rule;
 import magmac.app.lang.MergeDiagram;
 import magmac.app.lang.PlantUMLAfterPasser;
 import magmac.app.lang.PlantUMLLang;
-import magmac.app.lang.java.root.JavaRoot;
+import magmac.app.lang.java.node.JavaRoot;
 import magmac.app.stage.Passer;
 import magmac.app.stage.after.AfterAll;
 import magmac.app.stage.generate.Generator;

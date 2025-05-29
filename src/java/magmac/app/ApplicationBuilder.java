@@ -7,7 +7,7 @@ import magmac.app.config.TargetPlatform;
 import magmac.app.io.sources.Sources;
 import magmac.app.io.targets.PathTargets;
 import magmac.app.io.targets.Targets;
-import magmac.app.lang.java.root.JavaRoot;
+import magmac.app.lang.java.node.JavaRoot;
 import magmac.app.stage.lexer.Lexer;
 import magmac.app.stage.lexer.RuleLexer;
 

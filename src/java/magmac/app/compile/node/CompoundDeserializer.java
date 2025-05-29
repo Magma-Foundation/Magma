@@ -4,7 +4,6 @@ import magmac.api.Option;
 import magmac.api.Tuple2;
 import magmac.api.collect.list.List;
 import magmac.app.compile.error.CompileResult;
-import magmac.app.lang.java.define.Definition;
 
 import java.util.function.Function;
 
