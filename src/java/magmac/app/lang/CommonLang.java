@@ -91,8 +91,10 @@ public final class CommonLang {
         ));
     }
 
-    private static Rule createConditionalRule(String prefix, Rule value) {
-        return new StripRule(new PrefixRule(prefix, new StripRule(new PrefixRule("(", new SuffixRule(new NodeRule("condition", value), ")")))));
+    private static Rule createConditionalRule(String type, Rule value) {
+        Rule condition = new NodeRule("condition", value);
+        Rule childRule = new StripRule(new PrefixRule("(", new SuffixRule(condition, ")")));
+        return new TypeRule(type, new StripRule(new PrefixRule(type, childRule)));
     }
 
     public static Rule createPostRule(String type, String suffix, Rule value) {
