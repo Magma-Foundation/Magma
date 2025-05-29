@@ -23,6 +23,7 @@ import magmac.app.lang.java.function.FunctionSegment;
 import magmac.app.lang.java.type.TemplateType;
 import magmac.app.lang.java.value.DataAccess;
 import magmac.app.lang.java.value.Invokable;
+import magmac.app.lang.java.value.Lambda;
 import magmac.app.lang.java.value.Symbols;
 
 public final class CommonLang {
@@ -36,7 +37,7 @@ public final class CommonLang {
 
     static LazyRule initValueRule(Rule segment, LazyRule value, String lambdaInfix, Rule definition) {
         return value.set(new OrRule(Lists.of(
-                CommonLang.createLambdaRule(value, segment, lambdaInfix, definition),
+                Lambda.createLambdaRule(value, segment, lambdaInfix, definition),
                 new StripRule(new PrefixRule("!", new NodeRule("child", value))),
                 CommonLang.createCharRule(),
                 CommonLang.createStringRule(),
@@ -59,26 +60,6 @@ public final class CommonLang {
 
     private static Rule createIndexRule(LazyRule value) {
         return new TypeRule("index", new StripRule(new SuffixRule(LocatingRule.First(new NodeRule("parent", value), "[", new NodeRule("argument", value)), "]")));
-    }
-
-    private static Rule createLambdaRule(LazyRule value, Rule functionSegment, String infix, Rule definition) {
-        Rule value1 = new OrRule(Lists.of(
-                new StripRule(new PrefixRule("{", new SuffixRule(CommonLang.Statements("children", functionSegment), "}"))),
-                new NodeRule("value", value)
-        ));
-
-        NodeListRule parameters = new NodeListRule("parameters", new ValueFolder(), new OrRule(Lists.of(
-                definition,
-                Symbols.createSymbolRule("param")
-        )));
-
-        PrefixRule rule = new PrefixRule("(", new SuffixRule(parameters, ")"));
-        OrRule rule1 = new OrRule(Lists.of(
-                rule,
-                Symbols.createSymbolRule("param")
-        ));
-
-        return new TypeRule("lambda", LocatingRule.First(new StripRule(rule1), infix, value1));
     }
 
     private static Rule createOperationRule(Rule value, String type, String infix) {

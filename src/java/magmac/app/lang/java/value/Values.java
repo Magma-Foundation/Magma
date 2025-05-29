@@ -14,12 +14,13 @@ public class Values {
     }
 
     public static Option<CompileResult<Value>> deserialize(Node node) {
-        return Deserializers.or(node, Lists.<Deserializer<Value>>of(
+        return Deserializers.or(node, Lists.of(
                 Invokable::deserialize,
                 StringNode::deserialize,
                 DataAccess::deserialize,
                 Deserializers.wrap(Symbols::deserialize),
-                Deserializers.wrap(CharNode::deserialize)
+                Deserializers.wrap(CharNode::deserialize),
+                Deserializers.wrap(Lambda::deserialize)
         ));
     }
 }
