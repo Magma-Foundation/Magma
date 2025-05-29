@@ -6,7 +6,6 @@ import magmac.app.compile.node.Node;
 import magmac.app.compile.rule.OrRule;
 import magmac.app.compile.rule.Rule;
 import magmac.app.compile.rule.StripRule;
-import magmac.app.lang.CommonLang;
 import magmac.app.lang.LazyRule;
 import magmac.app.lang.java.Deserializers;
 import magmac.app.lang.java.Whitespace;
@@ -26,7 +25,7 @@ public interface FunctionSegment {
         Rule rule = new OrRule(Lists.of(
                 Whitespace.createWhitespaceRule(),
                 FunctionStatement.createStatementRule(functionSegmentValueRule),
-                CommonLang.createBlockRule(functionSegmentRule, value, definition)
+                Block.createBlockRule(functionSegmentRule, value, definition)
         ));
 
         return functionSegmentRule.set(new StripRule("before", rule, ""));

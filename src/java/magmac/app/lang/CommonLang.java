@@ -1,7 +1,6 @@
 package magmac.app.lang;
 
 import magmac.api.collect.list.Lists;
-import magmac.app.compile.rule.ExactRule;
 import magmac.app.compile.rule.FilterRule;
 import magmac.app.compile.rule.LocatingRule;
 import magmac.app.compile.rule.NodeListRule;
@@ -9,20 +8,19 @@ import magmac.app.compile.rule.NodeRule;
 import magmac.app.compile.rule.OrRule;
 import magmac.app.compile.rule.PrefixRule;
 import magmac.app.compile.rule.Rule;
-import magmac.app.compile.rule.Splitter;
 import magmac.app.compile.rule.StringRule;
 import magmac.app.compile.rule.StripRule;
 import magmac.app.compile.rule.SuffixRule;
 import magmac.app.compile.rule.TypeRule;
-import magmac.app.compile.rule.divide.FoldingDivider;
 import magmac.app.compile.rule.fold.DelimitedFolder;
 import magmac.app.compile.rule.fold.StatementFolder;
-import magmac.app.compile.rule.split.DividingSplitter;
 import magmac.app.lang.java.assign.Assignment;
 import magmac.app.lang.java.invoke.Invokable;
 import magmac.app.lang.java.type.TemplateType;
+import magmac.app.lang.java.value.CharNode;
 import magmac.app.lang.java.value.DataAccess;
 import magmac.app.lang.java.value.Lambda;
+import magmac.app.lang.java.value.StringNode;
 import magmac.app.lang.java.value.Symbols;
 
 public final class CommonLang {
@@ -34,8 +32,8 @@ public final class CommonLang {
         return value.set(new OrRule(Lists.of(
                 Lambda.createLambdaRule(value, segment, lambdaInfix, definition),
                 new StripRule(new PrefixRule("!", new NodeRule("child", value))),
-                CommonLang.createCharRule(),
-                CommonLang.createStringRule(),
+                CharNode.createCharRule(),
+                StringNode.createStringRule(),
                 Invokable.createInvokableRule(value),
                 CommonLang.createIndexRule(value),
                 CommonLang.createNumberRule(),
@@ -63,38 +61,6 @@ public final class CommonLang {
 
     private static Rule createNumberRule() {
         return new TypeRule("number", new StripRule(FilterRule.Number(new StringRule("value"))));
-    }
-
-    private static Rule createStringRule() {
-        return new TypeRule("string", new StripRule(new PrefixRule("\"", new SuffixRule(new StringRule("value"), "\""))));
-    }
-
-    private static Rule createCharRule() {
-        return new TypeRule("char", new StripRule(new PrefixRule("'", new SuffixRule(new StringRule("value"), "'"))));
-    }
-
-    public static Rule createBlockRule(LazyRule functionSegmentRule, Rule value, Rule definition) {
-        Rule header = new NodeRule("header", CommonLang.createBlockHeaderRule(value, definition));
-        Rule children = CommonLang.Statements("children", functionSegmentRule);
-        Splitter first = DividingSplitter.First(new FoldingDivider(new BlockFolder()), "");
-        Rule childRule = new LocatingRule(new SuffixRule(header, "{"), first, children);
-        return new TypeRule("block", new StripRule(new SuffixRule(childRule, "}")));
-    }
-
-    private static Rule createBlockHeaderRule(Rule value, Rule definition) {
-        return new OrRule(Lists.of(
-                new TypeRule("else", new StripRule(new ExactRule("else"))),
-                new TypeRule("try", new StripRule(new ExactRule("try"))),
-                CommonLang.createConditionalRule("if", value),
-                CommonLang.createConditionalRule("while", value),
-                new StripRule(new PrefixRule("catch", new StripRule(new PrefixRule("(", new SuffixRule(new NodeRule("definition", definition), ")")))))
-        ));
-    }
-
-    private static Rule createConditionalRule(String type, Rule value) {
-        Rule condition = new NodeRule("condition", value);
-        Rule childRule = new StripRule(new PrefixRule("(", new SuffixRule(condition, ")")));
-        return new TypeRule(type, new StripRule(new PrefixRule(type, childRule)));
     }
 
     public static Rule createPostRule(String type, String suffix, Rule value) {
