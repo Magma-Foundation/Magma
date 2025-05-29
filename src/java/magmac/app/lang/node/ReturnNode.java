@@ -10,9 +10,9 @@ import magmac.app.compile.rule.StripRule;
 import magmac.app.compile.rule.TypeRule;
 import magmac.app.lang.Deserializers;
 
-record Return(Value value) implements FunctionSegmentValue {
+record ReturnNode(Value value) implements FunctionSegmentValue {
     public static Option<CompileResult<FunctionSegmentValue>> deserialize(Node node) {
-        return Deserializers.deserializeWithType(node, "return").map(deserializer -> deserializer.withNode("value", Values::deserializeOrError).complete(Return::new));
+        return Deserializers.deserializeWithType(node, "return").map(deserializer -> deserializer.withNode("value", Values::deserializeOrError).complete(ReturnNode::new));
     }
 
     public static Rule createReturnRule(Rule value) {

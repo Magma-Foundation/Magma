@@ -27,7 +27,7 @@ public final class Values {
 
     public static Option<CompileResult<Value>> deserialize(Node node) {
         List<Deserializer<Value>> deserializers = Lists.of(
-                Deserializers.wrap(Invokable::deserialize),
+                Deserializers.wrap(InvokableNode::deserialize),
                 StringNode::deserialize,
                 node1 -> Access.deserialize(AccessType.Data, node1),
                 node1 -> Access.deserialize(AccessType.Method, node1),
@@ -56,7 +56,7 @@ public final class Values {
                 Not.createNotRule(value),
                 CharNode.createCharRule(),
                 StringNode.createStringRule(),
-                Invokable.createInvokableRule(value),
+                InvokableNode.createInvokableRule(value),
                 CommonLang.createIndexRule(value),
                 NumberNode.createNumberRule(),
                 Symbols.createSymbolRule(),

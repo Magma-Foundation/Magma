@@ -11,12 +11,12 @@ import magmac.app.compile.rule.Rule;
 import magmac.app.compile.rule.TypeRule;
 import magmac.app.lang.Deserializers;
 
-record Assignment(Assignable assignable, Value value) implements FunctionSegmentValue {
+record AssignmentNode(Assignable assignable, Value value) implements FunctionSegmentValue {
     public static Option<CompileResult<FunctionSegmentValue>> deserialize(Node node) {
         return Deserializers.deserializeWithType(node, "assignment").map(deserializer -> deserializer
                 .withNode("destination", Assignables::deserializeError)
                 .withNode("source", Values::deserializeOrError)
-                .complete(tuple -> new Assignment(tuple.left(), tuple.right())));
+                .complete(tuple -> new AssignmentNode(tuple.left(), tuple.right())));
     }
 
     public static Rule createAssignmentRule(Rule definition, Rule value) {

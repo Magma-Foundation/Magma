@@ -21,7 +21,7 @@ public record StructureStatement() implements StructureMember {
     public static Rule createStructureStatementRule(Rule definitionRule, LazyRule valueRule) {
         Rule definition = new NodeRule("value", new OrRule(Lists.of(
                 definitionRule,
-                Assignment.createAssignmentRule(definitionRule, valueRule))
+                AssignmentNode.createAssignmentRule(definitionRule, valueRule))
         ));
 
         return new TypeRule("structure-statement", new StripRule(new SuffixRule(definition, ";")));

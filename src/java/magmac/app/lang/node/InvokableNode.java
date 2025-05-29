@@ -18,11 +18,11 @@ import magmac.app.compile.rule.split.DividingSplitter;
 import magmac.app.lang.InvocationFolder;
 import magmac.app.lang.Deserializers;
 
-record Invokable(Caller left, List<Argument> right) implements Value, FunctionSegmentValue {
-    public static Option<CompileResult<Invokable>> deserialize(Node node) {
+record InvokableNode(Caller left, List<Argument> right) implements Value, FunctionSegmentValue {
+    public static Option<CompileResult<InvokableNode>> deserialize(Node node) {
         return Deserializers.deserializeWithType(node, "invokable").map(deserializer -> deserializer.withNode("caller", Caller::deserialize)
                 .withNodeList("arguments", Arguments::deserialize)
-                .complete(tuple -> new Invokable(tuple.left(), tuple.right())));
+                .complete(tuple -> new InvokableNode(tuple.left(), tuple.right())));
     }
 
     public static Rule createInvokableRule(Rule value) {
