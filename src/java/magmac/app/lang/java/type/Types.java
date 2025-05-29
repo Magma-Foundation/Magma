@@ -11,7 +11,8 @@ public class Types {
     public static CompileResult<Type> deserialize(Node node) {
         return Deserializers.orError("type", node, Lists.of(
                 Deserializers.wrap(Symbols::deserialize),
-                Deserializers.wrap(TemplateType::deserialize)
+                Deserializers.wrap(TemplateType::deserialize),
+                Deserializers.wrap(Variadic::deserialize)
         ));
     }
 }
