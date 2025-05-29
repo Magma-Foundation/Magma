@@ -40,7 +40,7 @@ public final class JavaLang {
         Rule beforeContent = CommonLang.attachTypeParams(name);
 
         Rule withParameters = new OrRule(Lists.of(
-                new StripRule(new SuffixRule(LocatingRule.First(beforeContent, "(", new StringRule("parameters")), ")")),
+                new StripRule(new SuffixRule(LocatingRule.First(beforeContent, "(", Parameters.createParametersRule(JavaLang.createDefinitionRule())), ")")),
                 beforeContent
         ));
 
