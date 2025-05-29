@@ -6,7 +6,6 @@ import magmac.app.compile.node.Node;
 import magmac.app.compile.rule.OrRule;
 import magmac.app.compile.rule.Rule;
 import magmac.app.compile.rule.TypeRule;
-import magmac.app.lang.CommonLang;
 import magmac.app.lang.LazyRule;
 import magmac.app.lang.MutableLazyRule;
 import magmac.app.lang.java.Deserializers;
@@ -14,6 +13,7 @@ import magmac.app.lang.java.Whitespace;
 import magmac.app.lang.java.define.Definition;
 import magmac.app.lang.java.function.FunctionSegment;
 import magmac.app.lang.java.function.MethodNode;
+import magmac.app.lang.java.value.Values;
 
 final class StructureMembers {
     public static CompileResult<StructureMember> deserialize(Node node) {
@@ -28,7 +28,7 @@ final class StructureMembers {
     public static Rule createClassMemberRule() {
         LazyRule functionSegmentRule = new MutableLazyRule();
         LazyRule valueLazy = new MutableLazyRule();
-        LazyRule value = CommonLang.initValueRule(functionSegmentRule, valueLazy, "->", Definition.createDefinitionRule());
+        LazyRule value = Values.initValueRule(functionSegmentRule, valueLazy, "->", Definition.createDefinitionRule());
         Rule functionSegment = FunctionSegment.initFunctionSegmentRule(functionSegmentRule, value, Definition.createDefinitionRule());
         return new OrRule(Lists.of(
                 Whitespace.createWhitespaceRule(),

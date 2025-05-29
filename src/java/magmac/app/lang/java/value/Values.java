@@ -8,6 +8,10 @@ import magmac.api.iter.collect.ListCollector;
 import magmac.app.compile.error.CompileResult;
 import magmac.app.compile.error.CompileResults;
 import magmac.app.compile.node.Node;
+import magmac.app.compile.rule.OrRule;
+import magmac.app.compile.rule.Rule;
+import magmac.app.lang.CommonLang;
+import magmac.app.lang.LazyRule;
 import magmac.app.lang.java.Deserializer;
 import magmac.app.lang.java.Deserializers;
 import magmac.app.lang.java.invoke.Invokable;
@@ -37,4 +41,28 @@ public class Values {
         return Deserializers.or(node, deserializers.addAll(operatorRules));
     }
 
+    public static LazyRule initValueRule(Rule segment, LazyRule value, String lambdaInfix, Rule definition) {
+        return value.set(new OrRule(getValueRules(segment, value, lambdaInfix, definition)));
+    }
+
+    private static List<Rule> getValueRules(Rule segment, LazyRule value, String lambdaInfix, Rule definition) {
+        List<Rule> ruleList = Lists.of(
+                Lambda.createLambdaRule(value, segment, lambdaInfix, definition),
+                Not.createNotRule(value),
+                CharNode.createCharRule(),
+                StringNode.createStringRule(),
+                Invokable.createInvokableRule(value),
+                CommonLang.createIndexRule(value),
+                NumberNode.createNumberRule(),
+                Symbols.createSymbolValueRule(),
+                Access.createAccessRule("data-access", ".", value),
+                Access.createAccessRule("method-access", "::", value)
+        );
+
+        List<Rule> operatorLists = Iters.fromValues(Operator.values())
+                .map(operator -> Operation.createOperationRule(value, operator.type(), operator.text()))
+                .collect(new ListCollector<>());
+
+        return ruleList.addAll(operatorLists);
+    }
 }

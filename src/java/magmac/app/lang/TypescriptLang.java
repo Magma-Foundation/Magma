@@ -19,6 +19,7 @@ import magmac.app.lang.java.function.Parameters;
 import magmac.app.lang.java.structure.StructureStatement;
 import magmac.app.lang.java.type.TemplateType;
 import magmac.app.lang.java.value.Symbols;
+import magmac.app.lang.java.value.Values;
 
 public final class TypescriptLang {
     public static Rule createRule() {
@@ -60,7 +61,7 @@ public final class TypescriptLang {
         ))));
 
         LazyRule functionSegmentRule = new MutableLazyRule();
-        LazyRule value = CommonLang.initValueRule(functionSegmentRule, valueLazy, " => ", definition);
+        LazyRule value = Values.initValueRule(functionSegmentRule, valueLazy, " => ", definition);
         Rule children = CommonLang.Statements("children", FunctionSegment.initFunctionSegmentRule(functionSegmentRule, value, definition));
         Rule childRule = new SuffixRule(LocatingRule.First(header, " {", new StripRule("", children, "after-children")), "}");
         return new TypeRule("method", new OptionNodeListRule("children",
