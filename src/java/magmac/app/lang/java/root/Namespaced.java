@@ -6,6 +6,14 @@ import magmac.api.iter.Iters;
 import magmac.app.compile.error.CompileResult;
 import magmac.app.compile.node.InitialDeserializer;
 import magmac.app.compile.node.Node;
+import magmac.app.compile.rule.NodeListRule;
+import magmac.app.compile.rule.PrefixRule;
+import magmac.app.compile.rule.Rule;
+import magmac.app.compile.rule.StringRule;
+import magmac.app.compile.rule.StripRule;
+import magmac.app.compile.rule.SuffixRule;
+import magmac.app.compile.rule.TypeRule;
+import magmac.app.compile.rule.fold.DelimitedFolder;
 import magmac.app.lang.java.Segment;
 
 public record Namespaced(NamespacedType type, List<Segment> segments) implements JavaRootSegment {
@@ -20,5 +28,10 @@ public record Namespaced(NamespacedType type, List<Segment> segments) implements
                 .map((NamespacedType type) -> Namespaced.deserialize(type, node))
                 .flatMap((Option<CompileResult<JavaRootSegment>> option) -> Iters.fromOption(option))
                 .next();
+    }
+
+    public static Rule createNamespacedRule(String type) {
+        Rule childRule = new NodeListRule("segments", new DelimitedFolder('.'), new StringRule("value"));
+        return new TypeRule(type, new StripRule(new SuffixRule(new PrefixRule(type + " ", childRule), ";")));
     }
 }

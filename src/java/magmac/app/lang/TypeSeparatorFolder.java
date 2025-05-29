@@ -3,7 +3,7 @@ package magmac.app.lang;
 import magmac.app.compile.rule.divide.DivideState;
 import magmac.app.compile.rule.fold.Folder;
 
-class TypeSeparatorFolder implements Folder {
+public class TypeSeparatorFolder implements Folder {
     @Override
     public DivideState fold(DivideState state, char c) {
         if (' ' == c && state.isLevel()) {

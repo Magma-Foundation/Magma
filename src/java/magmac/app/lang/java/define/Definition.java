@@ -2,9 +2,27 @@ package magmac.app.lang.java.define;
 
 import magmac.api.Option;
 import magmac.api.collect.list.List;
+import magmac.api.collect.list.Lists;
 import magmac.app.compile.error.CompileResult;
 import magmac.app.compile.node.InitialDeserializer;
 import magmac.app.compile.node.Node;
+import magmac.app.compile.rule.FilterRule;
+import magmac.app.compile.rule.LocatingRule;
+import magmac.app.compile.rule.NodeListRule;
+import magmac.app.compile.rule.NodeRule;
+import magmac.app.compile.rule.OrRule;
+import magmac.app.compile.rule.PrefixRule;
+import magmac.app.compile.rule.Rule;
+import magmac.app.compile.rule.Splitter;
+import magmac.app.compile.rule.StringRule;
+import magmac.app.compile.rule.StripRule;
+import magmac.app.compile.rule.TypeRule;
+import magmac.app.compile.rule.divide.Divider;
+import magmac.app.compile.rule.divide.FoldingDivider;
+import magmac.app.compile.rule.fold.DelimitedFolder;
+import magmac.app.compile.rule.split.DividingSplitter;
+import magmac.app.lang.CommonLang;
+import magmac.app.lang.TypeSeparatorFolder;
 import magmac.app.lang.java.Type;
 import magmac.app.lang.java.assign.Assignable;
 import magmac.app.lang.java.function.MethodHeader;
@@ -39,5 +57,23 @@ public record Definition(
 
     public static Option<CompileResult<Definition>> deserialize(Node node) {
         return node.deserializeWithType("definition").map(Definition::complete);
+    }
+
+    public static Rule createDefinitionRule() {
+        Rule modifiers = Modifier.createModifiersRule();
+        Rule annotations = new NodeListRule("annotations", new DelimitedFolder('\n'), new StripRule(new PrefixRule("@", new StringRule("value"))));
+        Rule beforeTypeParams = new OrRule(Lists.of(
+                LocatingRule.Last(annotations, "\n", modifiers),
+                modifiers
+        ));
+
+        Rule leftRule1 = CommonLang.attachTypeParams(beforeTypeParams);
+
+        Rule rightRule = new NodeRule("type", Types.createTypeRule());
+        Divider divider = new FoldingDivider(new TypeSeparatorFolder());
+        Splitter splitter = DividingSplitter.Last(divider, " ");
+        Rule leftRule = new LocatingRule(leftRule1, splitter, rightRule);
+        Rule stripRule = new StripRule(LocatingRule.Last(leftRule, " ", new StripRule(FilterRule.Symbol(new StringRule("name")))));
+        return new TypeRule("definition", stripRule);
     }
 }

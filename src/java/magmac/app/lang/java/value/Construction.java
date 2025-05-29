@@ -8,7 +8,6 @@ import magmac.app.compile.rule.PrefixRule;
 import magmac.app.compile.rule.Rule;
 import magmac.app.compile.rule.StripRule;
 import magmac.app.compile.rule.TypeRule;
-import magmac.app.lang.CommonLang;
 import magmac.app.lang.java.Type;
 import magmac.app.lang.java.invoke.Caller;
 import magmac.app.lang.java.type.Types;
@@ -19,6 +18,6 @@ public record Construction(Type type) implements Caller {
     }
 
     public static Rule createConstructionRule() {
-        return new TypeRule("construction", new StripRule(new PrefixRule("new ", new NodeRule("type", CommonLang.createTypeRule()))));
+        return new TypeRule("construction", new StripRule(new PrefixRule("new ", new NodeRule("type", Types.createTypeRule()))));
     }
 }

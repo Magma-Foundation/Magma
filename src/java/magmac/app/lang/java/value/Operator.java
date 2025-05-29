@@ -3,7 +3,10 @@ package magmac.app.lang.java.value;
 public enum Operator {
     Add("add"),
     LessThan("less-than"),
-    Subtract("subtract");
+    Subtract("subtract"),
+    Or("or"),
+    And("and"),
+    NotEquals("!=");
 
     private final String text;
 

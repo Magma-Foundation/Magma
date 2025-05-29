@@ -7,7 +7,7 @@ import magmac.app.config.TargetPlatform;
 import magmac.app.io.sources.Sources;
 import magmac.app.io.targets.PathTargets;
 import magmac.app.io.targets.Targets;
-import magmac.app.lang.JavaLang;
+import magmac.app.lang.java.root.JavaRoot;
 import magmac.app.stage.lexer.Lexer;
 import magmac.app.stage.lexer.RuleLexer;
 
@@ -18,7 +18,7 @@ public final class ApplicationBuilder {
         Path targetPath = platform.createTargetPath();
         String extension = platform.createExtension();
         Targets targets = new PathTargets(targetPath, extension);
-        Lexer lexer = new RuleLexer(JavaLang.createRule());
+        Lexer lexer = new RuleLexer(JavaRoot.createRule());
         Compiler compiler = platform.createCompiler(lexer);
         Application application = new CompileApplication(sources, compiler, targets);
         return application.run();
