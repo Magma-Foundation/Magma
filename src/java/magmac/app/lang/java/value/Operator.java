@@ -1,17 +1,25 @@
 package magmac.app.lang.java.value;
 
 public enum Operator {
-    Add("add"),
-    LessThan("less-than"),
-    Subtract("subtract"),
-    Or("or"),
-    And("and"),
-    NotEquals("!=");
+    Add("add", "+"),
+    And("and", "&&"),
+    Equals("equals", "=="),
+    GreaterThan("greater-than", ">"),
+    LessThan("less-than", "<"),
+    NotEquals("not-equals", "!="),
+    Or("or", "||"),
+    Subtract("subtract", "-");
 
+    private final String type;
     private final String text;
 
-    Operator(String text) {
+    Operator(String type, String text) {
+        this.type = type;
         this.text = text;
+    }
+
+    public String type() {
+        return this.type;
     }
 
     public String text() {

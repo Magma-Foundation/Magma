@@ -12,7 +12,7 @@ import magmac.app.lang.java.Deserializers;
 
 public record Operation(Value left, Operator operator, Value right) implements Value {
     public static Option<CompileResult<Value>> deserialize(Operator operator, Node node) {
-        return node.deserializeWithType(operator.text()).map(deserializer -> {
+        return node.deserializeWithType(operator.type()).map(deserializer -> {
             return deserializer.withNode("left", Values::deserializeOrError)
                     .withNode("right", Values::deserializeOrError)
                     .complete(tuple -> new Operation(tuple.left(), operator, tuple.right()));
