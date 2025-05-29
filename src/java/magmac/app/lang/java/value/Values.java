@@ -22,8 +22,10 @@ public class Values {
                 Deserializers.wrap(Symbols::deserialize),
                 Deserializers.wrap(CharNode::deserialize),
                 Deserializers.wrap(Lambda::deserialize),
-                Deserializers.wrap(Add::deserialize),
+                Operation.deserializeAs(Operator.Add),
+                Operation.deserializeAs(Operator.LessThan),
                 Deserializers.wrap(NumberNode::deserialize)
         ));
     }
+
 }
