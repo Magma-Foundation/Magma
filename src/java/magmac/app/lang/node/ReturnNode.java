@@ -10,8 +10,8 @@ import magmac.app.compile.rule.StripRule;
 import magmac.app.compile.rule.TypeRule;
 import magmac.app.lang.Deserializers;
 
-record ReturnNode(Value value) implements FunctionSegmentValue {
-    public static Option<CompileResult<FunctionSegmentValue>> deserialize(Node node) {
+record ReturnNode(Value value) implements FunctionSegmentValue, FunctionSegment {
+    public static Option<CompileResult<ReturnNode>> deserialize(Node node) {
         return Deserializers.deserializeWithType(node, "return").map(deserializer -> deserializer.withNode("value", Values::deserializeOrError).complete(ReturnNode::new));
     }
 
