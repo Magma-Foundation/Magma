@@ -19,7 +19,7 @@ public record DataAccess(String property, Value caller) implements Value {
     }
 
     public static Rule createAccessRule(String infix, LazyRule value, String type) {
-        Rule property = Symbol.createSymbolRule("property");
+        Rule property = Symbols.createSymbolRule("property");
         return new TypeRule(type, LocatingRule.Last(new NodeRule("instance", value), infix, property));
     }
 }

@@ -14,7 +14,7 @@ import magmac.app.compile.rule.TypeRule;
 import magmac.app.compile.rule.fold.DelimitedFolder;
 import magmac.app.lang.java.function.Parameters;
 import magmac.app.lang.java.type.TemplateType;
-import magmac.app.lang.java.value.Symbol;
+import magmac.app.lang.java.value.Symbols;
 
 public final class TypescriptLang {
     public static Rule createRule() {
@@ -90,7 +90,7 @@ public final class TypescriptLang {
         return type.set(new OrRule(Lists.of(
                 TemplateType.createTemplateRule(type),
                 TypescriptLang.createArrayRule(type),
-                Symbol.createSymbolTypeRule()
+                Symbols.createSymbolTypeRule()
         )));
     }
 

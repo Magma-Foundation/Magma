@@ -17,8 +17,9 @@ public record NodeListRule(String key, Folder folder, Rule childRule) implements
 
     @Override
     public CompileResult<Node> lex(String input) {
-        return new FoldingDivider(this.folder).divide(input)
-                .map((String segment) -> this.childRule.lex(segment))
+        return new FoldingDivider(this.folder)
+                .divide(input)
+                .map(this.childRule::lex)
                 .collect(new CompileResultCollector<>(new NodeListCollector()))
                 .mapValue((NodeList children) -> new MapNode().withNodeList(this.key, children));
     }

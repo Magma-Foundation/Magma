@@ -18,7 +18,7 @@ public class Values {
                 Invokable::deserialize,
                 StringNode::deserialize,
                 DataAccess::deserialize,
-                Deserializers.wrap(Symbol::deserialize),
+                Deserializers.wrap(Symbols::deserialize),
                 Deserializers.wrap(CharNode::deserialize)
         ));
     }

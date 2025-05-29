@@ -5,12 +5,12 @@ import magmac.app.compile.error.CompileResult;
 import magmac.app.compile.node.Node;
 import magmac.app.lang.java.Deserializers;
 import magmac.app.lang.java.Type;
-import magmac.app.lang.java.value.Symbol;
+import magmac.app.lang.java.value.Symbols;
 
 public class Types {
     public static CompileResult<Type> deserialize(Node node) {
         return Deserializers.orError("type", node, Lists.of(
-                Deserializers.wrap(Symbol::deserialize),
+                Deserializers.wrap(Symbols::deserialize),
                 Deserializers.wrap(TemplateType::deserialize)
         ));
     }

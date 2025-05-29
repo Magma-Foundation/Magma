@@ -18,12 +18,12 @@ import magmac.app.compile.rule.divide.FoldingDivider;
 import magmac.app.compile.rule.fold.DelimitedFolder;
 import magmac.app.compile.rule.fold.StatementFolder;
 import magmac.app.compile.rule.split.DividingSplitter;
-import magmac.app.lang.java.type.TemplateType;
-import magmac.app.lang.java.value.Symbol;
 import magmac.app.lang.java.assign.Assignment;
 import magmac.app.lang.java.function.FunctionSegment;
+import magmac.app.lang.java.type.TemplateType;
 import magmac.app.lang.java.value.DataAccess;
 import magmac.app.lang.java.value.Invokable;
+import magmac.app.lang.java.value.Symbols;
 
 public final class CommonLang {
     public static Rule createWhitespaceRule() {
@@ -43,7 +43,7 @@ public final class CommonLang {
                 Invokable.createInvokableRule(value),
                 CommonLang.createIndexRule(value),
                 CommonLang.createNumberRule(),
-                Symbol.createSymbolValueRule(),
+                Symbols.createSymbolValueRule(),
                 DataAccess.createAccessRule(".", value, "data-access"),
                 DataAccess.createAccessRule("::", value, "method-access"),
                 CommonLang.createOperationRule(value, "add", "+"),
@@ -69,13 +69,13 @@ public final class CommonLang {
 
         NodeListRule parameters = new NodeListRule("parameters", new ValueFolder(), new OrRule(Lists.of(
                 definition,
-                Symbol.createSymbolRule("param")
+                Symbols.createSymbolRule("param")
         )));
 
         PrefixRule rule = new PrefixRule("(", new SuffixRule(parameters, ")"));
         OrRule rule1 = new OrRule(Lists.of(
                 rule,
-                Symbol.createSymbolRule("param")
+                Symbols.createSymbolRule("param")
         ));
 
         return new TypeRule("lambda", LocatingRule.First(new StripRule(rule1), infix, value1));
@@ -146,7 +146,8 @@ public final class CommonLang {
                 CommonLang.createVariadicRule(type),
                 CommonLang.createArrayRule(type),
                 TemplateType.createTemplateRule(type),
-                Symbol.createSymbolTypeRule()
+                Symbols.createSymbolTypeRule(),
+                Symbols.createQualifiedRule()
         )));
     }
 
