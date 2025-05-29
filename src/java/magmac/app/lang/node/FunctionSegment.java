@@ -23,7 +23,8 @@ public interface FunctionSegment {
         return Deserializers.orError("function-segment", node, Lists.of(
                 Deserializers.wrap(Whitespace::deserialize),
                 Deserializers.wrap(FunctionStatement::deserialize),
-                Deserializers.wrap(Block::deserialize)
+                Deserializers.wrap(Block::deserialize),
+                Deserializers.wrap(ReturnNode::deserialize)
         ));
     }
 
