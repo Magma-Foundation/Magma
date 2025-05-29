@@ -4,7 +4,6 @@ import magmac.app.compile.rule.LocatingRule;
 import magmac.app.compile.rule.NodeListRule;
 import magmac.app.compile.rule.NodeRule;
 import magmac.app.compile.rule.Rule;
-import magmac.app.compile.rule.StringRule;
 import magmac.app.compile.rule.StripRule;
 import magmac.app.compile.rule.SuffixRule;
 import magmac.app.compile.rule.TypeRule;
@@ -17,13 +16,5 @@ public final class CommonLang {
 
     public static Rule createIndexRule(LazyRule value) {
         return new TypeRule("index", new StripRule(new SuffixRule(LocatingRule.First(new NodeRule("parent", value), "[", new NodeRule("argument", value)), "]")));
-    }
-
-    public static Rule attachTypeParams(Rule beforeTypeParams) {
-        Rule typeParams = new NodeListRule("type-parameters", new ValueFolder(), new StringRule("value"));
-        return new OptionNodeListRule("type-parameters",
-                new StripRule(new SuffixRule(LocatingRule.First(beforeTypeParams, "<", typeParams), ">")),
-                beforeTypeParams
-        );
     }
 }

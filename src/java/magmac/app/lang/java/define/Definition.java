@@ -16,13 +16,15 @@ import magmac.app.compile.rule.Rule;
 import magmac.app.compile.rule.Splitter;
 import magmac.app.compile.rule.StringRule;
 import magmac.app.compile.rule.StripRule;
+import magmac.app.compile.rule.SuffixRule;
 import magmac.app.compile.rule.TypeRule;
 import magmac.app.compile.rule.divide.Divider;
 import magmac.app.compile.rule.divide.FoldingDivider;
 import magmac.app.compile.rule.fold.DelimitedFolder;
 import magmac.app.compile.rule.split.DividingSplitter;
-import magmac.app.lang.CommonLang;
+import magmac.app.lang.OptionNodeListRule;
 import magmac.app.lang.TypeSeparatorFolder;
+import magmac.app.lang.ValueFolder;
 import magmac.app.lang.java.Type;
 import magmac.app.lang.java.assign.Assignable;
 import magmac.app.lang.java.function.MethodHeader;
@@ -67,7 +69,7 @@ public record Definition(
                 modifiers
         ));
 
-        Rule leftRule1 = CommonLang.attachTypeParams(beforeTypeParams);
+        Rule leftRule1 = attachTypeParams(beforeTypeParams);
 
         Rule rightRule = new NodeRule("type", Types.createTypeRule());
         Divider divider = new FoldingDivider(new TypeSeparatorFolder());
@@ -75,5 +77,13 @@ public record Definition(
         Rule leftRule = new LocatingRule(leftRule1, splitter, rightRule);
         Rule stripRule = new StripRule(LocatingRule.Last(leftRule, " ", new StripRule(FilterRule.Symbol(new StringRule("name")))));
         return new TypeRule("definition", stripRule);
+    }
+
+    public static Rule attachTypeParams(Rule beforeTypeParams) {
+        Rule typeParams = new NodeListRule("type-parameters", new ValueFolder(), new StringRule("value"));
+        return new OptionNodeListRule("type-parameters",
+                new StripRule(new SuffixRule(LocatingRule.First(beforeTypeParams, "<", typeParams), ">")),
+                beforeTypeParams
+        );
     }
 }

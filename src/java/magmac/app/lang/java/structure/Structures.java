@@ -21,7 +21,7 @@ import magmac.app.lang.java.type.Types;
 public class Structures {
     public static Rule createStructureRule(String keyword) {
         Rule name = new StripRule(FilterRule.Symbol(new StringRule("name")));
-        Rule beforeContent = CommonLang.attachTypeParams(name);
+        Rule beforeContent = Definition.attachTypeParams(name);
 
         Rule withParameters = new OrRule(Lists.of(
                 new StripRule(new SuffixRule(LocatingRule.First(beforeContent, "(", Parameters.createParametersRule(Definition.createDefinitionRule())), ")")),

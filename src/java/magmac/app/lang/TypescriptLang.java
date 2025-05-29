@@ -13,6 +13,7 @@ import magmac.app.compile.rule.SuffixRule;
 import magmac.app.compile.rule.TypeRule;
 import magmac.app.compile.rule.fold.DelimitedFolder;
 import magmac.app.lang.java.Whitespace;
+import magmac.app.lang.java.define.Definition;
 import magmac.app.lang.java.define.Modifier;
 import magmac.app.lang.java.function.FunctionSegment;
 import magmac.app.lang.java.function.Parameters;
@@ -40,7 +41,7 @@ public final class TypescriptLang {
     private static Rule createClassRule(String type) {
         Rule children = CommonLang.Statements("children", TypescriptLang.createStructureMemberRule());
         Rule name = new StringRule("name");
-        Rule afterKeyword = LocatingRule.First(CommonLang.attachTypeParams(name), " {", new SuffixRule(children, "\n}\n"));
+        Rule afterKeyword = LocatingRule.First(Definition.attachTypeParams(name), " {", new SuffixRule(children, "\n}\n"));
         return new TypeRule(type, new PrefixRule("export " + type + " ", afterKeyword));
     }
 
