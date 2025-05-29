@@ -7,6 +7,7 @@ import magmac.app.compile.node.InitialDeserializer;
 import magmac.app.compile.node.Node;
 import magmac.app.lang.java.Type;
 import magmac.app.lang.java.assign.Assignable;
+import magmac.app.lang.java.function.Header;
 import magmac.app.lang.java.function.Parameter;
 import magmac.app.lang.java.structure.TypeParam;
 import magmac.app.lang.java.type.Types;
@@ -17,7 +18,7 @@ public record Definition(
         List<Modifier> modifiers,
         Option<List<Annotation>> annotations,
         Option<List<TypeParam>> typeParams
-) implements Parameter, Assignable {
+) implements Parameter, Assignable, Header {
     public static CompileResult<Definition> deserializeError(Node node) {
         return Definition.complete(node.deserialize());
     }
