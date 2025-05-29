@@ -22,7 +22,8 @@ public final class FunctionSegmentValues {
                 Deserializers.wrap(Assignment::deserialize),
                 Deserializers.wrap(Invokable::deserialize),
                 Deserializers.wrap(node1 -> Post.deserialize(PostVariant.Increment, node1)),
-                Deserializers.wrap(node1 -> Post.deserialize(PostVariant.Decrement, node1))
+                Deserializers.wrap(node1 -> Post.deserialize(PostVariant.Decrement, node1)),
+                Deserializers.wrap(Break::deserialize)
         ));
     }
 
