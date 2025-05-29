@@ -24,19 +24,25 @@ final class Structures {
                 beforeContent
         ));
 
-        Rule extended = new NodeListRule("extended", new ValueFolder(), Types.createTypeRule());
+        Rule type = Types.createTypeRule();
+        Rule extended = new NodeListRule("extended", new ValueFolder(), type);
         Rule withEnds = new OrRule(Lists.of(
                 LocatingRule.First(withParameters, " extends ", extended),
                 withParameters
         ));
 
-        Rule implemented = new NodeListRule("implemented", new ValueFolder(), Types.createTypeRule());
+        Rule implemented = new NodeListRule("implemented", new ValueFolder(), type);
         Rule withImplements = new OrRule(Lists.of(
                 new ContextRule("With implements", LocatingRule.First(withEnds, " implements ", implemented)),
                 new ContextRule("Without implements", withEnds)
         ));
 
-        Rule afterKeyword = LocatingRule.First(withImplements, "{", new StripRule(new SuffixRule(CommonLang.Statements("children", StructureMembers.createClassMemberRule()), "}")));
+        Rule withPermits = new OrRule(Lists.of(
+                LocatingRule.Last(withImplements, " permits ", NodeListRule.Values("variants", type)),
+                withImplements
+        ));
+
+        Rule afterKeyword = LocatingRule.First(withPermits, "{", new StripRule(new SuffixRule(CommonLang.Statements("children", StructureMembers.createClassMemberRule()), "}")));
         return new TypeRule(keyword, LocatingRule.First(Modifier.createModifiersRule(), keyword + " ", afterKeyword));
     }
 }
