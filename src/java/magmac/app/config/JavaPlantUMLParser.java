@@ -2,7 +2,12 @@ package magmac.app.config;
 
 import magmac.app.compile.error.CompileResult;
 import magmac.app.io.Location;
-import magmac.app.lang.java.node.JavaRoot;
+import magmac.app.lang.node.PlantUMLRoot;
+import magmac.app.lang.node.JavaRoot;
+import magmac.app.lang.node.JavaRootSegment;
+import magmac.app.lang.node.Namespaced;
+import magmac.app.lang.node.StructureNode;
+import magmac.app.lang.node.Whitespace;
 import magmac.app.stage.parse.Parser;
 import magmac.app.stage.unit.UnitSet;
 
@@ -18,12 +23,18 @@ class JavaPlantUMLParser implements Parser<JavaRoot, PlantUMLRoot> {
                     root.children()
                             .iter()
                             .map(child -> {
-                                switch (child) {
-
-                                }
+                                return getObject(child);
                             });
                 }
             });
         });
+    }
+
+    private Object getObject(JavaRootSegment child) {
+        return switch (child) {
+            case Namespaced namespaced -> null;
+            case StructureNode structureNode -> null;
+            case Whitespace whitespace -> null;
+        };
     }
 }

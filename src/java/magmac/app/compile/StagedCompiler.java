@@ -2,7 +2,7 @@ package magmac.app.compile;
 
 import magmac.app.compile.error.CompileResult;
 import magmac.app.compile.node.Node;
-import magmac.app.lang.java.Serializable;
+import magmac.app.lang.Serializable;
 import magmac.app.stage.generate.Generator;
 import magmac.app.stage.lexer.Lexer;
 import magmac.app.stage.parse.Parser;

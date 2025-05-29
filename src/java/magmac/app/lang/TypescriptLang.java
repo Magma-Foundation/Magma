@@ -12,15 +12,15 @@ import magmac.app.compile.rule.StripRule;
 import magmac.app.compile.rule.SuffixRule;
 import magmac.app.compile.rule.TypeRule;
 import magmac.app.compile.rule.fold.DelimitedFolder;
-import magmac.app.lang.java.node.Whitespace;
-import magmac.app.lang.java.node.Definition;
-import magmac.app.lang.java.node.Modifier;
-import magmac.app.lang.java.node.FunctionSegment;
-import magmac.app.lang.java.node.Parameters;
-import magmac.app.lang.java.node.StructureStatement;
-import magmac.app.lang.java.node.TemplateType;
-import magmac.app.lang.java.node.Symbols;
-import magmac.app.lang.java.node.Values;
+import magmac.app.lang.node.Whitespace;
+import magmac.app.lang.node.Definition;
+import magmac.app.lang.node.Modifier;
+import magmac.app.lang.node.FunctionSegment;
+import magmac.app.lang.node.Parameters;
+import magmac.app.lang.node.StructureStatement;
+import magmac.app.lang.node.TemplateType;
+import magmac.app.lang.node.Symbols;
+import magmac.app.lang.node.Values;
 
 public final class TypescriptLang {
     public static Rule createRule() {

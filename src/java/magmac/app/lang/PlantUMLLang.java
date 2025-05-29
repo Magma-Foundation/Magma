@@ -11,7 +11,7 @@ import magmac.app.compile.rule.StringRule;
 import magmac.app.compile.rule.SuffixRule;
 import magmac.app.compile.rule.TypeRule;
 import magmac.app.compile.rule.fold.StatementFolder;
-import magmac.app.lang.java.node.Whitespace;
+import magmac.app.lang.node.Whitespace;
 
 public final class PlantUMLLang {
     public static Rule createRule() {

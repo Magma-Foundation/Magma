@@ -6,7 +6,7 @@ import magmac.app.compile.node.Node;
 import magmac.app.compile.rule.Rule;
 import magmac.app.lang.TypeScriptAfterPasser;
 import magmac.app.lang.TypescriptLang;
-import magmac.app.lang.java.node.JavaRoot;
+import magmac.app.lang.node.JavaRoot;
 import magmac.app.stage.Passer;
 import magmac.app.stage.after.AfterAll;
 import magmac.app.stage.after.EmptyAfterAll;
