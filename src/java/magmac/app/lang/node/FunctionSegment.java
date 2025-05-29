@@ -6,8 +6,8 @@ import magmac.app.compile.node.Node;
 import magmac.app.compile.rule.OrRule;
 import magmac.app.compile.rule.Rule;
 import magmac.app.compile.rule.StripRule;
-import magmac.app.lang.LazyRule;
 import magmac.app.lang.Deserializers;
+import magmac.app.lang.LazyRule;
 
 public interface FunctionSegment {
     static CompileResult<FunctionSegment> deserialize(Node node) {
@@ -24,7 +24,8 @@ public interface FunctionSegment {
         Rule rule = new OrRule(Lists.of(
                 Whitespace.createWhitespaceRule(),
                 FunctionStatement.createStatementRule(functionSegmentValueRule),
-                Block.createBlockRule(functionSegmentRule, value, definition)
+                Block.createBlockRule(functionSegmentRule, value, definition),
+                Return.createReturnRule(value)
         ));
 
         return functionSegmentRule.set(new StripRule("before", rule, ""));

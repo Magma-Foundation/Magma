@@ -8,12 +8,17 @@ import magmac.api.iter.collect.ListCollector;
 import magmac.app.compile.error.CompileResult;
 import magmac.app.compile.error.CompileResults;
 import magmac.app.compile.node.Node;
+import magmac.app.compile.rule.NodeRule;
 import magmac.app.compile.rule.OrRule;
+import magmac.app.compile.rule.PrefixRule;
 import magmac.app.compile.rule.Rule;
+import magmac.app.compile.rule.StripRule;
+import magmac.app.compile.rule.SuffixRule;
+import magmac.app.compile.rule.TypeRule;
 import magmac.app.lang.CommonLang;
-import magmac.app.lang.LazyRule;
 import magmac.app.lang.Deserializer;
 import magmac.app.lang.Deserializers;
+import magmac.app.lang.LazyRule;
 
 public final class Values {
     public static CompileResult<Value> deserializeOrError(Node node) {
@@ -44,9 +49,10 @@ public final class Values {
         return value.set(new OrRule(Values.getValueRules(segment, value, lambdaInfix, definition)));
     }
 
-    private static List<Rule> getValueRules(Rule segment, LazyRule value, String lambdaInfix, Rule definition) {
+    private static List<Rule> getValueRules(Rule functionSegment, LazyRule value, String lambdaInfix, Rule definition) {
         List<Rule> ruleList = Lists.of(
-                Lambda.createLambdaRule(value, segment, lambdaInfix, definition),
+                Values.createSwitchRule(functionSegment, value),
+                Lambda.createLambdaRule(value, functionSegment, lambdaInfix, definition),
                 Not.createNotRule(value),
                 CharNode.createCharRule(),
                 StringNode.createStringRule(),
@@ -63,5 +69,11 @@ public final class Values {
                 .collect(new ListCollector<>());
 
         return ruleList.addAll(operatorLists);
+    }
+
+    private static TypeRule createSwitchRule(Rule functionSegmentRule, Rule value) {
+        NodeRule value1 = new NodeRule("value", value);
+        PrefixRule header = new PrefixRule("switch", new StripRule(new PrefixRule("(", new SuffixRule(value1, ")"))));
+        return new TypeRule("switch", Block.createBlockRule0(new StripRule(header), functionSegmentRule));
     }
 }
