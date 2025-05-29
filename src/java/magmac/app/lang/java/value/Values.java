@@ -19,7 +19,7 @@ public class Values {
                 StringNode::deserialize,
                 node1 -> Access.deserialize(AccessType.Data, node1),
                 node1 -> Access.deserialize(AccessType.Method, node1),
-                Deserializers.wrap(Symbols::deserialize),
+                Deserializers.wrap(Symbols::deserializeSymbol),
                 Deserializers.wrap(CharNode::deserialize),
                 Deserializers.wrap(Lambda::deserialize),
                 Operation.deserializeAs(Operator.Add),

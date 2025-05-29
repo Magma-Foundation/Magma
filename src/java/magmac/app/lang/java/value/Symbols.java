@@ -20,7 +20,7 @@ public class Symbols {
         return new TypeRule("qualified", Symbols.createSegmentsRule("segments"));
     }
 
-    public static Option<CompileResult<Symbol>> deserialize(Node node) {
+    public static Option<CompileResult<Symbol>> deserializeSymbol(Node node) {
         return node.deserializeWithType("symbol").map(deserializer -> deserializer.withString("value")
                 .complete(Symbol::new)
                 .mapValue(type -> type));
@@ -37,4 +37,5 @@ public class Symbols {
     public static Rule createSymbolTypeRule() {
         return new TypeRule("symbol", Symbols.createSymbolRule("value"));
     }
+
 }
