@@ -26,7 +26,8 @@ public class Values {
                 Deserializers.wrap(Symbols::deserializeSymbol),
                 Deserializers.wrap(CharNode::deserialize),
                 Deserializers.wrap(Lambda::deserialize),
-                Deserializers.wrap(NumberNode::deserialize)
+                Deserializers.wrap(NumberNode::deserialize),
+                Deserializers.wrap(Not::deserialize)
         );
 
         List<Deserializer<Value>> operatorRules = Iters.fromValues(Operator.values())

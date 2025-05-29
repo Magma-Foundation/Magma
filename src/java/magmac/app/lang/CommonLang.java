@@ -8,7 +8,6 @@ import magmac.app.compile.rule.LocatingRule;
 import magmac.app.compile.rule.NodeListRule;
 import magmac.app.compile.rule.NodeRule;
 import magmac.app.compile.rule.OrRule;
-import magmac.app.compile.rule.PrefixRule;
 import magmac.app.compile.rule.Rule;
 import magmac.app.compile.rule.StringRule;
 import magmac.app.compile.rule.StripRule;
@@ -19,6 +18,7 @@ import magmac.app.lang.java.invoke.Invokable;
 import magmac.app.lang.java.value.Access;
 import magmac.app.lang.java.value.CharNode;
 import magmac.app.lang.java.value.Lambda;
+import magmac.app.lang.java.value.Not;
 import magmac.app.lang.java.value.NumberNode;
 import magmac.app.lang.java.value.Operation;
 import magmac.app.lang.java.value.Operator;
@@ -37,7 +37,7 @@ public final class CommonLang {
     private static List<Rule> getValueRules(Rule segment, LazyRule value, String lambdaInfix, Rule definition) {
         List<Rule> ruleList = Lists.of(
                 Lambda.createLambdaRule(value, segment, lambdaInfix, definition),
-                new StripRule(new PrefixRule("!", new NodeRule("child", value))),
+                Not.createNotRule(value),
                 CharNode.createCharRule(),
                 StringNode.createStringRule(),
                 Invokable.createInvokableRule(value),

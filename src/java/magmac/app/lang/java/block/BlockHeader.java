@@ -20,7 +20,9 @@ public interface BlockHeader {
         return Deserializers.orError("header", node, Lists.of(
                 Deserializers.wrap(node1 -> Conditional.deserialize(ConditionalType.If, node1)),
                 Deserializers.wrap(node1 -> Conditional.deserialize(ConditionalType.While, node1)),
-                Deserializers.wrap(Else::deserialize)
+                Deserializers.wrap(Else::deserialize),
+                Deserializers.wrap(Try::deserialize),
+                Deserializers.wrap(Catch::deserialize)
         ));
     }
 
@@ -30,7 +32,7 @@ public interface BlockHeader {
                 new TypeRule("try", new StripRule(new ExactRule("try"))),
                 Conditional.createConditionalRule("if", value),
                 Conditional.createConditionalRule("while", value),
-                new StripRule(new PrefixRule("catch", new StripRule(new PrefixRule("(", new SuffixRule(new NodeRule("definition", definition), ")")))))
+                new TypeRule("catch", new StripRule(new PrefixRule("catch", new StripRule(new PrefixRule("(", new SuffixRule(new NodeRule("definition", definition), ")"))))))
         ));
     }
 }
