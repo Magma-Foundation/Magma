@@ -9,6 +9,7 @@ import magmac.app.compile.rule.Rule;
 import magmac.app.compile.rule.StripRule;
 import magmac.app.compile.rule.SuffixRule;
 import magmac.app.compile.rule.TypeRule;
+import magmac.app.lang.java.block.BlockHeader;
 import magmac.app.lang.java.value.Value;
 import magmac.app.lang.java.value.Values;
 
