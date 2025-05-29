@@ -183,10 +183,14 @@ public final class MapNode implements Node {
     }
 
     @Override
-    public CompileResult<Tuple2<Node, NodeList>> removeNodeList(String key) {
+    public CompileResult<Tuple2<Node, NodeList>> removeNodeListOrError(String key) {
+        return this.removeNodeList(key).map(CompileResults::Ok).orElseGet(() -> this.createNotPresent(key));
+    }
+
+    @Override
+    public Option<Tuple2<Node, NodeList>> removeNodeList(String key) {
         return this.nodeLists.removeByKey(key)
-                .map((Tuple2<Map<String, NodeList>, NodeList> tuple) -> CompileResults.Ok(new Tuple2<>(this.withNodeLists(tuple.left()), tuple.right())))
-                .orElseGet(() -> this.createNotPresent(key));
+                .map(tuple -> new Tuple2<>(this.withNodeLists(tuple.left()), tuple.right()));
     }
 
     private Node withNodeLists(Map<String, NodeList> nodeLists) {

@@ -1,5 +1,8 @@
 package magmac.app.compile.node;
 
+import magmac.api.None;
+import magmac.api.Option;
+import magmac.api.Some;
 import magmac.api.Tuple2;
 import magmac.api.collect.list.List;
 import magmac.api.iter.collect.ListCollector;
@@ -29,7 +32,7 @@ public class CompoundDeserializerImpl<T> implements CompoundDeserializer<T> {
 
     @Override
     public <R> CompoundDeserializer<Tuple2<T, List<R>>> withNodeList(String key, Function<Node, CompileResult<R>> deserializer) {
-        return new CompoundDeserializerImpl<>(this.result.flatMapValue((Tuple2<Node, T> inner) -> inner.left().removeNodeList(key).flatMapValue((Tuple2<Node, NodeList> tuple) -> tuple.right()
+        return new CompoundDeserializerImpl<>(this.result.flatMapValue((Tuple2<Node, T> inner) -> inner.left().removeNodeListOrError(key).flatMapValue((Tuple2<Node, NodeList> tuple) -> tuple.right()
                 .iter()
                 .map(deserializer)
                 .collect(new CompileResultCollector<>(new ListCollector<>()))
@@ -42,5 +45,28 @@ public class CompoundDeserializerImpl<T> implements CompoundDeserializer<T> {
             Node right = removed.right();
             return deserializer.apply(right).flatMapValue((R newRight) -> CompileResults.Ok(new Tuple2<>(removed.left(), new Tuple2<>(inner.right(), newRight))));
         })));
+    }
+
+    @Override
+    public <R> CompoundDeserializer<Tuple2<T, Option<List<R>>>> withNodeListOptionally(String key, Function<Node, CompileResult<R>> deserializer) {
+        return new CompoundDeserializerImpl<>(this.result.flatMapValue((inner -> inner.left()
+                .removeNodeList(key)
+                .map(tuple -> this.mapElements(tuple.left(), tuple.right(), deserializer, inner.right()))
+                .orElseGet(() -> CompileResults.Ok(new Tuple2<>(inner.left(), new Tuple2<>(inner.right(), new None<List<R>>())))))));
+    }
+
+    private <R> CompileResult<Tuple2<Node, Tuple2<T, Option<List<R>>>>> mapElements(
+            Node current,
+            NodeList elements,
+            Function<Node, CompileResult<R>> deserializer,
+            T more
+    ) {
+        return elements.iter()
+                .map(deserializer)
+                .collect(new CompileResultCollector<>(new ListCollector<>()))
+                .mapValue((List<R> deserialized) -> {
+                    Option<List<R>> deserializedOption = new Some<>(deserialized);
+                    return new Tuple2<>(current, new Tuple2<T, Option<List<R>>>(more, deserializedOption));
+                });
     }
 }

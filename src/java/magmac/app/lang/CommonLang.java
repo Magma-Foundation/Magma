@@ -18,6 +18,7 @@ import magmac.app.compile.rule.divide.FoldingDivider;
 import magmac.app.compile.rule.fold.DelimitedFolder;
 import magmac.app.compile.rule.fold.StatementFolder;
 import magmac.app.compile.rule.split.DividingSplitter;
+import magmac.app.lang.java.type.TemplateType;
 import magmac.app.lang.java.value.Symbol;
 import magmac.app.lang.java.assign.Assignment;
 import magmac.app.lang.java.function.FunctionSegment;
@@ -27,10 +28,6 @@ import magmac.app.lang.java.value.Invokable;
 public final class CommonLang {
     public static Rule createWhitespaceRule() {
         return new TypeRule("whitespace", new StripRule(new ExactRule("")));
-    }
-
-    static Rule createTemplateRule() {
-        return new TypeRule("template", new StripRule(new SuffixRule(LocatingRule.First(new StripRule(new StringRule("base")), "<", new StringRule("arguments")), ">")));
     }
 
     public static NodeListRule Statements(String key, Rule childRule) {
@@ -144,11 +141,11 @@ public final class CommonLang {
     }
 
     public static Rule createTypeRule() {
-        LazyRule orRule = new MutableLazyRule();
-        return orRule.set(new OrRule(Lists.of(
-                CommonLang.createVariadicRule(orRule),
-                CommonLang.createArrayRule(orRule),
-                CommonLang.createTemplateRule(),
+        LazyRule type = new MutableLazyRule();
+        return type.set(new OrRule(Lists.of(
+                CommonLang.createVariadicRule(type),
+                CommonLang.createArrayRule(type),
+                TemplateType.createTemplateRule(type),
                 Symbol.createSymbolTypeRule()
         )));
     }

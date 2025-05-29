@@ -13,6 +13,7 @@ import magmac.app.compile.rule.SuffixRule;
 import magmac.app.compile.rule.TypeRule;
 import magmac.app.compile.rule.fold.DelimitedFolder;
 import magmac.app.lang.java.function.Parameters;
+import magmac.app.lang.java.type.TemplateType;
 import magmac.app.lang.java.value.Symbol;
 
 public final class TypescriptLang {
@@ -85,10 +86,10 @@ public final class TypescriptLang {
     }
 
     private static Rule createTypeRule() {
-        LazyRule orRule = new MutableLazyRule();
-        return orRule.set(new OrRule(Lists.of(
-                CommonLang.createTemplateRule(),
-                TypescriptLang.createArrayRule(orRule),
+        LazyRule type = new MutableLazyRule();
+        return type.set(new OrRule(Lists.of(
+                TemplateType.createTemplateRule(type),
+                TypescriptLang.createArrayRule(type),
                 Symbol.createSymbolTypeRule()
         )));
     }

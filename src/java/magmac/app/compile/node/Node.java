@@ -45,7 +45,9 @@ public interface Node {
 
     Option<InitialDeserializer> deserializeWithType(String type);
 
-    CompileResult<Tuple2<Node, NodeList>> removeNodeList(String key);
+    CompileResult<Tuple2<Node, NodeList>> removeNodeListOrError(String key);
+
+    Option<Tuple2<Node, NodeList>> removeNodeList(String key);
 
     boolean isEmpty();
 
