@@ -2,7 +2,8 @@ package magmac.app.lang.java.value;
 
 public enum Operator {
     Add("add"),
-    LessThan("less-than");
+    LessThan("less-than"),
+    Subtract("subtract");
 
     private final String text;
 
