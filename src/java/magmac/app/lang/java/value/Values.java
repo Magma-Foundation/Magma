@@ -21,7 +21,8 @@ public class Values {
                 node1 -> Access.deserialize(AccessType.Method, node1),
                 Deserializers.wrap(Symbols::deserialize),
                 Deserializers.wrap(CharNode::deserialize),
-                Deserializers.wrap(Lambda::deserialize)
+                Deserializers.wrap(Lambda::deserialize),
+                Deserializers.wrap(Add::deserialize)
         ));
     }
 }
