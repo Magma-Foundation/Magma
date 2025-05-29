@@ -24,15 +24,19 @@ public record StructureNode(
         Option<List<Type>> extended
 ) implements JavaRootSegment {
     public static Option<CompileResult<JavaRootSegment>> deserialize(StructureType type, Node node) {
-        return node.deserializeWithType(type.name().toLowerCase()).map((InitialDeserializer deserializer) -> deserializer
-                .withString("name")
+        return node.deserializeWithType(type.name().toLowerCase())
+                .map((InitialDeserializer deserializer) -> StructureNode.deserializeHelper(type, deserializer));
+    }
+
+    private static CompileResult<JavaRootSegment> deserializeHelper(StructureType type, InitialDeserializer deserializer) {
+        return deserializer.withString("name")
                 .withNodeList("modifiers", Modifier::deserialize)
                 .withNodeList("children", StructureMembers::deserialize)
                 .withNodeListOptionally("implemented", Types::deserialize)
                 .withNodeListOptionally("type-parameters", TypeParam::deserialize)
                 .withNodeListOptionally("parameters", Parameters::deserialize)
                 .withNodeListOptionally("extended", Types::deserialize)
-                .complete(tuple -> StructureNode.from(type, tuple)));
+                .complete(tuple -> StructureNode.from(type, tuple));
     }
 
     private static StructureNode from(
