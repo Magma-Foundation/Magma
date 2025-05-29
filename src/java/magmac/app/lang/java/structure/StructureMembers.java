@@ -12,7 +12,8 @@ final class StructureMembers {
         return Deserializers.orError("structure-member", node, Lists.of(
                 Deserializers.wrap(Whitespace::deserialize),
                 Deserializers.wrap(MethodNode::deserialize),
-                Deserializers.wrap(StructureStatement::deserialize)
+                Deserializers.wrap(StructureStatement::deserialize),
+                Deserializers.wrap(EnumValues::deserialize)
         ));
     }
 }

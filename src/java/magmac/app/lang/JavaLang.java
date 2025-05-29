@@ -22,9 +22,8 @@ import magmac.app.lang.java.Whitespace;
 import magmac.app.lang.java.define.Modifier;
 import magmac.app.lang.java.function.FunctionSegment;
 import magmac.app.lang.java.function.Parameters;
+import magmac.app.lang.java.structure.EnumValues;
 import magmac.app.lang.java.structure.StructureStatement;
-import magmac.app.lang.java.value.Arguments;
-import magmac.app.lang.java.value.Symbols;
 
 public final class JavaLang {
     public static Rule createRule() {
@@ -73,24 +72,8 @@ public final class JavaLang {
                 Whitespace.createWhitespaceRule(),
                 StructureStatement.createStructureStatementRule(new TypeRule("definition", JavaLang.createDefinitionRule()), value),
                 JavaLang.createMethodRule(functionSegment),
-                JavaLang.createEnumValuesRule(value)
+                EnumValues.createEnumValuesRule(value)
         ));
-    }
-
-    private static TypeRule createEnumValuesRule(Rule value) {
-        Rule name = new StripRule(FilterRule.Symbol(new StringRule("name")));
-        Rule rule = new SuffixRule(LocatingRule.First(name, "(", Arguments.createArgumentsRule(value)), ")");
-        Rule enumValue = new StripRule(new OrRule(Lists.of(
-                Symbols.createSymbolRule("value"),
-                rule
-        )));
-
-        Rule enumValues = new NodeListRule("children", new ValueFolder(), enumValue);
-        Rule withEnd = new StripRule(new SuffixRule(enumValues, ";"));
-        return new TypeRule("enum-values", new OrRule(Lists.of(
-                withEnd,
-                enumValues
-        )));
     }
 
     private static Rule createMethodRule(Rule childRule) {
