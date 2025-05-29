@@ -9,7 +9,7 @@ import magmac.app.compile.rule.Rule;
 import magmac.app.compile.rule.TypeRule;
 import magmac.app.lang.CommonLang;
 import magmac.app.lang.java.Deserializers;
-import magmac.app.lang.java.value.Invokable;
+import magmac.app.lang.java.invoke.Invokable;
 import magmac.app.lang.java.function.segment.Return;
 import magmac.app.lang.java.Whitespace;
 import magmac.app.lang.java.assign.Assignment;

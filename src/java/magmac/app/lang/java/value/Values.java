@@ -5,8 +5,8 @@ import magmac.api.collect.list.Lists;
 import magmac.app.compile.error.CompileResult;
 import magmac.app.compile.error.CompileResults;
 import magmac.app.compile.node.Node;
-import magmac.app.lang.java.Deserializer;
 import magmac.app.lang.java.Deserializers;
+import magmac.app.lang.java.invoke.Invokable;
 
 public class Values {
     public static CompileResult<Value> deserializeError(Node node) {
@@ -15,7 +15,7 @@ public class Values {
 
     public static Option<CompileResult<Value>> deserialize(Node node) {
         return Deserializers.or(node, Lists.of(
-                Invokable::deserialize,
+                Deserializers.wrap(Invokable::deserialize),
                 StringNode::deserialize,
                 DataAccess::deserialize,
                 Deserializers.wrap(Symbols::deserialize),

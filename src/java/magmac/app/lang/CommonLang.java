@@ -22,7 +22,7 @@ import magmac.app.lang.java.assign.Assignment;
 import magmac.app.lang.java.function.FunctionSegment;
 import magmac.app.lang.java.type.TemplateType;
 import magmac.app.lang.java.value.DataAccess;
-import magmac.app.lang.java.value.Invokable;
+import magmac.app.lang.java.invoke.Invokable;
 import magmac.app.lang.java.value.Lambda;
 import magmac.app.lang.java.value.Symbols;
 
