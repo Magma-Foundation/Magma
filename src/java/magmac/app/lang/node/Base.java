@@ -1,4 +1,4 @@
 package magmac.app.lang.node;
 
-public interface Base {
+public sealed interface Base permits QualifiedType, Symbol {
 }

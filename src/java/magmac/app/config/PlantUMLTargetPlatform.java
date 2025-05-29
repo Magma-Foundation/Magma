@@ -4,9 +4,9 @@ import magmac.app.compile.Compiler;
 import magmac.app.compile.StagedCompiler;
 import magmac.app.compile.node.Node;
 import magmac.app.compile.rule.Rule;
+import magmac.app.lang.JavaPlantUMLParser;
 import magmac.app.lang.MergeDiagram;
 import magmac.app.lang.PlantUMLAfterPasser;
-import magmac.app.lang.PlantUMLLang;
 import magmac.app.lang.node.PlantUMLRoot;
 import magmac.app.lang.node.JavaRoot;
 import magmac.app.stage.Passer;
@@ -42,7 +42,7 @@ public final class PlantUMLTargetPlatform implements TargetPlatform {
 
     @Override
     public Rule createRule() {
-        return PlantUMLLang.createRule();
+        return PlantUMLRoot.createRule();
     }
 
     @Override

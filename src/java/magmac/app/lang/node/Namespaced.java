@@ -19,14 +19,14 @@ import magmac.app.lang.Deserializers;
 public record Namespaced(NamespacedType type, List<Segment> segments) implements JavaRootSegment {
     private static Option<CompileResult<JavaRootSegment>> deserialize(NamespacedType type, Node node) {
         return Deserializers.deserializeWithType(node, type.type()).map((InitialDeserializer deserializer) -> deserializer
-                .withNodeList("segments", (Node node1) -> Segment.deserialize(node1))
+                .withNodeList("segments", Segment::deserialize)
                 .complete((List<Segment> segments1) -> new Namespaced(type, segments1)));
     }
 
     public static Option<CompileResult<JavaRootSegment>> deserialize(Node node) {
         return Iters.fromValues(NamespacedType.values())
                 .map((NamespacedType type) -> Namespaced.deserialize(type, node))
-                .flatMap((Option<CompileResult<JavaRootSegment>> option) -> Iters.fromOption(option))
+                .flatMap(Iters::fromOption)
                 .next();
     }
 

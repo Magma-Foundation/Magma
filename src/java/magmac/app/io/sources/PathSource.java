@@ -36,7 +36,7 @@ public record PathSource(Path root, Path child) implements Source {
         int nameCount = relative.getNameCount();
         int i = 0;
         while (i < nameCount) {
-            segments = segments.add(relative.getName(i).toString());
+            segments = segments.addLast(relative.getName(i).toString());
             i++;
         }
         return segments;

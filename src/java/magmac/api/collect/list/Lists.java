@@ -16,7 +16,7 @@ public final class Lists {
         List<T> copy = Lists.empty();
         int i = 0;
         while (i < size) {
-            copy = copy.add(element);
+            copy = copy.addLast(element);
             i++;
         }
         return copy;

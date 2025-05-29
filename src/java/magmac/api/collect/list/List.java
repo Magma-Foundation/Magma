@@ -7,7 +7,7 @@ import magmac.api.iter.Iter;
 import java.util.function.BiFunction;
 
 public interface List<T> {
-    List<T> add(T element);
+    List<T> addLast(T element);
 
     Iter<T> iter();
 
@@ -28,4 +28,6 @@ public interface List<T> {
     Option<Tuple2<List<T>, T>> popLast();
 
     Option<Tuple2<T, List<T>>> popFirst();
+
+    List<T> addFirst(T element);
 }

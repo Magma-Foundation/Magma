@@ -34,7 +34,7 @@ public class MutableDivideState implements DivideState {
 
     @Override
     public DivideState advance() {
-        this.segments = this.segments.add(this.buffer.toString());
+        this.segments = this.segments.addLast(this.buffer.toString());
         this.buffer = new StringBuilder();
         return this;
     }

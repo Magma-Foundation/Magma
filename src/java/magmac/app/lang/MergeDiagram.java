@@ -32,7 +32,7 @@ public class MergeDiagram implements AfterAll {
                 String parent = node.findString("parent").orElse("");
                 String child = node.findString("child").orElse("");
 
-                return current.mapOrPut(parent, (List<String> stringList) -> stringList.add(child), () -> Lists.of(child));
+                return current.mapOrPut(parent, (List<String> stringList) -> stringList.addLast(child), () -> Lists.of(child));
             }
             return current;
         });
@@ -47,7 +47,7 @@ public class MergeDiagram implements AfterAll {
             String parent = node1.findString("parent").orElse("");
             String child = node1.findString("child").orElse("");
 
-            return current.mapOrPut(child, (List<String> stringList) -> stringList.add(parent), () -> Lists.of(parent));
+            return current.mapOrPut(child, (List<String> stringList) -> stringList.addLast(parent), () -> Lists.of(parent));
         });
     }
 

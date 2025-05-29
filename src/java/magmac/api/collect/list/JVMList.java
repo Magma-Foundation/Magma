@@ -18,7 +18,7 @@ public record JVMList<T>(java.util.List<T> elements) implements List<T> {
     }
 
     @Override
-    public List<T> add(T element) {
+    public List<T> addLast(T element) {
         ArrayList<T> copy = new ArrayList<>(this.elements);
         copy.add(element);
         return new JVMList<>(copy);
@@ -31,7 +31,7 @@ public record JVMList<T>(java.util.List<T> elements) implements List<T> {
 
     @Override
     public List<T> addAll(List<T> others) {
-        return others.iter().fold(this.createInitial(), (List<T> tList, T element) -> tList.add(element));
+        return others.iter().fold(this.createInitial(), (List<T> tList, T element) -> tList.addLast(element));
     }
 
     private List<T> createInitial() {
@@ -90,5 +90,13 @@ public record JVMList<T>(java.util.List<T> elements) implements List<T> {
 
         java.util.List<T> slice = this.elements.subList(1, this.elements.size());
         return new Some<>(new Tuple2<>(this.elements.getFirst(), new JVMList<>(slice)));
+    }
+
+    @Override
+    public List<T> addFirst(T element) {
+        ArrayList<T> copy = new ArrayList<>();
+        copy.add(element);
+        copy.addAll(this.elements);
+        return new JVMList<>(copy);
     }
 }

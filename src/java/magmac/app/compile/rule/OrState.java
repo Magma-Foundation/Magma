@@ -32,6 +32,6 @@ record OrState<T>(Option<T> maybeValue, List<CompileError> errors) {
     }
 
     OrState<T> withError(CompileError error) {
-        return new OrState<>(this.maybeValue, this.errors.add(error));
+        return new OrState<>(this.maybeValue, this.errors.addLast(error));
     }
 }

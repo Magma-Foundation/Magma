@@ -11,6 +11,6 @@ public record ListCollector<T>() implements Collector<T, List<T>> {
 
     @Override
     public List<T> fold(List<T> current, T element) {
-        return current.add(element);
+        return current.addLast(element);
     }
 }

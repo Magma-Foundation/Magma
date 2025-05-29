@@ -37,7 +37,7 @@ public final class InlineNodeList implements NodeList {
 
     @Override
     public NodeList add(Node element) {
-        return new InlineNodeList(this.elements.add(element));
+        return new InlineNodeList(this.elements.addLast(element));
     }
 
     @Override

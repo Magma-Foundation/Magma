@@ -1,4 +1,4 @@
 package magmac.app.lang.node;
 
-public interface Type {
+public sealed interface Type permits ArrayType, Symbol, TemplateType, VariadicType {
 }
