@@ -61,10 +61,6 @@ public final class CommonLang {
         return new TypeRule("number", new StripRule(FilterRule.Number(new StringRule("value"))));
     }
 
-    public static Rule createPostRule(String type, String suffix, Rule value) {
-        return new TypeRule(type, new StripRule(new SuffixRule(new NodeRule("child", value), suffix)));
-    }
-
     public static Rule createTypeRule() {
         LazyRule type = new MutableLazyRule();
         return type.set(new OrRule(Lists.of(
