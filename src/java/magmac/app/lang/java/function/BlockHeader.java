@@ -8,7 +8,8 @@ import magmac.app.lang.java.Deserializers;
 public interface BlockHeader {
     static CompileResult<BlockHeader> deserialize(Node node) {
         return Deserializers.orError("header", node, Lists.of(
-
+                Deserializers.wrap(node1 -> Conditional.deserialize(ConditionalType.If, node1)),
+                Deserializers.wrap(node1 -> Conditional.deserialize(ConditionalType.While, node1))
         ));
     }
 }

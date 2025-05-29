@@ -9,7 +9,7 @@ import magmac.app.lang.java.Deserializers;
 import magmac.app.lang.java.invoke.Invokable;
 
 public class Values {
-    public static CompileResult<Value> deserializeError(Node node) {
+    public static CompileResult<Value> deserializeOrError(Node node) {
         return Values.deserialize(node).orElseGet(() -> CompileResults.NodeErr("Cannot deserialize value", node));
     }
 

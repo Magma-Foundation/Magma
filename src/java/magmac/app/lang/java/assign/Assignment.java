@@ -17,7 +17,7 @@ public record Assignment(Assignable assignable, Value value) implements Function
     public static Option<CompileResult<FunctionSegmentValue>> deserialize(Node node) {
         return node.deserializeWithType("assignment").map(deserializer -> deserializer
                 .withNode("destination", Assignables::deserializeError)
-                .withNode("source", Values::deserializeError)
+                .withNode("source", Values::deserializeOrError)
                 .complete(tuple -> new Assignment(tuple.left(), tuple.right())));
     }
 

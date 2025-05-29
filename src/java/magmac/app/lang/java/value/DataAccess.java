@@ -13,7 +13,7 @@ public record DataAccess(String property, Value caller) implements Value {
     public static Option<CompileResult<Value>> deserialize(Node node) {
         return node.deserializeWithType("data-access").map(deserializer -> {
             return deserializer.withString("property")
-                    .withNode("instance", Values::deserializeError)
+                    .withNode("instance", Values::deserializeOrError)
                     .complete(tuple -> new DataAccess(tuple.left(), tuple.right()));
         });
     }

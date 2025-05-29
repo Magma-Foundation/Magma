@@ -14,7 +14,7 @@ import magmac.app.lang.java.value.Values;
 
 public record Return(Value value) implements FunctionSegmentValue {
     public static Option<CompileResult<FunctionSegmentValue>> deserialize(Node node) {
-        return node.deserializeWithType("return").map(deserializer -> deserializer.withNode("value", Values::deserializeError).complete(value -> new Return(value)));
+        return node.deserializeWithType("return").map(deserializer -> deserializer.withNode("value", Values::deserializeOrError).complete(value -> new Return(value)));
     }
 
     public static Rule createReturnRule(Rule value) {
