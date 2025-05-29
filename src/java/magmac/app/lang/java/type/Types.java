@@ -16,7 +16,8 @@ public class Types {
         return Deserializers.orError("type", node, Lists.of(
                 Deserializers.wrap(Symbols::deserializeSymbol),
                 Deserializers.wrap(TemplateType::deserialize),
-                Deserializers.wrap(Variadic::deserialize)
+                Deserializers.wrap(Variadic::deserialize),
+                Deserializers.wrap(Array::deserialize)
         ));
     }
 
