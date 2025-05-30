@@ -9,6 +9,7 @@ import magmac.app.io.targets.PathTargets;
 import magmac.app.io.targets.Targets;
 import magmac.app.lang.TypescriptLang;
 import magmac.app.lang.node.JavaRoot;
+import magmac.app.lang.node.TypescriptRoot;
 import magmac.app.stage.generate.Generator;
 import magmac.app.stage.generate.RuleGenerator;
 import magmac.app.stage.parse.Parser;

@@ -36,8 +36,6 @@ TargetPlatform --> Application
 TargetPlatform --> Compiler
 TargetPlatform --> Rule
 TargetPlatform --> Targets
-TargetPlatform --> AfterAll
-TargetPlatform --> Passer
 TargetPlatform --> Path
 interface TargetPlatform
 Joiner --> None
@@ -188,6 +186,12 @@ Passer --> Node
 Passer --> ParseState
 Passer --> ParseResult
 interface Passer
+TypescriptRoot --> List
+TypescriptRoot --> MapNode
+TypescriptRoot --> Node
+TypescriptRoot --> Serializable
+class TypescriptRoot
+Serializable <|-- TypescriptRoot
 StructureMembers --> Lists
 StructureMembers --> CompileResult
 StructureMembers --> Node
@@ -357,7 +361,6 @@ Main --> Some
 Main --> Error
 Main --> Iters
 Main --> Result
-Main --> Application
 Main --> LexingStage
 Main --> PlantUMLTargetPlatform
 Main --> TargetPlatform
@@ -365,16 +368,16 @@ Main --> TypeScriptTargetPlatform
 Main --> ApplicationError
 Main --> PathSources
 Main --> Sources
-Main --> PathTargets
-Main --> Targets
 Main --> JavaRoot
 Main --> Lexer
 Main --> RuleLexer
 Main --> UnitSet
-Main --> Path
 Main --> Paths
 class Main
 class Console
+TypeScriptRootSegment --> Serializable
+interface TypeScriptRootSegment
+Serializable <|-- TypeScriptRootSegment
 UnitSetCollector --> Collector
 UnitSetCollector --> MapUnitSet
 UnitSetCollector --> Unit
@@ -579,13 +582,10 @@ PlantUMLTargetPlatform --> CompileApplication
 PlantUMLTargetPlatform --> Compiler
 PlantUMLTargetPlatform --> StagedCompiler
 PlantUMLTargetPlatform --> Rule
+PlantUMLTargetPlatform --> PathTargets
 PlantUMLTargetPlatform --> Targets
 PlantUMLTargetPlatform --> JavaPlantUMLParser
-PlantUMLTargetPlatform --> MergeDiagram
-PlantUMLTargetPlatform --> PlantUMLAfterPasser
 PlantUMLTargetPlatform --> PlantUMLRoot
-PlantUMLTargetPlatform --> Passer
-PlantUMLTargetPlatform --> AfterAll
 PlantUMLTargetPlatform --> Generator
 PlantUMLTargetPlatform --> RuleGenerator
 PlantUMLTargetPlatform --> Path
@@ -601,11 +601,6 @@ MutableLazyRule --> Node
 MutableLazyRule --> Rule
 class MutableLazyRule
 LazyRule <|-- MutableLazyRule
-TypescriptRoot --> MapNode
-TypescriptRoot --> Node
-TypescriptRoot --> Serializable
-class TypescriptRoot
-Serializable <|-- TypescriptRoot
 FirstSelector --> Option
 FirstSelector --> Tuple2
 FirstSelector --> List
@@ -698,7 +693,6 @@ Break --> Node
 Break --> Deserializers
 class Break
 FunctionSegmentValue <|-- Break
-class ApplicationBuilder
 DelimitedFolder --> DivideState
 class DelimitedFolder
 Folder <|-- DelimitedFolder
@@ -880,13 +874,11 @@ TypeScriptTargetPlatform --> CompileApplication
 TypeScriptTargetPlatform --> Compiler
 TypeScriptTargetPlatform --> StagedCompiler
 TypeScriptTargetPlatform --> Rule
+TypeScriptTargetPlatform --> PathTargets
 TypeScriptTargetPlatform --> Targets
-TypeScriptTargetPlatform --> TypeScriptAfterPasser
 TypeScriptTargetPlatform --> TypescriptLang
 TypeScriptTargetPlatform --> JavaRoot
-TypeScriptTargetPlatform --> Passer
-TypeScriptTargetPlatform --> AfterAll
-TypeScriptTargetPlatform --> EmptyAfterAll
+TypeScriptTargetPlatform --> TypescriptRoot
 TypeScriptTargetPlatform --> Generator
 TypeScriptTargetPlatform --> RuleGenerator
 TypeScriptTargetPlatform --> Parser
@@ -946,12 +938,18 @@ Compiler <|-- StagedCompiler
 LazyRule --> Rule
 interface LazyRule
 Rule <|-- LazyRule
+JavaTypescriptParser --> List
+JavaTypescriptParser --> Lists
 JavaTypescriptParser --> CompileResult
 JavaTypescriptParser --> CompileResultCollector
 JavaTypescriptParser --> CompileResults
+JavaTypescriptParser --> Location
 JavaTypescriptParser --> UnitSetCollector
 JavaTypescriptParser --> JavaRoot
+JavaTypescriptParser --> TypeScriptRootSegment
+JavaTypescriptParser --> TypescriptRoot
 JavaTypescriptParser --> Parser
+JavaTypescriptParser --> SimpleUnit
 JavaTypescriptParser --> Unit
 JavaTypescriptParser --> UnitSet
 class JavaTypescriptParser

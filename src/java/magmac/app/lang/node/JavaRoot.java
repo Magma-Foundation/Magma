@@ -33,6 +33,6 @@ public record JavaRoot(List<JavaRootSegment> children) implements Serializable {
 
     @Override
     public Node serialize() {
-        return new MapNode().withNodeListFromElements("children", this.children, JavaRootSegments::serialize);
+        return new MapNode().withSerializedNodeList("children", this.children, JavaRootSegments::serialize);
     }
 }

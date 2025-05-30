@@ -33,7 +33,7 @@ public class RuleGenerator implements Generator {
 
     private CompileError getDestruct(Unit<Node> entry, CompileError err) {
         return entry.destruct((location, node) -> {
-            String message = "Failed to generate entry '" + location + "'";
+            String message = "Failed to generate unit at location: '" + location + "'";
             return new ImmutableCompileError(message, new NodeContext(node), Lists.of(err));
         });
     }

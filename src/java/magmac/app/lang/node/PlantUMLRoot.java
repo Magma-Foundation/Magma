@@ -15,6 +15,6 @@ public record PlantUMLRoot(List<PlantUMLRootSegment> segments) implements Serial
 
     @Override
     public Node serialize() {
-        return new MapNode("root").withNodeListFromElements("segments", this.segments, PlantUMLRootSegment::serialize);
+        return new MapNode("root").withSerializedNodeList("segments", this.segments, PlantUMLRootSegment::serialize);
     }
 }

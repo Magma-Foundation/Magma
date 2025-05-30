@@ -49,7 +49,7 @@ public interface Node {
 
     boolean isEmpty();
 
-    <T> Node withNodeListFromElements(String key, List<T> list, Function<T, Node> serializer);
+    <T> Node withSerializedNodeList(String key, List<T> list, Function<T, Node> serializer);
 
     CompileResult<Tuple2<Node, String>> removeString(String key);
 
