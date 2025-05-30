@@ -9,10 +9,10 @@ import magmac.app.compile.error.CompileResults;
 import magmac.app.io.Location;
 import magmac.app.io.sources.UnitSetCollector;
 import magmac.app.lang.node.JavaRootSegment;
-import magmac.app.lang.node.Namespaced;
+import magmac.app.lang.node.JavaNamespacedNode;
 import magmac.app.lang.node.Root;
 import magmac.app.lang.node.Segment;
-import magmac.app.lang.node.StructureNode;
+import magmac.app.lang.node.JavaStructureNode;
 import magmac.app.lang.node.TypeScriptImport;
 import magmac.app.lang.node.TypeScriptRootSegment;
 import magmac.app.lang.node.TypescriptRoot;
@@ -38,13 +38,13 @@ class JavaTypescriptParser implements Parser<Root<JavaRootSegment>, TypescriptRo
 
     private static TypeScriptRootSegment parseRootSegment(Location location, JavaRootSegment rootSegment) {
         return switch (rootSegment) {
-            case Namespaced namespaced -> JavaTypescriptParser.parseNamespaced(location, namespaced);
-            case StructureNode structureNode -> new Whitespace();
+            case JavaNamespacedNode namespaced -> JavaTypescriptParser.parseNamespaced(location, namespaced);
+            case JavaStructureNode structureNode -> new Whitespace();
             case Whitespace whitespace -> whitespace;
         };
     }
 
-    private static TypeScriptRootSegment parseNamespaced(Location location, Namespaced namespaced) {
+    private static TypeScriptRootSegment parseNamespaced(Location location, JavaNamespacedNode namespaced) {
         return switch (namespaced.type()) {
             case Package -> new Whitespace();
             case Import -> JavaTypescriptParser.parseImport(location, namespaced.segments());

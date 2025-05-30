@@ -10,7 +10,7 @@ import magmac.app.compile.node.MapNode;
 import magmac.app.compile.node.Node;
 import magmac.app.lang.Deserializers;
 
-public record StructureNode(
+public record JavaStructureNode(
         StructureType type,
         String name,
         List<Modifier> modifiers,
@@ -23,11 +23,11 @@ public record StructureNode(
 ) implements JavaRootSegment {
     public static Option<CompileResult<JavaRootSegment>> deserialize(StructureType type, Node node) {
         return Deserializers.deserializeWithType(node, type.name().toLowerCase())
-                .map((InitialDestructor deserializer) -> StructureNode.deserializeHelper(type, deserializer));
+                .map((InitialDestructor deserializer) -> JavaStructureNode.deserializeHelper(type, deserializer));
     }
 
     private static CompileResult<JavaRootSegment> deserializeHelper(StructureType type, InitialDestructor deserializer) {
-        return StructureNode.attachOptionals(StructureNode.attachRequired(deserializer)).complete(tuple -> StructureNode.from(type, tuple));
+        return JavaStructureNode.attachOptionals(JavaStructureNode.attachRequired(deserializer)).complete(tuple -> JavaStructureNode.from(type, tuple));
     }
 
     private static CompoundDeserializer<Tuple2<Tuple2<String, List<Modifier>>, List<StructureMember>>> attachRequired(InitialDestructor deserializer) {
@@ -44,10 +44,10 @@ public record StructureNode(
                 .withNodeListOptionally("variants", Types::deserialize);
     }
 
-    private static StructureNode from(
+    private static JavaStructureNode from(
             StructureType type,
             Tuple2<Tuple2<Tuple2<Tuple2<Tuple2<Tuple2<Tuple2<String, List<Modifier>>, List<StructureMember>>, Option<List<Type>>>, Option<List<TypeParam>>>, Option<List<Parameter>>>, Option<List<Type>>>, Option<List<Type>>> tuple) {
-        return new StructureNode(type,
+        return new JavaStructureNode(type,
                 tuple.left().left().left().left().left().left().left(),
                 tuple.left().left().left().left().left().left().right(),
                 tuple.left().left().left().left().left().right(),

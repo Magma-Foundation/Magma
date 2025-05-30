@@ -17,16 +17,16 @@ import magmac.app.compile.rule.TypeRule;
 import magmac.app.compile.rule.fold.DelimitedFolder;
 import magmac.app.lang.Deserializers;
 
-public record Namespaced(NamespacedType type, List<Segment> segments) implements JavaRootSegment {
+public record JavaNamespacedNode(NamespacedType type, List<Segment> segments) implements JavaRootSegment {
     private static Option<CompileResult<JavaRootSegment>> deserialize(NamespacedType type, Node node) {
         return Deserializers.deserializeWithType(node, type.type()).map((InitialDestructor deserializer) -> deserializer
                 .withNodeList("segments", Segment::deserialize)
-                .complete((List<Segment> segments1) -> new Namespaced(type, segments1)));
+                .complete((List<Segment> segments1) -> new JavaNamespacedNode(type, segments1)));
     }
 
     public static Option<CompileResult<JavaRootSegment>> deserialize(Node node) {
         return Iters.fromValues(NamespacedType.values())
-                .map((NamespacedType type) -> Namespaced.deserialize(type, node))
+                .map((NamespacedType type) -> JavaNamespacedNode.deserialize(type, node))
                 .flatMap(Iters::fromOption)
                 .next();
     }

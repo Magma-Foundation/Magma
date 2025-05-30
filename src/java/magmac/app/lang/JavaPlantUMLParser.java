@@ -14,7 +14,7 @@ import magmac.app.lang.node.ArrayType;
 import magmac.app.lang.node.Base;
 import magmac.app.lang.node.Root;
 import magmac.app.lang.node.JavaRootSegment;
-import magmac.app.lang.node.Namespaced;
+import magmac.app.lang.node.JavaNamespacedNode;
 import magmac.app.lang.node.PlantUMLDependency;
 import magmac.app.lang.node.PlantUMLFooter;
 import magmac.app.lang.node.PlantUMLHeader;
@@ -25,7 +25,7 @@ import magmac.app.lang.node.PlantUMLStructure;
 import magmac.app.lang.node.PlantUMLStructureType;
 import magmac.app.lang.node.QualifiedType;
 import magmac.app.lang.node.Segment;
-import magmac.app.lang.node.StructureNode;
+import magmac.app.lang.node.JavaStructureNode;
 import magmac.app.lang.node.StructureType;
 import magmac.app.lang.node.Symbol;
 import magmac.app.lang.node.TemplateType;
@@ -39,7 +39,7 @@ import magmac.app.stage.unit.Unit;
 import magmac.app.stage.unit.UnitSet;
 
 public class JavaPlantUMLParser implements Parser<Root<JavaRootSegment>, PlantUMLRoot> {
-    private static Iter<PlantUMLRootSegment> parseNamespaced(String child, Namespaced namespaced) {
+    private static Iter<PlantUMLRootSegment> parseNamespaced(String child, JavaNamespacedNode namespaced) {
         return switch (namespaced.type()) {
             case Package -> Iters.empty();
             case Import -> {
@@ -66,7 +66,7 @@ public class JavaPlantUMLParser implements Parser<Root<JavaRootSegment>, PlantUM
                 .orElse("");
     }
 
-    private static PlantUMLRootSegment createStructureSegment(StructureNode structureNode) {
+    private static PlantUMLRootSegment createStructureSegment(JavaStructureNode structureNode) {
         String name = structureNode.name();
         StructureType type = structureNode.type();
 
@@ -109,12 +109,12 @@ public class JavaPlantUMLParser implements Parser<Root<JavaRootSegment>, PlantUM
     private static Iter<PlantUMLRootSegment> parseRootSegment(String fileName, JavaRootSegment rootSegment) {
         return switch (rootSegment) {
             case Whitespace _ -> Iters.empty();
-            case Namespaced namespaced -> JavaPlantUMLParser.parseNamespaced(fileName, namespaced);
-            case StructureNode structureNode -> JavaPlantUMLParser.parseStructure(structureNode);
+            case JavaNamespacedNode namespaced -> JavaPlantUMLParser.parseNamespaced(fileName, namespaced);
+            case JavaStructureNode structureNode -> JavaPlantUMLParser.parseStructure(structureNode);
         };
     }
 
-    private static Iter<PlantUMLRootSegment> parseStructure(StructureNode structureNode) {
+    private static Iter<PlantUMLRootSegment> parseStructure(JavaStructureNode structureNode) {
         PlantUMLRootSegment segment = JavaPlantUMLParser.createStructureSegment(structureNode);
         String child = structureNode.name();
 
