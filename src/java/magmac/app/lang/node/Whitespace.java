@@ -2,6 +2,7 @@ package magmac.app.lang.node;
 
 import magmac.api.Option;
 import magmac.app.compile.error.CompileResult;
+import magmac.app.compile.node.MapNode;
 import magmac.app.compile.node.Node;
 import magmac.app.compile.rule.ExactRule;
 import magmac.app.compile.rule.Rule;
@@ -16,5 +17,10 @@ public final class Whitespace implements Argument, FunctionSegment, Parameter, S
 
     public static Rule createWhitespaceRule() {
         return new TypeRule("whitespace", new StripRule(new ExactRule("")));
+    }
+
+    @Override
+    public Node serialize() {
+        return new MapNode("whitespace");
     }
 }

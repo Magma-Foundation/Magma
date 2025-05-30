@@ -4,9 +4,11 @@ import magmac.api.collect.list.Lists;
 import magmac.app.compile.error.CompileResult;
 import magmac.app.compile.node.MapNode;
 import magmac.app.compile.node.Node;
+import magmac.app.compile.rule.OrRule;
+import magmac.app.compile.rule.Rule;
 import magmac.app.lang.Deserializers;
 
-final class JavaRootSegments {
+public final class JavaRootSegments {
     public static CompileResult<JavaRootSegment> deserialize(Node node) {
         return Deserializers.orError("root-segment", node, Lists.of(
                 Deserializers.wrap(Whitespace::deserialize),
@@ -20,5 +22,17 @@ final class JavaRootSegments {
 
     public static Node serialize(JavaRootSegment segment) {
         return new MapNode();
+    }
+
+    static Rule getChildRule() {
+        return new OrRule(Lists.of(
+                Whitespace.createWhitespaceRule(),
+                Namespaced.createNamespacedRule("package"),
+                Namespaced.createNamespacedRule("import"),
+                Structures.createStructureRule("record"),
+                Structures.createStructureRule("interface"),
+                Structures.createStructureRule("class"),
+                Structures.createStructureRule("enum")
+        ));
     }
 }

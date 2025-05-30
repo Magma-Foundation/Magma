@@ -6,7 +6,7 @@ import magmac.app.lang.Deserializers;
 
 final class EnumValue {
     public static CompileResult<EnumValue> deserialize(Node node) {
-        return Deserializers.deserialize(node)
+        return Deserializers.destruct(node)
                 .complete(EnumValue::new);
     }
 }

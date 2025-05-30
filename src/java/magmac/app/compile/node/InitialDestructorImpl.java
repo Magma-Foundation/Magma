@@ -6,22 +6,23 @@ import magmac.api.iter.collect.ListCollector;
 import magmac.app.compile.error.CompileResult;
 import magmac.app.compile.error.CompileResultCollector;
 import magmac.app.compile.error.CompileResults;
+import magmac.app.lang.node.Deserializer;
 
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-public class InitialDeserializerImpl implements InitialDeserializer {
+public class InitialDestructorImpl implements InitialDestructor {
     private final Node node;
 
-    public InitialDeserializerImpl(Node node) {
+    public InitialDestructorImpl(Node node) {
         this.node = node;
     }
 
     @Override
-    public <T> CompoundDeserializer<List<T>> withNodeList(String key, Function<Node, CompileResult<T>> deserializer) {
+    public <T> CompoundDeserializer<List<T>> withNodeList(String key, Deserializer<T> deserializer) {
         return new CompoundDeserializerImpl<>(this.node.removeNodeListOrError(key).flatMapValue((Tuple2<Node, NodeList> tuple) -> tuple.right()
                 .iter()
-                .map(deserializer)
+                .map(deserializer::deserialize)
                 .collect(new CompileResultCollector<>(new ListCollector<>()))
                 .mapValue((List<T> collect) -> new Tuple2<>(tuple.left(), collect))));
     }

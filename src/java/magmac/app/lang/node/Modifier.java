@@ -11,7 +11,7 @@ import magmac.app.lang.Deserializers;
 
 public record Modifier(String value) {
     public static CompileResult<Modifier> deserialize(Node node) {
-        return Deserializers.deserialize(node)
+        return Deserializers.destruct(node)
                 .withString("value")
                 .complete(Modifier::new);
     }

@@ -8,7 +8,8 @@ import magmac.app.error.ApplicationError;
 import magmac.app.error.ThrowableError;
 import magmac.app.io.targets.Targets;
 import magmac.app.lang.Serializable;
-import magmac.app.lang.node.JavaRoot;
+import magmac.app.lang.node.JavaRootSegment;
+import magmac.app.lang.node.Root;
 import magmac.app.stage.unit.UnitSet;
 
 public final class CompileApplication<R extends Serializable> implements Application {
@@ -21,7 +22,7 @@ public final class CompileApplication<R extends Serializable> implements Applica
     }
 
     @Override
-    public Option<Error> parseAndStore(UnitSet<JavaRoot> units) {
+    public Option<Error> parseAndStore(UnitSet<Root<JavaRootSegment>> units) {
         return this.compiler.parseAndGenerate(units)
                 .toResult()
                 .mapErr(ApplicationError::new)

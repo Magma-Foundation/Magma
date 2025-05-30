@@ -6,7 +6,7 @@ import magmac.app.lang.Deserializers;
 
 public record Segment(String value) {
     public static CompileResult<Segment> deserialize(Node node) {
-        return Deserializers.deserialize(node)
+        return Deserializers.destruct(node)
                 .withString("value")
                 .complete(Segment::new);
     }

@@ -10,8 +10,8 @@ import magmac.app.compile.error.CompileResult;
 import magmac.app.compile.error.CompileResults;
 import magmac.app.compile.error.context.NodeContext;
 import magmac.app.compile.error.error.CompileError;
-import magmac.app.compile.node.InitialDeserializer;
-import magmac.app.compile.node.InitialDeserializerImpl;
+import magmac.app.compile.node.InitialDestructor;
+import magmac.app.compile.node.InitialDestructorImpl;
 import magmac.app.compile.node.Node;
 import magmac.app.error.ImmutableCompileError;
 
@@ -37,15 +37,15 @@ public final class Deserializers {
         return node -> deserializer.deserialize(node).map(result -> result.mapValue(value -> value));
     }
 
-    public static Option<InitialDeserializer> deserializeWithType(Node node, String type) {
+    public static Option<InitialDestructor> deserializeWithType(Node node, String type) {
         if (node.is(type)) {
-            return new Some<>(new InitialDeserializerImpl(node));
+            return new Some<>(new InitialDestructorImpl(node));
         }
 
         return new None<>();
     }
 
-    public static InitialDeserializer deserialize(Node node) {
-        return new InitialDeserializerImpl(node);
+    public static InitialDestructor destruct(Node node) {
+        return new InitialDestructorImpl(node);
     }
 }

@@ -4,7 +4,7 @@ import magmac.api.Option;
 import magmac.api.collect.list.List;
 import magmac.api.collect.list.Lists;
 import magmac.app.compile.error.CompileResult;
-import magmac.app.compile.node.InitialDeserializer;
+import magmac.app.compile.node.InitialDestructor;
 import magmac.app.compile.node.Node;
 import magmac.app.compile.rule.FilterRule;
 import magmac.app.compile.rule.LocatingRule;
@@ -35,10 +35,10 @@ public record Definition(
         Option<List<TypeParam>> typeParams
 ) implements Parameter, Assignable, MethodHeader {
     public static CompileResult<Definition> deserializeError(Node node) {
-        return Definition.complete(Deserializers.deserialize(node));
+        return Definition.complete(Deserializers.destruct(node));
     }
 
-    private static CompileResult<Definition> complete(InitialDeserializer deserialize) {
+    private static CompileResult<Definition> complete(InitialDestructor deserialize) {
         return deserialize.withString("name")
                 .withNode("type", Types::deserialize)
                 .withNodeList("modifiers", Modifier::deserialize)

@@ -1,4 +1,6 @@
 package magmac.app.lang.node;
 
-public sealed interface JavaRootSegment permits Whitespace, Namespaced, StructureNode {
+import magmac.app.lang.Serializable;
+
+public sealed interface JavaRootSegment extends Serializable permits Whitespace, Namespaced, StructureNode {
 }

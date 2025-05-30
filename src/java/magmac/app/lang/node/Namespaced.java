@@ -4,7 +4,8 @@ import magmac.api.Option;
 import magmac.api.collect.list.List;
 import magmac.api.iter.Iters;
 import magmac.app.compile.error.CompileResult;
-import magmac.app.compile.node.InitialDeserializer;
+import magmac.app.compile.node.InitialDestructor;
+import magmac.app.compile.node.MapNode;
 import magmac.app.compile.node.Node;
 import magmac.app.compile.rule.NodeListRule;
 import magmac.app.compile.rule.PrefixRule;
@@ -18,7 +19,7 @@ import magmac.app.lang.Deserializers;
 
 public record Namespaced(NamespacedType type, List<Segment> segments) implements JavaRootSegment {
     private static Option<CompileResult<JavaRootSegment>> deserialize(NamespacedType type, Node node) {
-        return Deserializers.deserializeWithType(node, type.type()).map((InitialDeserializer deserializer) -> deserializer
+        return Deserializers.deserializeWithType(node, type.type()).map((InitialDestructor deserializer) -> deserializer
                 .withNodeList("segments", Segment::deserialize)
                 .complete((List<Segment> segments1) -> new Namespaced(type, segments1)));
     }
@@ -33,5 +34,10 @@ public record Namespaced(NamespacedType type, List<Segment> segments) implements
     public static Rule createNamespacedRule(String type) {
         Rule childRule = new NodeListRule("segments", new DelimitedFolder('.'), new StringRule("value"));
         return new TypeRule(type, new StripRule(new SuffixRule(new PrefixRule(type + " ", childRule), ";")));
+    }
+
+    @Override
+    public Node serialize() {
+        return new MapNode();
     }
 }

@@ -32,6 +32,15 @@ PlantUMLInherits --> TypeRule
 class PlantUMLInherits
 PlantUMLRootSegment <|-- PlantUMLInherits
 interface Base
+Root --> List
+Root --> MapNode
+Root --> Node
+Root --> Rule
+Root --> TypeRule
+Root --> CommonLang
+Root --> Serializable
+class Root
+Serializable <|-- Root
 TargetPlatform --> Application
 TargetPlatform --> Compiler
 TargetPlatform --> Rule
@@ -121,7 +130,8 @@ Not --> Deserializers
 class Not
 Value <|-- Not
 Compiler --> CompileResult
-Compiler --> JavaRoot
+Compiler --> JavaRootSegment
+Compiler --> Root
 Compiler --> UnitSet
 interface Compiler
 MapCollector --> Tuple2
@@ -160,8 +170,8 @@ Deserializers --> CompileResult
 Deserializers --> CompileResults
 Deserializers --> NodeContext
 Deserializers --> CompileError
-Deserializers --> InitialDeserializer
-Deserializers --> InitialDeserializerImpl
+Deserializers --> InitialDestructor
+Deserializers --> InitialDestructorImpl
 Deserializers --> Node
 Deserializers --> ImmutableCompileError
 class Deserializers
@@ -210,7 +220,8 @@ CompileApplication --> ApplicationError
 CompileApplication --> ThrowableError
 CompileApplication --> Targets
 CompileApplication --> Serializable
-CompileApplication --> JavaRoot
+CompileApplication --> JavaRootSegment
+CompileApplication --> Root
 CompileApplication --> UnitSet
 class CompileApplication
 Application <|-- CompileApplication
@@ -252,19 +263,6 @@ Block --> LazyRule
 Block --> Deserializers
 class Block
 FunctionSegment <|-- Block
-JavaRoot --> List
-JavaRoot --> Lists
-JavaRoot --> CompileResult
-JavaRoot --> MapNode
-JavaRoot --> Node
-JavaRoot --> OrRule
-JavaRoot --> Rule
-JavaRoot --> TypeRule
-JavaRoot --> CommonLang
-JavaRoot --> Deserializers
-JavaRoot --> Serializable
-class JavaRoot
-Serializable <|-- JavaRoot
 OrState --> None
 OrState --> Option
 OrState --> Some
@@ -355,6 +353,17 @@ Result --> Tuple2
 Result --> Function
 Result --> Supplier
 interface Result
+InitialDestructorImpl --> Tuple2
+InitialDestructorImpl --> List
+InitialDestructorImpl --> ListCollector
+InitialDestructorImpl --> CompileResult
+InitialDestructorImpl --> CompileResultCollector
+InitialDestructorImpl --> CompileResults
+InitialDestructorImpl --> Deserializer
+InitialDestructorImpl --> Function
+InitialDestructorImpl --> Supplier
+class InitialDestructorImpl
+InitialDestructor <|-- InitialDestructorImpl
 Main --> Console
 Main --> Option
 Main --> Some
@@ -368,7 +377,9 @@ Main --> TypeScriptTargetPlatform
 Main --> ApplicationError
 Main --> PathSources
 Main --> Sources
-Main --> JavaRoot
+Main --> JavaLang
+Main --> JavaRootSegment
+Main --> Root
 Main --> Lexer
 Main --> RuleLexer
 Main --> UnitSet
@@ -389,7 +400,7 @@ MethodNode --> Option
 MethodNode --> List
 MethodNode --> Lists
 MethodNode --> CompileResult
-MethodNode --> InitialDeserializer
+MethodNode --> InitialDestructor
 MethodNode --> Node
 MethodNode --> FilterRule
 MethodNode --> LocatingRule
@@ -508,7 +519,9 @@ Stage <|-- Generator
 Max --> Optional
 class Max
 Collector <|-- Max
+JavaRootSegment --> Serializable
 interface JavaRootSegment
+Serializable <|-- JavaRootSegment
 DividingSplitter --> Option
 DividingSplitter --> Tuple2
 DividingSplitter --> List
@@ -636,6 +649,12 @@ InlinePassResult --> ParseUnitImpl
 InlinePassResult --> Supplier
 class InlinePassResult
 ParseResult <|-- InlinePassResult
+InitialDestructor --> List
+InitialDestructor --> CompileResult
+InitialDestructor --> Deserializer
+InitialDestructor --> Function
+InitialDestructor --> Supplier
+interface InitialDestructor
 TypeRule --> Lists
 TypeRule --> CompileResult
 TypeRule --> CompileResults
@@ -702,6 +721,10 @@ Some --> Predicate
 Some --> Supplier
 class Some
 Option <|-- Some
+Deserializer --> CompileResult
+Deserializer --> Node
+Deserializer --> Serializable
+interface Deserializer
 YieldNode --> Option
 YieldNode --> CompileResult
 YieldNode --> Node
@@ -757,7 +780,7 @@ JavaPlantUMLParser --> CompileResults
 JavaPlantUMLParser --> Location
 JavaPlantUMLParser --> ArrayType
 JavaPlantUMLParser --> Base
-JavaPlantUMLParser --> JavaRoot
+JavaPlantUMLParser --> Root
 JavaPlantUMLParser --> JavaRootSegment
 JavaPlantUMLParser --> Namespaced
 JavaPlantUMLParser --> PlantUMLDependency
@@ -877,7 +900,8 @@ TypeScriptTargetPlatform --> Rule
 TypeScriptTargetPlatform --> PathTargets
 TypeScriptTargetPlatform --> Targets
 TypeScriptTargetPlatform --> TypescriptLang
-TypeScriptTargetPlatform --> JavaRoot
+TypeScriptTargetPlatform --> JavaRootSegment
+TypeScriptTargetPlatform --> Root
 TypeScriptTargetPlatform --> TypescriptRoot
 TypeScriptTargetPlatform --> Generator
 TypeScriptTargetPlatform --> RuleGenerator
@@ -929,7 +953,8 @@ class Maps
 class Tuple2
 StagedCompiler --> CompileResult
 StagedCompiler --> Serializable
-StagedCompiler --> JavaRoot
+StagedCompiler --> JavaRootSegment
+StagedCompiler --> Root
 StagedCompiler --> Generator
 StagedCompiler --> Parser
 StagedCompiler --> UnitSet
@@ -945,7 +970,8 @@ JavaTypescriptParser --> CompileResultCollector
 JavaTypescriptParser --> CompileResults
 JavaTypescriptParser --> Location
 JavaTypescriptParser --> UnitSetCollector
-JavaTypescriptParser --> JavaRoot
+JavaTypescriptParser --> JavaRootSegment
+JavaTypescriptParser --> Root
 JavaTypescriptParser --> TypeScriptRootSegment
 JavaTypescriptParser --> TypescriptRoot
 JavaTypescriptParser --> Parser
@@ -974,6 +1000,12 @@ LastSelector --> List
 LastSelector --> Joiner
 class LastSelector
 Selector <|-- LastSelector
+RootDeserializer --> CompileResult
+RootDeserializer --> Node
+RootDeserializer --> Deserializers
+RootDeserializer --> Serializable
+class RootDeserializer
+Deserializer <|-- RootDeserializer
 InlineCompileResult --> Tuple2
 InlineCompileResult --> Result
 InlineCompileResult --> CompileError
@@ -1004,7 +1036,8 @@ Namespaced --> Option
 Namespaced --> List
 Namespaced --> Iters
 Namespaced --> CompileResult
-Namespaced --> InitialDeserializer
+Namespaced --> InitialDestructor
+Namespaced --> MapNode
 Namespaced --> Node
 Namespaced --> NodeListRule
 Namespaced --> PrefixRule
@@ -1017,11 +1050,6 @@ Namespaced --> DelimitedFolder
 Namespaced --> Deserializers
 class Namespaced
 JavaRootSegment <|-- Namespaced
-InitialDeserializer --> List
-InitialDeserializer --> CompileResult
-InitialDeserializer --> Function
-InitialDeserializer --> Supplier
-interface InitialDeserializer
 Try --> Option
 Try --> CompileResult
 Try --> Node
@@ -1054,7 +1082,8 @@ StructureNode --> Tuple2
 StructureNode --> List
 StructureNode --> CompileResult
 StructureNode --> CompoundDeserializer
-StructureNode --> InitialDeserializer
+StructureNode --> InitialDestructor
+StructureNode --> MapNode
 StructureNode --> Node
 StructureNode --> Deserializers
 class StructureNode
@@ -1223,6 +1252,7 @@ class FoldingDivider
 Divider <|-- FoldingDivider
 Whitespace --> Option
 Whitespace --> CompileResult
+Whitespace --> MapNode
 Whitespace --> Node
 Whitespace --> ExactRule
 Whitespace --> Rule
@@ -1252,6 +1282,10 @@ InvocationFolder --> DivideState
 InvocationFolder --> Folder
 class InvocationFolder
 Folder <|-- InvocationFolder
+JavaLang --> JavaRootSegment
+JavaLang --> JavaRootSegments
+JavaLang --> RootDeserializer
+class JavaLang
 StringRule --> Ok
 StringRule --> CompileResult
 StringRule --> CompileResults
@@ -1425,7 +1459,7 @@ Definition --> Option
 Definition --> List
 Definition --> Lists
 Definition --> CompileResult
-Definition --> InitialDeserializer
+Definition --> InitialDestructor
 Definition --> Node
 Definition --> FilterRule
 Definition --> LocatingRule
@@ -1525,7 +1559,8 @@ Segment --> Deserializers
 class Segment
 Application --> Option
 Application --> Error
-Application --> JavaRoot
+Application --> JavaRootSegment
+Application --> Root
 Application --> UnitSet
 interface Application
 ImmutableParseState --> Location
@@ -1615,6 +1650,8 @@ JavaRootSegments --> Lists
 JavaRootSegments --> CompileResult
 JavaRootSegments --> MapNode
 JavaRootSegments --> Node
+JavaRootSegments --> OrRule
+JavaRootSegments --> Rule
 JavaRootSegments --> Deserializers
 class JavaRootSegments
 HeadedIter --> Option
@@ -1627,16 +1664,6 @@ HeadedIter --> Function
 HeadedIter --> Predicate
 class HeadedIter
 Iter <|-- HeadedIter
-InitialDeserializerImpl --> Tuple2
-InitialDeserializerImpl --> List
-InitialDeserializerImpl --> ListCollector
-InitialDeserializerImpl --> CompileResult
-InitialDeserializerImpl --> CompileResultCollector
-InitialDeserializerImpl --> CompileResults
-InitialDeserializerImpl --> Function
-InitialDeserializerImpl --> Supplier
-class InitialDeserializerImpl
-InitialDeserializer <|-- InitialDeserializerImpl
 Splitter --> Option
 Splitter --> Tuple2
 interface Splitter

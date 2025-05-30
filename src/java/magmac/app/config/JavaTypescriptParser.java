@@ -7,7 +7,8 @@ import magmac.app.compile.error.CompileResultCollector;
 import magmac.app.compile.error.CompileResults;
 import magmac.app.io.Location;
 import magmac.app.io.sources.UnitSetCollector;
-import magmac.app.lang.node.JavaRoot;
+import magmac.app.lang.node.JavaRootSegment;
+import magmac.app.lang.node.Root;
 import magmac.app.lang.node.TypeScriptRootSegment;
 import magmac.app.lang.node.TypescriptRoot;
 import magmac.app.stage.parse.Parser;
@@ -15,18 +16,18 @@ import magmac.app.stage.unit.SimpleUnit;
 import magmac.app.stage.unit.Unit;
 import magmac.app.stage.unit.UnitSet;
 
-class JavaTypescriptParser implements Parser<JavaRoot, TypescriptRoot> {
-    private static CompileResult<Unit<TypescriptRoot>> parseUnit(Unit<JavaRoot> unit) {
+class JavaTypescriptParser implements Parser<Root<JavaRootSegment>, TypescriptRoot> {
+    private static CompileResult<Unit<TypescriptRoot>> parseUnit(Unit<Root<JavaRootSegment>> unit) {
         return unit.destruct((location, javaRoot) -> JavaTypescriptParser.parseRoot(location, javaRoot));
     }
 
-    private static CompileResult<Unit<TypescriptRoot>> parseRoot(Location location, JavaRoot root) {
+    private static CompileResult<Unit<TypescriptRoot>> parseRoot(Location location, Root<JavaRootSegment> root) {
         List<TypeScriptRootSegment> rootSegments = Lists.empty();
         return CompileResults.Ok(new SimpleUnit<>(location, new TypescriptRoot(rootSegments)));
     }
 
     @Override
-    public CompileResult<UnitSet<TypescriptRoot>> apply(UnitSet<JavaRoot> initial) {
+    public CompileResult<UnitSet<TypescriptRoot>> apply(UnitSet<Root<JavaRootSegment>> initial) {
         return initial.iter()
                 .map(JavaTypescriptParser::parseUnit)
                 .collect(new CompileResultCollector<>(new UnitSetCollector<>()));

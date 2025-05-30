@@ -6,7 +6,7 @@ import magmac.app.lang.Deserializers;
 
 record Annotation(String value) {
     public static CompileResult<Annotation> deserialize(Node node) {
-        return Deserializers.deserialize(node)
+        return Deserializers.destruct(node)
                 .withString("value")
                 .complete(Annotation::new);
     }

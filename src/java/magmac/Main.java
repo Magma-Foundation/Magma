@@ -13,7 +13,9 @@ import magmac.app.config.TypeScriptTargetPlatform;
 import magmac.app.error.ApplicationError;
 import magmac.app.io.sources.PathSources;
 import magmac.app.io.sources.Sources;
-import magmac.app.lang.node.JavaRoot;
+import magmac.app.lang.JavaLang;
+import magmac.app.lang.node.JavaRootSegment;
+import magmac.app.lang.node.Root;
 import magmac.app.stage.lexer.Lexer;
 import magmac.app.stage.lexer.RuleLexer;
 import magmac.app.stage.unit.UnitSet;
@@ -29,19 +31,19 @@ final class Main {
                 .ifPresent(error -> Console.handleError(error.display()));
     }
 
-    private static Option<Error> getNext(UnitSet<JavaRoot> result) {
+    private static Option<Error> getNext(UnitSet<Root<JavaRootSegment>> result) {
         return Iters.fromValues(new PlantUMLTargetPlatform(), new TypeScriptTargetPlatform())
                 .map((TargetPlatform platform) -> Main.run(result, platform))
                 .flatMap(Iters::fromOption)
                 .next();
     }
 
-    private static Result<UnitSet<JavaRoot>, ApplicationError> loadSources(Sources sources) {
-        Lexer lexer = new RuleLexer(JavaRoot.createRule());
-        return new LexingStage<JavaRoot>(lexer, JavaRoot::deserialize).getUnitSetApplicationErrorResult(sources);
+    private static Result<UnitSet<Root<JavaRootSegment>>, ApplicationError> loadSources(Sources sources) {
+        Lexer lexer = new RuleLexer(Root.createRule());
+        return new LexingStage<Root<JavaRootSegment>>(lexer, node -> JavaLang.createDeserializer().deserialize(node)).getUnitSetApplicationErrorResult(sources);
     }
 
-    private static Option<Error> run(UnitSet<JavaRoot> roots, TargetPlatform platform) {
+    private static Option<Error> run(UnitSet<Root<JavaRootSegment>> roots, TargetPlatform platform) {
         return platform.createApplication().parseAndStore(roots);
     }
 }

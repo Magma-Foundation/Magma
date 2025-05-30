@@ -6,7 +6,7 @@ import magmac.app.lang.Deserializers;
 
 record TypeParam(String value) {
     public static CompileResult<TypeParam> deserialize(Node node) {
-        return Deserializers.deserialize(node)
+        return Deserializers.destruct(node)
                 .withString("value")
                 .complete(TypeParam::new);
     }

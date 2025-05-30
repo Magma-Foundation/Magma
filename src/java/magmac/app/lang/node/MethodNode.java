@@ -4,7 +4,7 @@ import magmac.api.Option;
 import magmac.api.collect.list.List;
 import magmac.api.collect.list.Lists;
 import magmac.app.compile.error.CompileResult;
-import magmac.app.compile.node.InitialDeserializer;
+import magmac.app.compile.node.InitialDestructor;
 import magmac.app.compile.node.Node;
 import magmac.app.compile.rule.FilterRule;
 import magmac.app.compile.rule.LocatingRule;
@@ -22,7 +22,7 @@ import magmac.app.lang.Deserializers;
 
 record MethodNode(MethodHeader methodHeader, Option<List<FunctionSegment>> maybeChildren, List<Parameter> right) implements StructureMember {
     public static Option<CompileResult<StructureMember>> deserialize(Node node) {
-        return Deserializers.deserializeWithType(node, "method").map((InitialDeserializer deserializer) -> deserializer
+        return Deserializers.deserializeWithType(node, "method").map((InitialDestructor deserializer) -> deserializer
                 .withNode("header", MethodHeader::deserializeError)
                 .withNodeListOptionally("children", FunctionSegment::deserialize)
                 .withNodeList("parameters", Parameters::deserialize)

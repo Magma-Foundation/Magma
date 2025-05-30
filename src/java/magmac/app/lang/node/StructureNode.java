@@ -5,7 +5,8 @@ import magmac.api.Tuple2;
 import magmac.api.collect.list.List;
 import magmac.app.compile.error.CompileResult;
 import magmac.app.compile.node.CompoundDeserializer;
-import magmac.app.compile.node.InitialDeserializer;
+import magmac.app.compile.node.InitialDestructor;
+import magmac.app.compile.node.MapNode;
 import magmac.app.compile.node.Node;
 import magmac.app.lang.Deserializers;
 
@@ -22,14 +23,14 @@ public record StructureNode(
 ) implements JavaRootSegment {
     public static Option<CompileResult<JavaRootSegment>> deserialize(StructureType type, Node node) {
         return Deserializers.deserializeWithType(node, type.name().toLowerCase())
-                .map((InitialDeserializer deserializer) -> StructureNode.deserializeHelper(type, deserializer));
+                .map((InitialDestructor deserializer) -> StructureNode.deserializeHelper(type, deserializer));
     }
 
-    private static CompileResult<JavaRootSegment> deserializeHelper(StructureType type, InitialDeserializer deserializer) {
+    private static CompileResult<JavaRootSegment> deserializeHelper(StructureType type, InitialDestructor deserializer) {
         return StructureNode.attachOptionals(StructureNode.attachRequired(deserializer)).complete(tuple -> StructureNode.from(type, tuple));
     }
 
-    private static CompoundDeserializer<Tuple2<Tuple2<String, List<Modifier>>, List<StructureMember>>> attachRequired(InitialDeserializer deserializer) {
+    private static CompoundDeserializer<Tuple2<Tuple2<String, List<Modifier>>, List<StructureMember>>> attachRequired(InitialDestructor deserializer) {
         return deserializer.withString("name")
                 .withNodeList("modifiers", Modifier::deserialize)
                 .withNodeList("children", StructureMembers::deserialize);
@@ -56,5 +57,10 @@ public record StructureNode(
                 tuple.left().right(),
                 tuple.right()
         );
+    }
+
+    @Override
+    public Node serialize() {
+        return new MapNode();
     }
 }
