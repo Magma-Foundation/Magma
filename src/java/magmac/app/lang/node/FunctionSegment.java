@@ -56,7 +56,7 @@ public interface FunctionSegment {
         StripRule rightRule = new StripRule(new SuffixRule(new NodeRule("value", value), ";"));
         Rule childRule = LocatingRule.First(beforeArrow, "->", new OrRule(Lists.of(
                 rightRule,
-                new StripRule(new PrefixRule("{", new SuffixRule(new NodeListRule("children", new StatementFolder(), segment), "}")))
+                new StripRule(new PrefixRule("{", new SuffixRule(NodeListRule.createNodeListRule("children", new StatementFolder(), segment), "}")))
         )));
         return new TypeRule("case", new StripRule(new PrefixRule("case", childRule)));
     }

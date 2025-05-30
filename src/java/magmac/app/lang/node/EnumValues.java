@@ -26,7 +26,7 @@ record EnumValues(List<EnumValue> values) implements StructureMember {
                 rule
         )));
 
-        Rule enumValues = new NodeListRule("children", new ValueFolder(), enumValue);
+        Rule enumValues = NodeListRule.createNodeListRule("children", new ValueFolder(), enumValue);
         Rule withEnd = new StripRule(new SuffixRule(enumValues, ";"));
         return new TypeRule("enum-values", new OrRule(Lists.of(
                 withEnd,

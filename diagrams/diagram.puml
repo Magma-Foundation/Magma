@@ -881,16 +881,18 @@ TypescriptLang --> StringRule
 TypescriptLang --> StripRule
 TypescriptLang --> SuffixRule
 TypescriptLang --> TypeRule
+TypescriptLang --> DelimitedDivider
+TypescriptLang --> Divider
 TypescriptLang --> DelimitedFolder
-TypescriptLang --> Whitespace
 TypescriptLang --> Definition
-TypescriptLang --> Modifier
 TypescriptLang --> FunctionSegment
+TypescriptLang --> Modifier
 TypescriptLang --> Parameters
 TypescriptLang --> StructureStatement
-TypescriptLang --> TemplateType
 TypescriptLang --> Symbols
+TypescriptLang --> TemplateType
 TypescriptLang --> Values
+TypescriptLang --> Whitespace
 class TypescriptLang
 TypeScriptTargetPlatform --> Application
 TypeScriptTargetPlatform --> CompileApplication
@@ -1215,6 +1217,7 @@ QualifiedType --> List
 QualifiedType --> CompileResult
 QualifiedType --> Node
 QualifiedType --> NodeListRule
+QualifiedType --> Rule
 QualifiedType --> TypeRule
 QualifiedType --> DelimitedFolder
 QualifiedType --> Deserializers
@@ -1334,6 +1337,11 @@ class VariadicType
 Type <|-- VariadicType
 Head --> Option
 interface Head
+DelimitedDivider --> Iter
+DelimitedDivider --> Iters
+DelimitedDivider --> Pattern
+class DelimitedDivider
+Divider <|-- DelimitedDivider
 ParseResult --> CompileResult
 ParseResult --> Node
 ParseResult --> ParseUnit
@@ -1462,6 +1470,7 @@ NodeListRule --> MapNode
 NodeListRule --> Node
 NodeListRule --> NodeList
 NodeListRule --> NodeListCollector
+NodeListRule --> Divider
 NodeListRule --> FoldingDivider
 NodeListRule --> Folder
 NodeListRule --> ValueFolder

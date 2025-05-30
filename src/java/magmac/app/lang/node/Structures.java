@@ -25,13 +25,13 @@ final class Structures {
         ));
 
         Rule type = Types.createTypeRule();
-        Rule extended = new NodeListRule("extended", new ValueFolder(), type);
+        Rule extended = NodeListRule.createNodeListRule("extended", new ValueFolder(), type);
         Rule withEnds = new OrRule(Lists.of(
                 LocatingRule.First(withParameters, " extends ", extended),
                 withParameters
         ));
 
-        Rule implemented = new NodeListRule("implemented", new ValueFolder(), type);
+        Rule implemented = NodeListRule.createNodeListRule("implemented", new ValueFolder(), type);
         Rule withImplements = new OrRule(Lists.of(
                 new ContextRule("With implements", LocatingRule.First(withEnds, "implements", implemented)),
                 new ContextRule("Without implements", withEnds)

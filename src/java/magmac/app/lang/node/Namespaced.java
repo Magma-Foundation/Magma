@@ -32,7 +32,7 @@ public record Namespaced(NamespacedType type, List<Segment> segments) implements
     }
 
     public static Rule createNamespacedRule(String type) {
-        Rule childRule = new NodeListRule("segments", new DelimitedFolder('.'), new StringRule("value"));
+        Rule childRule = NodeListRule.createNodeListRule("segments", new DelimitedFolder('.'), new StringRule("value"));
         return new TypeRule(type, new StripRule(new SuffixRule(new PrefixRule(type + " ", childRule), ";")));
     }
 

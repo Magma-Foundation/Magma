@@ -17,6 +17,6 @@ public record Modifier(String value) {
     }
 
     public static Rule createModifiersRule() {
-        return new StripRule(new NodeListRule("modifiers", new DelimitedFolder(' '), new StringRule("value")));
+        return new StripRule(NodeListRule.createNodeListRule("modifiers", new DelimitedFolder(' '), new StringRule("value")));
     }
 }

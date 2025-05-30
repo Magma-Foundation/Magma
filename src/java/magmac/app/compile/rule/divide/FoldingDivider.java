@@ -74,4 +74,9 @@ public record FoldingDivider(Folder folder) implements Divider {
 
         return current.advance().iter();
     }
+
+    @Override
+    public String createDelimiter() {
+        return this.folder.createDelimiter();
+    }
 }

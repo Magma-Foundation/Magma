@@ -5,6 +5,7 @@ import magmac.api.collect.list.List;
 import magmac.app.compile.error.CompileResult;
 import magmac.app.compile.node.Node;
 import magmac.app.compile.rule.NodeListRule;
+import magmac.app.compile.rule.Rule;
 import magmac.app.compile.rule.TypeRule;
 import magmac.app.compile.rule.fold.DelimitedFolder;
 import magmac.app.lang.Deserializers;
@@ -18,7 +19,7 @@ public record QualifiedType(List<Segment> segments) implements Base {
         return new TypeRule("qualified", QualifiedType.createSegmentsRule("segments"));
     }
 
-    private static NodeListRule createSegmentsRule(String key) {
-        return new NodeListRule(key, new DelimitedFolder('.'), Symbols.createSymbolRule("value"));
+    private static Rule createSegmentsRule(String key) {
+        return NodeListRule.createNodeListRule(key, new DelimitedFolder('.'), Symbols.createSymbolRule("value"));
     }
 }

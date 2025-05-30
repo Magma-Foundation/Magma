@@ -8,7 +8,7 @@ public record TypeScriptImport(List<Segment> values, List<Segment> segments) imp
     @Override
     public Node serialize() {
         return new MapNode("import")
-                .withSerializedNodeList("children", this.values, Segment::serialize)
+                .withSerializedNodeList("values", this.values, Segment::serialize)
                 .withSerializedNodeList("segments", this.segments, Segment::serialize);
     }
 }

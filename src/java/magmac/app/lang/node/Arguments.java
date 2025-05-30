@@ -16,7 +16,7 @@ final class Arguments {
         ));
     }
 
-    public static NodeListRule createArgumentsRule(Rule value) {
+    public static Rule createArgumentsRule(Rule value) {
         return NodeListRule.Values("arguments", new OrRule(Lists.of(
                 Whitespace.createWhitespaceRule(),
                 value

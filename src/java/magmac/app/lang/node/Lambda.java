@@ -41,8 +41,8 @@ record Lambda() implements Value {
         return new TypeRule("lambda", LocatingRule.First(new StripRule(beforeInfix), infix, afterInfix));
     }
 
-    private static NodeListRule createLambdaParameterRule(Rule definition) {
-        return new NodeListRule("parameters", new ValueFolder(), new OrRule(Lists.of(
+    private static Rule createLambdaParameterRule(Rule definition) {
+        return NodeListRule.createNodeListRule("parameters", new ValueFolder(), new OrRule(Lists.of(
                 definition,
                 Symbols.createSymbolRule("param")
         )));

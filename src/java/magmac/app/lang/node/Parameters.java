@@ -17,8 +17,8 @@ public final class Parameters {
         ));
     }
 
-    public static NodeListRule createParametersRule(Rule definition) {
-        return new NodeListRule("parameters", new ValueFolder(), new OrRule(Lists.of(
+    public static Rule createParametersRule(Rule definition) {
+        return NodeListRule.createNodeListRule("parameters", new ValueFolder(), new OrRule(Lists.of(
                 Whitespace.createWhitespaceRule(),
                 definition
         )));

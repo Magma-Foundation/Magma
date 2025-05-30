@@ -58,7 +58,7 @@ public record Definition(
 
     public static Rule createDefinitionRule() {
         Rule modifiers = Modifier.createModifiersRule();
-        Rule annotations = new NodeListRule("annotations", new DelimitedFolder('\n'), new StripRule(new PrefixRule("@", new StringRule("value"))));
+        Rule annotations = NodeListRule.createNodeListRule("annotations", new DelimitedFolder('\n'), new StripRule(new PrefixRule("@", new StringRule("value"))));
         Rule beforeTypeParams = new OrRule(Lists.of(
                 LocatingRule.Last(annotations, "\n", modifiers),
                 modifiers
@@ -75,7 +75,7 @@ public record Definition(
     }
 
     public static Rule attachTypeParams(Rule beforeTypeParams) {
-        Rule typeParams = new NodeListRule("type-parameters", new ValueFolder(), new StringRule("value"));
+        Rule typeParams = NodeListRule.createNodeListRule("type-parameters", new ValueFolder(), new StringRule("value"));
         return new OptionNodeListRule("type-parameters",
                 new StripRule(new SuffixRule(LocatingRule.First(beforeTypeParams, "<", typeParams), ">")),
                 beforeTypeParams

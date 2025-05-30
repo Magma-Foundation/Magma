@@ -11,16 +11,18 @@ import magmac.app.compile.rule.StringRule;
 import magmac.app.compile.rule.StripRule;
 import magmac.app.compile.rule.SuffixRule;
 import magmac.app.compile.rule.TypeRule;
+import magmac.app.compile.rule.divide.DelimitedDivider;
+import magmac.app.compile.rule.divide.Divider;
 import magmac.app.compile.rule.fold.DelimitedFolder;
-import magmac.app.lang.node.Whitespace;
 import magmac.app.lang.node.Definition;
-import magmac.app.lang.node.Modifier;
 import magmac.app.lang.node.FunctionSegment;
+import magmac.app.lang.node.Modifier;
 import magmac.app.lang.node.Parameters;
 import magmac.app.lang.node.StructureStatement;
-import magmac.app.lang.node.TemplateType;
 import magmac.app.lang.node.Symbols;
+import magmac.app.lang.node.TemplateType;
 import magmac.app.lang.node.Values;
+import magmac.app.lang.node.Whitespace;
 
 public final class TypescriptLang {
     public static Rule createRule() {
@@ -33,8 +35,9 @@ public final class TypescriptLang {
     }
 
     private static Rule createImportRule() {
-        Rule segments = new SuffixRule(new NodeListRule("segments", new DelimitedFolder('/'), new StringRule("value")), "\";\n");
-        Rule first = LocatingRule.First(new StringRule("child"), " } from \"", segments);
+        Rule segments = new SuffixRule(NodeListRule.createNodeListRule("segments", new DelimitedFolder('/'), new StringRule("value")), "\";\n");
+        Rule leftRule = new NodeListRule("values", new StringRule("value"), new DelimitedDivider(", "));
+        Rule first = LocatingRule.First(leftRule, " } from \"", segments);
         return new TypeRule("import", new PrefixRule("import { ", first));
     }
 
@@ -72,7 +75,7 @@ public final class TypescriptLang {
     }
 
     private static Rule createConstructorRule(Rule definition) {
-        NodeListRule parametersRule = Parameters.createParametersRule(definition);
+        Rule parametersRule = Parameters.createParametersRule(definition);
         return new TypeRule("constructor", new PrefixRule("constructor(", new SuffixRule(parametersRule, ")")));
     }
 

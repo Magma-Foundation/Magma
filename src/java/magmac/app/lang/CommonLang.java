@@ -10,8 +10,8 @@ import magmac.app.compile.rule.TypeRule;
 import magmac.app.compile.rule.fold.StatementFolder;
 
 public final class CommonLang {
-    public static NodeListRule Statements(String key, Rule childRule) {
-        return new NodeListRule(key, new StatementFolder(), childRule);
+    public static Rule Statements(String key, Rule childRule) {
+        return NodeListRule.createNodeListRule(key, new StatementFolder(), childRule);
     }
 
     public static Rule createIndexRule(LazyRule value) {
