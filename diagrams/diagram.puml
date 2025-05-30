@@ -1134,6 +1134,9 @@ PlantUMLRootSegment <|-- PlantUMLHeader
 Rule --> CompileResult
 Rule --> Node
 interface Rule
+StructureNode --> Option
+StructureNode --> List
+class StructureNode
 CompileResultCollector --> Collector
 CompileResultCollector --> Ok
 class CompileResultCollector
