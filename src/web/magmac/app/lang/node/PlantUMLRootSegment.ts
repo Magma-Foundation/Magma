@@ -1,1 +1,1 @@
-import { Serializable } from "magmac/app/lang/Serializable";
+import { Serializable } from "../../../../magmac/app/lang/Serializable";

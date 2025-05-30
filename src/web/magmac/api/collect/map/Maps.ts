@@ -1,1 +1,1 @@
-import { HashMap } from "java/util/HashMap";
+import { HashMap } from "../../../../java/util/HashMap";

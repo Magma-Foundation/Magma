@@ -43,7 +43,7 @@ public final class Values {
                 .map(operator -> Deserializers.wrap(Operation.deserializeAs(operator)))
                 .collect(new ListCollector<>());
 
-        return Deserializers.or(node, deserializers.addAll(operatorRules));
+        return Deserializers.or(node, deserializers.addAllLast(operatorRules));
     }
 
     public static LazyRule initValueRule(Rule segment, LazyRule value, String lambdaInfix, Rule definition) {
@@ -69,7 +69,7 @@ public final class Values {
                 .map(operator -> Operation.createOperationRule(value, operator.type(), operator.text()))
                 .collect(new ListCollector<>());
 
-        return ruleList.addAll(operatorLists);
+        return ruleList.addAllLast(operatorLists);
     }
 
     private static TypeRule createSwitchRule(Rule functionSegmentRule, Rule value) {

@@ -1,1 +1,1 @@
-import { Error } from "magmac/api/error/Error";
+import { Error } from "../../../magmac/api/error/Error";

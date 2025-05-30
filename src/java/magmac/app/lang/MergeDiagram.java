@@ -70,7 +70,7 @@ public class MergeDiagram implements AfterAll {
 
             List<String> parentDependencies = MergeDiagram.findParentDependencies(child, childrenWithInheritedTypes, childrenWithDependencies);
             List<String> childWithInheritedTypes = childrenWithInheritedTypes.getOrDefault(child, Lists.empty());
-            List<String> toRemove = parentDependencies.addAll(childWithInheritedTypes);
+            List<String> toRemove = parentDependencies.addAllLast(childWithInheritedTypes);
             List<String> list = currentDependencies.removeAll(toRemove);
 
             NodeList others = new InlineNodeList(list.iter()

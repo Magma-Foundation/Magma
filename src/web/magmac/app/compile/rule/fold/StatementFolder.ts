@@ -1,1 +1,1 @@
-import { DivideState } from "magmac/app/compile/rule/divide/DivideState";
+import { DivideState } from "../../../../../magmac/app/compile/rule/divide/DivideState";

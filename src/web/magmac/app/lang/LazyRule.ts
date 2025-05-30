@@ -1,1 +1,1 @@
-import { Rule } from "magmac/app/compile/rule/Rule";
+import { Rule } from "../../../magmac/app/compile/rule/Rule";

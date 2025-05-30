@@ -1,1 +1,1 @@
-import { CompileResult } from "magmac/app/compile/error/CompileResult";
+import { CompileResult } from "../../../magmac/app/compile/error/CompileResult";

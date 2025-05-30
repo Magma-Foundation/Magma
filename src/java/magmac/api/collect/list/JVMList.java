@@ -30,7 +30,7 @@ public record JVMList<T>(java.util.List<T> elements) implements List<T> {
     }
 
     @Override
-    public List<T> addAll(List<T> others) {
+    public List<T> addAllLast(List<T> others) {
         return others.iter().fold(this.createInitial(), List::addLast);
     }
 

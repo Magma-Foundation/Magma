@@ -11,7 +11,7 @@ public interface List<T> {
 
     Iter<T> iter();
 
-    List<T> addAll(List<T> others);
+    List<T> addAllLast(List<T> others);
 
     List<T> removeAll(List<T> others);
 

@@ -1,1 +1,1 @@
-import { Collector } from "magmac/api/iter/collect/Collector";
+import { Collector } from "../../../../magmac/api/iter/collect/Collector";

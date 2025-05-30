@@ -119,8 +119,8 @@ public class JavaPlantUMLParser implements Parser<Root<JavaRootSegment>, PlantUM
         String child = structureNode.name();
 
         return Lists.of(segment)
-                .addAll(JavaPlantUMLParser.toInherits(child, structureNode.extended()))
-                .addAll(JavaPlantUMLParser.toInherits(child, structureNode.implemented()))
+                .addAllLast(JavaPlantUMLParser.toInherits(child, structureNode.extended()))
+                .addAllLast(JavaPlantUMLParser.toInherits(child, structureNode.implemented()))
                 .iter();
     }
 

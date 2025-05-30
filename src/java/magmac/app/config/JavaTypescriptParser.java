@@ -30,34 +30,40 @@ class JavaTypescriptParser implements Parser<Root<JavaRootSegment>, TypescriptRo
     private static CompileResult<Unit<TypescriptRoot>> parseRoot(Location location, Root<JavaRootSegment> root) {
         List<TypeScriptRootSegment> rootSegments = root.children()
                 .iter()
-                .map(JavaTypescriptParser::parseRootSegment)
+                .map(rootSegment -> JavaTypescriptParser.parseRootSegment(location, rootSegment))
                 .collect(new ListCollector<>());
 
         return CompileResults.Ok(new SimpleUnit<>(location, new TypescriptRoot(rootSegments)));
     }
 
-    private static TypeScriptRootSegment parseRootSegment(JavaRootSegment rootSegment) {
+    private static TypeScriptRootSegment parseRootSegment(Location location, JavaRootSegment rootSegment) {
         return switch (rootSegment) {
-            case Namespaced namespaced -> JavaTypescriptParser.parseNamespaced(namespaced);
+            case Namespaced namespaced -> JavaTypescriptParser.parseNamespaced(location, namespaced);
             case StructureNode structureNode -> new Whitespace();
             case Whitespace whitespace -> whitespace;
         };
     }
 
-    private static TypeScriptRootSegment parseNamespaced(Namespaced namespaced) {
+    private static TypeScriptRootSegment parseNamespaced(Location location, Namespaced namespaced) {
         return switch (namespaced.type()) {
             case Package -> new Whitespace();
-            case Import -> JavaTypescriptParser.parseImport(namespaced.segments());
+            case Import -> JavaTypescriptParser.parseImport(location, namespaced.segments());
         };
     }
 
-    private static TypeScriptImport parseImport(List<Segment> segments) {
+    private static TypeScriptImport parseImport(Location location, List<Segment> segments) {
         List<String> segmentValues = segments.iter()
                 .map(Segment::value)
                 .collect(new ListCollector<>());
 
+        List<Segment> before = location.namespace()
+                .iter()
+                .map(_ -> "..")
+                .map(Segment::new)
+                .collect(new ListCollector<>());
+
         Segment last = new Segment(segmentValues.findLast().orElse(""));
-        return new TypeScriptImport(Lists.of(last), segments);
+        return new TypeScriptImport(Lists.of(last), before.addAllLast(segments));
     }
 
     @Override
