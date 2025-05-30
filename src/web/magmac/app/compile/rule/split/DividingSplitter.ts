@@ -4,3 +4,5 @@ import { List } from "../../../../../magmac/api/collect/list/List";
 import { ListCollector } from "../../../../../magmac/api/iter/collect/ListCollector";
 import { Splitter } from "../../../../../magmac/app/compile/rule/Splitter";
 import { Divider } from "../../../../../magmac/app/compile/rule/divide/Divider";
+export class DividingSplitter {
+}

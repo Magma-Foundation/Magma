@@ -10,3 +10,5 @@ import { Files } from "../../../java/nio/file/Files";
 import { Path } from "../../../java/nio/file/Path";
 import { Collectors } from "../../../java/util/stream/Collectors";
 import { Stream } from "../../../java/util/stream/Stream";
+export class SafeFiles {
+}

@@ -11,3 +11,5 @@ import { Generator } from "../../../magmac/app/stage/generate/Generator";
 import { RuleGenerator } from "../../../magmac/app/stage/generate/RuleGenerator";
 import { Path } from "../../../java/nio/file/Path";
 import { Paths } from "../../../java/nio/file/Paths";
+export class PlantUMLTargetPlatform {
+}

@@ -8,3 +8,5 @@ import { CompileResult } from "../../../../magmac/app/compile/error/CompileResul
 import { CompileResultCollector } from "../../../../magmac/app/compile/error/CompileResultCollector";
 import { CompileResults } from "../../../../magmac/app/compile/error/CompileResults";
 import { Function } from "../../../../java/util/function/Function";
+export class CompoundDestructorImpl<T> {
+}

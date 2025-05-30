@@ -8,3 +8,5 @@ import { Divider } from "../../../../magmac/app/compile/rule/divide/Divider";
 import { FoldingDivider } from "../../../../magmac/app/compile/rule/divide/FoldingDivider";
 import { Folder } from "../../../../magmac/app/compile/rule/fold/Folder";
 import { ValueFolder } from "../../../../magmac/app/lang/ValueFolder";
+export class NodeListRule {
+}

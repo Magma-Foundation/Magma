@@ -18,3 +18,5 @@ import { Lexer } from "../magmac/app/stage/lexer/Lexer";
 import { RuleLexer } from "../magmac/app/stage/lexer/RuleLexer";
 import { UnitSet } from "../magmac/app/stage/unit/UnitSet";
 import { Paths } from "../java/nio/file/Paths";
+export class Main {
+}

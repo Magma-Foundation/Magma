@@ -14,3 +14,5 @@ import { CompileResults } from "../../../../magmac/app/compile/error/CompileResu
 import { CompileErrors } from "../../../../magmac/app/compile/error/error/CompileErrors";
 import { BiFunction } from "../../../../java/util/function/BiFunction";
 import { Function } from "../../../../java/util/function/Function";
+export class MapNode {
+}

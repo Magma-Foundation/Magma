@@ -5,3 +5,5 @@ import { Root } from "../../../magmac/app/lang/node/Root";
 import { Generator } from "../../../magmac/app/stage/generate/Generator";
 import { Parser } from "../../../magmac/app/stage/parse/Parser";
 import { UnitSet } from "../../../magmac/app/stage/unit/UnitSet";
+export class StagedCompiler<R extends Serializable> {
+}

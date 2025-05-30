@@ -13,3 +13,5 @@ import { InitialDestructorImpl } from "../../../magmac/app/compile/node/InitialD
 import { Node } from "../../../magmac/app/compile/node/Node";
 import { ImmutableCompileError } from "../../../magmac/app/error/ImmutableCompileError";
 import { TypedDeserializer } from "../../../magmac/app/lang/node/TypedDeserializer";
+export class Deserializers {
+}

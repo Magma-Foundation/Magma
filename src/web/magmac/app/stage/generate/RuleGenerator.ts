@@ -9,3 +9,5 @@ import { ImmutableCompileError } from "../../../../magmac/app/error/ImmutableCom
 import { UnitSetCollector } from "../../../../magmac/app/io/sources/UnitSetCollector";
 import { Unit } from "../../../../magmac/app/stage/unit/Unit";
 import { UnitSet } from "../../../../magmac/app/stage/unit/UnitSet";
+export class RuleGenerator {
+}

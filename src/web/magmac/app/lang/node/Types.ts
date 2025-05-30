@@ -6,3 +6,5 @@ import { Rule } from "../../../../magmac/app/compile/rule/Rule";
 import { LazyRule } from "../../../../magmac/app/lang/LazyRule";
 import { MutableLazyRule } from "../../../../magmac/app/lang/MutableLazyRule";
 import { Deserializers } from "../../../../magmac/app/lang/Deserializers";
+export class Types {
+}

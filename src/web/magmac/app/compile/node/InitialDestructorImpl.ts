@@ -7,3 +7,5 @@ import { CompileResults } from "../../../../magmac/app/compile/error/CompileResu
 import { Deserializer } from "../../../../magmac/app/lang/node/Deserializer";
 import { Function } from "../../../../java/util/function/Function";
 import { Supplier } from "../../../../java/util/function/Supplier";
+export class InitialDestructorImpl {
+}

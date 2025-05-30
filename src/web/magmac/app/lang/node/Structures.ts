@@ -11,3 +11,5 @@ import { SuffixRule } from "../../../../magmac/app/compile/rule/SuffixRule";
 import { TypeRule } from "../../../../magmac/app/compile/rule/TypeRule";
 import { CommonLang } from "../../../../magmac/app/lang/CommonLang";
 import { ValueFolder } from "../../../../magmac/app/lang/ValueFolder";
+export class Structures {
+}

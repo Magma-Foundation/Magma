@@ -7,3 +7,5 @@ import { StringContext } from "../../../../magmac/app/compile/error/context/Stri
 import { CompileError } from "../../../../magmac/app/compile/error/error/CompileError";
 import { Node } from "../../../../magmac/app/compile/node/Node";
 import { ImmutableCompileError } from "../../../../magmac/app/error/ImmutableCompileError";
+export class CompileResults {
+}

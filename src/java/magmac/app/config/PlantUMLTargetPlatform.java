@@ -38,8 +38,7 @@ public final class PlantUMLTargetPlatform implements TargetPlatform {
         return new StagedCompiler<PlantUMLRoot>(new JavaPlantUMLParser(), generator);
     }
 
-    @Override
-    public Application createApplication0(Targets targets) {
+    private Application createApplication0(Targets targets) {
         return new CompileApplication<>(createCompiler(), targets);
     }
 

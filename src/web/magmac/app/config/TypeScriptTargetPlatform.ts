@@ -14,3 +14,5 @@ import { RuleGenerator } from "../../../magmac/app/stage/generate/RuleGenerator"
 import { Parser } from "../../../magmac/app/stage/parse/Parser";
 import { Path } from "../../../java/nio/file/Path";
 import { Paths } from "../../../java/nio/file/Paths";
+export class TypeScriptTargetPlatform {
+}

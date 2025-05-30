@@ -49,7 +49,6 @@ Serializable <|-- Root
 TargetPlatform --> Application
 TargetPlatform --> Compiler
 TargetPlatform --> Rule
-TargetPlatform --> Targets
 TargetPlatform --> Path
 interface TargetPlatform
 Joiner --> None
@@ -946,7 +945,6 @@ class FilterRule
 Rule <|-- FilterRule
 TypescriptLang --> Lists
 TypescriptLang --> LocatingRule
-TypescriptLang --> NodeListRule
 TypescriptLang --> NodeRule
 TypescriptLang --> OrRule
 TypescriptLang --> PrefixRule
@@ -955,16 +953,14 @@ TypescriptLang --> StringRule
 TypescriptLang --> StripRule
 TypescriptLang --> SuffixRule
 TypescriptLang --> TypeRule
-TypescriptLang --> DelimitedDivider
-TypescriptLang --> Divider
-TypescriptLang --> DelimitedFolder
-TypescriptLang --> Definition
 TypescriptLang --> FunctionSegment
 TypescriptLang --> Modifier
 TypescriptLang --> Parameters
 TypescriptLang --> StructureStatement
 TypescriptLang --> Symbols
 TypescriptLang --> TemplateType
+TypescriptLang --> TypeScriptImport
+TypescriptLang --> TypescriptStructureNode
 TypescriptLang --> Values
 TypescriptLang --> Whitespace
 class TypescriptLang
@@ -1152,6 +1148,15 @@ interface Parameter
 TypeScriptImport --> List
 TypeScriptImport --> MapNode
 TypeScriptImport --> Node
+TypeScriptImport --> LocatingRule
+TypeScriptImport --> NodeListRule
+TypeScriptImport --> PrefixRule
+TypeScriptImport --> Rule
+TypeScriptImport --> StringRule
+TypeScriptImport --> SuffixRule
+TypeScriptImport --> TypeRule
+TypeScriptImport --> DelimitedDivider
+TypeScriptImport --> DelimitedFolder
 class TypeScriptImport
 TypeScriptRootSegment <|-- TypeScriptImport
 PlantUMLHeader --> MapNode
@@ -1690,6 +1695,14 @@ class ReturnNode
 FunctionSegmentValue <|-- ReturnNode
 FunctionSegment <|-- ReturnNode
 TypescriptStructureNode --> Node
+TypescriptStructureNode --> LocatingRule
+TypescriptStructureNode --> PrefixRule
+TypescriptStructureNode --> Rule
+TypescriptStructureNode --> StringRule
+TypescriptStructureNode --> SuffixRule
+TypescriptStructureNode --> TypeRule
+TypescriptStructureNode --> CommonLang
+TypescriptStructureNode --> TypescriptLang
 class TypescriptStructureNode
 TypeScriptRootSegment <|-- TypescriptStructureNode
 PlantUMLAfterPasser --> Some

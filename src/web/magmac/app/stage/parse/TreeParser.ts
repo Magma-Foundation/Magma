@@ -12,3 +12,5 @@ import { ParseUnitImpl } from "../../../../magmac/app/stage/unit/ParseUnitImpl";
 import { Passer } from "../../../../magmac/app/stage/Passer";
 import { Unit } from "../../../../magmac/app/stage/unit/Unit";
 import { UnitSet } from "../../../../magmac/app/stage/unit/UnitSet";
+export class TreeParser {
+}

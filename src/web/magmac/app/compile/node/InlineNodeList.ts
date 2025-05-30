@@ -7,3 +7,5 @@ import { Joiner } from "../../../../magmac/api/iter/collect/Joiner";
 import { CompileResult } from "../../../../magmac/app/compile/error/CompileResult";
 import { CompileResultCollector } from "../../../../magmac/app/compile/error/CompileResultCollector";
 import { Function } from "../../../../java/util/function/Function";
+export class InlineNodeList {
+}

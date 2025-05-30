@@ -15,3 +15,5 @@ import { InlinePassResult } from "../../../magmac/app/stage/result/InlinePassRes
 import { ParseResult } from "../../../magmac/app/stage/result/ParseResult";
 import { ParseUnit } from "../../../magmac/app/stage/unit/ParseUnit";
 import { ParseUnitImpl } from "../../../magmac/app/stage/unit/ParseUnitImpl";
+export class TypeScriptAfterPasser {
+}

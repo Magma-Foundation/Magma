@@ -10,3 +10,5 @@ import { ParseUnit } from "../../../magmac/app/stage/unit/ParseUnit";
 import { ParseUnitImpl } from "../../../magmac/app/stage/unit/ParseUnitImpl";
 import { Passer } from "../../../magmac/app/stage/Passer";
 import { ParseState } from "../../../magmac/app/stage/parse/ParseState";
+export class FlattenJava {
+}

@@ -24,7 +24,7 @@ import { PlantUMLStructureType } from "../../../magmac/app/lang/node/PlantUMLStr
 import { QualifiedType } from "../../../magmac/app/lang/node/QualifiedType";
 import { Segment } from "../../../magmac/app/lang/node/Segment";
 import { JavaStructureNode } from "../../../magmac/app/lang/node/JavaStructureNode";
-import { StructureType } from "../../../magmac/app/lang/node/StructureType";
+import { JavaStructureType } from "../../../magmac/app/lang/node/JavaStructureType";
 import { Symbol } from "../../../magmac/app/lang/node/Symbol";
 import { TemplateType } from "../../../magmac/app/lang/node/TemplateType";
 import { Type } from "../../../magmac/app/lang/node/Type";
@@ -35,3 +35,5 @@ import { MapUnitSet } from "../../../magmac/app/stage/unit/MapUnitSet";
 import { SimpleUnit } from "../../../magmac/app/stage/unit/SimpleUnit";
 import { Unit } from "../../../magmac/app/stage/unit/Unit";
 import { UnitSet } from "../../../magmac/app/stage/unit/UnitSet";
+export class JavaPlantUMLParser {
+}

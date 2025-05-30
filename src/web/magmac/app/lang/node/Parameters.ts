@@ -6,3 +6,5 @@ import { OrRule } from "../../../../magmac/app/compile/rule/OrRule";
 import { Rule } from "../../../../magmac/app/compile/rule/Rule";
 import { ValueFolder } from "../../../../magmac/app/lang/ValueFolder";
 import { Deserializers } from "../../../../magmac/app/lang/Deserializers";
+export class Parameters {
+}
