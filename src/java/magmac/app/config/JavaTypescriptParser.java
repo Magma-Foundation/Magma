@@ -18,7 +18,7 @@ import magmac.app.stage.unit.UnitSet;
 
 class JavaTypescriptParser implements Parser<Root<JavaRootSegment>, TypescriptRoot> {
     private static CompileResult<Unit<TypescriptRoot>> parseUnit(Unit<Root<JavaRootSegment>> unit) {
-        return unit.destruct((location, javaRoot) -> JavaTypescriptParser.parseRoot(location, javaRoot));
+        return unit.destruct(JavaTypescriptParser::parseRoot);
     }
 
     private static CompileResult<Unit<TypescriptRoot>> parseRoot(Location location, Root<JavaRootSegment> root) {
