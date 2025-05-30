@@ -289,6 +289,11 @@ Block --> LazyRule
 Block --> Deserializers
 class Block
 FunctionSegment <|-- Block
+TypescriptMethod --> MapNode
+TypescriptMethod --> Node
+TypescriptMethod --> Serializable
+class TypescriptMethod
+TypescriptStructureMember <|-- TypescriptMethod
 OrState --> None
 OrState --> Option
 OrState --> Some
@@ -683,6 +688,7 @@ class FirstSelector
 Selector <|-- FirstSelector
 Constructor --> Option
 Constructor --> CompileResult
+Constructor --> MapNode
 Constructor --> Node
 Constructor --> Deserializers
 class Constructor
@@ -1043,11 +1049,14 @@ JavaTypescriptParser --> CompileResultCollector
 JavaTypescriptParser --> CompileResults
 JavaTypescriptParser --> Location
 JavaTypescriptParser --> UnitSetCollector
+JavaTypescriptParser --> Constructor
+JavaTypescriptParser --> Definition
 JavaTypescriptParser --> EnumValues
 JavaTypescriptParser --> JavaNamespacedNode
 JavaTypescriptParser --> JavaRootSegment
 JavaTypescriptParser --> JavaStructureMember
 JavaTypescriptParser --> JavaStructureNode
+JavaTypescriptParser --> MethodHeader
 JavaTypescriptParser --> MethodNode
 JavaTypescriptParser --> Root
 JavaTypescriptParser --> Segment
@@ -1055,6 +1064,7 @@ JavaTypescriptParser --> StructureStatement
 JavaTypescriptParser --> StructureValue
 JavaTypescriptParser --> TypeScriptImport
 JavaTypescriptParser --> TypeScriptRootSegment
+JavaTypescriptParser --> TypescriptMethod
 JavaTypescriptParser --> TypescriptRoot
 JavaTypescriptParser --> TypescriptStructureMember
 JavaTypescriptParser --> TypescriptStructureNode
@@ -1550,6 +1560,7 @@ Definition --> List
 Definition --> Lists
 Definition --> CompileResult
 Definition --> InitialDestructor
+Definition --> MapNode
 Definition --> Node
 Definition --> FilterRule
 Definition --> LocatingRule
@@ -1567,10 +1578,10 @@ Definition --> Divider
 Definition --> FoldingDivider
 Definition --> DelimitedFolder
 Definition --> DividingSplitter
+Definition --> Deserializers
 Definition --> OptionNodeListRule
 Definition --> TypeSeparatorFolder
 Definition --> ValueFolder
-Definition --> Deserializers
 class Definition
 Parameter <|-- Definition
 Assignable <|-- Definition
@@ -1730,7 +1741,9 @@ MethodHeader --> Lists
 MethodHeader --> CompileResult
 MethodHeader --> Node
 MethodHeader --> Deserializers
+MethodHeader --> Serializable
 interface MethodHeader
+Serializable <|-- MethodHeader
 JavaRootSegments --> Lists
 JavaRootSegments --> CompileResult
 JavaRootSegments --> MapNode

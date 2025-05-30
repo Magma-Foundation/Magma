@@ -82,6 +82,11 @@ public final class MapNode implements Node {
     }
 
     @Override
+    public <T> Node withNodeSerialized(String key, T element, Function<T, Node> serializer) {
+        return this.withNode(key, serializer.apply(element));
+    }
+
+    @Override
     public Iter<Tuple2<String, Node>> iterNodes() {
         return this.nodes.iter();
     }

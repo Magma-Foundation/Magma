@@ -5,6 +5,7 @@ import magmac.api.collect.list.List;
 import magmac.api.collect.list.Lists;
 import magmac.app.compile.error.CompileResult;
 import magmac.app.compile.node.InitialDestructor;
+import magmac.app.compile.node.MapNode;
 import magmac.app.compile.node.Node;
 import magmac.app.compile.rule.FilterRule;
 import magmac.app.compile.rule.LocatingRule;
@@ -22,10 +23,10 @@ import magmac.app.compile.rule.divide.Divider;
 import magmac.app.compile.rule.divide.FoldingDivider;
 import magmac.app.compile.rule.fold.DelimitedFolder;
 import magmac.app.compile.rule.split.DividingSplitter;
+import magmac.app.lang.Deserializers;
 import magmac.app.lang.OptionNodeListRule;
 import magmac.app.lang.TypeSeparatorFolder;
 import magmac.app.lang.ValueFolder;
-import magmac.app.lang.Deserializers;
 
 public record Definition(
         String name,
@@ -80,5 +81,10 @@ public record Definition(
                 new StripRule(new SuffixRule(LocatingRule.First(beforeTypeParams, "<", typeParams), ">")),
                 beforeTypeParams
         );
+    }
+
+    @Override
+    public Node serialize() {
+        return new MapNode("definition");
     }
 }

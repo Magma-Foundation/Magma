@@ -8,11 +8,14 @@ import magmac.app.compile.error.CompileResultCollector;
 import magmac.app.compile.error.CompileResults;
 import magmac.app.io.Location;
 import magmac.app.io.sources.UnitSetCollector;
+import magmac.app.lang.node.Constructor;
+import magmac.app.lang.node.Definition;
 import magmac.app.lang.node.EnumValues;
 import magmac.app.lang.node.JavaNamespacedNode;
 import magmac.app.lang.node.JavaRootSegment;
 import magmac.app.lang.node.JavaStructureMember;
 import magmac.app.lang.node.JavaStructureNode;
+import magmac.app.lang.node.MethodHeader;
 import magmac.app.lang.node.MethodNode;
 import magmac.app.lang.node.Root;
 import magmac.app.lang.node.Segment;
@@ -20,6 +23,7 @@ import magmac.app.lang.node.StructureStatement;
 import magmac.app.lang.node.StructureValue;
 import magmac.app.lang.node.TypeScriptImport;
 import magmac.app.lang.node.TypeScriptRootSegment;
+import magmac.app.lang.node.TypescriptMethod;
 import magmac.app.lang.node.TypescriptRoot;
 import magmac.app.lang.node.TypescriptStructureMember;
 import magmac.app.lang.node.TypescriptStructureNode;
@@ -82,10 +86,21 @@ class JavaTypescriptParser implements Parser<Root<JavaRootSegment>, TypescriptRo
 
     private static TypescriptStructureMember parseStructureMember(JavaStructureMember structureNode) {
         return switch (structureNode) {
-            case EnumValues enumValues -> new Whitespace();
-            case MethodNode methodNode -> new Whitespace();
-            case StructureStatement structureStatement -> new Whitespace();
             case Whitespace whitespace -> new Whitespace();
+            case EnumValues enumValues -> new Whitespace();
+            case StructureStatement structureStatement -> new Whitespace();
+            case MethodNode methodNode -> JavaTypescriptParser.parseMethod(methodNode);
+        };
+    }
+
+    private static TypescriptStructureMember parseMethod(MethodNode methodNode) {
+        return new TypescriptMethod(JavaTypescriptParser.parseMethodHeader(methodNode.header()));
+    }
+
+    private static MethodHeader parseMethodHeader(MethodHeader header) {
+        return switch (header) {
+            case Constructor constructor -> constructor;
+            case Definition definition -> definition;
         };
     }
 

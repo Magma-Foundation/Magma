@@ -54,4 +54,6 @@ public interface Node {
     CompileResult<Tuple2<Node, String>> removeString(String key);
 
     CompileResult<Tuple2<Node, Node>> removeNode(String key);
+
+    <T> Node withNodeSerialized(String key, T element, Function<T, Node> serializer);
 }

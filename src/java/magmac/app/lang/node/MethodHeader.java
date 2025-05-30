@@ -4,8 +4,9 @@ import magmac.api.collect.list.Lists;
 import magmac.app.compile.error.CompileResult;
 import magmac.app.compile.node.Node;
 import magmac.app.lang.Deserializers;
+import magmac.app.lang.Serializable;
 
-interface MethodHeader {
+public sealed interface MethodHeader extends Serializable permits Constructor, Definition {
     static CompileResult<MethodHeader> deserializeError(Node node) {
         return Deserializers.orError("header", node, Lists.of(
                 Deserializers.wrap(Definition::deserialize),
