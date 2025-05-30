@@ -21,5 +21,5 @@ public interface CompileResult<T> {
 
     <R> CompileResult<Tuple2<T, R>> and(Supplier<CompileResult<R>> supplier);
 
-    Result<T, CompileError> result();
+    Result<T, CompileError> toResult();
 }

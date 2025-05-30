@@ -18,7 +18,7 @@ public record TypeRule(String type, Rule childRule) implements Rule {
 
     @Override
     public CompileResult<Node> lex(String input) {
-        return CompileResults.fromResult(this.childRule.lex(input).result()
+        return CompileResults.fromResult(this.childRule.lex(input).toResult()
                 .mapValue((Node node) -> node.retype(this.type))
                 .mapErr((CompileError err) -> this.createError(new StringContext(input), err)));
     }
@@ -26,7 +26,7 @@ public record TypeRule(String type, Rule childRule) implements Rule {
     @Override
     public CompileResult<String> generate(Node node) {
         if (node.is(this.type)) {
-            return CompileResults.fromResult(this.childRule.generate(node).result().mapErr((CompileError err) -> this.createError(new NodeContext(node), err)));
+            return CompileResults.fromResult(this.childRule.generate(node).toResult().mapErr((CompileError err) -> this.createError(new NodeContext(node), err)));
         }
 
         return CompileErrors.createNodeError("Type '" + this.type + "' not present", node);

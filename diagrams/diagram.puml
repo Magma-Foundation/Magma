@@ -32,11 +32,12 @@ PlantUMLInherits --> TypeRule
 class PlantUMLInherits
 PlantUMLRootSegment <|-- PlantUMLInherits
 interface Base
+TargetPlatform --> Application
 TargetPlatform --> Compiler
 TargetPlatform --> Rule
+TargetPlatform --> Targets
 TargetPlatform --> AfterAll
 TargetPlatform --> Passer
-TargetPlatform --> Lexer
 TargetPlatform --> Path
 interface TargetPlatform
 Joiner --> None
@@ -122,6 +123,7 @@ Not --> Deserializers
 class Not
 Value <|-- Not
 Compiler --> CompileResult
+Compiler --> JavaRoot
 Compiler --> UnitSet
 interface Compiler
 MapCollector --> Tuple2
@@ -196,14 +198,15 @@ StructureMembers --> LazyRule
 StructureMembers --> MutableLazyRule
 StructureMembers --> Deserializers
 class StructureMembers
+CompileApplication --> Option
 CompileApplication --> Some
 CompileApplication --> Error
 CompileApplication --> Compiler
 CompileApplication --> ApplicationError
 CompileApplication --> ThrowableError
-CompileApplication --> Sources
 CompileApplication --> Targets
-CompileApplication --> Option
+CompileApplication --> Serializable
+CompileApplication --> JavaRoot
 CompileApplication --> UnitSet
 class CompileApplication
 Application <|-- CompileApplication
@@ -349,14 +352,26 @@ Result --> Function
 Result --> Supplier
 interface Result
 Main --> Console
-Main --> Iters
-Main --> ApplicationBuilder
+Main --> Option
+Main --> Some
 Main --> Error
+Main --> Iters
+Main --> Result
+Main --> Application
+Main --> LexingStage
 Main --> PlantUMLTargetPlatform
 Main --> TargetPlatform
 Main --> TypeScriptTargetPlatform
+Main --> ApplicationError
 Main --> PathSources
 Main --> Sources
+Main --> PathTargets
+Main --> Targets
+Main --> JavaRoot
+Main --> Lexer
+Main --> RuleLexer
+Main --> UnitSet
+Main --> Path
 Main --> Paths
 class Main
 class Console
@@ -559,19 +574,20 @@ Map --> Iter
 Map --> Function
 Map --> Supplier
 interface Map
+PlantUMLTargetPlatform --> Application
+PlantUMLTargetPlatform --> CompileApplication
 PlantUMLTargetPlatform --> Compiler
 PlantUMLTargetPlatform --> StagedCompiler
 PlantUMLTargetPlatform --> Rule
+PlantUMLTargetPlatform --> Targets
 PlantUMLTargetPlatform --> JavaPlantUMLParser
 PlantUMLTargetPlatform --> MergeDiagram
 PlantUMLTargetPlatform --> PlantUMLAfterPasser
 PlantUMLTargetPlatform --> PlantUMLRoot
-PlantUMLTargetPlatform --> JavaRoot
 PlantUMLTargetPlatform --> Passer
 PlantUMLTargetPlatform --> AfterAll
 PlantUMLTargetPlatform --> Generator
 PlantUMLTargetPlatform --> RuleGenerator
-PlantUMLTargetPlatform --> Lexer
 PlantUMLTargetPlatform --> Path
 PlantUMLTargetPlatform --> Paths
 class PlantUMLTargetPlatform
@@ -682,17 +698,6 @@ Break --> Node
 Break --> Deserializers
 class Break
 FunctionSegmentValue <|-- Break
-ApplicationBuilder --> Option
-ApplicationBuilder --> Error
-ApplicationBuilder --> Compiler
-ApplicationBuilder --> TargetPlatform
-ApplicationBuilder --> Sources
-ApplicationBuilder --> PathTargets
-ApplicationBuilder --> Targets
-ApplicationBuilder --> JavaRoot
-ApplicationBuilder --> Lexer
-ApplicationBuilder --> RuleLexer
-ApplicationBuilder --> Path
 class ApplicationBuilder
 DelimitedFolder --> DivideState
 class DelimitedFolder
@@ -870,9 +875,12 @@ TypescriptLang --> TemplateType
 TypescriptLang --> Symbols
 TypescriptLang --> Values
 class TypescriptLang
+TypeScriptTargetPlatform --> Application
+TypeScriptTargetPlatform --> CompileApplication
 TypeScriptTargetPlatform --> Compiler
 TypeScriptTargetPlatform --> StagedCompiler
 TypeScriptTargetPlatform --> Rule
+TypeScriptTargetPlatform --> Targets
 TypeScriptTargetPlatform --> TypeScriptAfterPasser
 TypeScriptTargetPlatform --> TypescriptLang
 TypeScriptTargetPlatform --> JavaRoot
@@ -881,7 +889,6 @@ TypeScriptTargetPlatform --> AfterAll
 TypeScriptTargetPlatform --> EmptyAfterAll
 TypeScriptTargetPlatform --> Generator
 TypeScriptTargetPlatform --> RuleGenerator
-TypeScriptTargetPlatform --> Lexer
 TypeScriptTargetPlatform --> Parser
 TypeScriptTargetPlatform --> Path
 TypeScriptTargetPlatform --> Paths
@@ -929,25 +936,23 @@ Maps --> HashMap
 class Maps
 class Tuple2
 StagedCompiler --> CompileResult
-StagedCompiler --> Node
 StagedCompiler --> Serializable
+StagedCompiler --> JavaRoot
 StagedCompiler --> Generator
-StagedCompiler --> Lexer
 StagedCompiler --> Parser
 StagedCompiler --> UnitSet
-StagedCompiler --> Function
 class StagedCompiler
 Compiler <|-- StagedCompiler
 LazyRule --> Rule
 interface LazyRule
 Rule <|-- LazyRule
-JavaTypescriptParser --> Err
 JavaTypescriptParser --> CompileResult
+JavaTypescriptParser --> CompileResultCollector
 JavaTypescriptParser --> CompileResults
-JavaTypescriptParser --> StringContext
-JavaTypescriptParser --> ImmutableCompileError
+JavaTypescriptParser --> UnitSetCollector
 JavaTypescriptParser --> JavaRoot
 JavaTypescriptParser --> Parser
+JavaTypescriptParser --> Unit
 JavaTypescriptParser --> UnitSet
 class JavaTypescriptParser
 Parser <|-- JavaTypescriptParser
@@ -1335,6 +1340,16 @@ PrefixRule --> CompileErrors
 PrefixRule --> Node
 class PrefixRule
 Rule <|-- PrefixRule
+LexingStage --> Result
+LexingStage --> CompileResult
+LexingStage --> Node
+LexingStage --> ApplicationError
+LexingStage --> ThrowableError
+LexingStage --> Sources
+LexingStage --> Lexer
+LexingStage --> UnitSet
+LexingStage --> Function
+class LexingStage
 enum AccessType
 ArrayType --> Option
 ArrayType --> CompileResult
@@ -1510,8 +1525,10 @@ Segment --> CompileResult
 Segment --> Node
 Segment --> Deserializers
 class Segment
-Application --> Error
 Application --> Option
+Application --> Error
+Application --> JavaRoot
+Application --> UnitSet
 interface Application
 ImmutableParseState --> Location
 class ImmutableParseState

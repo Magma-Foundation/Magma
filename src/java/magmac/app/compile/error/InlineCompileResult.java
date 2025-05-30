@@ -8,30 +8,30 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-public record InlineCompileResult<T>(Result<T, CompileError> result) implements CompileResult<T> {
+public record InlineCompileResult<T>(Result<T, CompileError> toResult) implements CompileResult<T> {
     @Override
     public <R> CompileResult<R> mapValue(Function<T, R> mapper) {
-        return CompileResults.fromResult(this.result.mapValue(mapper));
+        return CompileResults.fromResult(this.toResult.mapValue(mapper));
     }
 
     @Override
     public <R> R match(Function<T, R> whenOk, Function<CompileError, R> whenErr) {
-        return this.result.match(whenOk, whenErr);
+        return this.toResult.match(whenOk, whenErr);
     }
 
     @Override
     public CompileResult<T> mapErr(Function<CompileError, CompileError> mapper) {
-        return CompileResults.fromResult(this.result.mapErr(mapper));
+        return CompileResults.fromResult(this.toResult.mapErr(mapper));
     }
 
     @Override
     public <R> CompileResult<R> flatMapValue(Function<T, CompileResult<R>> mapper) {
-        return CompileResults.fromResult(this.result.flatMapValue((T t) -> mapper.apply(t).result()));
+        return CompileResults.fromResult(this.toResult.flatMapValue((T t) -> mapper.apply(t).toResult()));
     }
 
     @Override
     public <R> CompileResult<Tuple2<T, R>> and(Supplier<CompileResult<R>> supplier) {
-        return CompileResults.fromResult(this.result.and(() -> supplier.get().result()));
+        return CompileResults.fromResult(this.toResult.and(() -> supplier.get().toResult()));
     }
 
     @Override
