@@ -33,7 +33,7 @@ final class Structures {
 
         Rule implemented = new NodeListRule("implemented", new ValueFolder(), type);
         Rule withImplements = new OrRule(Lists.of(
-                new ContextRule("With implements", LocatingRule.First(withEnds, " implements ", implemented)),
+                new ContextRule("With implements", LocatingRule.First(withEnds, "implements", implemented)),
                 new ContextRule("Without implements", withEnds)
         ));
 

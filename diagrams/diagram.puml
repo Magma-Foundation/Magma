@@ -965,15 +965,19 @@ interface LazyRule
 Rule <|-- LazyRule
 JavaTypescriptParser --> List
 JavaTypescriptParser --> Lists
+JavaTypescriptParser --> ListCollector
 JavaTypescriptParser --> CompileResult
 JavaTypescriptParser --> CompileResultCollector
 JavaTypescriptParser --> CompileResults
 JavaTypescriptParser --> Location
 JavaTypescriptParser --> UnitSetCollector
 JavaTypescriptParser --> JavaRootSegment
+JavaTypescriptParser --> Namespaced
 JavaTypescriptParser --> Root
+JavaTypescriptParser --> StructureNode
 JavaTypescriptParser --> TypeScriptRootSegment
 JavaTypescriptParser --> TypescriptRoot
+JavaTypescriptParser --> Whitespace
 JavaTypescriptParser --> Parser
 JavaTypescriptParser --> SimpleUnit
 JavaTypescriptParser --> Unit
@@ -1262,9 +1266,10 @@ Whitespace --> Deserializers
 class Whitespace
 Argument <|-- Whitespace
 FunctionSegment <|-- Whitespace
+JavaRootSegment <|-- Whitespace
 Parameter <|-- Whitespace
 StructureMember <|-- Whitespace
-JavaRootSegment <|-- Whitespace
+TypeScriptRootSegment <|-- Whitespace
 CommonLang --> LocatingRule
 CommonLang --> NodeListRule
 CommonLang --> NodeRule
