@@ -32,7 +32,7 @@ public interface FunctionSegment {
         Rule functionSegmentValueRule = FunctionSegmentValues.createFunctionSegmentValueRule(value, definition);
 
         Rule rule = new OrRule(Lists.of(
-                new StripRule(new ExactRule(";")),
+                new TypeRule("whitespace", new StripRule(new ExactRule(";"))),
                 Whitespace.createWhitespaceRule(),
                 FunctionStatement.createStatementRule(functionSegmentValueRule),
                 Block.createBlockRule(functionSegmentRule, value, definition),
