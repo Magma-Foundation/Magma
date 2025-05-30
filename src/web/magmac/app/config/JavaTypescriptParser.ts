@@ -6,11 +6,11 @@ import { CompileResultCollector } from "../../../magmac/app/compile/error/Compil
 import { CompileResults } from "../../../magmac/app/compile/error/CompileResults";
 import { Location } from "../../../magmac/app/io/Location";
 import { UnitSetCollector } from "../../../magmac/app/io/sources/UnitSetCollector";
+import { JavaNamespacedNode } from "../../../magmac/app/lang/node/JavaNamespacedNode";
 import { JavaRootSegment } from "../../../magmac/app/lang/node/JavaRootSegment";
-import { Namespaced } from "../../../magmac/app/lang/node/Namespaced";
+import { JavaStructureNode } from "../../../magmac/app/lang/node/JavaStructureNode";
 import { Root } from "../../../magmac/app/lang/node/Root";
 import { Segment } from "../../../magmac/app/lang/node/Segment";
-import { StructureNode } from "../../../magmac/app/lang/node/StructureNode";
 import { TypeScriptImport } from "../../../magmac/app/lang/node/TypeScriptImport";
 import { TypeScriptRootSegment } from "../../../magmac/app/lang/node/TypeScriptRootSegment";
 import { TypescriptRoot } from "../../../magmac/app/lang/node/TypescriptRoot";

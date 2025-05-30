@@ -314,6 +314,24 @@ StructureMember <|-- StructureStatement
 Location --> List
 Location --> Joiner
 class Location
+JavaNamespacedNode --> Option
+JavaNamespacedNode --> List
+JavaNamespacedNode --> Iters
+JavaNamespacedNode --> CompileResult
+JavaNamespacedNode --> InitialDestructor
+JavaNamespacedNode --> MapNode
+JavaNamespacedNode --> Node
+JavaNamespacedNode --> NodeListRule
+JavaNamespacedNode --> PrefixRule
+JavaNamespacedNode --> Rule
+JavaNamespacedNode --> StringRule
+JavaNamespacedNode --> StripRule
+JavaNamespacedNode --> SuffixRule
+JavaNamespacedNode --> TypeRule
+JavaNamespacedNode --> DelimitedFolder
+JavaNamespacedNode --> Deserializers
+class JavaNamespacedNode
+JavaRootSegment <|-- JavaNamespacedNode
 StripRule --> CompileResult
 StripRule --> Node
 class StripRule
@@ -680,6 +698,17 @@ Post --> TypeRule
 Post --> Deserializers
 class Post
 FunctionSegmentValue <|-- Post
+JavaStructureNode --> Option
+JavaStructureNode --> Tuple2
+JavaStructureNode --> List
+JavaStructureNode --> CompileResult
+JavaStructureNode --> CompoundDeserializer
+JavaStructureNode --> InitialDestructor
+JavaStructureNode --> MapNode
+JavaStructureNode --> Node
+JavaStructureNode --> Deserializers
+class JavaStructureNode
+JavaRootSegment <|-- JavaStructureNode
 OrRule --> List
 OrRule --> Iter
 OrRule --> CompileResult
@@ -782,7 +811,7 @@ JavaPlantUMLParser --> ArrayType
 JavaPlantUMLParser --> Base
 JavaPlantUMLParser --> Root
 JavaPlantUMLParser --> JavaRootSegment
-JavaPlantUMLParser --> Namespaced
+JavaPlantUMLParser --> JavaNamespacedNode
 JavaPlantUMLParser --> PlantUMLDependency
 JavaPlantUMLParser --> PlantUMLFooter
 JavaPlantUMLParser --> PlantUMLHeader
@@ -793,7 +822,7 @@ JavaPlantUMLParser --> PlantUMLStructure
 JavaPlantUMLParser --> PlantUMLStructureType
 JavaPlantUMLParser --> QualifiedType
 JavaPlantUMLParser --> Segment
-JavaPlantUMLParser --> StructureNode
+JavaPlantUMLParser --> JavaStructureNode
 JavaPlantUMLParser --> StructureType
 JavaPlantUMLParser --> Symbol
 JavaPlantUMLParser --> TemplateType
@@ -973,11 +1002,11 @@ JavaTypescriptParser --> CompileResultCollector
 JavaTypescriptParser --> CompileResults
 JavaTypescriptParser --> Location
 JavaTypescriptParser --> UnitSetCollector
+JavaTypescriptParser --> JavaNamespacedNode
 JavaTypescriptParser --> JavaRootSegment
-JavaTypescriptParser --> Namespaced
+JavaTypescriptParser --> JavaStructureNode
 JavaTypescriptParser --> Root
 JavaTypescriptParser --> Segment
-JavaTypescriptParser --> StructureNode
 JavaTypescriptParser --> TypeScriptImport
 JavaTypescriptParser --> TypeScriptRootSegment
 JavaTypescriptParser --> TypescriptRoot
@@ -1040,24 +1069,6 @@ Modifier --> StripRule
 Modifier --> DelimitedFolder
 Modifier --> Deserializers
 class Modifier
-Namespaced --> Option
-Namespaced --> List
-Namespaced --> Iters
-Namespaced --> CompileResult
-Namespaced --> InitialDestructor
-Namespaced --> MapNode
-Namespaced --> Node
-Namespaced --> NodeListRule
-Namespaced --> PrefixRule
-Namespaced --> Rule
-Namespaced --> StringRule
-Namespaced --> StripRule
-Namespaced --> SuffixRule
-Namespaced --> TypeRule
-Namespaced --> DelimitedFolder
-Namespaced --> Deserializers
-class Namespaced
-JavaRootSegment <|-- Namespaced
 Try --> Option
 Try --> CompileResult
 Try --> Node
@@ -1090,17 +1101,6 @@ PlantUMLRootSegment <|-- PlantUMLHeader
 Rule --> CompileResult
 Rule --> Node
 interface Rule
-StructureNode --> Option
-StructureNode --> Tuple2
-StructureNode --> List
-StructureNode --> CompileResult
-StructureNode --> CompoundDeserializer
-StructureNode --> InitialDestructor
-StructureNode --> MapNode
-StructureNode --> Node
-StructureNode --> Deserializers
-class StructureNode
-JavaRootSegment <|-- StructureNode
 CompileResultCollector --> Collector
 CompileResultCollector --> Ok
 class CompileResultCollector

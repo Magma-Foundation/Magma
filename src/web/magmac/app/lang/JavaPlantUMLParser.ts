@@ -12,7 +12,7 @@ import { ArrayType } from "../../../magmac/app/lang/node/ArrayType";
 import { Base } from "../../../magmac/app/lang/node/Base";
 import { Root } from "../../../magmac/app/lang/node/Root";
 import { JavaRootSegment } from "../../../magmac/app/lang/node/JavaRootSegment";
-import { Namespaced } from "../../../magmac/app/lang/node/Namespaced";
+import { JavaNamespacedNode } from "../../../magmac/app/lang/node/JavaNamespacedNode";
 import { PlantUMLDependency } from "../../../magmac/app/lang/node/PlantUMLDependency";
 import { PlantUMLFooter } from "../../../magmac/app/lang/node/PlantUMLFooter";
 import { PlantUMLHeader } from "../../../magmac/app/lang/node/PlantUMLHeader";
@@ -23,7 +23,7 @@ import { PlantUMLStructure } from "../../../magmac/app/lang/node/PlantUMLStructu
 import { PlantUMLStructureType } from "../../../magmac/app/lang/node/PlantUMLStructureType";
 import { QualifiedType } from "../../../magmac/app/lang/node/QualifiedType";
 import { Segment } from "../../../magmac/app/lang/node/Segment";
-import { StructureNode } from "../../../magmac/app/lang/node/StructureNode";
+import { JavaStructureNode } from "../../../magmac/app/lang/node/JavaStructureNode";
 import { StructureType } from "../../../magmac/app/lang/node/StructureType";
 import { Symbol } from "../../../magmac/app/lang/node/Symbol";
 import { TemplateType } from "../../../magmac/app/lang/node/TemplateType";
