@@ -5,6 +5,7 @@ import magmac.api.Tuple2;
 import magmac.api.collect.list.List;
 import magmac.api.iter.Iter;
 import magmac.app.compile.error.CompileResult;
+import magmac.app.lang.Serializable;
 
 import java.util.function.Function;
 
@@ -49,11 +50,19 @@ public interface Node {
 
     boolean isEmpty();
 
-    <T> Node withNodeListSerialized(String key, List<T> list, Function<T, Node> serializer);
-
     CompileResult<Tuple2<Node, String>> removeString(String key);
 
     CompileResult<Tuple2<Node, Node>> removeNode(String key);
 
-    <T> Node withNodeSerialized(String key, T element, Function<T, Node> serializer);
+    <T> Node withNodeListAndSerializer(String key, List<T> list, Function<T, Node> serializer);
+
+    <T> Node withNodeAndSerializer(String key, T element, Function<T, Node> serializer);
+
+    default <T extends Serializable> Node withNodeListSerialized(String key, List<T> list) {
+        return this.withNodeListAndSerializer(key, list, Serializable::serialize);
+    }
+
+    default <T extends Serializable> Node withNodeSerialized(String key, T element) {
+        return this.withNodeAndSerializer(key, element, Serializable::serialize);
+    }
 }

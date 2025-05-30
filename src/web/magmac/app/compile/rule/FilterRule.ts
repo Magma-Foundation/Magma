@@ -5,4 +5,9 @@ import { Filter } from "../../../../magmac/app/compile/rule/filter/Filter";
 import { NumberFilter } from "../../../../magmac/app/compile/rule/filter/NumberFilter";
 import { SymbolFilter } from "../../../../magmac/app/compile/rule/filter/SymbolFilter";
 export class FilterRule {
+	FilterRule : private;
+	Symbol : Rule;
+	Number : Rule;
+	lex : CompileResult<Node>;
+	generate : CompileResult<String>;
 }

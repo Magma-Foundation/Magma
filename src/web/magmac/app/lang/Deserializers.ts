@@ -14,4 +14,10 @@ import { Node } from "../../../magmac/app/compile/node/Node";
 import { ImmutableCompileError } from "../../../magmac/app/error/ImmutableCompileError";
 import { TypedDeserializer } from "../../../magmac/app/lang/node/TypedDeserializer";
 export class Deserializers {
+	orError : CompileResult<T>;
+	wrap : CompileError;
+	or : Option<CompileResult<T>>;
+	wrap : TypedDeserializer<R>;
+	deserializeWithType : Option<InitialDestructor>;
+	destruct : InitialDestructor;
 }

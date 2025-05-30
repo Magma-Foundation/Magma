@@ -8,4 +8,7 @@ import { TypeRule } from "../../../../magmac/app/compile/rule/TypeRule";
 import { CommonLang } from "../../../../magmac/app/lang/CommonLang";
 import { TypescriptLang } from "../../../../magmac/app/lang/TypescriptLang";
 export class TypescriptStructureNode {
+	TypescriptStructureNode : public;
+	createClassRule : Rule;
+	serialize : Node;
 }

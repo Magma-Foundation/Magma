@@ -36,4 +36,14 @@ import { SimpleUnit } from "../../../magmac/app/stage/unit/SimpleUnit";
 import { Unit } from "../../../magmac/app/stage/unit/Unit";
 import { UnitSet } from "../../../magmac/app/stage/unit/UnitSet";
 export class JavaPlantUMLParser {
+	parseNamespaced : Iter<PlantUMLRootSegment>;
+	createSimpleName : String;
+	createSimpleNameFromQualifiedType : String;
+	createStructureSegment : PlantUMLRootSegment;
+	createSimpleNameFromType : String;
+	apply : CompileResult<UnitSet<PlantUMLRoot>>;
+	parseRoot : Iter<PlantUMLRootSegment>;
+	parseRootSegment : Iter<PlantUMLRootSegment>;
+	parseStructure : Iter<PlantUMLRootSegment>;
+	toInherits : List<PlantUMLRootSegment>;
 }

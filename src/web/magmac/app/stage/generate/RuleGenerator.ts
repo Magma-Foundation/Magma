@@ -10,4 +10,8 @@ import { UnitSetCollector } from "../../../../magmac/app/io/sources/UnitSetColle
 import { Unit } from "../../../../magmac/app/stage/unit/Unit";
 import { UnitSet } from "../../../../magmac/app/stage/unit/UnitSet";
 export class RuleGenerator {
+	RuleGenerator : public;
+	apply : CompileResult<UnitSet<String>>;
+	generateEntry : CompileResult<Unit<String>>;
+	getDestruct : CompileError;
 }

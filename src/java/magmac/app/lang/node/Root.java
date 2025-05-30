@@ -15,6 +15,6 @@ public record Root<T extends Serializable>(List<T> children) implements Serializ
 
     @Override
     public Node serialize() {
-        return new MapNode().withNodeListSerialized("children", this.children, Serializable::serialize);
+        return new MapNode().withNodeListAndSerializer("children", this.children, Serializable::serialize);
     }
 }

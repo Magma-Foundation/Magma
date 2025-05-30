@@ -88,6 +88,6 @@ public record Definition(
     public Node serialize() {
         return new MapNode("definition")
                 .withString("name", name)
-                .withNodeSerialized("type", type, Serializable::serialize);
+                .withNodeAndSerializer("type", type, Serializable::serialize);
     }
 }

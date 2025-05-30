@@ -9,4 +9,10 @@ import { CompileResultCollector } from "../../../../magmac/app/compile/error/Com
 import { CompileResults } from "../../../../magmac/app/compile/error/CompileResults";
 import { Function } from "../../../../java/util/function/Function";
 export class CompoundDestructorImpl<T> {
+	CompoundDestructorImpl : public;
+	complete : CompileResult<R>;
+	withNodeList : CompoundDestructor<Tuple2<T, List<R>>>;
+	withNode : CompoundDestructor<Tuple2<T, R>>;
+	withNodeListOptionally : CompoundDestructor<Tuple2<T, Option<List<R>>>>;
+	mapElements : CompileResult<Tuple2<Node, Tuple2<T, Option<List<R>>>>>;
 }

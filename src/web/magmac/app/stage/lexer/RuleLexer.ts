@@ -6,4 +6,7 @@ import { UnitSetCollector } from "../../../../magmac/app/io/sources/UnitSetColle
 import { Unit } from "../../../../magmac/app/stage/unit/Unit";
 import { UnitSet } from "../../../../magmac/app/stage/unit/UnitSet";
 export class RuleLexer {
+	RuleLexer : public;
+	foldEntry : CompileResult<Unit<Node>>;
+	apply : CompileResult<UnitSet<Node>>;
 }

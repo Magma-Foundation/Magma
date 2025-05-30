@@ -8,4 +8,12 @@ import { CompileResult } from "../../../../magmac/app/compile/error/CompileResul
 import { CompileResultCollector } from "../../../../magmac/app/compile/error/CompileResultCollector";
 import { Function } from "../../../../java/util/function/Function";
 export class InlineNodeList {
+	InlineNodeList : public;
+	empty : NodeList;
+	of : NodeList;
+	iter : Iter<Node>;
+	add : NodeList;
+	addAll : NodeList;
+	findLast : Option<Node>;
+	join : CompileResult<String>;
 }

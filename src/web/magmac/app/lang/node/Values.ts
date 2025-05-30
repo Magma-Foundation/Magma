@@ -17,4 +17,10 @@ import { CommonLang } from "../../../../magmac/app/lang/CommonLang";
 import { Deserializers } from "../../../../magmac/app/lang/Deserializers";
 import { LazyRule } from "../../../../magmac/app/lang/LazyRule";
 export class Values {
+	deserializeOrError : CompileResult<Value>;
+	deserialize : Option<CompileResult<Value>>;
+	getWrap : TypedDeserializer<Value>;
+	initValueRule : LazyRule;
+	getValueRules : List<Rule>;
+	createSwitchRule : TypeRule;
 }

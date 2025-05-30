@@ -9,6 +9,6 @@ public record TypescriptRoot(List<TypeScriptRootSegment> children) implements Se
     @Override
     public Node serialize() {
         return new MapNode("root")
-                .withNodeListSerialized("children", this.children, TypeScriptRootSegment::serialize);
+                .withNodeListAndSerializer("children", this.children, TypeScriptRootSegment::serialize);
     }
 }

@@ -6,11 +6,14 @@ import { CompileResultCollector } from "../../../magmac/app/compile/error/Compil
 import { CompileResults } from "../../../magmac/app/compile/error/CompileResults";
 import { Location } from "../../../magmac/app/io/Location";
 import { UnitSetCollector } from "../../../magmac/app/io/sources/UnitSetCollector";
+import { Constructor } from "../../../magmac/app/lang/node/Constructor";
+import { Definition } from "../../../magmac/app/lang/node/Definition";
 import { EnumValues } from "../../../magmac/app/lang/node/EnumValues";
 import { JavaNamespacedNode } from "../../../magmac/app/lang/node/JavaNamespacedNode";
 import { JavaRootSegment } from "../../../magmac/app/lang/node/JavaRootSegment";
 import { JavaStructureMember } from "../../../magmac/app/lang/node/JavaStructureMember";
 import { JavaStructureNode } from "../../../magmac/app/lang/node/JavaStructureNode";
+import { MethodHeader } from "../../../magmac/app/lang/node/MethodHeader";
 import { MethodNode } from "../../../magmac/app/lang/node/MethodNode";
 import { Root } from "../../../magmac/app/lang/node/Root";
 import { Segment } from "../../../magmac/app/lang/node/Segment";
@@ -18,6 +21,7 @@ import { StructureStatement } from "../../../magmac/app/lang/node/StructureState
 import { StructureValue } from "../../../magmac/app/lang/node/StructureValue";
 import { TypeScriptImport } from "../../../magmac/app/lang/node/TypeScriptImport";
 import { TypeScriptRootSegment } from "../../../magmac/app/lang/node/TypeScriptRootSegment";
+import { TypescriptMethod } from "../../../magmac/app/lang/node/TypescriptMethod";
 import { TypescriptRoot } from "../../../magmac/app/lang/node/TypescriptRoot";
 import { TypescriptStructureMember } from "../../../magmac/app/lang/node/TypescriptStructureMember";
 import { TypescriptStructureNode } from "../../../magmac/app/lang/node/TypescriptStructureNode";
@@ -28,4 +32,15 @@ import { SimpleUnit } from "../../../magmac/app/stage/unit/SimpleUnit";
 import { Unit } from "../../../magmac/app/stage/unit/Unit";
 import { UnitSet } from "../../../magmac/app/stage/unit/UnitSet";
 export class JavaTypescriptParser {
+	parseUnit : CompileResult<Unit<TypescriptRoot>>;
+	parseRoot : CompileResult<Unit<TypescriptRoot>>;
+	parseRootSegment : TypeScriptRootSegment;
+	parseJavaStructure : TypeScriptRootSegment;
+	parseClass : TypescriptStructureNode;
+	parseStructureMember : TypescriptStructureMember;
+	parseMethod : TypescriptStructureMember;
+	parseMethodHeader : MethodHeader;
+	parseNamespaced : TypeScriptRootSegment;
+	parseImport : TypeScriptImport;
+	apply : CompileResult<UnitSet<TypescriptRoot>>;
 }

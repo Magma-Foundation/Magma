@@ -13,4 +13,13 @@ import { Passer } from "../../../../magmac/app/stage/Passer";
 import { Unit } from "../../../../magmac/app/stage/unit/Unit";
 import { UnitSet } from "../../../../magmac/app/stage/unit/UnitSet";
 export class TreeParser {
+	TreeParser : public;
+	parseNodeListEntry : CompileResult<ParseUnit<Node>>;
+	getParseUnitCompileResult : CompileResult<ParseUnit<NodeList>>;
+	parseTree : CompileResult<ParseUnit<Node>>;
+	parseNodes : CompileResult<ParseUnit<Node>>;
+	parseNodeEntry : CompileResult<ParseUnit<Node>>;
+	parseNodeLists : CompileResult<ParseUnit<Node>>;
+	apply : CompileResult<UnitSet<Node>>;
+	parseUnit : CompileResult<Unit<Node>>;
 }

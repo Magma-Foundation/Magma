@@ -9,4 +9,9 @@ import { FoldingDivider } from "../../../../magmac/app/compile/rule/divide/Foldi
 import { Folder } from "../../../../magmac/app/compile/rule/fold/Folder";
 import { ValueFolder } from "../../../../magmac/app/lang/ValueFolder";
 export class NodeListRule {
+	NodeListRule : public;
+	Values : Rule;
+	createNodeListRule : Rule;
+	lex : CompileResult<Node>;
+	generate : CompileResult<String>;
 }

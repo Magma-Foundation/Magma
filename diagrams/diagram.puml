@@ -1545,6 +1545,7 @@ Node --> Tuple2
 Node --> List
 Node --> Iter
 Node --> CompileResult
+Node --> Serializable
 Node --> Function
 interface Node
 NodeListRule --> CompileResult

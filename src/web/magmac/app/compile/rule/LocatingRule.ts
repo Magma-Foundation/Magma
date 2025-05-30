@@ -6,4 +6,10 @@ import { FirstLocator } from "../../../../magmac/app/compile/rule/locate/FirstLo
 import { LastLocator } from "../../../../magmac/app/compile/rule/locate/LastLocator";
 import { Locator } from "../../../../magmac/app/compile/rule/locate/Locator";
 export class LocatingRule {
+	LocatingRule : public;
+	First : Rule;
+	Last : Rule;
+	createLocatingRule : Rule;
+	lex : CompileResult<Node>;
+	generate : CompileResult<String>;
 }

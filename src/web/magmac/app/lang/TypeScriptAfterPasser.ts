@@ -16,4 +16,12 @@ import { ParseResult } from "../../../magmac/app/stage/result/ParseResult";
 import { ParseUnit } from "../../../magmac/app/stage/unit/ParseUnit";
 import { ParseUnitImpl } from "../../../magmac/app/stage/unit/ParseUnitImpl";
 export class TypeScriptAfterPasser {
+	passImport : Option<ParseResult>;
+	passMethod : Option<ParseResult>;
+	passVariadic : Option<ParseResult>;
+	format : Option<ParseResult>;
+	pass : ParseResult;
+	passTemp : Option<ParseResult>;
+	getObjectCompileResult : CompileResult<ParseUnit<Node>>;
+	getNode : Node;
 }

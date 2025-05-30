@@ -8,4 +8,9 @@ import { CompileError } from "../../../../magmac/app/compile/error/error/Compile
 import { Node } from "../../../../magmac/app/compile/node/Node";
 import { ImmutableCompileError } from "../../../../magmac/app/error/ImmutableCompileError";
 export class CompileResults {
+	fromResult : CompileResult<T>;
+	Ok : CompileResult<T>;
+	NodeErr : CompileResult<T>;
+	fromErrWithString : CompileResult<T>;
+	fromWithContext : CompileResult<T>;
 }

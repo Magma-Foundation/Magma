@@ -6,4 +6,17 @@ import { List } from "../../../../../magmac/api/collect/list/List";
 import { Lists } from "../../../../../magmac/api/collect/list/Lists";
 import { Iter } from "../../../../../magmac/api/iter/Iter";
 export class MutableDivideState {
+	MutableDivideState : private;
+	MutableDivideState : public;
+	append : DivideState;
+	advance : DivideState;
+	iter : Iter<String>;
+	isLevel : boolean;
+	enter : DivideState;
+	exit : DivideState;
+	isShallow : boolean;
+	pop : Option<Tuple2<DivideState, Character>>;
+	popAndAppendToTuple : Option<Tuple2<DivideState, Character>>;
+	popAndAppendToOption : Option<DivideState>;
+	peek : char;
 }

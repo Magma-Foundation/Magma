@@ -26,6 +26,6 @@ public record QualifiedType(List<Segment> segments) implements Base {
 
     @Override
     public Node serialize() {
-        return new MapNode("qualified").withNodeListSerialized("segments", this.segments, Segment::serialize);
+        return new MapNode("qualified").withNodeListAndSerializer("segments", this.segments, Segment::serialize);
     }
 }

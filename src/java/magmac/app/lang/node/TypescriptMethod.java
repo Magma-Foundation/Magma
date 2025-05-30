@@ -8,6 +8,6 @@ public record TypescriptMethod(MethodHeader header) implements TypescriptStructu
     @Override
     public Node serialize() {
         return new MapNode("method")
-                .withNodeSerialized("header", this.header, Serializable::serialize);
+                .withNodeAndSerializer("header", this.header, Serializable::serialize);
     }
 }

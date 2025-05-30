@@ -17,7 +17,7 @@ import magmac.app.compile.rule.TypeRule;
 import magmac.app.lang.Deserializers;
 import magmac.app.lang.Serializable;
 
-public record TemplateType(Base base, List<Type> right) implements Type {
+public record TemplateType(Base base, List<Type> arguments) implements Type {
     public static Option<CompileResult<TemplateType>> deserialize(Node node) {
         return Deserializers.deserializeWithType(node, "template").map(deserializer -> deserializer
                 .withNode("base", TemplateType::deserializeBase)
@@ -45,6 +45,7 @@ public record TemplateType(Base base, List<Type> right) implements Type {
     @Override
     public Node serialize() {
         return new MapNode("template")
-                .withNodeSerialized("base", base, Serializable::serialize);
+                .withNodeSerialized("base", this.base)
+                .withNodeListSerialized("arguments", this.arguments);
     }
 }

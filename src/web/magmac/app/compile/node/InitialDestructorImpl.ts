@@ -8,4 +8,9 @@ import { Deserializer } from "../../../../magmac/app/lang/node/Deserializer";
 import { Function } from "../../../../java/util/function/Function";
 import { Supplier } from "../../../../java/util/function/Supplier";
 export class InitialDestructorImpl {
+	InitialDestructorImpl : public;
+	withNodeList : CompoundDestructor<List<T>>;
+	withString : CompoundDestructor<String>;
+	withNode : CompoundDestructor<T>;
+	complete : CompileResult<T>;
 }

@@ -19,4 +19,11 @@ import { TypescriptStructureNode } from "../../../magmac/app/lang/node/Typescrip
 import { Values } from "../../../magmac/app/lang/node/Values";
 import { Whitespace } from "../../../magmac/app/lang/node/Whitespace";
 export class TypescriptLang {
+	createRule : Rule;
+	createStructureMemberRule : Rule;
+	createMethodRule : Rule;
+	createConstructorRule : Rule;
+	createDefinitionRule : Rule;
+	createTypeRule : Rule;
+	createArrayRule : TypeRule;
 }

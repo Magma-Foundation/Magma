@@ -17,8 +17,8 @@ public record StructureValue<T extends Serializable>(
     public Node serialize(String type) {
         return new MapNode(type)
                 .withString("name", this.name)
-                .withNodeListSerialized("modifiers", this.modifiers, Serializable::serialize)
-                .withNodeListSerialized("members", this.members, Serializable::serialize)
+                .withNodeListAndSerializer("modifiers", this.modifiers, Serializable::serialize)
+                .withNodeListAndSerializer("members", this.members, Serializable::serialize)
                 .merge(this.serializeTypeParams())
                 .merge(this.serializeExtendedParams())
                 .merge(this.serializeImplementsParams());
@@ -26,19 +26,19 @@ public record StructureValue<T extends Serializable>(
 
     private Node serializeImplementsParams() {
         return this.maybeImplemented
-                .map(implemented -> new MapNode().withNodeListSerialized("implemented", implemented, Serializable::serialize))
+                .map(implemented -> new MapNode().withNodeListAndSerializer("implemented", implemented, Serializable::serialize))
                 .orElse(new MapNode());
     }
 
     private Node serializeExtendedParams() {
         return this.maybeExtended
-                .map(extended -> new MapNode().withNodeListSerialized("extended", extended, Serializable::serialize))
+                .map(extended -> new MapNode().withNodeListAndSerializer("extended", extended, Serializable::serialize))
                 .orElse(new MapNode());
     }
 
     private Node serializeTypeParams() {
         return this.maybeTypeParams
-                .map(typeParams -> new MapNode().withNodeListSerialized("type-parameters", typeParams, Serializable::serialize))
+                .map(typeParams -> new MapNode().withNodeListAndSerializer("type-parameters", typeParams, Serializable::serialize))
                 .orElse(new MapNode());
     }
 }

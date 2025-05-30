@@ -82,7 +82,7 @@ public final class MapNode implements Node {
     }
 
     @Override
-    public <T> Node withNodeSerialized(String key, T element, Function<T, Node> serializer) {
+    public <T> Node withNodeAndSerializer(String key, T element, Function<T, Node> serializer) {
         return this.withNode(key, serializer.apply(element));
     }
 
@@ -198,7 +198,7 @@ public final class MapNode implements Node {
     }
 
     @Override
-    public <T> Node withNodeListSerialized(String key, List<T> list, Function<T, Node> serializer) {
+    public <T> Node withNodeListAndSerializer(String key, List<T> list, Function<T, Node> serializer) {
         NodeList nodeList = list.iter()
                 .map(serializer)
                 .collect(new NodeListCollector());
