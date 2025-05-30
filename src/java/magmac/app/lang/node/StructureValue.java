@@ -18,6 +18,7 @@ public record StructureValue<T extends Serializable>(
         return new MapNode(type)
                 .withString("name", this.name)
                 .withNodeListSerialized("modifiers", this.modifiers, Serializable::serialize)
+                .withNodeListSerialized("members", this.members, Serializable::serialize)
                 .merge(this.serializeTypeParams())
                 .merge(this.serializeExtendedParams())
                 .merge(this.serializeImplementsParams());
