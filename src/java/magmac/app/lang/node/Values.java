@@ -27,6 +27,7 @@ public final class Values {
 
     public static Option<CompileResult<Value>> deserialize(Node node) {
         List<Deserializer<Value>> deserializers = Lists.of(
+                Deserializers.wrap(SwitchNode::deserialize),
                 Deserializers.wrap(InvokableNode::deserialize),
                 StringNode::deserialize,
                 node1 -> Access.deserialize(AccessType.Data, node1),
