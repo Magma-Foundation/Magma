@@ -37,10 +37,10 @@ public final class JavaStructureNode implements JavaRootSegment {
     }
 
     public Option<List<Type>> implemented() {
-        return this.value.implemented();
+        return this.value.maybeImplemented();
     }
 
     public Option<List<Type>> extended() {
-        return this.value.extended();
+        return this.value.maybeExtended();
     }
 }

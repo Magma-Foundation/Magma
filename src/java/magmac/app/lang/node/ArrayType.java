@@ -2,6 +2,7 @@ package magmac.app.lang.node;
 
 import magmac.api.Option;
 import magmac.app.compile.error.CompileResult;
+import magmac.app.compile.node.MapNode;
 import magmac.app.compile.node.Node;
 import magmac.app.compile.rule.NodeRule;
 import magmac.app.compile.rule.Rule;
@@ -19,5 +20,10 @@ public record ArrayType(Type type) implements Type {
     public static Option<CompileResult<Type>> deserialize(Node node) {
         return Deserializers.deserializeWithType(node, "array").map(deserializer -> deserializer.withNode("child", Types::deserialize)
                 .complete(ArrayType::new));
+    }
+
+    @Override
+    public Node serialize() {
+        return new MapNode();
     }
 }

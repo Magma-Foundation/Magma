@@ -4,6 +4,7 @@ import magmac.api.Option;
 import magmac.api.collect.list.List;
 import magmac.api.collect.list.Lists;
 import magmac.app.compile.error.CompileResult;
+import magmac.app.compile.node.MapNode;
 import magmac.app.compile.node.Node;
 import magmac.app.compile.rule.LocatingRule;
 import magmac.app.compile.rule.NodeListRule;
@@ -38,5 +39,10 @@ public record TemplateType(Base base, List<Type> right) implements Type {
 
         Rule arguments = NodeListRule.Values("arguments", type);
         return new TypeRule("template", new StripRule(new SuffixRule(LocatingRule.First(base, "<", arguments), ">")));
+    }
+
+    @Override
+    public Node serialize() {
+        return new MapNode();
     }
 }

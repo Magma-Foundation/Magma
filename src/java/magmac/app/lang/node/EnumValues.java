@@ -4,6 +4,7 @@ import magmac.api.Option;
 import magmac.api.collect.list.List;
 import magmac.api.collect.list.Lists;
 import magmac.app.compile.error.CompileResult;
+import magmac.app.compile.node.MapNode;
 import magmac.app.compile.node.Node;
 import magmac.app.compile.rule.FilterRule;
 import magmac.app.compile.rule.LocatingRule;
@@ -14,8 +15,8 @@ import magmac.app.compile.rule.StringRule;
 import magmac.app.compile.rule.StripRule;
 import magmac.app.compile.rule.SuffixRule;
 import magmac.app.compile.rule.TypeRule;
-import magmac.app.lang.ValueFolder;
 import magmac.app.lang.Deserializers;
+import magmac.app.lang.ValueFolder;
 
 public record EnumValues(List<EnumValue> values) implements JavaStructureMember {
     public static TypeRule createEnumValuesRule(Rule value) {
@@ -37,5 +38,10 @@ public record EnumValues(List<EnumValue> values) implements JavaStructureMember 
     public static Option<CompileResult<JavaStructureMember>> deserialize(Node node) {
         return Deserializers.deserializeWithType(node, "enum-values").map(deserializer -> deserializer.withNodeList("children", EnumValue::deserialize)
                 .complete(EnumValues::new));
+    }
+
+    @Override
+    public Node serialize() {
+        return new MapNode();
     }
 }

@@ -1,6 +1,5 @@
 package magmac.app.lang.node;
 
-import magmac.app.compile.node.MapNode;
 import magmac.app.compile.node.Node;
 
 public final class TypescriptStructureNode implements TypeScriptRootSegment {
@@ -14,6 +13,6 @@ public final class TypescriptStructureNode implements TypeScriptRootSegment {
 
     @Override
     public Node serialize() {
-        return new MapNode();
+        return this.value.serialize(this.type.name().toLowerCase());
     }
 }

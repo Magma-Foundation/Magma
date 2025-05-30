@@ -193,7 +193,7 @@ public final class MapNode implements Node {
     }
 
     @Override
-    public <T> Node withSerializedNodeList(String key, List<T> list, Function<T, Node> serializer) {
+    public <T> Node withNodeListSerialized(String key, List<T> list, Function<T, Node> serializer) {
         NodeList nodeList = list.iter()
                 .map(serializer)
                 .collect(new NodeListCollector());

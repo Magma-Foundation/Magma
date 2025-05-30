@@ -71,10 +71,10 @@ class JavaTypescriptParser implements Parser<Root<JavaRootSegment>, TypescriptRo
         StructureValue<TypescriptStructureMember> structureNode1 = new StructureValue<>(
                 value.name(),
                 value.modifiers(),
-                value.typeParams(),
-                value.extended(),
-                value.implemented(),
-                collect
+                collect,
+                value.maybeTypeParams(),
+                value.maybeExtended(),
+                value.maybeImplemented()
         );
 
         return new TypescriptStructureNode(TypescriptStructureType.Class, structureNode1);

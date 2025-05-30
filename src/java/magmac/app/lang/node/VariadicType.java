@@ -2,6 +2,7 @@ package magmac.app.lang.node;
 
 import magmac.api.Option;
 import magmac.app.compile.error.CompileResult;
+import magmac.app.compile.node.MapNode;
 import magmac.app.compile.node.Node;
 import magmac.app.compile.rule.NodeRule;
 import magmac.app.compile.rule.Rule;
@@ -19,5 +20,10 @@ public record VariadicType(Type node) implements Type {
     public static Rule createVariadicRule(Rule rule) {
         NodeRule child = new NodeRule("child", rule);
         return new TypeRule("variadic", new StripRule(new SuffixRule(child, "...")));
+    }
+
+    @Override
+    public Node serialize() {
+        return new MapNode();
     }
 }

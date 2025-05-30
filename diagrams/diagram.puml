@@ -15,7 +15,9 @@ BlockHeader --> Deserializers
 interface BlockHeader
 StructureValue --> Option
 StructureValue --> List
-StructureValue --> Objects
+StructureValue --> MapNode
+StructureValue --> Node
+StructureValue --> Serializable
 class StructureValue
 PlantUMLRootSegments --> Lists
 PlantUMLRootSegments --> OrRule
@@ -325,6 +327,7 @@ UnitSet <|-- MapUnitSet
 StructureStatement --> Option
 StructureStatement --> Lists
 StructureStatement --> CompileResult
+StructureStatement --> MapNode
 StructureStatement --> Node
 StructureStatement --> NodeRule
 StructureStatement --> OrRule
@@ -332,11 +335,13 @@ StructureStatement --> Rule
 StructureStatement --> StripRule
 StructureStatement --> SuffixRule
 StructureStatement --> TypeRule
-StructureStatement --> LazyRule
 StructureStatement --> Deserializers
+StructureStatement --> LazyRule
 class StructureStatement
 JavaStructureMember <|-- StructureStatement
+TypescriptStructureMember --> Serializable
 interface TypescriptStructureMember
+Serializable <|-- TypescriptStructureMember
 Location --> List
 Location --> Joiner
 class Location
@@ -451,6 +456,7 @@ MethodNode --> List
 MethodNode --> Lists
 MethodNode --> CompileResult
 MethodNode --> InitialDestructor
+MethodNode --> MapNode
 MethodNode --> Node
 MethodNode --> FilterRule
 MethodNode --> LocatingRule
@@ -463,8 +469,8 @@ MethodNode --> StripRule
 MethodNode --> SuffixRule
 MethodNode --> TypeRule
 MethodNode --> CommonLang
-MethodNode --> OptionNodeListRule
 MethodNode --> Deserializers
+MethodNode --> OptionNodeListRule
 class MethodNode
 JavaStructureMember <|-- MethodNode
 TypedDeserializer --> Option
@@ -496,6 +502,7 @@ TemplateType --> Option
 TemplateType --> List
 TemplateType --> Lists
 TemplateType --> CompileResult
+TemplateType --> MapNode
 TemplateType --> Node
 TemplateType --> LocatingRule
 TemplateType --> NodeListRule
@@ -550,6 +557,7 @@ EnumValues --> Option
 EnumValues --> List
 EnumValues --> Lists
 EnumValues --> CompileResult
+EnumValues --> MapNode
 EnumValues --> Node
 EnumValues --> FilterRule
 EnumValues --> LocatingRule
@@ -560,8 +568,8 @@ EnumValues --> StringRule
 EnumValues --> StripRule
 EnumValues --> SuffixRule
 EnumValues --> TypeRule
-EnumValues --> ValueFolder
 EnumValues --> Deserializers
+EnumValues --> ValueFolder
 class EnumValues
 JavaStructureMember <|-- EnumValues
 enum PostVariant
@@ -904,7 +912,9 @@ StringNode --> TypeRule
 StringNode --> Deserializers
 class StringNode
 Value <|-- StringNode
+JavaStructureMember --> Serializable
 interface JavaStructureMember
+Serializable <|-- JavaStructureMember
 SafeFiles --> None
 SafeFiles --> Option
 SafeFiles --> Some
@@ -920,9 +930,12 @@ SafeFiles --> Stream
 class SafeFiles
 interface Assignable
 TypeParam --> CompileResult
+TypeParam --> MapNode
 TypeParam --> Node
 TypeParam --> Deserializers
+TypeParam --> Serializable
 class TypeParam
+Serializable <|-- TypeParam
 FilterRule --> CompileResult
 FilterRule --> CompileErrors
 FilterRule --> Node
@@ -1101,6 +1114,7 @@ RuleLexer --> UnitSet
 class RuleLexer
 Lexer <|-- RuleLexer
 Modifier --> CompileResult
+Modifier --> MapNode
 Modifier --> Node
 Modifier --> NodeListRule
 Modifier --> Rule
@@ -1108,7 +1122,9 @@ Modifier --> StringRule
 Modifier --> StripRule
 Modifier --> DelimitedFolder
 Modifier --> Deserializers
+Modifier --> Serializable
 class Modifier
+Serializable <|-- Modifier
 Try --> Option
 Try --> CompileResult
 Try --> Node
@@ -1373,6 +1389,7 @@ FunctionSegmentValues --> Deserializers
 class FunctionSegmentValues
 VariadicType --> Option
 VariadicType --> CompileResult
+VariadicType --> MapNode
 VariadicType --> Node
 VariadicType --> NodeRule
 VariadicType --> Rule
@@ -1401,7 +1418,11 @@ EnumValue --> CompileResult
 EnumValue --> Node
 EnumValue --> Deserializers
 class EnumValue
+Type --> Serializable
 interface Type
+Serializable <|-- Type
+Symbol --> MapNode
+Symbol --> Node
 class Symbol
 Type <|-- Symbol
 Value <|-- Symbol
@@ -1453,6 +1474,7 @@ class LexingStage
 enum AccessType
 ArrayType --> Option
 ArrayType --> CompileResult
+ArrayType --> MapNode
 ArrayType --> Node
 ArrayType --> NodeRule
 ArrayType --> Rule
@@ -1667,7 +1689,6 @@ ReturnNode --> Deserializers
 class ReturnNode
 FunctionSegmentValue <|-- ReturnNode
 FunctionSegment <|-- ReturnNode
-TypescriptStructureNode --> MapNode
 TypescriptStructureNode --> Node
 class TypescriptStructureNode
 TypeScriptRootSegment <|-- TypescriptStructureNode

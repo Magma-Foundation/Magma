@@ -1,4 +1,6 @@
 package magmac.app.lang.node;
 
-public sealed interface Type permits ArrayType, Symbol, TemplateType, VariadicType {
+import magmac.app.lang.Serializable;
+
+public sealed interface Type extends Serializable permits ArrayType, Symbol, TemplateType, VariadicType {
 }

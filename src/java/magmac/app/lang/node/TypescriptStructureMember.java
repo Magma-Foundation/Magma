@@ -1,4 +1,6 @@
 package magmac.app.lang.node;
 
-public interface TypescriptStructureMember {
+import magmac.app.lang.Serializable;
+
+public interface TypescriptStructureMember extends Serializable {
 }

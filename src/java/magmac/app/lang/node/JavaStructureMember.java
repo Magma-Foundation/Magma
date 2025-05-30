@@ -1,4 +1,6 @@
 package magmac.app.lang.node;
 
-public sealed interface JavaStructureMember permits EnumValues, MethodNode, StructureStatement, Whitespace {
+import magmac.app.lang.Serializable;
+
+public sealed interface JavaStructureMember extends Serializable permits EnumValues, MethodNode, StructureStatement, Whitespace {
 }
