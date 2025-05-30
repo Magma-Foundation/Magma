@@ -1,13 +1,12 @@
 package magmac.app.compile.rule;
 
+import magmac.api.collect.list.List;
 import magmac.api.iter.Iter;
 import magmac.app.compile.error.CompileResult;
 import magmac.app.compile.error.context.Context;
 import magmac.app.compile.error.context.NodeContext;
 import magmac.app.compile.error.context.StringContext;
 import magmac.app.compile.node.Node;
-
-import magmac.api.collect.list.List;
 
 import java.util.function.Function;
 

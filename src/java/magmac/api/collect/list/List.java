@@ -19,7 +19,7 @@ public interface List<T> {
 
     List<T> sort(BiFunction<T, T, Integer> sorter);
 
-    T getLast();
+    Option<T> findLast();
 
     boolean contains(T element);
 

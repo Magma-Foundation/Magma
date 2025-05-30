@@ -31,10 +31,6 @@ public final class InlineNodeList implements NodeList {
         return this.elements.iter();
     }
 
-    private Node last() {
-        return this.elements.getLast();
-    }
-
     @Override
     public NodeList add(Node element) {
         return new InlineNodeList(this.elements.addLast(element));
@@ -47,7 +43,7 @@ public final class InlineNodeList implements NodeList {
 
     @Override
     public Option<Node> findLast() {
-        return new Some<>(this.last());
+        return this.elements.findLast();
     }
 
     @Override

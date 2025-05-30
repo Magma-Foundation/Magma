@@ -680,13 +680,13 @@ Post --> TypeRule
 Post --> Deserializers
 class Post
 FunctionSegmentValue <|-- Post
+OrRule --> List
 OrRule --> Iter
 OrRule --> CompileResult
 OrRule --> Context
 OrRule --> NodeContext
 OrRule --> StringContext
 OrRule --> Node
-OrRule --> List
 OrRule --> Function
 class OrRule
 Rule <|-- OrRule
@@ -974,7 +974,9 @@ JavaTypescriptParser --> UnitSetCollector
 JavaTypescriptParser --> JavaRootSegment
 JavaTypescriptParser --> Namespaced
 JavaTypescriptParser --> Root
+JavaTypescriptParser --> Segment
 JavaTypescriptParser --> StructureNode
+JavaTypescriptParser --> TypeScriptImport
 JavaTypescriptParser --> TypeScriptRootSegment
 JavaTypescriptParser --> TypescriptRoot
 JavaTypescriptParser --> Whitespace
@@ -1072,6 +1074,11 @@ FunctionStatement --> Deserializers
 class FunctionStatement
 FunctionSegment <|-- FunctionStatement
 interface Parameter
+TypeScriptImport --> List
+TypeScriptImport --> MapNode
+TypeScriptImport --> Node
+class TypeScriptImport
+TypeScriptRootSegment <|-- TypeScriptImport
 PlantUMLHeader --> MapNode
 PlantUMLHeader --> Node
 PlantUMLHeader --> ExactRule
@@ -1559,6 +1566,7 @@ MergeDiagram --> UnitSet
 class MergeDiagram
 AfterAll <|-- MergeDiagram
 Segment --> CompileResult
+Segment --> MapNode
 Segment --> Node
 Segment --> Deserializers
 class Segment

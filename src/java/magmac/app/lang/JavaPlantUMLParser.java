@@ -43,8 +43,7 @@ public class JavaPlantUMLParser implements Parser<Root<JavaRootSegment>, PlantUM
         return switch (namespaced.type()) {
             case Package -> Iters.empty();
             case Import -> {
-                String parent = namespaced.segments()
-                        .getLast()
+                String parent = namespaced.segments().findLast().orElse(null)
                         .value();
 
                 yield Iters.fromValues(new PlantUMLDependency(child, parent));

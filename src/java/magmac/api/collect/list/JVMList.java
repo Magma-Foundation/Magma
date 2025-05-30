@@ -58,11 +58,6 @@ public record JVMList<T>(java.util.List<T> elements) implements List<T> {
     }
 
     @Override
-    public T getLast() {
-        return this.elements.getLast();
-    }
-
-    @Override
     public boolean contains(T element) {
         return this.elements.contains(element);
     }
@@ -98,5 +93,13 @@ public record JVMList<T>(java.util.List<T> elements) implements List<T> {
         copy.add(element);
         copy.addAll(this.elements);
         return new JVMList<>(copy);
+    }
+
+    @Override
+    public Option<T> findLast() {
+        if (this.elements.isEmpty()) {
+            return new None<>();
+        }
+        return new Some<>(this.elements.getLast());
     }
 }

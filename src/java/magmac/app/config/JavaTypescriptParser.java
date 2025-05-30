@@ -11,7 +11,9 @@ import magmac.app.io.sources.UnitSetCollector;
 import magmac.app.lang.node.JavaRootSegment;
 import magmac.app.lang.node.Namespaced;
 import magmac.app.lang.node.Root;
+import magmac.app.lang.node.Segment;
 import magmac.app.lang.node.StructureNode;
+import magmac.app.lang.node.TypeScriptImport;
 import magmac.app.lang.node.TypeScriptRootSegment;
 import magmac.app.lang.node.TypescriptRoot;
 import magmac.app.lang.node.Whitespace;
@@ -36,10 +38,26 @@ class JavaTypescriptParser implements Parser<Root<JavaRootSegment>, TypescriptRo
 
     private static TypeScriptRootSegment parseRootSegment(JavaRootSegment rootSegment) {
         return switch (rootSegment) {
-            case Namespaced namespaced -> new Whitespace();
+            case Namespaced namespaced -> JavaTypescriptParser.parseNamespaced(namespaced);
             case StructureNode structureNode -> new Whitespace();
             case Whitespace whitespace -> whitespace;
         };
+    }
+
+    private static TypeScriptRootSegment parseNamespaced(Namespaced namespaced) {
+        return switch (namespaced.type()) {
+            case Package -> new Whitespace();
+            case Import -> JavaTypescriptParser.parseImport(namespaced.segments());
+        };
+    }
+
+    private static TypeScriptImport parseImport(List<Segment> segments) {
+        List<String> segmentValues = segments.iter()
+                .map(Segment::value)
+                .collect(new ListCollector<>());
+
+        Segment last = new Segment(segmentValues.findLast().orElse(""));
+        return new TypeScriptImport(Lists.of(last), segments);
     }
 
     @Override
