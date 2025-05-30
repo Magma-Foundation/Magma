@@ -12,10 +12,10 @@ import magmac.app.compile.error.CompileResults;
 
 import java.util.function.Function;
 
-public class CompoundDeserializerImpl<T> implements CompoundDeserializer<T> {
+public class CompoundDestructorImpl<T> implements CompoundDestructor<T> {
     private final CompileResult<Tuple2<Node, T>> result;
 
-    public CompoundDeserializerImpl(CompileResult<Tuple2<Node, T>> result) {
+    public CompoundDestructorImpl(CompileResult<Tuple2<Node, T>> result) {
         this.result = result;
     }
 
@@ -31,8 +31,8 @@ public class CompoundDeserializerImpl<T> implements CompoundDeserializer<T> {
     }
 
     @Override
-    public <R> CompoundDeserializer<Tuple2<T, List<R>>> withNodeList(String key, Function<Node, CompileResult<R>> deserializer) {
-        return new CompoundDeserializerImpl<>(this.result.flatMapValue((Tuple2<Node, T> inner) -> inner.left().removeNodeListOrError(key).flatMapValue((Tuple2<Node, NodeList> tuple) -> tuple.right()
+    public <R> CompoundDestructor<Tuple2<T, List<R>>> withNodeList(String key, Function<Node, CompileResult<R>> deserializer) {
+        return new CompoundDestructorImpl<>(this.result.flatMapValue((Tuple2<Node, T> inner) -> inner.left().removeNodeListOrError(key).flatMapValue((Tuple2<Node, NodeList> tuple) -> tuple.right()
                 .iter()
                 .map(deserializer)
                 .collect(new CompileResultCollector<>(new ListCollector<>()))
@@ -40,16 +40,16 @@ public class CompoundDeserializerImpl<T> implements CompoundDeserializer<T> {
     }
 
     @Override
-    public <R> CompoundDeserializer<Tuple2<T, R>> withNode(String key, Function<Node, CompileResult<R>> deserializer) {
-        return new CompoundDeserializerImpl<Tuple2<T, R>>(this.result.flatMapValue((Tuple2<Node, T> inner) -> inner.left().removeNode(key).flatMapValue((Tuple2<Node, Node> removed) -> {
+    public <R> CompoundDestructor<Tuple2<T, R>> withNode(String key, Function<Node, CompileResult<R>> deserializer) {
+        return new CompoundDestructorImpl<Tuple2<T, R>>(this.result.flatMapValue((Tuple2<Node, T> inner) -> inner.left().removeNode(key).flatMapValue((Tuple2<Node, Node> removed) -> {
             Node right = removed.right();
             return deserializer.apply(right).flatMapValue((R newRight) -> CompileResults.Ok(new Tuple2<>(removed.left(), new Tuple2<>(inner.right(), newRight))));
         })));
     }
 
     @Override
-    public <R> CompoundDeserializer<Tuple2<T, Option<List<R>>>> withNodeListOptionally(String key, Function<Node, CompileResult<R>> deserializer) {
-        return new CompoundDeserializerImpl<>(this.result.flatMapValue((inner -> inner.left()
+    public <R> CompoundDestructor<Tuple2<T, Option<List<R>>>> withNodeListOptionally(String key, Function<Node, CompileResult<R>> deserializer) {
+        return new CompoundDestructorImpl<>(this.result.flatMapValue((inner -> inner.left()
                 .removeNodeList(key)
                 .map(tuple -> this.mapElements(tuple.left(), tuple.right(), deserializer, inner.right()))
                 .orElseGet(() -> CompileResults.Ok(new Tuple2<>(inner.left(), new Tuple2<>(inner.right(), new None<List<R>>())))))));

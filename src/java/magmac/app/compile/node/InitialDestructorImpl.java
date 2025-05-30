@@ -19,8 +19,8 @@ public class InitialDestructorImpl implements InitialDestructor {
     }
 
     @Override
-    public <T> CompoundDeserializer<List<T>> withNodeList(String key, Deserializer<T> deserializer) {
-        return new CompoundDeserializerImpl<>(this.node.removeNodeListOrError(key).flatMapValue((Tuple2<Node, NodeList> tuple) -> tuple.right()
+    public <T> CompoundDestructor<List<T>> withNodeList(String key, Deserializer<T> deserializer) {
+        return new CompoundDestructorImpl<>(this.node.removeNodeListOrError(key).flatMapValue((Tuple2<Node, NodeList> tuple) -> tuple.right()
                 .iter()
                 .map(deserializer::deserialize)
                 .collect(new CompileResultCollector<>(new ListCollector<>()))
@@ -28,13 +28,13 @@ public class InitialDestructorImpl implements InitialDestructor {
     }
 
     @Override
-    public CompoundDeserializer<String> withString(String key) {
-        return new CompoundDeserializerImpl<>(this.node.removeString(key));
+    public CompoundDestructor<String> withString(String key) {
+        return new CompoundDestructorImpl<>(this.node.removeString(key));
     }
 
     @Override
-    public <T> CompoundDeserializer<T> withNode(String key, Function<Node, CompileResult<T>> deserializer) {
-        return new CompoundDeserializerImpl<>(this.node.removeNode(key).flatMapValue((Tuple2<Node, Node> tuple) -> deserializer.apply(tuple.right()).mapValue((T deserialized) -> new Tuple2<>(tuple.left(), deserialized))));
+    public <T> CompoundDestructor<T> withNode(String key, Function<Node, CompileResult<T>> deserializer) {
+        return new CompoundDestructorImpl<>(this.node.removeNode(key).flatMapValue((Tuple2<Node, Node> tuple) -> deserializer.apply(tuple.right()).mapValue((T deserialized) -> new Tuple2<>(tuple.left(), deserialized))));
     }
 
     @Override
