@@ -1,402 +1,263 @@
 @startuml
 skinparam linetype ortho
-class TypescriptLang
-
-class TypeScriptTargetPlatform
-TargetPlatform <|-- TypeScriptTargetPlatform
-
-interface Targets
-
+BlockHeader --> Lists
+BlockHeader --> CompileResult
+BlockHeader --> Node
+BlockHeader --> ExactRule
+BlockHeader --> NodeRule
+BlockHeader --> OrRule
+BlockHeader --> PrefixRule
+BlockHeader --> Rule
+BlockHeader --> StripRule
+BlockHeader --> SuffixRule
+BlockHeader --> TypeRule
+BlockHeader --> Deserializers
+interface BlockHeader
+enum StructureType
+PlantUMLRootSegments --> Lists
+PlantUMLRootSegments --> OrRule
+PlantUMLRootSegments --> Rule
+PlantUMLRootSegments --> SuffixRule
+class PlantUMLRootSegments
+List --> Option
+List --> Tuple2
+List --> Iter
+List --> BiFunction
 interface List
-
+PlantUMLInherits --> MapNode
+PlantUMLInherits --> Node
+PlantUMLInherits --> LocatingRule
+PlantUMLInherits --> StringRule
+PlantUMLInherits --> TypeRule
+class PlantUMLInherits
+PlantUMLRootSegment <|-- PlantUMLInherits
+interface Base
+TargetPlatform --> Compiler
+TargetPlatform --> Rule
+TargetPlatform --> AfterAll
+TargetPlatform --> Passer
+TargetPlatform --> Lexer
+TargetPlatform --> Path
 interface TargetPlatform
-
+Joiner --> None
+Joiner --> Option
+Joiner --> Some
 class Joiner
 Collector <|-- Joiner
-
+ListCollector --> List
+ListCollector --> Lists
 class ListCollector
 Collector <|-- ListCollector
-
-interface Unit
-
-class FlattenJava
-Passer <|-- FlattenJava
-
-class Maps
-
-class Tuple2
-
+interface FunctionSegmentValue
+Catch --> Option
+Catch --> CompileResult
+Catch --> Node
+Catch --> Deserializers
+class Catch
+BlockHeader <|-- Catch
+AssignmentNode --> Option
+AssignmentNode --> Lists
+AssignmentNode --> CompileResult
+AssignmentNode --> Node
+AssignmentNode --> LocatingRule
+AssignmentNode --> NodeRule
+AssignmentNode --> OrRule
+AssignmentNode --> Rule
+AssignmentNode --> TypeRule
+AssignmentNode --> Deserializers
+class AssignmentNode
+FunctionSegmentValue <|-- AssignmentNode
+ApplicationError --> Error
 class ApplicationError
 Error <|-- ApplicationError
-
-class StagedCompiler
-Compiler <|-- StagedCompiler
-
-interface LazyRule
-Rule <|-- LazyRule
-
+PlantUMLStructure --> MapNode
+PlantUMLStructure --> Node
+PlantUMLStructure --> PrefixRule
+PlantUMLStructure --> Rule
+PlantUMLStructure --> StringRule
+PlantUMLStructure --> TypeRule
+class PlantUMLStructure
+PlantUMLRootSegment <|-- PlantUMLStructure
+FunctionSegment --> Lists
+FunctionSegment --> CompileResult
+FunctionSegment --> Node
+FunctionSegment --> ExactRule
+FunctionSegment --> LocatingRule
+FunctionSegment --> NodeListRule
+FunctionSegment --> NodeRule
+FunctionSegment --> OrRule
+FunctionSegment --> PrefixRule
+FunctionSegment --> Rule
+FunctionSegment --> StringRule
+FunctionSegment --> StripRule
+FunctionSegment --> SuffixRule
+FunctionSegment --> TypeRule
+FunctionSegment --> StatementFolder
+FunctionSegment --> Deserializers
+FunctionSegment --> LazyRule
+interface FunctionSegment
+Access --> Option
+Access --> CompileResult
+Access --> Node
+Access --> LocatingRule
+Access --> NodeRule
+Access --> Rule
+Access --> TypeRule
+Access --> LazyRule
+Access --> Deserializers
+class Access
+Value <|-- Access
+AfterAll --> Node
+AfterAll --> UnitSet
 interface AfterAll
-
+Not --> Option
+Not --> CompileResult
+Not --> Node
+Not --> NodeRule
+Not --> PrefixRule
+Not --> StripRule
+Not --> TypeRule
+Not --> LazyRule
+Not --> Deserializers
+class Not
+Value <|-- Not
+Compiler --> CompileResult
+Compiler --> UnitSet
 interface Compiler
-
+MapCollector --> Tuple2
+MapCollector --> Collector
 class MapCollector
 Collector <|-- MapCollector
-
-class ImmutableCompileError
-CompileError <|-- ImmutableCompileError
-
-interface NodeList
-
+Values --> Option
+Values --> List
+Values --> Lists
+Values --> Iters
+Values --> ListCollector
+Values --> CompileResult
+Values --> CompileResults
+Values --> Node
+Values --> NodeRule
+Values --> OrRule
+Values --> PrefixRule
+Values --> Rule
+Values --> StripRule
+Values --> SuffixRule
+Values --> TypeRule
+Values --> CommonLang
+Values --> Deserializer
+Values --> Deserializers
+Values --> LazyRule
+class Values
+Folder --> DivideState
 interface Folder
-
-class LastSelector
-Selector <|-- LastSelector
-
+Deserializers --> None
+Deserializers --> Option
+Deserializers --> Some
+Deserializers --> List
+Deserializers --> Lists
+Deserializers --> Iters
+Deserializers --> CompileResult
+Deserializers --> CompileResults
+Deserializers --> NodeContext
+Deserializers --> CompileError
+Deserializers --> InitialDeserializer
+Deserializers --> InitialDeserializerImpl
+Deserializers --> Node
+Deserializers --> ImmutableCompileError
+class Deserializers
+ParseUnit --> NodeList
+ParseUnit --> ParseState
+ParseUnit --> BiFunction
 interface ParseUnit
-
+RuleGenerator --> Lists
+RuleGenerator --> CompileResult
+RuleGenerator --> CompileResultCollector
+RuleGenerator --> NodeContext
+RuleGenerator --> CompileError
+RuleGenerator --> Node
+RuleGenerator --> Rule
+RuleGenerator --> ImmutableCompileError
+RuleGenerator --> UnitSetCollector
+RuleGenerator --> Unit
+RuleGenerator --> UnitSet
 class RuleGenerator
 Generator <|-- RuleGenerator
-
+Passer --> Node
+Passer --> ParseState
+Passer --> ParseResult
 interface Passer
-
-class InlineCompileResult
-CompileResult <|-- InlineCompileResult
-
-class RuleLexer
-Lexer <|-- RuleLexer
-
+StructureMembers --> Lists
+StructureMembers --> CompileResult
+StructureMembers --> Node
+StructureMembers --> OrRule
+StructureMembers --> Rule
+StructureMembers --> TypeRule
+StructureMembers --> LazyRule
+StructureMembers --> MutableLazyRule
+StructureMembers --> Deserializers
+class StructureMembers
+CompileApplication --> Some
+CompileApplication --> Error
+CompileApplication --> Compiler
+CompileApplication --> ApplicationError
+CompileApplication --> ThrowableError
+CompileApplication --> Sources
+CompileApplication --> Targets
+CompileApplication --> Option
+CompileApplication --> UnitSet
 class CompileApplication
 Application <|-- CompileApplication
-
-interface JavaRootSegment
-
-class OrState
-
-interface ParseState
-
-class MapUnitSet
-UnitSet <|-- MapUnitSet
-
-interface Rule
-
-class CompileResultCollector
-Collector <|-- CompileResultCollector
-
-interface Error
-
-class PathTargets
-Targets <|-- PathTargets
-
-class Location
-
-class SingleHead
-Head <|-- SingleHead
-
-interface Option
-
-class StripRule
-Rule <|-- StripRule
-
-class CompileErrors
-
-class Ok
-Result <|-- Ok
-
-interface Parser
-Stage <|-- Parser
-
-interface Lexer
-Stage <|-- Lexer
-
-class DivideRule
-Rule <|-- DivideRule
-
-interface IOResult
-
-class LocatingRule
-Rule <|-- LocatingRule
-
-class SuffixRule
-Rule <|-- SuffixRule
-
-class EmptyAfterAll
-AfterAll <|-- EmptyAfterAll
-
-interface Result
-
-class PlantUMLLang
-
-class Main
-
-class Console
-
-class LastLocator
-Locator <|-- LastLocator
-
-class MutableDivideState
-DivideState <|-- MutableDivideState
-
-interface CompileError
-Error <|-- CompileError
-
-interface Locator
-
-class TypeSeparatorFolder
-Folder <|-- TypeSeparatorFolder
-
-class UnitSetCollector
-Collector <|-- UnitSetCollector
-
-class ContextRule
-Rule <|-- ContextRule
-
-interface Selector
-
-class RangeHead
-Head <|-- RangeHead
-
-interface Source
-
-interface UnitSet
-
-class ParseUnitImpl
-ParseUnit <|-- ParseUnitImpl
-
-class SimpleUnit
-Unit <|-- SimpleUnit
-
-class FlatMapHead
-Head <|-- FlatMapHead
-
-class FoldingDivider
-Divider <|-- FoldingDivider
-
-class Lists
-
-class CommonLang
-
-class InvocationFolder
-Folder <|-- InvocationFolder
-
-class JavaLang
-
-interface Filter
-
-class StringRule
-Rule <|-- StringRule
-
-class ThrowableError
-Error <|-- ThrowableError
-
-class None
-Option <|-- None
-
-class JVMList
-List <|-- JVMList
-
-class ResultCollector
-Collector <|-- ResultCollector
-
-interface Head
-
+Lambda --> Option
+Lambda --> Lists
+Lambda --> CompileResult
+Lambda --> Node
+Lambda --> LocatingRule
+Lambda --> NodeListRule
+Lambda --> NodeRule
+Lambda --> OrRule
+Lambda --> PrefixRule
+Lambda --> Rule
+Lambda --> StripRule
+Lambda --> SuffixRule
+Lambda --> TypeRule
+Lambda --> CommonLang
+Lambda --> LazyRule
+Lambda --> ValueFolder
+Lambda --> Deserializers
+class Lambda
+Value <|-- Lambda
+Block --> Option
+Block --> List
+Block --> CompileResult
+Block --> Node
+Block --> LocatingRule
+Block --> NodeRule
+Block --> Rule
+Block --> Splitter
+Block --> StripRule
+Block --> SuffixRule
+Block --> TypeRule
+Block --> FoldingDivider
+Block --> DividingSplitter
+Block --> BlockFolder
+Block --> CommonLang
+Block --> LazyRule
+Block --> Deserializers
+class Block
+FunctionSegment <|-- Block
+JavaRoot --> List
+JavaRoot --> Lists
+JavaRoot --> CompileResult
+JavaRoot --> MapNode
+JavaRoot --> Node
+JavaRoot --> OrRule
+JavaRoot --> Rule
+JavaRoot --> TypeRule
+JavaRoot --> CommonLang
+JavaRoot --> Deserializers
+JavaRoot --> Serializable
 class JavaRoot
-
-interface ParseResult
-
-class StatementFolder
-Folder <|-- StatementFolder
-
-interface Generator
-Stage <|-- Generator
-
-class Max
-Collector <|-- Max
-
-class NodeContext
-Context <|-- NodeContext
-
-interface CompileResult
-
-class DividingSplitter
-Splitter <|-- DividingSplitter
-
-class EmptyHead
-Head <|-- EmptyHead
-
-class NodeListCollector
-Collector <|-- NodeListCollector
-
-class NumberFilter
-Filter <|-- NumberFilter
-
-interface Stage
-
-class CompileResults
-
-class PathSources
-Sources <|-- PathSources
-
-interface Map
-
-interface DivideState
-
-class PlantUMLTargetPlatform
-TargetPlatform <|-- PlantUMLTargetPlatform
-
-class MutableLazyRule
-LazyRule <|-- MutableLazyRule
-
-class JVMMap
-Map <|-- JVMMap
-
-class PrefixRule
-Rule <|-- PrefixRule
-
-class FirstSelector
-Selector <|-- FirstSelector
-
-class ExactRule
-Rule <|-- ExactRule
-
-class PathSource
-Source <|-- PathSource
-
-class StringContext
-Context <|-- StringContext
-
-class InlinePassResult
-ParseResult <|-- InlinePassResult
-
-class TypeRule
-Rule <|-- TypeRule
-
-class SymbolFilter
-Filter <|-- SymbolFilter
-
-class InlineNodeList
-NodeList <|-- InlineNodeList
-
-class FirstLocator
-Locator <|-- FirstLocator
-
-interface Node
-
-class OrRule
-Rule <|-- OrRule
-
-interface Iter
-
-class NodeRule
-Rule <|-- NodeRule
-
-class Iters
-
-class BlockFolder
-Folder <|-- BlockFolder
-
-class ApplicationBuilder
-
-class DelimitedFolder
-Folder <|-- DelimitedFolder
-
-class TypeScriptAfterPasser
-Passer <|-- TypeScriptAfterPasser
-
-interface Collector
-
-class Some
-Option <|-- Some
-
-class LocatingSplitter
-Splitter <|-- LocatingSplitter
-
-interface Context
-
-class MergeDiagram
-AfterAll <|-- MergeDiagram
-
-interface Sources
-
-interface Application
-
-class ImmutableParseState
-ParseState <|-- ImmutableParseState
-
-interface Divider
-
-class TreeParser
-Parser <|-- TreeParser
-
-class Err
-Result <|-- Err
-
-class OptionNodeListRule
-Rule <|-- OptionNodeListRule
-
-class PlantUMLAfterPasser
-Passer <|-- PlantUMLAfterPasser
-
-class ValueFolder
-Folder <|-- ValueFolder
-
-class SafeFiles
-
-class HeadedIter
-Iter <|-- HeadedIter
-
-interface Splitter
-
-class MapNode
-Node <|-- MapNode
-
-class FilterRule
-Rule <|-- FilterRule
-
-class InlineIOResult
-IOResult <|-- InlineIOResult
-
-Iters --> Option
-Iters --> EmptyHead
-Iters --> HeadedIter
-Iters --> RangeHead
-Iters --> SingleHead
-RangeHead --> None
-RangeHead --> Some
-MergeDiagram --> Option
-MergeDiagram --> Tuple2
-MergeDiagram --> List
-MergeDiagram --> Lists
-MergeDiagram --> Map
-MergeDiagram --> Maps
-MergeDiagram --> Iters
-MergeDiagram --> ListCollector
-MergeDiagram --> InlineNodeList
-MergeDiagram --> MapNode
-MergeDiagram --> NodeList
-MergeDiagram --> Location
-MergeDiagram --> MapUnitSet
-MergeDiagram --> SimpleUnit
-Node --> Option
-Node --> Tuple2
-Node --> Iter
-Node --> CompileResult
-ParseState --> Location
-ParseUnitImpl --> InlineNodeList
-FlatMapHead --> None
-FlatMapHead --> Iter
-FlatMapHead --> Function
-JVMList --> None
-JVMList --> Some
-JVMList --> HeadedIter
-JVMList --> RangeHead
-JVMList --> ListCollector
-JVMList --> ArrayList
-MutableLazyRule --> None
-MutableLazyRule --> Option
-MutableLazyRule --> Some
-MutableLazyRule --> CompileResult
-MutableLazyRule --> CompileErrors
-MutableLazyRule --> Node
+Serializable <|-- JavaRoot
 OrState --> None
 OrState --> Option
 OrState --> Some
@@ -409,48 +270,464 @@ OrState --> CompileResults
 OrState --> Context
 OrState --> CompileError
 OrState --> ImmutableCompileError
-DivideRule --> CompileResultCollector
-DivideRule --> CompileErrors
-DivideRule --> MapNode
-DivideRule --> NodeList
-DivideRule --> NodeListCollector
-DivideRule --> FoldingDivider
-DivideRule --> Folder
-Locator --> Option
-ListCollector --> List
-ListCollector --> Lists
-Lists --> ArrayList
-Lists --> Arrays
+class OrState
+Arguments --> Lists
+Arguments --> CompileResult
+Arguments --> Node
+Arguments --> NodeListRule
+Arguments --> OrRule
+Arguments --> Rule
+Arguments --> Deserializers
+class Arguments
+ParseState --> Location
+interface ParseState
+MapUnitSet --> Tuple2
+MapUnitSet --> Map
+MapUnitSet --> MapCollector
+MapUnitSet --> Maps
+MapUnitSet --> Iter
+MapUnitSet --> CompileResult
+MapUnitSet --> CompileResultCollector
+MapUnitSet --> Location
+MapUnitSet --> Function
+class MapUnitSet
+UnitSet <|-- MapUnitSet
+StructureStatement --> Option
+StructureStatement --> Lists
+StructureStatement --> CompileResult
+StructureStatement --> Node
+StructureStatement --> NodeRule
+StructureStatement --> OrRule
+StructureStatement --> Rule
+StructureStatement --> StripRule
+StructureStatement --> SuffixRule
+StructureStatement --> TypeRule
+StructureStatement --> LazyRule
+StructureStatement --> Deserializers
+class StructureStatement
+StructureMember <|-- StructureStatement
+Location --> List
+Location --> Joiner
+class Location
+StripRule --> CompileResult
+StripRule --> Node
+class StripRule
+Rule <|-- StripRule
+CompileErrors --> Err
+CompileErrors --> CompileResult
+CompileErrors --> CompileResults
+CompileErrors --> NodeContext
+CompileErrors --> StringContext
+CompileErrors --> Node
+CompileErrors --> ImmutableCompileError
+class CompileErrors
+Else --> Option
+Else --> CompileResult
+Else --> Node
+Else --> Deserializers
+class Else
+BlockHeader <|-- Else
+Parser --> UnitSet
+Parser --> Stage
+interface Parser
+Stage <|-- Parser
+Lexer --> Node
+Lexer --> UnitSet
+Lexer --> Stage
+interface Lexer
+Stage <|-- Lexer
 IOResult --> Result
 IOResult --> IOException
 IOResult --> Function
+interface IOResult
+Annotation --> CompileResult
+Annotation --> Node
+Annotation --> Deserializers
+class Annotation
+Result --> Tuple2
+Result --> Function
+Result --> Supplier
+interface Result
+Main --> Console
+Main --> Iters
+Main --> ApplicationBuilder
+Main --> Error
+Main --> PlantUMLTargetPlatform
+Main --> TargetPlatform
+Main --> TypeScriptTargetPlatform
+Main --> PathSources
+Main --> Sources
+Main --> Paths
+class Main
+class Console
+UnitSetCollector --> Collector
+UnitSetCollector --> MapUnitSet
+UnitSetCollector --> Unit
+UnitSetCollector --> UnitSet
+class UnitSetCollector
+Collector <|-- UnitSetCollector
+enum ConditionalType
+MethodNode --> Option
+MethodNode --> List
+MethodNode --> Lists
+MethodNode --> CompileResult
+MethodNode --> InitialDeserializer
+MethodNode --> Node
+MethodNode --> FilterRule
+MethodNode --> LocatingRule
+MethodNode --> NodeRule
+MethodNode --> OrRule
+MethodNode --> PrefixRule
+MethodNode --> Rule
+MethodNode --> StringRule
+MethodNode --> StripRule
+MethodNode --> SuffixRule
+MethodNode --> TypeRule
+MethodNode --> CommonLang
+MethodNode --> OptionNodeListRule
+MethodNode --> Deserializers
+class MethodNode
+StructureMember <|-- MethodNode
+ContextRule --> Lists
+ContextRule --> CompileResult
+ContextRule --> NodeContext
+ContextRule --> CompileError
+ContextRule --> Node
+ContextRule --> StringContext
+ContextRule --> ImmutableCompileError
+class ContextRule
+Rule <|-- ContextRule
+Selector --> Option
+Selector --> Tuple2
+Selector --> List
+interface Selector
+RangeHead --> None
+RangeHead --> Option
+RangeHead --> Some
+class RangeHead
+Head <|-- RangeHead
+Source --> IOResult
+Source --> Location
+interface Source
+TemplateType --> Option
+TemplateType --> List
+TemplateType --> Lists
+TemplateType --> CompileResult
+TemplateType --> Node
+TemplateType --> LocatingRule
+TemplateType --> NodeListRule
+TemplateType --> NodeRule
+TemplateType --> OrRule
+TemplateType --> Rule
+TemplateType --> StripRule
+TemplateType --> SuffixRule
+TemplateType --> TypeRule
+TemplateType --> Deserializers
+class TemplateType
+Type <|-- TemplateType
+SimpleUnit --> CompileResult
+SimpleUnit --> Location
+SimpleUnit --> BiFunction
+SimpleUnit --> Function
+class SimpleUnit
+Unit <|-- SimpleUnit
+Lists --> ArrayList
+Lists --> Arrays
+class Lists
+enum PlantUMLStructureType
+Deserializer --> Option
+Deserializer --> CompileResult
+Deserializer --> Node
+interface Deserializer
+interface Filter
+ThrowableError --> Error
+ThrowableError --> PrintWriter
+ThrowableError --> StringWriter
+class ThrowableError
+Error <|-- ThrowableError
+None --> Consumer
+None --> Function
+None --> Predicate
+None --> Supplier
+class None
+Option <|-- None
+JVMList --> None
+JVMList --> Option
+JVMList --> Some
+JVMList --> Tuple2
+JVMList --> HeadedIter
+JVMList --> RangeHead
+JVMList --> Iter
+JVMList --> ListCollector
+JVMList --> ArrayList
+JVMList --> BiFunction
+class JVMList
+List <|-- JVMList
+EnumValues --> Option
+EnumValues --> List
+EnumValues --> Lists
+EnumValues --> CompileResult
+EnumValues --> Node
+EnumValues --> FilterRule
+EnumValues --> LocatingRule
+EnumValues --> NodeListRule
+EnumValues --> OrRule
+EnumValues --> Rule
+EnumValues --> StringRule
+EnumValues --> StripRule
+EnumValues --> SuffixRule
+EnumValues --> TypeRule
+EnumValues --> ValueFolder
+EnumValues --> Deserializers
+class EnumValues
+StructureMember <|-- EnumValues
+enum PostVariant
+Generator --> Node
+Generator --> UnitSet
+Generator --> Stage
+interface Generator
+Stage <|-- Generator
+Max --> Optional
+class Max
+Collector <|-- Max
+interface JavaRootSegment
+DividingSplitter --> Option
+DividingSplitter --> Tuple2
+DividingSplitter --> List
+DividingSplitter --> ListCollector
+DividingSplitter --> Splitter
+DividingSplitter --> Divider
+class DividingSplitter
+Splitter <|-- DividingSplitter
+Types --> Lists
+Types --> CompileResult
+Types --> Node
+Types --> OrRule
+Types --> Rule
+Types --> LazyRule
+Types --> MutableLazyRule
+Types --> Deserializers
+class Types
+EmptyHead --> None
+EmptyHead --> Option
+class EmptyHead
+Head <|-- EmptyHead
+NodeListCollector --> Collector
+class NodeListCollector
+Collector <|-- NodeListCollector
+Symbols --> Option
+Symbols --> CompileResult
+Symbols --> Node
+Symbols --> FilterRule
+Symbols --> Rule
+Symbols --> StringRule
+Symbols --> StripRule
+Symbols --> TypeRule
+Symbols --> Deserializers
+class Symbols
 Stage --> CompileResult
+interface Stage
+CompileResults --> Err
+CompileResults --> Ok
+CompileResults --> Result
+CompileResults --> Context
+CompileResults --> NodeContext
+CompileResults --> StringContext
+CompileResults --> CompileError
+CompileResults --> Node
+CompileResults --> ImmutableCompileError
+class CompileResults
+PathSources --> List
+PathSources --> Iter
+PathSources --> ListCollector
+PathSources --> ResultCollector
+PathSources --> Result
+PathSources --> IOResult
+PathSources --> InlineIOResult
+PathSources --> SafeFiles
+PathSources --> SimpleUnit
+PathSources --> Unit
+PathSources --> UnitSet
+PathSources --> IOException
+PathSources --> Files
+PathSources --> Path
+class PathSources
+Sources <|-- PathSources
+Map --> Option
+Map --> Tuple2
+Map --> Iter
+Map --> Function
+Map --> Supplier
+interface Map
+PlantUMLTargetPlatform --> Compiler
+PlantUMLTargetPlatform --> StagedCompiler
+PlantUMLTargetPlatform --> Rule
+PlantUMLTargetPlatform --> JavaPlantUMLParser
+PlantUMLTargetPlatform --> MergeDiagram
+PlantUMLTargetPlatform --> PlantUMLAfterPasser
+PlantUMLTargetPlatform --> PlantUMLRoot
+PlantUMLTargetPlatform --> JavaRoot
+PlantUMLTargetPlatform --> Passer
+PlantUMLTargetPlatform --> AfterAll
+PlantUMLTargetPlatform --> Generator
+PlantUMLTargetPlatform --> RuleGenerator
+PlantUMLTargetPlatform --> Lexer
+PlantUMLTargetPlatform --> Path
+PlantUMLTargetPlatform --> Paths
+class PlantUMLTargetPlatform
+TargetPlatform <|-- PlantUMLTargetPlatform
+MutableLazyRule --> None
+MutableLazyRule --> Option
+MutableLazyRule --> Some
+MutableLazyRule --> CompileResult
+MutableLazyRule --> CompileErrors
+MutableLazyRule --> Node
+MutableLazyRule --> Rule
+class MutableLazyRule
+LazyRule <|-- MutableLazyRule
+TypescriptRoot --> MapNode
+TypescriptRoot --> Node
+TypescriptRoot --> Serializable
+class TypescriptRoot
+Serializable <|-- TypescriptRoot
+FirstSelector --> Option
+FirstSelector --> Tuple2
+FirstSelector --> List
+FirstSelector --> Joiner
+class FirstSelector
+Selector <|-- FirstSelector
+Constructor --> Option
+Constructor --> CompileResult
+Constructor --> Node
+Constructor --> Deserializers
+class Constructor
+MethodHeader <|-- Constructor
+ExactRule --> Ok
+ExactRule --> CompileResult
+ExactRule --> CompileResults
+ExactRule --> CompileErrors
+ExactRule --> MapNode
+ExactRule --> Node
+class ExactRule
+Rule <|-- ExactRule
+class StringContext
+Context <|-- StringContext
+InlinePassResult --> None
+InlinePassResult --> Option
+InlinePassResult --> Some
+InlinePassResult --> Ok
+InlinePassResult --> CompileResult
+InlinePassResult --> CompileResults
+InlinePassResult --> Node
+InlinePassResult --> ParseState
+InlinePassResult --> ParseUnit
+InlinePassResult --> ParseUnitImpl
+InlinePassResult --> Supplier
+class InlinePassResult
+ParseResult <|-- InlinePassResult
+TypeRule --> Lists
+TypeRule --> CompileResult
+TypeRule --> CompileResults
+TypeRule --> Context
+TypeRule --> NodeContext
+TypeRule --> StringContext
+TypeRule --> CompileError
+TypeRule --> CompileErrors
+TypeRule --> Node
+TypeRule --> ImmutableCompileError
+class TypeRule
+Rule <|-- TypeRule
+class SymbolFilter
+Filter <|-- SymbolFilter
+Post --> Option
+Post --> CompileResult
+Post --> Node
+Post --> NodeRule
+Post --> Rule
+Post --> StripRule
+Post --> SuffixRule
+Post --> TypeRule
+Post --> Deserializers
+class Post
+FunctionSegmentValue <|-- Post
+OrRule --> Iter
+OrRule --> CompileResult
+OrRule --> Context
+OrRule --> NodeContext
+OrRule --> StringContext
+OrRule --> Node
+OrRule --> List
+OrRule --> Function
+class OrRule
+Rule <|-- OrRule
 Iter --> Option
 Iter --> Collector
 Iter --> Result
 Iter --> BiFunction
 Iter --> Function
 Iter --> Predicate
-Selector --> Option
-Selector --> Tuple2
-Selector --> List
-PrefixRule --> CompileErrors
-Head --> Option
-NodeContext --> Node
-NodeList --> Option
-NodeList --> Iter
-NodeList --> CompileResult
-NodeList --> Function
-SingleHead --> None
-SingleHead --> Some
+interface Iter
+NodeRule --> CompileResult
+NodeRule --> MapNode
+NodeRule --> Node
+class NodeRule
+Rule <|-- NodeRule
+BlockFolder --> DivideState
+BlockFolder --> Folder
+class BlockFolder
+Folder <|-- BlockFolder
+Break --> Option
+Break --> CompileResult
+Break --> Node
+Break --> Deserializers
+class Break
+FunctionSegmentValue <|-- Break
+ApplicationBuilder --> Option
+ApplicationBuilder --> Error
+ApplicationBuilder --> Compiler
+ApplicationBuilder --> TargetPlatform
+ApplicationBuilder --> Sources
+ApplicationBuilder --> PathTargets
+ApplicationBuilder --> Targets
+ApplicationBuilder --> JavaRoot
+ApplicationBuilder --> Lexer
+ApplicationBuilder --> RuleLexer
+ApplicationBuilder --> Path
+class ApplicationBuilder
+DelimitedFolder --> DivideState
+class DelimitedFolder
+Folder <|-- DelimitedFolder
+Some --> Consumer
+Some --> Function
+Some --> Predicate
+Some --> Supplier
+class Some
+Option <|-- Some
+YieldNode --> Option
+YieldNode --> CompileResult
+YieldNode --> Node
+YieldNode --> NodeRule
+YieldNode --> PrefixRule
+YieldNode --> Rule
+YieldNode --> StripRule
+YieldNode --> TypeRule
+YieldNode --> Deserializers
+class YieldNode
+FunctionSegmentValue <|-- YieldNode
 Sources --> IOResult
 Sources --> UnitSet
-Parser --> Node
-Parser --> UnitSet
+interface Sources
+Continue --> Option
+Continue --> CompileResult
+Continue --> Node
+Continue --> Deserializers
+class Continue
+FunctionSegmentValue <|-- Continue
 TreeParser --> Tuple2
 TreeParser --> CompileResult
 TreeParser --> CompileResultCollector
 TreeParser --> CompileResults
+TreeParser --> Node
 TreeParser --> NodeList
 TreeParser --> Location
 TreeParser --> UnitSetCollector
@@ -459,73 +736,92 @@ TreeParser --> ParseUnit
 TreeParser --> ParseUnitImpl
 TreeParser --> Passer
 TreeParser --> Unit
-InlineNodeList --> Some
-InlineNodeList --> List
-InlineNodeList --> Lists
-InlineNodeList --> Joiner
-InlineNodeList --> CompileResultCollector
-UnitSet --> Iter
-Rule --> CompileResult
-Rule --> Node
-RuleGenerator --> CompileResult
-RuleGenerator --> CompileResultCollector
-RuleGenerator --> Rule
-RuleGenerator --> UnitSetCollector
-RuleGenerator --> Unit
-Map --> Tuple2
-Map --> Iter
-Map --> Function
-Map --> Supplier
-JVMMap --> JVMList
-JVMMap --> ArrayList
-Application --> Error
-Application --> Option
-Generator --> Node
-Generator --> UnitSet
-CompileResultCollector --> Ok
-Max --> Optional
-TypescriptLang --> Lists
-TypescriptLang --> DivideRule
-TypescriptLang --> LocatingRule
-TypescriptLang --> NodeRule
-TypescriptLang --> OrRule
-TypescriptLang --> PrefixRule
-TypescriptLang --> Rule
-TypescriptLang --> StringRule
-TypescriptLang --> StripRule
-TypescriptLang --> SuffixRule
-TypescriptLang --> TypeRule
-TypescriptLang --> DelimitedFolder
-MapNode --> None
-MapNode --> Some
-MapNode --> Map
-MapNode --> Maps
-MapNode --> Iters
-MapNode --> Joiner
-MapNode --> Ok
-MapNode --> CompileResults
-MapNode --> CompileErrors
-MapNode --> BiFunction
-MapNode --> Function
-Folder --> DivideState
-FoldingDivider --> None
-FoldingDivider --> Option
-FoldingDivider --> Some
-FoldingDivider --> Tuple2
-FoldingDivider --> Folder
-TargetPlatform --> Rule
-TargetPlatform --> AfterAll
-TargetPlatform --> Passer
-TargetPlatform --> Path
-MapCollector --> Tuple2
-TypeScriptTargetPlatform --> TypeScriptAfterPasser
-TypeScriptTargetPlatform --> TypescriptLang
-TypeScriptTargetPlatform --> EmptyAfterAll
-TypeScriptTargetPlatform --> Paths
-EmptyHead --> None
-CompileResults --> Ok
-CompileResults --> Result
-CompileResults --> CompileError
+TreeParser --> UnitSet
+class TreeParser
+Parser <|-- TreeParser
+OptionNodeListRule --> Lists
+OptionNodeListRule --> CompileResult
+OptionNodeListRule --> Node
+OptionNodeListRule --> OrRule
+OptionNodeListRule --> Rule
+class OptionNodeListRule
+Rule <|-- OptionNodeListRule
+JavaPlantUMLParser --> Option
+JavaPlantUMLParser --> List
+JavaPlantUMLParser --> Lists
+JavaPlantUMLParser --> Iter
+JavaPlantUMLParser --> Iters
+JavaPlantUMLParser --> Joiner
+JavaPlantUMLParser --> ListCollector
+JavaPlantUMLParser --> CompileResult
+JavaPlantUMLParser --> CompileResults
+JavaPlantUMLParser --> Location
+JavaPlantUMLParser --> ArrayType
+JavaPlantUMLParser --> Base
+JavaPlantUMLParser --> JavaRoot
+JavaPlantUMLParser --> JavaRootSegment
+JavaPlantUMLParser --> Namespaced
+JavaPlantUMLParser --> PlantUMLDependency
+JavaPlantUMLParser --> PlantUMLFooter
+JavaPlantUMLParser --> PlantUMLHeader
+JavaPlantUMLParser --> PlantUMLInherits
+JavaPlantUMLParser --> PlantUMLRoot
+JavaPlantUMLParser --> PlantUMLRootSegment
+JavaPlantUMLParser --> PlantUMLStructure
+JavaPlantUMLParser --> PlantUMLStructureType
+JavaPlantUMLParser --> QualifiedType
+JavaPlantUMLParser --> Segment
+JavaPlantUMLParser --> StructureNode
+JavaPlantUMLParser --> StructureType
+JavaPlantUMLParser --> Symbol
+JavaPlantUMLParser --> TemplateType
+JavaPlantUMLParser --> Type
+JavaPlantUMLParser --> VariadicType
+JavaPlantUMLParser --> Whitespace
+JavaPlantUMLParser --> Parser
+JavaPlantUMLParser --> MapUnitSet
+JavaPlantUMLParser --> SimpleUnit
+JavaPlantUMLParser --> Unit
+JavaPlantUMLParser --> UnitSet
+class JavaPlantUMLParser
+Parser <|-- JavaPlantUMLParser
+enum Operator
+ValueFolder --> DivideState
+ValueFolder --> Folder
+class ValueFolder
+Folder <|-- ValueFolder
+InvokableNode --> Option
+InvokableNode --> List
+InvokableNode --> Lists
+InvokableNode --> CompileResult
+InvokableNode --> Node
+InvokableNode --> LocatingRule
+InvokableNode --> NodeRule
+InvokableNode --> OrRule
+InvokableNode --> Rule
+InvokableNode --> Splitter
+InvokableNode --> StripRule
+InvokableNode --> SuffixRule
+InvokableNode --> TypeRule
+InvokableNode --> FoldingDivider
+InvokableNode --> DividingSplitter
+InvokableNode --> InvocationFolder
+InvokableNode --> Deserializers
+class InvokableNode
+Value <|-- InvokableNode
+FunctionSegmentValue <|-- InvokableNode
+StringNode --> Option
+StringNode --> CompileResult
+StringNode --> Node
+StringNode --> PrefixRule
+StringNode --> Rule
+StringNode --> StringRule
+StringNode --> StripRule
+StringNode --> SuffixRule
+StringNode --> TypeRule
+StringNode --> Deserializers
+class StringNode
+Value <|-- StringNode
 SafeFiles --> None
 SafeFiles --> Option
 SafeFiles --> Some
@@ -538,248 +834,622 @@ SafeFiles --> Files
 SafeFiles --> Path
 SafeFiles --> Collectors
 SafeFiles --> Stream
-JavaRoot --> List
-JavaRoot --> Lists
-JavaRoot --> JavaRootSegment
-Targets --> IOException
-Targets --> Option
-Targets --> UnitSet
-StagedCompiler --> Node
-StagedCompiler --> Generator
-StagedCompiler --> Lexer
-StagedCompiler --> Parser
-MutableDivideState --> None
-MutableDivideState --> Some
-MutableDivideState --> List
-MutableDivideState --> Lists
-CompileApplication --> Some
-CompileApplication --> Compiler
-CompileApplication --> CompileError
-CompileApplication --> ApplicationError
-CompileApplication --> ThrowableError
-CompileApplication --> Sources
-CompileApplication --> Targets
-CompileApplication --> UnitSet
-CompileApplication --> IOException
-ContextRule --> Lists
-ContextRule --> NodeContext
-ContextRule --> CompileError
-ContextRule --> StringContext
-ContextRule --> ImmutableCompileError
-PlantUMLTargetPlatform --> PlantUMLAfterPasser
-PlantUMLTargetPlatform --> MergeDiagram
-PlantUMLTargetPlatform --> PlantUMLLang
-PlantUMLTargetPlatform --> Paths
-LocatingRule --> Tuple2
-LocatingRule --> CompileErrors
-LocatingRule --> FirstLocator
-LocatingRule --> LastLocator
-LocatingRule --> Locator
-SuffixRule --> CompileErrors
-JavaLang --> Lists
-JavaLang --> ContextRule
-JavaLang --> DivideRule
-JavaLang --> FilterRule
-JavaLang --> LocatingRule
-JavaLang --> NodeRule
-JavaLang --> OrRule
-JavaLang --> PrefixRule
-JavaLang --> Rule
-JavaLang --> Splitter
-JavaLang --> StringRule
-JavaLang --> StripRule
-JavaLang --> SuffixRule
-JavaLang --> TypeRule
-JavaLang --> Divider
-JavaLang --> FoldingDivider
-JavaLang --> DelimitedFolder
-JavaLang --> DividingSplitter
-PlantUMLLang --> Lists
-PlantUMLLang --> DivideRule
-PlantUMLLang --> ExactRule
-PlantUMLLang --> LocatingRule
-PlantUMLLang --> OrRule
-PlantUMLLang --> PrefixRule
-PlantUMLLang --> Rule
-PlantUMLLang --> StringRule
-PlantUMLLang --> SuffixRule
-PlantUMLLang --> TypeRule
-PlantUMLLang --> StatementFolder
-CompileResult --> Tuple2
-CompileResult --> Result
-CompileResult --> CompileError
-CompileResult --> BiFunction
-CompileResult --> Function
-CompileResult --> Supplier
-FlattenJava --> Some
-FlattenJava --> ListCollector
-FlattenJava --> CompileResults
-FlattenJava --> InlineNodeList
-FlattenJava --> NodeList
-FlattenJava --> InlinePassResult
-FlattenJava --> ParseUnit
-FlattenJava --> ParseUnitImpl
+class SafeFiles
+interface Assignable
+TypeParam --> CompileResult
+TypeParam --> Node
+TypeParam --> Deserializers
+class TypeParam
+FilterRule --> CompileResult
 FilterRule --> CompileErrors
+FilterRule --> Node
 FilterRule --> Filter
 FilterRule --> NumberFilter
 FilterRule --> SymbolFilter
+class FilterRule
+Rule <|-- FilterRule
+TypescriptLang --> Lists
+TypescriptLang --> LocatingRule
+TypescriptLang --> NodeListRule
+TypescriptLang --> NodeRule
+TypescriptLang --> OrRule
+TypescriptLang --> PrefixRule
+TypescriptLang --> Rule
+TypescriptLang --> StringRule
+TypescriptLang --> StripRule
+TypescriptLang --> SuffixRule
+TypescriptLang --> TypeRule
+TypescriptLang --> DelimitedFolder
+TypescriptLang --> Whitespace
+TypescriptLang --> Definition
+TypescriptLang --> Modifier
+TypescriptLang --> FunctionSegment
+TypescriptLang --> Parameters
+TypescriptLang --> StructureStatement
+TypescriptLang --> TemplateType
+TypescriptLang --> Symbols
+TypescriptLang --> Values
+class TypescriptLang
+TypeScriptTargetPlatform --> Compiler
+TypeScriptTargetPlatform --> StagedCompiler
+TypeScriptTargetPlatform --> Rule
+TypeScriptTargetPlatform --> TypeScriptAfterPasser
+TypeScriptTargetPlatform --> TypescriptLang
+TypeScriptTargetPlatform --> JavaRoot
+TypeScriptTargetPlatform --> Passer
+TypeScriptTargetPlatform --> AfterAll
+TypeScriptTargetPlatform --> EmptyAfterAll
+TypeScriptTargetPlatform --> Generator
+TypeScriptTargetPlatform --> RuleGenerator
+TypeScriptTargetPlatform --> Lexer
+TypeScriptTargetPlatform --> Parser
+TypeScriptTargetPlatform --> Path
+TypeScriptTargetPlatform --> Paths
+class TypeScriptTargetPlatform
+TargetPlatform <|-- TypeScriptTargetPlatform
+Targets --> IOException
+Targets --> Option
+Targets --> UnitSet
+interface Targets
+Caller --> Lists
+Caller --> CompileResult
+Caller --> Node
+Caller --> Deserializers
+interface Caller
 Unit --> CompileResult
 Unit --> Location
 Unit --> BiFunction
 Unit --> Function
-Passer --> Node
-Passer --> ParseState
-Passer --> ParseResult
-Result --> Tuple2
-Result --> Function
-Result --> Supplier
-ApplicationBuilder --> Option
-ApplicationBuilder --> Error
-ApplicationBuilder --> Compiler
-ApplicationBuilder --> StagedCompiler
-ApplicationBuilder --> TargetPlatform
-ApplicationBuilder --> Sources
-ApplicationBuilder --> PathTargets
-ApplicationBuilder --> Targets
-ApplicationBuilder --> FlattenJava
-ApplicationBuilder --> JavaLang
-ApplicationBuilder --> AfterAll
-ApplicationBuilder --> Passer
-ApplicationBuilder --> Generator
-ApplicationBuilder --> RuleGenerator
-ApplicationBuilder --> Lexer
-ApplicationBuilder --> RuleLexer
-ApplicationBuilder --> Parser
-ApplicationBuilder --> TreeParser
-ApplicationBuilder --> Path
+interface Unit
+FlattenJava --> Some
+FlattenJava --> ListCollector
+FlattenJava --> CompileResults
+FlattenJava --> InlineNodeList
+FlattenJava --> Node
+FlattenJava --> NodeList
+FlattenJava --> InlinePassResult
+FlattenJava --> ParseResult
+FlattenJava --> ParseUnit
+FlattenJava --> ParseUnitImpl
+FlattenJava --> Passer
+FlattenJava --> ParseState
+class FlattenJava
+Passer <|-- FlattenJava
+interface Argument
+Parameters --> Lists
+Parameters --> CompileResult
+Parameters --> Node
+Parameters --> NodeListRule
+Parameters --> OrRule
+Parameters --> Rule
+Parameters --> ValueFolder
+Parameters --> Deserializers
+class Parameters
 Maps --> HashMap
-ParseUnit --> NodeList
-ParseUnit --> ParseState
-ParseUnit --> BiFunction
-List --> Option
-List --> Tuple2
-List --> Iter
-List --> BiFunction
-ResultCollector --> Tuple2
-ResultCollector --> Ok
-ResultCollector --> Result
-Compiler --> CompileResult
-Compiler --> UnitSet
-OrRule --> Iter
-OrRule --> Context
-OrRule --> NodeContext
-OrRule --> StringContext
-OrRule --> CompileError
-OrRule --> List
-OrRule --> Function
-PathSource --> List
-PathSource --> Lists
-PathSource --> SafeFiles
-PathSource --> Path
-PathTargets --> Iters
-PathTargets --> Location
-PathTargets --> SafeFiles
-PathTargets --> Unit
-PathTargets --> Files
-PathTargets --> Path
-CompileErrors --> Err
-CompileErrors --> CompileResult
-CompileErrors --> CompileResults
-CompileErrors --> NodeContext
-CompileErrors --> StringContext
-CompileErrors --> Node
-CompileErrors --> ImmutableCompileError
-DivideState --> Tuple2
-DivideState --> Option
-DivideState --> Iter
-HeadedIter --> Ok
-Lexer --> Node
-Lexer --> UnitSet
-Option --> Consumer
-Option --> Function
-Option --> Predicate
-Option --> Supplier
-StringRule --> Ok
-StringRule --> CompileResults
-StringRule --> CompileErrors
-StringRule --> MapNode
-InlinePassResult --> None
-InlinePassResult --> Option
-InlinePassResult --> Some
-InlinePassResult --> Ok
-InlinePassResult --> CompileResults
-InlinePassResult --> ParseState
-InlinePassResult --> ParseUnitImpl
-Source --> IOResult
-Source --> Location
-PathSources --> List
-PathSources --> Iter
-PathSources --> ListCollector
-PathSources --> ResultCollector
-PathSources --> Result
-PathSources --> InlineIOResult
-PathSources --> SafeFiles
-PathSources --> SimpleUnit
-PathSources --> Unit
-PathSources --> IOException
-PathSources --> Files
-PathSources --> Path
-MapUnitSet --> Tuple2
-MapUnitSet --> Map
-MapUnitSet --> Maps
-MapUnitSet --> Location
-ThrowableError --> PrintWriter
-ThrowableError --> StringWriter
-ExactRule --> Ok
-ExactRule --> CompileResults
-ExactRule --> CompileErrors
-ExactRule --> MapNode
-UnitSetCollector --> MapUnitSet
-UnitSetCollector --> Unit
-UnitSetCollector --> UnitSet
-LocatingSplitter --> Locator
-FirstLocator --> None
-FirstLocator --> Some
-AfterAll --> Node
-AfterAll --> UnitSet
-Joiner --> None
-Joiner --> Option
-Joiner --> Some
-LastLocator --> None
-LastLocator --> Some
-Splitter --> Option
-Splitter --> Tuple2
-ParseResult --> CompileResult
-ParseResult --> Node
-ParseResult --> ParseUnit
-ParseResult --> Supplier
+class Maps
+class Tuple2
+StagedCompiler --> CompileResult
+StagedCompiler --> Node
+StagedCompiler --> Serializable
+StagedCompiler --> Generator
+StagedCompiler --> Lexer
+StagedCompiler --> Parser
+StagedCompiler --> UnitSet
+StagedCompiler --> Function
+class StagedCompiler
+Compiler <|-- StagedCompiler
+LazyRule --> Rule
+interface LazyRule
+Rule <|-- LazyRule
+JavaTypescriptParser --> Err
+JavaTypescriptParser --> CompileResult
+JavaTypescriptParser --> CompileResults
+JavaTypescriptParser --> StringContext
+JavaTypescriptParser --> ImmutableCompileError
+JavaTypescriptParser --> JavaRoot
+JavaTypescriptParser --> Parser
+JavaTypescriptParser --> UnitSet
+class JavaTypescriptParser
+Parser <|-- JavaTypescriptParser
 ImmutableCompileError --> List
 ImmutableCompileError --> Lists
 ImmutableCompileError --> Iter
 ImmutableCompileError --> Joiner
 ImmutableCompileError --> Max
 ImmutableCompileError --> Context
-FirstSelector --> Joiner
+ImmutableCompileError --> CompileError
+class ImmutableCompileError
+CompileError <|-- ImmutableCompileError
+NodeList --> Option
+NodeList --> Iter
+NodeList --> CompileResult
+NodeList --> Function
+interface NodeList
+LastSelector --> Option
+LastSelector --> Tuple2
+LastSelector --> List
 LastSelector --> Joiner
-CommonLang --> Lists
-CommonLang --> ContextRule
-CommonLang --> DivideRule
-CommonLang --> ExactRule
-CommonLang --> FilterRule
+class LastSelector
+Selector <|-- LastSelector
+InlineCompileResult --> Tuple2
+InlineCompileResult --> Result
+InlineCompileResult --> CompileError
+InlineCompileResult --> BiFunction
+InlineCompileResult --> Function
+InlineCompileResult --> Supplier
+class InlineCompileResult
+CompileResult <|-- InlineCompileResult
+RuleLexer --> CompileResult
+RuleLexer --> CompileResultCollector
+RuleLexer --> Node
+RuleLexer --> Rule
+RuleLexer --> UnitSetCollector
+RuleLexer --> Unit
+RuleLexer --> UnitSet
+class RuleLexer
+Lexer <|-- RuleLexer
+Modifier --> CompileResult
+Modifier --> Node
+Modifier --> NodeListRule
+Modifier --> Rule
+Modifier --> StringRule
+Modifier --> StripRule
+Modifier --> DelimitedFolder
+Modifier --> Deserializers
+class Modifier
+Namespaced --> Option
+Namespaced --> List
+Namespaced --> Iters
+Namespaced --> CompileResult
+Namespaced --> InitialDeserializer
+Namespaced --> Node
+Namespaced --> NodeListRule
+Namespaced --> PrefixRule
+Namespaced --> Rule
+Namespaced --> StringRule
+Namespaced --> StripRule
+Namespaced --> SuffixRule
+Namespaced --> TypeRule
+Namespaced --> DelimitedFolder
+Namespaced --> Deserializers
+class Namespaced
+JavaRootSegment <|-- Namespaced
+InitialDeserializer --> List
+InitialDeserializer --> CompileResult
+InitialDeserializer --> Function
+InitialDeserializer --> Supplier
+interface InitialDeserializer
+Try --> Option
+Try --> CompileResult
+Try --> Node
+Try --> Deserializers
+class Try
+BlockHeader <|-- Try
+FunctionStatement --> Option
+FunctionStatement --> CompileResult
+FunctionStatement --> Node
+FunctionStatement --> NodeRule
+FunctionStatement --> Rule
+FunctionStatement --> StripRule
+FunctionStatement --> SuffixRule
+FunctionStatement --> TypeRule
+FunctionStatement --> Deserializers
+class FunctionStatement
+FunctionSegment <|-- FunctionStatement
+interface Parameter
+PlantUMLHeader --> MapNode
+PlantUMLHeader --> Node
+PlantUMLHeader --> ExactRule
+PlantUMLHeader --> TypeRule
+class PlantUMLHeader
+PlantUMLRootSegment <|-- PlantUMLHeader
+Rule --> CompileResult
+Rule --> Node
+interface Rule
+StructureNode --> Option
+StructureNode --> Tuple2
+StructureNode --> List
+StructureNode --> CompileResult
+StructureNode --> CompoundDeserializer
+StructureNode --> InitialDeserializer
+StructureNode --> Node
+StructureNode --> Deserializers
+class StructureNode
+JavaRootSegment <|-- StructureNode
+CompileResultCollector --> Collector
+CompileResultCollector --> Ok
+class CompileResultCollector
+Collector <|-- CompileResultCollector
+interface Error
+PathTargets --> Option
+PathTargets --> Iters
+PathTargets --> Location
+PathTargets --> SafeFiles
+PathTargets --> Unit
+PathTargets --> UnitSet
+PathTargets --> IOException
+PathTargets --> Files
+PathTargets --> Path
+class PathTargets
+Targets <|-- PathTargets
+PlantUMLFooter --> MapNode
+PlantUMLFooter --> Node
+PlantUMLFooter --> ExactRule
+PlantUMLFooter --> TypeRule
+class PlantUMLFooter
+PlantUMLRootSegment <|-- PlantUMLFooter
+SingleHead --> None
+SingleHead --> Option
+SingleHead --> Some
+class SingleHead
+Head <|-- SingleHead
+NumberNode --> Option
+NumberNode --> CompileResult
+NumberNode --> Node
+NumberNode --> FilterRule
+NumberNode --> Rule
+NumberNode --> StringRule
+NumberNode --> StripRule
+NumberNode --> TypeRule
+NumberNode --> Deserializers
+class NumberNode
+Value <|-- NumberNode
+Option --> Consumer
+Option --> Function
+Option --> Predicate
+Option --> Supplier
+interface Option
+PlantUMLRoot --> List
+PlantUMLRoot --> MapNode
+PlantUMLRoot --> Node
+PlantUMLRoot --> NodeListRule
+PlantUMLRoot --> Rule
+PlantUMLRoot --> StatementFolder
+PlantUMLRoot --> Serializable
+class PlantUMLRoot
+Serializable <|-- PlantUMLRoot
+Ok --> Tuple2
+Ok --> Function
+Ok --> Supplier
+class Ok
+Result <|-- Ok
+LocatingRule --> Tuple2
+LocatingRule --> CompileResult
+LocatingRule --> CompileErrors
+LocatingRule --> Node
+LocatingRule --> FirstLocator
+LocatingRule --> LastLocator
+LocatingRule --> Locator
+class LocatingRule
+Rule <|-- LocatingRule
+SuffixRule --> CompileResult
+SuffixRule --> CompileErrors
+SuffixRule --> Node
+class SuffixRule
+Rule <|-- SuffixRule
+EmptyAfterAll --> Node
+EmptyAfterAll --> UnitSet
+class EmptyAfterAll
+AfterAll <|-- EmptyAfterAll
+Structures --> Lists
+Structures --> ContextRule
+Structures --> FilterRule
+Structures --> LocatingRule
+Structures --> NodeListRule
+Structures --> OrRule
+Structures --> Rule
+Structures --> StringRule
+Structures --> StripRule
+Structures --> SuffixRule
+Structures --> TypeRule
+Structures --> CommonLang
+Structures --> ValueFolder
+class Structures
+LastLocator --> None
+LastLocator --> Option
+LastLocator --> Some
+class LastLocator
+Locator <|-- LastLocator
+MutableDivideState --> None
+MutableDivideState --> Option
+MutableDivideState --> Some
+MutableDivideState --> Tuple2
+MutableDivideState --> List
+MutableDivideState --> Lists
+MutableDivideState --> Iter
+class MutableDivideState
+DivideState <|-- MutableDivideState
+CompileError --> Error
+interface CompileError
+Error <|-- CompileError
+Locator --> Option
+interface Locator
+PlantUMLRootSegment --> Serializable
+interface PlantUMLRootSegment
+Serializable <|-- PlantUMLRootSegment
+QualifiedType --> Option
+QualifiedType --> List
+QualifiedType --> CompileResult
+QualifiedType --> Node
+QualifiedType --> NodeListRule
+QualifiedType --> TypeRule
+QualifiedType --> DelimitedFolder
+QualifiedType --> Deserializers
+class QualifiedType
+Base <|-- QualifiedType
+TypeSeparatorFolder --> DivideState
+TypeSeparatorFolder --> Folder
+class TypeSeparatorFolder
+Folder <|-- TypeSeparatorFolder
+UnitSet --> Iter
+UnitSet --> CompileResult
+UnitSet --> Function
+interface UnitSet
+ParseUnitImpl --> InlineNodeList
+ParseUnitImpl --> NodeList
+ParseUnitImpl --> ParseState
+ParseUnitImpl --> BiFunction
+class ParseUnitImpl
+ParseUnit <|-- ParseUnitImpl
+PlantUMLDependency --> MapNode
+PlantUMLDependency --> Node
+PlantUMLDependency --> LocatingRule
+PlantUMLDependency --> StringRule
+PlantUMLDependency --> TypeRule
+class PlantUMLDependency
+PlantUMLRootSegment <|-- PlantUMLDependency
+SwitchNode --> Option
+SwitchNode --> CompileResult
+SwitchNode --> Node
+SwitchNode --> Deserializers
+class SwitchNode
+Value <|-- SwitchNode
+FlatMapHead --> None
+FlatMapHead --> Iter
+FlatMapHead --> Option
+FlatMapHead --> Function
+class FlatMapHead
+Head <|-- FlatMapHead
+FoldingDivider --> None
+FoldingDivider --> Option
+FoldingDivider --> Some
+FoldingDivider --> Tuple2
+FoldingDivider --> Iter
+FoldingDivider --> Folder
+class FoldingDivider
+Divider <|-- FoldingDivider
+Whitespace --> Option
+Whitespace --> CompileResult
+Whitespace --> Node
+Whitespace --> ExactRule
+Whitespace --> Rule
+Whitespace --> StripRule
+Whitespace --> TypeRule
+Whitespace --> Deserializers
+class Whitespace
+Argument <|-- Whitespace
+FunctionSegment <|-- Whitespace
+Parameter <|-- Whitespace
+StructureMember <|-- Whitespace
+JavaRootSegment <|-- Whitespace
 CommonLang --> LocatingRule
+CommonLang --> NodeListRule
 CommonLang --> NodeRule
-CommonLang --> OrRule
-CommonLang --> PrefixRule
 CommonLang --> Rule
-CommonLang --> Splitter
-CommonLang --> StringRule
 CommonLang --> StripRule
 CommonLang --> SuffixRule
 CommonLang --> TypeRule
-CommonLang --> FoldingDivider
-CommonLang --> DelimitedFolder
 CommonLang --> StatementFolder
-CommonLang --> DividingSplitter
+class CommonLang
+interface Value
+Caller <|-- Value
+Argument <|-- Value
+Assignable <|-- Value
+InvocationFolder --> DivideState
+InvocationFolder --> Folder
+class InvocationFolder
+Folder <|-- InvocationFolder
+StringRule --> Ok
+StringRule --> CompileResult
+StringRule --> CompileResults
+StringRule --> CompileErrors
+StringRule --> MapNode
+StringRule --> Node
+class StringRule
+Rule <|-- StringRule
+interface StructureMember
+ResultCollector --> Tuple2
+ResultCollector --> Ok
+ResultCollector --> Result
+class ResultCollector
+Collector <|-- ResultCollector
+FunctionSegmentValues --> Lists
+FunctionSegmentValues --> CompileResult
+FunctionSegmentValues --> Node
+FunctionSegmentValues --> ExactRule
+FunctionSegmentValues --> OrRule
+FunctionSegmentValues --> Rule
+FunctionSegmentValues --> TypeRule
+FunctionSegmentValues --> Deserializers
+class FunctionSegmentValues
+VariadicType --> Option
+VariadicType --> CompileResult
+VariadicType --> Node
+VariadicType --> NodeRule
+VariadicType --> Rule
+VariadicType --> StripRule
+VariadicType --> SuffixRule
+VariadicType --> TypeRule
+VariadicType --> Deserializers
+class VariadicType
+Type <|-- VariadicType
+Head --> Option
+interface Head
+ParseResult --> CompileResult
+ParseResult --> Node
+ParseResult --> ParseUnit
+ParseResult --> Supplier
+interface ParseResult
+StatementFolder --> DivideState
+class StatementFolder
+Folder <|-- StatementFolder
+EnumValue --> CompileResult
+EnumValue --> Node
+EnumValue --> Deserializers
+class EnumValue
+interface Type
+class Symbol
+Type <|-- Symbol
+Value <|-- Symbol
+Base <|-- Symbol
+NodeContext --> Node
+class NodeContext
+Context <|-- NodeContext
+CompileResult --> Tuple2
+CompileResult --> Result
+CompileResult --> CompileError
+CompileResult --> BiFunction
+CompileResult --> Function
+CompileResult --> Supplier
+interface CompileResult
+class NumberFilter
+Filter <|-- NumberFilter
+DivideState --> Tuple2
+DivideState --> Option
+DivideState --> Iter
+interface DivideState
+JVMMap --> None
+JVMMap --> Option
+JVMMap --> Some
+JVMMap --> Tuple2
+JVMMap --> JVMList
+JVMMap --> Iter
+JVMMap --> ArrayList
+JVMMap --> HashMap
+JVMMap --> Function
+JVMMap --> Supplier
+class JVMMap
+Map <|-- JVMMap
+PrefixRule --> CompileResult
+PrefixRule --> CompileErrors
+PrefixRule --> Node
+class PrefixRule
+Rule <|-- PrefixRule
+enum AccessType
+ArrayType --> Option
+ArrayType --> CompileResult
+ArrayType --> Node
+ArrayType --> NodeRule
+ArrayType --> Rule
+ArrayType --> StripRule
+ArrayType --> SuffixRule
+ArrayType --> TypeRule
+ArrayType --> Deserializers
+class ArrayType
+Type <|-- ArrayType
+CompoundDeserializer --> Option
+CompoundDeserializer --> Tuple2
+CompoundDeserializer --> List
+CompoundDeserializer --> CompileResult
+CompoundDeserializer --> Function
+interface CompoundDeserializer
+PathSource --> List
+PathSource --> Lists
+PathSource --> IOResult
+PathSource --> Location
+PathSource --> SafeFiles
+PathSource --> Path
+class PathSource
+Source <|-- PathSource
+InlineNodeList --> Option
+InlineNodeList --> Some
+InlineNodeList --> List
+InlineNodeList --> Lists
+InlineNodeList --> Iter
+InlineNodeList --> Joiner
+InlineNodeList --> CompileResult
+InlineNodeList --> CompileResultCollector
+InlineNodeList --> Function
+class InlineNodeList
+NodeList <|-- InlineNodeList
+Serializable --> Node
+interface Serializable
+FirstLocator --> None
+FirstLocator --> Option
+FirstLocator --> Some
+class FirstLocator
+Locator <|-- FirstLocator
+Construction --> Option
+Construction --> CompileResult
+Construction --> Node
+Construction --> NodeRule
+Construction --> PrefixRule
+Construction --> Rule
+Construction --> StripRule
+Construction --> TypeRule
+Construction --> Deserializers
+class Construction
+Caller <|-- Construction
+Node --> Option
+Node --> Tuple2
+Node --> List
+Node --> Iter
+Node --> CompileResult
+Node --> Function
+interface Node
+NodeListRule --> CompileResult
+NodeListRule --> CompileResultCollector
+NodeListRule --> MapNode
+NodeListRule --> Node
+NodeListRule --> NodeList
+NodeListRule --> NodeListCollector
+NodeListRule --> FoldingDivider
+NodeListRule --> Folder
+NodeListRule --> ValueFolder
+class NodeListRule
+Rule <|-- NodeListRule
+Definition --> Option
+Definition --> List
+Definition --> Lists
+Definition --> CompileResult
+Definition --> InitialDeserializer
+Definition --> Node
+Definition --> FilterRule
+Definition --> LocatingRule
+Definition --> NodeListRule
+Definition --> NodeRule
+Definition --> OrRule
+Definition --> PrefixRule
+Definition --> Rule
+Definition --> Splitter
+Definition --> StringRule
+Definition --> StripRule
+Definition --> SuffixRule
+Definition --> TypeRule
+Definition --> Divider
+Definition --> FoldingDivider
+Definition --> DelimitedFolder
+Definition --> DividingSplitter
+Definition --> OptionNodeListRule
+Definition --> TypeSeparatorFolder
+Definition --> ValueFolder
+Definition --> Deserializers
+class Definition
+Parameter <|-- Definition
+Assignable <|-- Definition
+MethodHeader <|-- Definition
+Iters --> Option
+Iters --> EmptyHead
+Iters --> HeadedIter
+Iters --> RangeHead
+Iters --> SingleHead
+class Iters
+Assignables --> Lists
+Assignables --> CompileResult
+Assignables --> Node
+Assignables --> Deserializers
+class Assignables
+enum NamespacedType
 TypeScriptAfterPasser --> None
 TypeScriptAfterPasser --> Option
 TypeScriptAfterPasser --> Some
@@ -788,45 +1458,118 @@ TypeScriptAfterPasser --> CompileResult
 TypeScriptAfterPasser --> CompileResults
 TypeScriptAfterPasser --> InlineNodeList
 TypeScriptAfterPasser --> MapNode
+TypeScriptAfterPasser --> Node
 TypeScriptAfterPasser --> NodeList
 TypeScriptAfterPasser --> NodeListCollector
+TypeScriptAfterPasser --> Passer
+TypeScriptAfterPasser --> ParseState
 TypeScriptAfterPasser --> InlinePassResult
+TypeScriptAfterPasser --> ParseResult
 TypeScriptAfterPasser --> ParseUnit
 TypeScriptAfterPasser --> ParseUnitImpl
-NodeRule --> MapNode
-DividingSplitter --> List
-DividingSplitter --> ListCollector
-DividingSplitter --> Divider
-Main --> Console
-Main --> Option
-Main --> Iters
-Main --> ApplicationBuilder
-Main --> Error
-Main --> PlantUMLTargetPlatform
-Main --> TargetPlatform
-Main --> TypeScriptTargetPlatform
-Main --> PathSources
-Main --> Sources
-Main --> Paths
+class TypeScriptAfterPasser
+Passer <|-- TypeScriptAfterPasser
+interface Collector
+LocatingSplitter --> Option
+LocatingSplitter --> Tuple2
+LocatingSplitter --> Locator
+class LocatingSplitter
+Splitter <|-- LocatingSplitter
+CharNode --> Option
+CharNode --> CompileResult
+CharNode --> Node
+CharNode --> PrefixRule
+CharNode --> Rule
+CharNode --> StringRule
+CharNode --> StripRule
+CharNode --> SuffixRule
+CharNode --> TypeRule
+CharNode --> Deserializers
+class CharNode
+Value <|-- CharNode
+interface Context
+MergeDiagram --> Tuple2
+MergeDiagram --> List
+MergeDiagram --> Lists
+MergeDiagram --> Map
+MergeDiagram --> Maps
+MergeDiagram --> Iters
+MergeDiagram --> ListCollector
+MergeDiagram --> InlineNodeList
+MergeDiagram --> MapNode
+MergeDiagram --> Node
+MergeDiagram --> NodeList
+MergeDiagram --> Location
+MergeDiagram --> AfterAll
+MergeDiagram --> MapUnitSet
+MergeDiagram --> SimpleUnit
+MergeDiagram --> UnitSet
+class MergeDiagram
+AfterAll <|-- MergeDiagram
+Segment --> CompileResult
+Segment --> Node
+Segment --> Deserializers
+class Segment
+Application --> Error
+Application --> Option
+interface Application
+ImmutableParseState --> Location
+class ImmutableParseState
+ParseState <|-- ImmutableParseState
+Conditional --> Option
+Conditional --> CompileResult
+Conditional --> Node
+Conditional --> NodeRule
+Conditional --> PrefixRule
+Conditional --> Rule
+Conditional --> StripRule
+Conditional --> SuffixRule
+Conditional --> TypeRule
+Conditional --> Deserializers
+class Conditional
+BlockHeader <|-- Conditional
+Operation --> Option
+Operation --> CompileResult
+Operation --> Node
+Operation --> LocatingRule
+Operation --> NodeRule
+Operation --> Rule
+Operation --> TypeRule
+Operation --> Deserializer
+Operation --> Deserializers
+class Operation
+Value <|-- Operation
 Divider --> Iter
-OptionNodeListRule --> Lists
-OptionNodeListRule --> OrRule
-RuleLexer --> ResultCollector
-RuleLexer --> CompileResult
-RuleLexer --> CompileResults
-RuleLexer --> Rule
-RuleLexer --> UnitSetCollector
-RuleLexer --> Unit
-Location --> List
-Location --> Joiner
-TypeRule --> Lists
-TypeRule --> CompileResults
-TypeRule --> Context
-TypeRule --> NodeContext
-TypeRule --> StringContext
-TypeRule --> CompileError
-TypeRule --> CompileErrors
-TypeRule --> ImmutableCompileError
+interface Divider
+CompoundDeserializerImpl --> None
+CompoundDeserializerImpl --> Option
+CompoundDeserializerImpl --> Some
+CompoundDeserializerImpl --> Tuple2
+CompoundDeserializerImpl --> List
+CompoundDeserializerImpl --> ListCollector
+CompoundDeserializerImpl --> CompileResult
+CompoundDeserializerImpl --> CompileResultCollector
+CompoundDeserializerImpl --> CompileResults
+CompoundDeserializerImpl --> Function
+class CompoundDeserializerImpl
+CompoundDeserializer <|-- CompoundDeserializerImpl
+Err --> Tuple2
+Err --> Function
+Err --> Supplier
+class Err
+Result <|-- Err
+ReturnNode --> Option
+ReturnNode --> CompileResult
+ReturnNode --> Node
+ReturnNode --> NodeRule
+ReturnNode --> PrefixRule
+ReturnNode --> Rule
+ReturnNode --> StripRule
+ReturnNode --> TypeRule
+ReturnNode --> Deserializers
+class ReturnNode
+FunctionSegmentValue <|-- ReturnNode
+FunctionSegment <|-- ReturnNode
 PlantUMLAfterPasser --> Some
 PlantUMLAfterPasser --> List
 PlantUMLAfterPasser --> ListCollector
@@ -836,10 +1579,73 @@ PlantUMLAfterPasser --> CompileResults
 PlantUMLAfterPasser --> CompileErrors
 PlantUMLAfterPasser --> InlineNodeList
 PlantUMLAfterPasser --> MapNode
+PlantUMLAfterPasser --> Node
 PlantUMLAfterPasser --> NodeList
 PlantUMLAfterPasser --> NodeListCollector
 PlantUMLAfterPasser --> StringRule
 PlantUMLAfterPasser --> InlinePassResult
+PlantUMLAfterPasser --> ParseResult
 PlantUMLAfterPasser --> ParseUnit
 PlantUMLAfterPasser --> ParseUnitImpl
+PlantUMLAfterPasser --> Passer
+PlantUMLAfterPasser --> ParseState
+class PlantUMLAfterPasser
+Passer <|-- PlantUMLAfterPasser
+MethodHeader --> Lists
+MethodHeader --> CompileResult
+MethodHeader --> Node
+MethodHeader --> Deserializers
+interface MethodHeader
+JavaRootSegments --> Lists
+JavaRootSegments --> CompileResult
+JavaRootSegments --> MapNode
+JavaRootSegments --> Node
+JavaRootSegments --> Deserializers
+class JavaRootSegments
+HeadedIter --> Option
+HeadedIter --> Iter
+HeadedIter --> Collector
+HeadedIter --> Ok
+HeadedIter --> Result
+HeadedIter --> BiFunction
+HeadedIter --> Function
+HeadedIter --> Predicate
+class HeadedIter
+Iter <|-- HeadedIter
+InitialDeserializerImpl --> Tuple2
+InitialDeserializerImpl --> List
+InitialDeserializerImpl --> ListCollector
+InitialDeserializerImpl --> CompileResult
+InitialDeserializerImpl --> CompileResultCollector
+InitialDeserializerImpl --> CompileResults
+InitialDeserializerImpl --> Function
+InitialDeserializerImpl --> Supplier
+class InitialDeserializerImpl
+InitialDeserializer <|-- InitialDeserializerImpl
+Splitter --> Option
+Splitter --> Tuple2
+interface Splitter
+MapNode --> None
+MapNode --> Option
+MapNode --> Some
+MapNode --> Tuple2
+MapNode --> List
+MapNode --> Map
+MapNode --> Maps
+MapNode --> Iter
+MapNode --> Iters
+MapNode --> Joiner
+MapNode --> Ok
+MapNode --> CompileResult
+MapNode --> CompileResults
+MapNode --> CompileErrors
+MapNode --> BiFunction
+MapNode --> Function
+class MapNode
+Node <|-- MapNode
+InlineIOResult --> Result
+InlineIOResult --> IOException
+InlineIOResult --> Function
+class InlineIOResult
+IOResult <|-- InlineIOResult
 @enduml

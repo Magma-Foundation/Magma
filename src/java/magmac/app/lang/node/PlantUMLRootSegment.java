@@ -1,4 +1,6 @@
 package magmac.app.lang.node;
 
-public interface PlantUMLRootSegment {
+import magmac.app.lang.Serializable;
+
+public interface PlantUMLRootSegment extends Serializable {
 }

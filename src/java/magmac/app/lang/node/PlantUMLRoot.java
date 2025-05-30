@@ -10,11 +10,11 @@ import magmac.app.lang.Serializable;
 
 public record PlantUMLRoot(List<PlantUMLRootSegment> segments) implements Serializable {
     public static Rule createRule() {
-        return new NodeListRule("children", new StatementFolder(), PlantUMLRootSegments.createRootSegmentRule());
+        return new NodeListRule("segments", new StatementFolder(), PlantUMLRootSegments.createRootSegmentRule());
     }
 
     @Override
     public Node serialize() {
-        return new MapNode();
+        return new MapNode("root").withNodeListFromElements("segments", this.segments, PlantUMLRootSegment::serialize);
     }
 }
