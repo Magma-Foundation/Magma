@@ -25,6 +25,7 @@ import magmac.app.compile.rule.fold.DelimitedFolder;
 import magmac.app.compile.rule.split.DividingSplitter;
 import magmac.app.lang.Deserializers;
 import magmac.app.lang.OptionNodeListRule;
+import magmac.app.lang.Serializable;
 import magmac.app.lang.TypeSeparatorFolder;
 import magmac.app.lang.ValueFolder;
 
@@ -85,6 +86,8 @@ public record Definition(
 
     @Override
     public Node serialize() {
-        return new MapNode("definition");
+        return new MapNode("definition")
+                .withString("name", name)
+                .withNodeSerialized("type", type, Serializable::serialize);
     }
 }

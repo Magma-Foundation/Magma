@@ -6,6 +6,6 @@ import magmac.app.compile.node.Node;
 public record Symbol(String value) implements Type, Value, Base {
     @Override
     public Node serialize() {
-        return new MapNode();
+        return new MapNode("symbol").withString("value", this.value);
     }
 }

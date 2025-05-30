@@ -36,7 +36,9 @@ PlantUMLInherits --> StringRule
 PlantUMLInherits --> TypeRule
 class PlantUMLInherits
 PlantUMLRootSegment <|-- PlantUMLInherits
+Base --> Serializable
 interface Base
+Serializable <|-- Base
 Root --> List
 Root --> MapNode
 Root --> Node
@@ -517,6 +519,7 @@ TemplateType --> StripRule
 TemplateType --> SuffixRule
 TemplateType --> TypeRule
 TemplateType --> Deserializers
+TemplateType --> Serializable
 class TemplateType
 Type <|-- TemplateType
 SimpleUnit --> CompileResult
@@ -1293,6 +1296,7 @@ Serializable <|-- PlantUMLRootSegment
 QualifiedType --> Option
 QualifiedType --> List
 QualifiedType --> CompileResult
+QualifiedType --> MapNode
 QualifiedType --> Node
 QualifiedType --> NodeListRule
 QualifiedType --> Rule
@@ -1580,6 +1584,7 @@ Definition --> DelimitedFolder
 Definition --> DividingSplitter
 Definition --> Deserializers
 Definition --> OptionNodeListRule
+Definition --> Serializable
 Definition --> TypeSeparatorFolder
 Definition --> ValueFolder
 class Definition

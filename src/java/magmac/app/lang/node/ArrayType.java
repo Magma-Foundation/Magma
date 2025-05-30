@@ -24,6 +24,6 @@ public record ArrayType(Type type) implements Type {
 
     @Override
     public Node serialize() {
-        return new MapNode();
+        return new MapNode("array");
     }
 }

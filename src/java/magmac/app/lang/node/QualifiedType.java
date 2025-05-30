@@ -3,6 +3,7 @@ package magmac.app.lang.node;
 import magmac.api.Option;
 import magmac.api.collect.list.List;
 import magmac.app.compile.error.CompileResult;
+import magmac.app.compile.node.MapNode;
 import magmac.app.compile.node.Node;
 import magmac.app.compile.rule.NodeListRule;
 import magmac.app.compile.rule.Rule;
@@ -21,5 +22,10 @@ public record QualifiedType(List<Segment> segments) implements Base {
 
     private static Rule createSegmentsRule(String key) {
         return NodeListRule.createNodeListRule(key, new DelimitedFolder('.'), Symbols.createSymbolRule("value"));
+    }
+
+    @Override
+    public Node serialize() {
+        return new MapNode("qualified").withNodeListSerialized("segments", this.segments, Segment::serialize);
     }
 }

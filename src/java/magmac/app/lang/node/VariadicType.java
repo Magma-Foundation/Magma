@@ -24,6 +24,6 @@ public record VariadicType(Type node) implements Type {
 
     @Override
     public Node serialize() {
-        return new MapNode();
+        return new MapNode("variadic");
     }
 }

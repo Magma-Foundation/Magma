@@ -1,4 +1,6 @@
 package magmac.app.lang.node;
 
-public sealed interface Base permits QualifiedType, Symbol {
+import magmac.app.lang.Serializable;
+
+public sealed interface Base extends Serializable permits QualifiedType, Symbol {
 }
