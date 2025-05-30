@@ -1,8 +1,7 @@
 package magmac.app.lang.node;
 
-public enum StructureType {
+public enum TypescriptStructureType {
     Class,
-    Record,
     Enum,
     Interface
 }

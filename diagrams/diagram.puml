@@ -13,7 +13,10 @@ BlockHeader --> SuffixRule
 BlockHeader --> TypeRule
 BlockHeader --> Deserializers
 interface BlockHeader
-enum StructureType
+StructureValue --> Option
+StructureValue --> List
+StructureValue --> Objects
+class StructureValue
 PlantUMLRootSegments --> Lists
 PlantUMLRootSegments --> OrRule
 PlantUMLRootSegments --> Rule
@@ -332,7 +335,8 @@ StructureStatement --> TypeRule
 StructureStatement --> LazyRule
 StructureStatement --> Deserializers
 class StructureStatement
-StructureMember <|-- StructureStatement
+JavaStructureMember <|-- StructureStatement
+interface TypescriptStructureMember
 Location --> List
 Location --> Joiner
 class Location
@@ -462,7 +466,7 @@ MethodNode --> CommonLang
 MethodNode --> OptionNodeListRule
 MethodNode --> Deserializers
 class MethodNode
-StructureMember <|-- MethodNode
+JavaStructureMember <|-- MethodNode
 TypedDeserializer --> Option
 TypedDeserializer --> CompileResult
 TypedDeserializer --> Node
@@ -559,7 +563,7 @@ EnumValues --> TypeRule
 EnumValues --> ValueFolder
 EnumValues --> Deserializers
 class EnumValues
-StructureMember <|-- EnumValues
+JavaStructureMember <|-- EnumValues
 enum PostVariant
 Generator --> Node
 Generator --> UnitSet
@@ -850,7 +854,7 @@ JavaPlantUMLParser --> PlantUMLStructureType
 JavaPlantUMLParser --> QualifiedType
 JavaPlantUMLParser --> Segment
 JavaPlantUMLParser --> JavaStructureNode
-JavaPlantUMLParser --> StructureType
+JavaPlantUMLParser --> JavaStructureType
 JavaPlantUMLParser --> Symbol
 JavaPlantUMLParser --> TemplateType
 JavaPlantUMLParser --> Type
@@ -900,6 +904,7 @@ StringNode --> TypeRule
 StringNode --> Deserializers
 class StringNode
 Value <|-- StringNode
+interface JavaStructureMember
 SafeFiles --> None
 SafeFiles --> Option
 SafeFiles --> Some
@@ -1029,14 +1034,22 @@ JavaTypescriptParser --> CompileResultCollector
 JavaTypescriptParser --> CompileResults
 JavaTypescriptParser --> Location
 JavaTypescriptParser --> UnitSetCollector
+JavaTypescriptParser --> EnumValues
 JavaTypescriptParser --> JavaNamespacedNode
 JavaTypescriptParser --> JavaRootSegment
+JavaTypescriptParser --> JavaStructureMember
 JavaTypescriptParser --> JavaStructureNode
+JavaTypescriptParser --> MethodNode
 JavaTypescriptParser --> Root
 JavaTypescriptParser --> Segment
+JavaTypescriptParser --> StructureStatement
+JavaTypescriptParser --> StructureValue
 JavaTypescriptParser --> TypeScriptImport
 JavaTypescriptParser --> TypeScriptRootSegment
 JavaTypescriptParser --> TypescriptRoot
+JavaTypescriptParser --> TypescriptStructureMember
+JavaTypescriptParser --> TypescriptStructureNode
+JavaTypescriptParser --> TypescriptStructureType
 JavaTypescriptParser --> Whitespace
 JavaTypescriptParser --> Parser
 JavaTypescriptParser --> SimpleUnit
@@ -1131,12 +1144,10 @@ PlantUMLHeader --> ExactRule
 PlantUMLHeader --> TypeRule
 class PlantUMLHeader
 PlantUMLRootSegment <|-- PlantUMLHeader
+enum TypescriptStructureType
 Rule --> CompileResult
 Rule --> Node
 interface Rule
-StructureNode --> Option
-StructureNode --> List
-class StructureNode
 CompileResultCollector --> Collector
 CompileResultCollector --> Ok
 class CompileResultCollector
@@ -1314,8 +1325,9 @@ Argument <|-- Whitespace
 FunctionSegment <|-- Whitespace
 JavaRootSegment <|-- Whitespace
 Parameter <|-- Whitespace
-StructureMember <|-- Whitespace
+JavaStructureMember <|-- Whitespace
 TypeScriptRootSegment <|-- Whitespace
+TypescriptStructureMember <|-- Whitespace
 CommonLang --> LocatingRule
 CommonLang --> NodeListRule
 CommonLang --> NodeRule
@@ -1345,7 +1357,6 @@ StringRule --> MapNode
 StringRule --> Node
 class StringRule
 Rule <|-- StringRule
-interface StructureMember
 ResultCollector --> Tuple2
 ResultCollector --> Ok
 ResultCollector --> Result
@@ -1411,6 +1422,7 @@ DivideState --> Tuple2
 DivideState --> Option
 DivideState --> Iter
 interface DivideState
+enum JavaStructureType
 JVMMap --> None
 JVMMap --> Option
 JVMMap --> Some
@@ -1655,6 +1667,10 @@ ReturnNode --> Deserializers
 class ReturnNode
 FunctionSegmentValue <|-- ReturnNode
 FunctionSegment <|-- ReturnNode
+TypescriptStructureNode --> MapNode
+TypescriptStructureNode --> Node
+class TypescriptStructureNode
+TypeScriptRootSegment <|-- TypescriptStructureNode
 PlantUMLAfterPasser --> Some
 PlantUMLAfterPasser --> List
 PlantUMLAfterPasser --> ListCollector

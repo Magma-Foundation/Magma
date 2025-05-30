@@ -17,7 +17,7 @@ import magmac.app.compile.rule.TypeRule;
 import magmac.app.lang.ValueFolder;
 import magmac.app.lang.Deserializers;
 
-record EnumValues(List<EnumValue> values) implements StructureMember {
+public record EnumValues(List<EnumValue> values) implements JavaStructureMember {
     public static TypeRule createEnumValuesRule(Rule value) {
         Rule name = new StripRule(FilterRule.Symbol(new StringRule("name")));
         Rule rule = new SuffixRule(LocatingRule.First(name, "(", Arguments.createArgumentsRule(value)), ")");
@@ -34,7 +34,7 @@ record EnumValues(List<EnumValue> values) implements StructureMember {
         )));
     }
 
-    public static Option<CompileResult<StructureMember>> deserialize(Node node) {
+    public static Option<CompileResult<JavaStructureMember>> deserialize(Node node) {
         return Deserializers.deserializeWithType(node, "enum-values").map(deserializer -> deserializer.withNodeList("children", EnumValue::deserialize)
                 .complete(EnumValues::new));
     }

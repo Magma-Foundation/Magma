@@ -26,7 +26,7 @@ import magmac.app.lang.node.PlantUMLStructureType;
 import magmac.app.lang.node.QualifiedType;
 import magmac.app.lang.node.Segment;
 import magmac.app.lang.node.JavaStructureNode;
-import magmac.app.lang.node.StructureType;
+import magmac.app.lang.node.JavaStructureType;
 import magmac.app.lang.node.Symbol;
 import magmac.app.lang.node.TemplateType;
 import magmac.app.lang.node.Type;
@@ -68,7 +68,7 @@ public class JavaPlantUMLParser implements Parser<Root<JavaRootSegment>, PlantUM
 
     private static PlantUMLRootSegment createStructureSegment(JavaStructureNode structureNode) {
         String name = structureNode.name();
-        StructureType type = structureNode.type();
+        JavaStructureType type = structureNode.type();
 
         return switch (type) {
             case Class, Record -> new PlantUMLStructure(PlantUMLStructureType.Class, name);

@@ -6,14 +6,14 @@ import magmac.app.compile.node.MapNode;
 import magmac.app.compile.node.Node;
 
 public final class JavaStructureNode implements JavaRootSegment {
-    private final StructureType type;
-    private final StructureValue value;
+    private final JavaStructureType type;
+    public final StructureValue<JavaStructureMember> value;
     private final Option<List<Parameter>> parameters;
     private final Option<List<Type>> variants;
 
     public JavaStructureNode(
-            StructureType type,
-            StructureValue structureNode,
+            JavaStructureType type,
+            StructureValue<JavaStructureMember> structureNode,
             Option<List<Parameter>> parameters,
             Option<List<Type>> variants
     ) {
@@ -28,7 +28,7 @@ public final class JavaStructureNode implements JavaRootSegment {
         return new MapNode();
     }
 
-    public StructureType type() {
+    public JavaStructureType type() {
         return this.type;
     }
 

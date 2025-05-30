@@ -11,7 +11,7 @@ import magmac.app.lang.MutableLazyRule;
 import magmac.app.lang.Deserializers;
 
 final class StructureMembers {
-    public static CompileResult<StructureMember> deserialize(Node node) {
+    public static CompileResult<JavaStructureMember> deserialize(Node node) {
         return Deserializers.orError("structure-member", node, Lists.of(
                 Deserializers.wrap(Whitespace::deserialize),
                 Deserializers.wrap(MethodNode::deserialize),

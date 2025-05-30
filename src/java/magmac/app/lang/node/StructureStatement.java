@@ -13,8 +13,8 @@ import magmac.app.compile.rule.TypeRule;
 import magmac.app.lang.LazyRule;
 import magmac.app.lang.Deserializers;
 
-public record StructureStatement() implements StructureMember {
-    public static Option<CompileResult<StructureMember>> deserialize(Node node) {
+public record StructureStatement() implements JavaStructureMember {
+    public static Option<CompileResult<JavaStructureMember>> deserialize(Node node) {
         return Deserializers.deserializeWithType(node, "structure-statement").map(deserializer -> deserializer.complete(StructureStatement::new));
     }
 

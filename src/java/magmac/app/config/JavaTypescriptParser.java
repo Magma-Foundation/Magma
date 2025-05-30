@@ -8,14 +8,22 @@ import magmac.app.compile.error.CompileResultCollector;
 import magmac.app.compile.error.CompileResults;
 import magmac.app.io.Location;
 import magmac.app.io.sources.UnitSetCollector;
+import magmac.app.lang.node.EnumValues;
 import magmac.app.lang.node.JavaNamespacedNode;
 import magmac.app.lang.node.JavaRootSegment;
+import magmac.app.lang.node.JavaStructureMember;
 import magmac.app.lang.node.JavaStructureNode;
+import magmac.app.lang.node.MethodNode;
 import magmac.app.lang.node.Root;
 import magmac.app.lang.node.Segment;
+import magmac.app.lang.node.StructureStatement;
+import magmac.app.lang.node.StructureValue;
 import magmac.app.lang.node.TypeScriptImport;
 import magmac.app.lang.node.TypeScriptRootSegment;
 import magmac.app.lang.node.TypescriptRoot;
+import magmac.app.lang.node.TypescriptStructureMember;
+import magmac.app.lang.node.TypescriptStructureNode;
+import magmac.app.lang.node.TypescriptStructureType;
 import magmac.app.lang.node.Whitespace;
 import magmac.app.stage.parse.Parser;
 import magmac.app.stage.unit.SimpleUnit;
@@ -46,10 +54,38 @@ class JavaTypescriptParser implements Parser<Root<JavaRootSegment>, TypescriptRo
 
     private static TypeScriptRootSegment parseJavaStructure(JavaStructureNode structureNode) {
         return switch (structureNode.type()) {
-            case Class -> new Whitespace();
+            case Class -> JavaTypescriptParser.parseClass(structureNode);
             case Record -> new Whitespace();
             case Enum -> new Whitespace();
             case Interface -> new Whitespace();
+        };
+    }
+
+    private static TypescriptStructureNode parseClass(JavaStructureNode structureNode) {
+        StructureValue<JavaStructureMember> value = structureNode.value;
+        List<TypescriptStructureMember> collect = value.members()
+                .iter()
+                .map(JavaTypescriptParser::parseStructureMember)
+                .collect(new ListCollector<>());
+
+        StructureValue<TypescriptStructureMember> structureNode1 = new StructureValue<>(
+                value.name(),
+                value.modifiers(),
+                value.typeParams(),
+                value.extended(),
+                value.implemented(),
+                collect
+        );
+
+        return new TypescriptStructureNode(TypescriptStructureType.Class, structureNode1);
+    }
+
+    private static TypescriptStructureMember parseStructureMember(JavaStructureMember structureNode) {
+        return switch (structureNode) {
+            case EnumValues enumValues -> new Whitespace();
+            case MethodNode methodNode -> new Whitespace();
+            case StructureStatement structureStatement -> new Whitespace();
+            case Whitespace whitespace -> new Whitespace();
         };
     }
 

@@ -13,10 +13,10 @@ public final class JavaRootSegments {
         return Deserializers.orError("root-segment", node, Lists.of(
                 Deserializers.wrap(Whitespace::deserialize),
                 JavaNamespacedNode::deserialize,
-                Deserializers.wrap(new JavaStructureNodeDeserializer(StructureType.Class)),
-                Deserializers.wrap(new JavaStructureNodeDeserializer(StructureType.Interface)),
-                Deserializers.wrap(new JavaStructureNodeDeserializer(StructureType.Record)),
-                Deserializers.wrap(new JavaStructureNodeDeserializer(StructureType.Enum))
+                Deserializers.wrap(new JavaStructureNodeDeserializer(JavaStructureType.Class)),
+                Deserializers.wrap(new JavaStructureNodeDeserializer(JavaStructureType.Interface)),
+                Deserializers.wrap(new JavaStructureNodeDeserializer(JavaStructureType.Record)),
+                Deserializers.wrap(new JavaStructureNodeDeserializer(JavaStructureType.Enum))
         ));
     }
 
