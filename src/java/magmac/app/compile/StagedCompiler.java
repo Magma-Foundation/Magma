@@ -17,7 +17,7 @@ public final class StagedCompiler<R extends Serializable> implements Compiler {
     }
 
     @Override
-    public CompileResult<UnitSet<String>> parseAndGenerator(UnitSet<JavaRoot> units) {
+    public CompileResult<UnitSet<String>> parseAndGenerate(UnitSet<JavaRoot> units) {
         return this.parser.apply(units)
                 .mapValue((UnitSet<R> roots) -> roots.mapValues(Serializable::serialize))
                 .flatMapValue(this.generator::apply);

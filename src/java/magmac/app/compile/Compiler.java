@@ -5,5 +5,5 @@ import magmac.app.lang.node.JavaRoot;
 import magmac.app.stage.unit.UnitSet;
 
 public interface Compiler {
-    CompileResult<UnitSet<String>> parseAndGenerator(UnitSet<JavaRoot> units);
+    CompileResult<UnitSet<String>> parseAndGenerate(UnitSet<JavaRoot> units);
 }

@@ -21,8 +21,8 @@ public final class CompileApplication<R extends Serializable> implements Applica
     }
 
     @Override
-    public Option<Error> compileAndWrite(UnitSet<JavaRoot> units) {
-        return this.compiler.parseAndGenerator(units)
+    public Option<Error> parseAndStore(UnitSet<JavaRoot> units) {
+        return this.compiler.parseAndGenerate(units)
                 .toResult()
                 .mapErr(ApplicationError::new)
                 .match((UnitSet<String> outputs) -> this.targets.writeAll(outputs).map(ThrowableError::new).map(ApplicationError::new), Some::new);

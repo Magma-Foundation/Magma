@@ -5,13 +5,10 @@ import magmac.app.CompileApplication;
 import magmac.app.compile.Compiler;
 import magmac.app.compile.StagedCompiler;
 import magmac.app.compile.rule.Rule;
+import magmac.app.io.targets.PathTargets;
 import magmac.app.io.targets.Targets;
-import magmac.app.lang.TypeScriptAfterPasser;
 import magmac.app.lang.TypescriptLang;
 import magmac.app.lang.node.JavaRoot;
-import magmac.app.stage.Passer;
-import magmac.app.stage.after.AfterAll;
-import magmac.app.stage.after.EmptyAfterAll;
 import magmac.app.stage.generate.Generator;
 import magmac.app.stage.generate.RuleGenerator;
 import magmac.app.stage.parse.Parser;
@@ -20,19 +17,10 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 public final class TypeScriptTargetPlatform implements TargetPlatform {
-    @Override
-    public Passer createAfterChild() {
-        return new TypeScriptAfterPasser();
-    }
 
     @Override
     public Path createTargetPath() {
         return Paths.get(".", "src", "web");
-    }
-
-    @Override
-    public AfterAll createAfterAll() {
-        return new EmptyAfterAll();
     }
 
     @Override
@@ -53,7 +41,15 @@ public final class TypeScriptTargetPlatform implements TargetPlatform {
     }
 
     @Override
-    public Application createApplication(Targets targets) {
+    public Application createApplication0(Targets targets) {
         return new CompileApplication<>(createCompiler(), targets);
+    }
+
+    @Override
+    public Application createApplication() {
+        Path targetPath = this.createTargetPath();
+        String extension = this.createExtension();
+        Targets targets = new PathTargets(targetPath, extension);
+        return this.createApplication0(targets);
     }
 }
