@@ -16,7 +16,6 @@ import magmac.app.compile.rule.StripRule;
 import magmac.app.compile.rule.SuffixRule;
 import magmac.app.compile.rule.TypeRule;
 import magmac.app.lang.CommonLang;
-import magmac.app.lang.Deserializer;
 import magmac.app.lang.Deserializers;
 import magmac.app.lang.LazyRule;
 
@@ -26,7 +25,7 @@ public final class Values {
     }
 
     public static Option<CompileResult<Value>> deserialize(Node node) {
-        List<Deserializer<Value>> deserializers = Lists.of(
+        List<TypedDeserializer<Value>> deserializers = Lists.of(
                 Deserializers.wrap(SwitchNode::deserialize),
                 Deserializers.wrap(InvokableNode::deserialize),
                 StringNode::deserialize,
@@ -39,11 +38,15 @@ public final class Values {
                 Deserializers.wrap(Not::deserialize)
         );
 
-        List<Deserializer<Value>> operatorRules = Iters.fromValues(Operator.values())
-                .map(operator -> Deserializers.wrap(Operation.deserializeAs(operator)))
+        List<TypedDeserializer<Value>> operatorRules = Iters.fromValues(Operator.values())
+                .map(Values::getWrap)
                 .collect(new ListCollector<>());
 
         return Deserializers.or(node, deserializers.addAllLast(operatorRules));
+    }
+
+    private static TypedDeserializer<Value> getWrap(Operator operator) {
+        return Deserializers.wrap(Deserializers.wrap(new OperationDeserializer(operator)));
     }
 
     public static LazyRule initValueRule(Rule segment, LazyRule value, String lambdaInfix, Rule definition) {

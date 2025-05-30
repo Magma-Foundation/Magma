@@ -1,9 +1,4 @@
 import { Option } from "../../../../magmac/api/Option";
-import { Tuple2 } from "../../../../magmac/api/Tuple2";
 import { List } from "../../../../magmac/api/collect/list/List";
-import { CompileResult } from "../../../../magmac/app/compile/error/CompileResult";
-import { CompoundDeserializer } from "../../../../magmac/app/compile/node/CompoundDeserializer";
-import { InitialDestructor } from "../../../../magmac/app/compile/node/InitialDestructor";
 import { MapNode } from "../../../../magmac/app/compile/node/MapNode";
 import { Node } from "../../../../magmac/app/compile/node/Node";
-import { Deserializers } from "../../../../magmac/app/lang/Deserializers";

@@ -14,6 +14,5 @@ import { StripRule } from "../../../../magmac/app/compile/rule/StripRule";
 import { SuffixRule } from "../../../../magmac/app/compile/rule/SuffixRule";
 import { TypeRule } from "../../../../magmac/app/compile/rule/TypeRule";
 import { CommonLang } from "../../../../magmac/app/lang/CommonLang";
-import { Deserializer } from "../../../../magmac/app/lang/Deserializer";
 import { Deserializers } from "../../../../magmac/app/lang/Deserializers";
 import { LazyRule } from "../../../../magmac/app/lang/LazyRule";

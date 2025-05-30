@@ -57,6 +57,16 @@ ListCollector --> Lists
 class ListCollector
 Collector <|-- ListCollector
 interface FunctionSegmentValue
+JavaStructureNodeDeserializer --> Option
+JavaStructureNodeDeserializer --> Tuple2
+JavaStructureNodeDeserializer --> List
+JavaStructureNodeDeserializer --> CompileResult
+JavaStructureNodeDeserializer --> CompoundDestructor
+JavaStructureNodeDeserializer --> InitialDestructor
+JavaStructureNodeDeserializer --> Node
+JavaStructureNodeDeserializer --> Deserializers
+class JavaStructureNodeDeserializer
+TypedDeserializer <|-- JavaStructureNodeDeserializer
 Catch --> Option
 Catch --> CompileResult
 Catch --> Node
@@ -118,6 +128,18 @@ Value <|-- Access
 AfterAll --> Node
 AfterAll --> UnitSet
 interface AfterAll
+CompoundDestructorImpl --> None
+CompoundDestructorImpl --> Option
+CompoundDestructorImpl --> Some
+CompoundDestructorImpl --> Tuple2
+CompoundDestructorImpl --> List
+CompoundDestructorImpl --> ListCollector
+CompoundDestructorImpl --> CompileResult
+CompoundDestructorImpl --> CompileResultCollector
+CompoundDestructorImpl --> CompileResults
+CompoundDestructorImpl --> Function
+class CompoundDestructorImpl
+CompoundDestructor <|-- CompoundDestructorImpl
 Not --> Option
 Not --> CompileResult
 Not --> Node
@@ -154,7 +176,6 @@ Values --> StripRule
 Values --> SuffixRule
 Values --> TypeRule
 Values --> CommonLang
-Values --> Deserializer
 Values --> Deserializers
 Values --> LazyRule
 class Values
@@ -174,6 +195,7 @@ Deserializers --> InitialDestructor
 Deserializers --> InitialDestructorImpl
 Deserializers --> Node
 Deserializers --> ImmutableCompileError
+Deserializers --> TypedDeserializer
 class Deserializers
 ParseUnit --> NodeList
 ParseUnit --> ParseState
@@ -359,6 +381,12 @@ Lexer --> UnitSet
 Lexer --> Stage
 interface Lexer
 Stage <|-- Lexer
+CompoundDestructor --> Option
+CompoundDestructor --> Tuple2
+CompoundDestructor --> List
+CompoundDestructor --> CompileResult
+CompoundDestructor --> Function
+interface CompoundDestructor
 IOResult --> Result
 IOResult --> IOException
 IOResult --> Function
@@ -435,6 +463,10 @@ MethodNode --> OptionNodeListRule
 MethodNode --> Deserializers
 class MethodNode
 StructureMember <|-- MethodNode
+TypedDeserializer --> Option
+TypedDeserializer --> CompileResult
+TypedDeserializer --> Node
+interface TypedDeserializer
 ContextRule --> Lists
 ContextRule --> CompileResult
 ContextRule --> NodeContext
@@ -699,14 +731,9 @@ Post --> Deserializers
 class Post
 FunctionSegmentValue <|-- Post
 JavaStructureNode --> Option
-JavaStructureNode --> Tuple2
 JavaStructureNode --> List
-JavaStructureNode --> CompileResult
-JavaStructureNode --> CompoundDeserializer
-JavaStructureNode --> InitialDestructor
 JavaStructureNode --> MapNode
 JavaStructureNode --> Node
-JavaStructureNode --> Deserializers
 class JavaStructureNode
 JavaRootSegment <|-- JavaStructureNode
 OrRule --> List
@@ -1086,6 +1113,12 @@ FunctionStatement --> TypeRule
 FunctionStatement --> Deserializers
 class FunctionStatement
 FunctionSegment <|-- FunctionStatement
+OperationDeserializer --> Option
+OperationDeserializer --> CompileResult
+OperationDeserializer --> Node
+OperationDeserializer --> Deserializers
+class OperationDeserializer
+TypedDeserializer <|-- OperationDeserializer
 interface Parameter
 TypeScriptImport --> List
 TypeScriptImport --> MapNode
@@ -1414,12 +1447,6 @@ ArrayType --> TypeRule
 ArrayType --> Deserializers
 class ArrayType
 Type <|-- ArrayType
-CompoundDeserializer --> Option
-CompoundDeserializer --> Tuple2
-CompoundDeserializer --> List
-CompoundDeserializer --> CompileResult
-CompoundDeserializer --> Function
-interface CompoundDeserializer
 PathSource --> List
 PathSource --> Lists
 PathSource --> IOResult
@@ -1600,31 +1627,14 @@ Conditional --> TypeRule
 Conditional --> Deserializers
 class Conditional
 BlockHeader <|-- Conditional
-Operation --> Option
-Operation --> CompileResult
-Operation --> Node
 Operation --> LocatingRule
 Operation --> NodeRule
 Operation --> Rule
 Operation --> TypeRule
-Operation --> Deserializer
-Operation --> Deserializers
 class Operation
 Value <|-- Operation
 Divider --> Iter
 interface Divider
-CompoundDeserializerImpl --> None
-CompoundDeserializerImpl --> Option
-CompoundDeserializerImpl --> Some
-CompoundDeserializerImpl --> Tuple2
-CompoundDeserializerImpl --> List
-CompoundDeserializerImpl --> ListCollector
-CompoundDeserializerImpl --> CompileResult
-CompoundDeserializerImpl --> CompileResultCollector
-CompoundDeserializerImpl --> CompileResults
-CompoundDeserializerImpl --> Function
-class CompoundDeserializerImpl
-CompoundDeserializer <|-- CompoundDeserializerImpl
 Err --> Tuple2
 Err --> Function
 Err --> Supplier

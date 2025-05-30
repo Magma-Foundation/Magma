@@ -1,9 +1,4 @@
-import { Option } from "../../../../magmac/api/Option";
-import { CompileResult } from "../../../../magmac/app/compile/error/CompileResult";
-import { Node } from "../../../../magmac/app/compile/node/Node";
 import { LocatingRule } from "../../../../magmac/app/compile/rule/LocatingRule";
 import { NodeRule } from "../../../../magmac/app/compile/rule/NodeRule";
 import { Rule } from "../../../../magmac/app/compile/rule/Rule";
 import { TypeRule } from "../../../../magmac/app/compile/rule/TypeRule";
-import { Deserializer } from "../../../../magmac/app/lang/Deserializer";
-import { Deserializers } from "../../../../magmac/app/lang/Deserializers";

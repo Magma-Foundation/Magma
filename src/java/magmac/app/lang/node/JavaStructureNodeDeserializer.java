@@ -9,7 +9,7 @@ import magmac.app.compile.node.InitialDestructor;
 import magmac.app.compile.node.Node;
 import magmac.app.lang.Deserializers;
 
-public record JavaStructureNodeDeserializer(StructureType type) {
+public record JavaStructureNodeDeserializer(StructureType type) implements TypedDeserializer<JavaStructureNode> {
     private static CompileResult<JavaStructureNode> deserializeHelper(StructureType type, InitialDestructor deserializer) {
         return JavaStructureNodeDeserializer.attachOptionals(JavaStructureNodeDeserializer.attachRequired(deserializer))
                 .complete(tuple -> JavaStructureNodeDeserializer.from(type, tuple));
