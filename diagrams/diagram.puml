@@ -116,7 +116,9 @@ FunctionSegment --> TypeRule
 FunctionSegment --> StatementFolder
 FunctionSegment --> Deserializers
 FunctionSegment --> LazyRule
+FunctionSegment --> Serializable
 interface FunctionSegment
+Serializable <|-- FunctionSegment
 Access --> Option
 Access --> CompileResult
 Access --> Node
@@ -276,6 +278,7 @@ Value <|-- Lambda
 Block --> Option
 Block --> List
 Block --> CompileResult
+Block --> MapNode
 Block --> Node
 Block --> LocatingRule
 Block --> NodeRule
@@ -292,6 +295,8 @@ Block --> LazyRule
 Block --> Deserializers
 class Block
 FunctionSegment <|-- Block
+TypescriptMethod --> Option
+TypescriptMethod --> List
 TypescriptMethod --> MapNode
 TypescriptMethod --> Node
 class TypescriptMethod
@@ -1177,6 +1182,7 @@ class Try
 BlockHeader <|-- Try
 FunctionStatement --> Option
 FunctionStatement --> CompileResult
+FunctionStatement --> MapNode
 FunctionStatement --> Node
 FunctionStatement --> NodeRule
 FunctionStatement --> Rule
@@ -1747,6 +1753,7 @@ class Err
 Result <|-- Err
 ReturnNode --> Option
 ReturnNode --> CompileResult
+ReturnNode --> MapNode
 ReturnNode --> Node
 ReturnNode --> NodeRule
 ReturnNode --> PrefixRule

@@ -3,6 +3,7 @@ package magmac.app.lang.node;
 import magmac.api.Option;
 import magmac.api.collect.list.List;
 import magmac.app.compile.error.CompileResult;
+import magmac.app.compile.node.MapNode;
 import magmac.app.compile.node.Node;
 import magmac.app.compile.rule.LocatingRule;
 import magmac.app.compile.rule.NodeRule;
@@ -36,5 +37,10 @@ record Block(List<FunctionSegment> segments, BlockHeader header) implements Func
         Splitter first = DividingSplitter.First(new FoldingDivider(new BlockFolder()), "");
         Rule childRule = new LocatingRule(new SuffixRule(header, "{"), first, children);
         return new TypeRule("block", new StripRule(new SuffixRule(childRule, "}")));
+    }
+
+    @Override
+    public Node serialize() {
+        return new MapNode();
     }
 }

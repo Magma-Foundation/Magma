@@ -123,7 +123,7 @@ class JavaTypescriptParser implements Parser<Root<JavaRootSegment>, TypescriptRo
 
         TypeScriptMethodHeader header = JavaTypescriptParser.parseMethodHeader(methodNode.header());
         ParameterizedMethodHeader<TypeScriptParameter> parameterizedHeader = new ParameterizedMethodHeader<>(header, parameters);
-        return new TypescriptMethod(parameterizedHeader);
+        return new TypescriptMethod(parameterizedHeader, methodNode.maybeChildren());
     }
 
     private static TypeScriptParameter parseParameter(JavaParameter parameter) {

@@ -17,8 +17,9 @@ import magmac.app.compile.rule.TypeRule;
 import magmac.app.compile.rule.fold.StatementFolder;
 import magmac.app.lang.Deserializers;
 import magmac.app.lang.LazyRule;
+import magmac.app.lang.Serializable;
 
-public interface FunctionSegment {
+public interface FunctionSegment extends Serializable {
     static CompileResult<FunctionSegment> deserialize(Node node) {
         return Deserializers.orError("function-segment", node, Lists.of(
                 Deserializers.wrap(Whitespace::deserialize),
