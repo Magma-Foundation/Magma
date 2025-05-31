@@ -25,8 +25,13 @@ public record Definition<T extends Serializable>(
                 .complete((result) -> new Definition<JavaType>(result.left().left().left().left(), result.left().left().left().right(), result.left().left().right(), result.left().right(), result.right()));
     }
 
-    static CompileResult<Definition<JavaType>> deserializeWithDestructor(Node node) {
+    static CompileResult<Definition<JavaType>> deserialize(Node node) {
         return deserialize0(Deserializers.destruct(node));
+    }
+
+    static Option<CompileResult<Definition<JavaType>>> deserializeWithType(Node node) {
+        return Deserializers.deserializeWithType(node, "definition")
+                .map(Definition::deserialize0);
     }
 
     @Override

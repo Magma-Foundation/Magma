@@ -8,6 +8,7 @@ import magmac.app.compile.rule.StringRule;
 import magmac.app.compile.rule.SuffixRule;
 import magmac.app.compile.rule.TypeRule;
 import magmac.app.lang.CommonLang;
+import magmac.app.lang.JavaLang;
 import magmac.app.lang.TypescriptLang;
 
 public final class TypescriptStructureNode implements TypeScriptRootSegment {
@@ -22,7 +23,7 @@ public final class TypescriptStructureNode implements TypeScriptRootSegment {
     public static Rule createClassRule(String type) {
         Rule children = CommonLang.Statements("members", TypescriptLang.createStructureMemberRule());
         Rule name = new StringRule("name");
-        Rule afterKeyword = LocatingRule.First(JavaDefinition.attachTypeParams(name), " {", new SuffixRule(children, "\n}\n"));
+        Rule afterKeyword = LocatingRule.First(JavaLang.attachTypeParams(name), " {", new SuffixRule(children, "\n}\n"));
         return new TypeRule(type, new PrefixRule("export " + type + " ", afterKeyword));
     }
 

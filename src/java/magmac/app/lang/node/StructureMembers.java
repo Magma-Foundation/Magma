@@ -6,6 +6,7 @@ import magmac.app.compile.node.Node;
 import magmac.app.compile.rule.OrRule;
 import magmac.app.compile.rule.Rule;
 import magmac.app.compile.rule.TypeRule;
+import magmac.app.lang.JavaLang;
 import magmac.app.lang.LazyRule;
 import magmac.app.lang.MutableLazyRule;
 import magmac.app.lang.Deserializers;
@@ -23,11 +24,11 @@ final class StructureMembers {
     public static Rule createClassMemberRule() {
         LazyRule functionSegmentRule = new MutableLazyRule();
         LazyRule valueLazy = new MutableLazyRule();
-        LazyRule value = Values.initValueRule(functionSegmentRule, valueLazy, "->", JavaDefinition.creaeteRule());
-        Rule functionSegment = FunctionSegment.initFunctionSegmentRule(functionSegmentRule, value, JavaDefinition.creaeteRule());
+        LazyRule value = Values.initValueRule(functionSegmentRule, valueLazy, "->", JavaLang.createRule());
+        Rule functionSegment = FunctionSegment.initFunctionSegmentRule(functionSegmentRule, value, JavaLang.createRule());
         return new OrRule(Lists.of(
                 Whitespace.createWhitespaceRule(),
-                StructureStatement.createStructureStatementRule(new TypeRule("definition", JavaDefinition.creaeteRule()), value),
+                StructureStatement.createStructureStatementRule(new TypeRule("definition", JavaLang.createRule()), value),
                 JavaMethod.createMethodRule(functionSegment),
                 EnumValues.createEnumValuesRule(value)
         ));

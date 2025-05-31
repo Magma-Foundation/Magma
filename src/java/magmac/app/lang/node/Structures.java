@@ -12,15 +12,16 @@ import magmac.app.compile.rule.StripRule;
 import magmac.app.compile.rule.SuffixRule;
 import magmac.app.compile.rule.TypeRule;
 import magmac.app.lang.CommonLang;
+import magmac.app.lang.JavaLang;
 import magmac.app.lang.ValueFolder;
 
 final class Structures {
     public static Rule createStructureRule(String keyword) {
         Rule name = new StripRule(FilterRule.Symbol(new StringRule("name")));
-        Rule beforeContent = JavaDefinition.attachTypeParams(name);
+        Rule beforeContent = JavaLang.attachTypeParams(name);
 
         Rule withParameters = new OrRule(Lists.of(
-                new StripRule(new SuffixRule(LocatingRule.First(beforeContent, "(", Parameters.createParametersRule(JavaDefinition.creaeteRule())), ")")),
+                new StripRule(new SuffixRule(LocatingRule.First(beforeContent, "(", Parameters.createParametersRule(JavaLang.createRule())), ")")),
                 beforeContent
         ));
 
