@@ -497,9 +497,8 @@ TemplateType --> StripRule
 TemplateType --> SuffixRule
 TemplateType --> TypeRule
 TemplateType --> Deserializers
-TemplateType --> Serializable
 class TemplateType
-Type <|-- TemplateType
+JavaType <|-- TemplateType
 SimpleUnit --> CompileResult
 SimpleUnit --> Location
 SimpleUnit --> BiFunction
@@ -870,7 +869,7 @@ JavaPlantUMLParser --> JavaStructureNode
 JavaPlantUMLParser --> JavaStructureType
 JavaPlantUMLParser --> Symbol
 JavaPlantUMLParser --> TemplateType
-JavaPlantUMLParser --> Type
+JavaPlantUMLParser --> JavaType
 JavaPlantUMLParser --> VariadicType
 JavaPlantUMLParser --> Whitespace
 JavaPlantUMLParser --> Parser
@@ -1423,7 +1422,7 @@ VariadicType --> SuffixRule
 VariadicType --> TypeRule
 VariadicType --> Deserializers
 class VariadicType
-Type <|-- VariadicType
+JavaType <|-- VariadicType
 Head --> Option
 interface Head
 DelimitedDivider --> Iter
@@ -1443,13 +1442,10 @@ EnumValue --> CompileResult
 EnumValue --> Node
 EnumValue --> Deserializers
 class EnumValue
-Type --> Serializable
-interface Type
-Serializable <|-- Type
 Symbol --> MapNode
 Symbol --> Node
 class Symbol
-Type <|-- Symbol
+JavaType <|-- Symbol
 Value <|-- Symbol
 Base <|-- Symbol
 NodeContext --> Node
@@ -1508,7 +1504,7 @@ ArrayType --> SuffixRule
 ArrayType --> TypeRule
 ArrayType --> Deserializers
 class ArrayType
-Type <|-- ArrayType
+JavaType <|-- ArrayType
 PathSource --> List
 PathSource --> Lists
 PathSource --> IOResult
@@ -1566,6 +1562,12 @@ NodeListRule --> Folder
 NodeListRule --> ValueFolder
 class NodeListRule
 Rule <|-- NodeListRule
+Definition --> Option
+Definition --> List
+Definition --> MapNode
+Definition --> Node
+Definition --> Serializable
+class Definition
 Iters --> Option
 Iters --> EmptyHead
 Iters --> HeadedIter
@@ -1685,6 +1687,9 @@ ReturnNode --> Deserializers
 class ReturnNode
 FunctionSegmentValue <|-- ReturnNode
 FunctionSegment <|-- ReturnNode
+JavaType --> Serializable
+interface JavaType
+Serializable <|-- JavaType
 TypescriptStructureNode --> Node
 TypescriptStructureNode --> LocatingRule
 TypescriptStructureNode --> PrefixRule
@@ -1746,11 +1751,9 @@ Splitter --> Option
 Splitter --> Tuple2
 interface Splitter
 JavaDefinition --> Option
-JavaDefinition --> List
 JavaDefinition --> Lists
 JavaDefinition --> CompileResult
 JavaDefinition --> InitialDestructor
-JavaDefinition --> MapNode
 JavaDefinition --> Node
 JavaDefinition --> FilterRule
 JavaDefinition --> LocatingRule
@@ -1770,7 +1773,6 @@ JavaDefinition --> DelimitedFolder
 JavaDefinition --> DividingSplitter
 JavaDefinition --> Deserializers
 JavaDefinition --> OptionNodeListRule
-JavaDefinition --> Serializable
 JavaDefinition --> TypeSeparatorFolder
 JavaDefinition --> ValueFolder
 class JavaDefinition

@@ -1,11 +1,9 @@
 package magmac.app.lang.node;
 
 import magmac.api.Option;
-import magmac.api.collect.list.List;
 import magmac.api.collect.list.Lists;
 import magmac.app.compile.error.CompileResult;
 import magmac.app.compile.node.InitialDestructor;
-import magmac.app.compile.node.MapNode;
 import magmac.app.compile.node.Node;
 import magmac.app.compile.rule.FilterRule;
 import magmac.app.compile.rule.LocatingRule;
@@ -25,17 +23,16 @@ import magmac.app.compile.rule.fold.DelimitedFolder;
 import magmac.app.compile.rule.split.DividingSplitter;
 import magmac.app.lang.Deserializers;
 import magmac.app.lang.OptionNodeListRule;
-import magmac.app.lang.Serializable;
 import magmac.app.lang.TypeSeparatorFolder;
 import magmac.app.lang.ValueFolder;
 
-public record JavaDefinition(
-        String name,
-        JavaType type,
-        List<Modifier> modifiers,
-        Option<List<Annotation>> annotations,
-        Option<List<TypeParam>> typeParams
-) implements Parameter, Assignable, MethodHeader {
+public final class JavaDefinition implements Parameter, Assignable, MethodHeader {
+    private final Definition definition;
+
+    public JavaDefinition(Definition definition) {
+        this.definition = definition;
+    }
+
     public static CompileResult<JavaDefinition> deserializeError(Node node) {
         return JavaDefinition.complete(Deserializers.destruct(node));
     }
@@ -47,11 +44,7 @@ public record JavaDefinition(
                 .withNodeListOptionally("annotations", Annotation::deserialize)
                 .withNodeListOptionally("type-parameters", TypeParam::deserialize)
                 .complete((result) -> new JavaDefinition(
-                        result.left().left().left().left(),
-                        result.left().left().left().right(),
-                        result.left().left().right(),
-                        result.left().right(),
-                        result.right()));
+                        new Definition(result.left().left().left().left(), result.left().left().left().right(), result.left().left().right(), result.left().right(), result.right())));
     }
 
     public static Option<CompileResult<JavaDefinition>> deserialize(Node node) {
@@ -86,8 +79,6 @@ public record JavaDefinition(
 
     @Override
     public Node serialize() {
-        return new MapNode("definition")
-                .withString("name", name)
-                .withNodeAndSerializer("type", type, Serializable::serialize);
+        return this.definition.serialize();
     }
 }
