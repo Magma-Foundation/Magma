@@ -10,6 +10,6 @@ import { JavaRootSegment } from "../../magmac/app/lang/node/JavaRootSegment";
 import { Root } from "../../magmac/app/lang/node/Root";
 import { UnitSet } from "../../magmac/app/stage/unit/UnitSet";
 export class CompileApplication<R extends Serializable> {
-	CompileApplication : public;
-	parseAndStore : Option<Error>;
+	CompileApplication(compiler : Compiler, targets : Targets) : public;
+	parseAndStore(units : UnitSet<Root<JavaRootSegment>>) : Option<Error>;
 }

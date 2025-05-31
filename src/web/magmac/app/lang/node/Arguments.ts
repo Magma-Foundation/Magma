@@ -6,6 +6,6 @@ import { OrRule } from "../../../../magmac/app/compile/rule/OrRule";
 import { Rule } from "../../../../magmac/app/compile/rule/Rule";
 import { Deserializers } from "../../../../magmac/app/lang/Deserializers";
 export class Arguments {
-	deserialize : CompileResult<Argument>;
-	createArgumentsRule : Rule;
+	deserialize(node : Node) : CompileResult<Argument>;
+	createArgumentsRule(value : Rule) : Rule;
 }

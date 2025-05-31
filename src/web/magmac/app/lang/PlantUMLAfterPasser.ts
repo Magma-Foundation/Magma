@@ -18,13 +18,13 @@ import { ParseUnitImpl } from "../../../magmac/app/stage/unit/ParseUnitImpl";
 import { Passer } from "../../../magmac/app/stage/Passer";
 import { ParseState } from "../../../magmac/app/stage/parse/ParseState";
 export class PlantUMLAfterPasser {
-	createInherits : CompileResult<NodeList>;
-	getNodeListCompileResult : CompileResult<NodeList>;
-	createInherits0 : CompileResult<NodeList>;
-	stringifyType : CompileResult<String>;
-	replaceRootChild : CompileResult<NodeList>;
-	replaceRootChildren : CompileResult<NodeList>;
-	replaceChildrenToList : CompileResult<List<NodeList>>;
-	pass : ParseResult;
-	getTuple2CompileResult : CompileResult<ParseUnit<Node>>;
+	createInherits(child : Node, key : String) : CompileResult<NodeList>;
+	getNodeListCompileResult(child : Node, implemented : Node) : CompileResult<NodeList>;
+	createInherits0(type : Node, child : String) : CompileResult<NodeList>;
+	stringifyType(type : Node) : CompileResult<String>;
+	replaceRootChild(child : Node) : CompileResult<NodeList>;
+	replaceRootChildren(node : Node) : CompileResult<NodeList>;
+	replaceChildrenToList(node : Node) : CompileResult<List<NodeList>>;
+	pass(state : ParseState, node : Node) : ParseResult;
+	getTuple2CompileResult(state : ParseState, node : Node, values : NodeList) : CompileResult<ParseUnit<Node>>;
 }

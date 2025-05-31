@@ -10,7 +10,8 @@ import { StripRule } from "../../../../magmac/app/compile/rule/StripRule";
 import { SuffixRule } from "../../../../magmac/app/compile/rule/SuffixRule";
 import { TypeRule } from "../../../../magmac/app/compile/rule/TypeRule";
 import { CommonLang } from "../../../../magmac/app/lang/CommonLang";
+import { JavaLang } from "../../../../magmac/app/lang/JavaLang";
 import { ValueFolder } from "../../../../magmac/app/lang/ValueFolder";
 export class Structures {
-	createStructureRule : Rule;
+	createStructureRule(keyword : String) : Rule;
 }

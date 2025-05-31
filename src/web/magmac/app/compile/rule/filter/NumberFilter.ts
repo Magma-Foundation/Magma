@@ -1,4 +1,4 @@
 export class NumberFilter {
-	test : boolean;
-	createMessage : String;
+	test(input : String) : boolean;
+	createMessage() : String;
 }

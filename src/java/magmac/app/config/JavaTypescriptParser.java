@@ -85,22 +85,26 @@ class JavaTypescriptParser implements Parser<Root<JavaRootSegment>, TypescriptRo
     }
 
     private static TypescriptStructureNode parseClass(JavaStructureNode structureNode) {
-        StructureValue<JavaStructureMember> value = structureNode.value;
+        StructureValue<JavaType, JavaStructureMember> value = structureNode.value;
         List<TypescriptStructureMember> collect = value.members()
                 .iter()
                 .map(JavaTypescriptParser::parseStructureMember)
                 .collect(new ListCollector<>());
 
-        StructureValue<TypescriptStructureMember> structureNode1 = new StructureValue<>(
+        StructureValue<TypeScriptType, TypescriptStructureMember> structureNode1 = new StructureValue<>(
                 value.name(),
                 value.modifiers(),
                 collect,
                 value.maybeTypeParams(),
-                value.maybeExtended(),
-                value.maybeImplemented()
+                value.maybeExtended().map(JavaTypescriptParser::parseTypeList),
+                value.maybeImplemented().map(JavaTypescriptParser::parseTypeList)
         );
 
         return new TypescriptStructureNode(TypescriptStructureType.Class, structureNode1);
+    }
+
+    private static List<TypeScriptType> parseTypeList(List<JavaType> list) {
+        return list.iter().map(JavaTypescriptParser::parseType).collect(new ListCollector<>());
     }
 
     private static TypescriptStructureMember parseStructureMember(JavaStructureMember structureNode) {
@@ -166,12 +170,7 @@ class JavaTypescriptParser implements Parser<Root<JavaRootSegment>, TypescriptRo
 
     private static TypeScriptTemplateType parseTemplateType(JavaTemplateType type) {
         Symbol base = JavaTypescriptParser.parseBaseType(type.base);
-        List<TypeScriptType> collect = type.typeArguments
-                .arguments()
-                .iter()
-                .map(JavaTypescriptParser::parseType)
-                .collect(new ListCollector<>());
-
+        List<TypeScriptType> collect = JavaTypescriptParser.parseTypeList(type.typeArguments.arguments());
         return new TypeScriptTemplateType(base, new TypeArguments<>(collect));
     }
 

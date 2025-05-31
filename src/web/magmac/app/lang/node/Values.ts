@@ -17,10 +17,10 @@ import { CommonLang } from "../../../../magmac/app/lang/CommonLang";
 import { Deserializers } from "../../../../magmac/app/lang/Deserializers";
 import { LazyRule } from "../../../../magmac/app/lang/LazyRule";
 export class Values {
-	deserializeOrError : CompileResult<Value>;
-	deserialize : Option<CompileResult<Value>>;
-	getWrap : TypedDeserializer<Value>;
-	initValueRule : LazyRule;
-	getValueRules : List<Rule>;
-	createSwitchRule : TypeRule;
+	deserializeOrError(node : Node) : CompileResult<Value>;
+	deserialize(node : Node) : Option<CompileResult<Value>>;
+	getWrap(operator : Operator) : TypedDeserializer<Value>;
+	initValueRule(segment : Rule, value : LazyRule, lambdaInfix : String, definition : Rule) : LazyRule;
+	getValueRules(functionSegment : Rule, value : LazyRule, lambdaInfix : String, definition : Rule) : List<Rule>;
+	createSwitchRule(functionSegmentRule : Rule, value : Rule) : TypeRule;
 }

@@ -36,9 +36,6 @@ PlantUMLInherits --> StringRule
 PlantUMLInherits --> TypeRule
 class PlantUMLInherits
 PlantUMLRootSegment <|-- PlantUMLInherits
-Base --> Serializable
-interface Base
-Serializable <|-- Base
 Root --> List
 Root --> MapNode
 Root --> Node
@@ -458,6 +455,9 @@ class Console
 TypeScriptRootSegment --> Serializable
 interface TypeScriptRootSegment
 Serializable <|-- TypeScriptRootSegment
+JavaBase --> Serializable
+interface JavaBase
+Serializable <|-- JavaBase
 UnitSetCollector --> Collector
 UnitSetCollector --> MapUnitSet
 UnitSetCollector --> Unit
@@ -490,24 +490,6 @@ Head <|-- RangeHead
 Source --> IOResult
 Source --> Location
 interface Source
-TemplateType --> Option
-TemplateType --> List
-TemplateType --> Lists
-TemplateType --> CompileResult
-TemplateType --> MapNode
-TemplateType --> Node
-TemplateType --> LocatingRule
-TemplateType --> NodeListRule
-TemplateType --> NodeRule
-TemplateType --> OrRule
-TemplateType --> Rule
-TemplateType --> StripRule
-TemplateType --> SuffixRule
-TemplateType --> TypeRule
-TemplateType --> Deserializers
-class TemplateType
-JavaType <|-- TemplateType
-TypeScriptType <|-- TemplateType
 SimpleUnit --> CompileResult
 SimpleUnit --> Location
 SimpleUnit --> BiFunction
@@ -813,6 +795,17 @@ Some --> Predicate
 Some --> Supplier
 class Some
 Option <|-- Some
+JavaArrayType --> Option
+JavaArrayType --> CompileResult
+JavaArrayType --> Node
+JavaArrayType --> NodeRule
+JavaArrayType --> Rule
+JavaArrayType --> StripRule
+JavaArrayType --> SuffixRule
+JavaArrayType --> TypeRule
+JavaArrayType --> Deserializers
+class JavaArrayType
+JavaType <|-- JavaArrayType
 Deserializer --> CompileResult
 Deserializer --> Node
 Deserializer --> Serializable
@@ -875,8 +868,8 @@ JavaPlantUMLParser --> ListCollector
 JavaPlantUMLParser --> CompileResult
 JavaPlantUMLParser --> CompileResults
 JavaPlantUMLParser --> Location
-JavaPlantUMLParser --> ArrayType
-JavaPlantUMLParser --> Base
+JavaPlantUMLParser --> JavaArrayType
+JavaPlantUMLParser --> JavaBase
 JavaPlantUMLParser --> Root
 JavaPlantUMLParser --> JavaRootSegment
 JavaPlantUMLParser --> JavaNamespacedNode
@@ -893,7 +886,7 @@ JavaPlantUMLParser --> Segment
 JavaPlantUMLParser --> JavaStructureNode
 JavaPlantUMLParser --> JavaStructureType
 JavaPlantUMLParser --> Symbol
-JavaPlantUMLParser --> TemplateType
+JavaPlantUMLParser --> JavaTemplateType
 JavaPlantUMLParser --> JavaType
 JavaPlantUMLParser --> VariadicType
 JavaPlantUMLParser --> Whitespace
@@ -989,7 +982,7 @@ TypescriptLang --> Modifier
 TypescriptLang --> Parameters
 TypescriptLang --> StructureStatement
 TypescriptLang --> Symbols
-TypescriptLang --> TemplateType
+TypescriptLang --> JavaTemplateType
 TypescriptLang --> TypeScriptImport
 TypescriptLang --> TypescriptStructureNode
 TypescriptLang --> Values
@@ -1068,6 +1061,7 @@ interface LazyRule
 Rule <|-- LazyRule
 JavaTypescriptParser --> List
 JavaTypescriptParser --> Lists
+JavaTypescriptParser --> Joiner
 JavaTypescriptParser --> ListCollector
 JavaTypescriptParser --> CompileResult
 JavaTypescriptParser --> CompileResultCollector
@@ -1078,6 +1072,8 @@ JavaTypescriptParser --> ArrayType
 JavaTypescriptParser --> Constructor
 JavaTypescriptParser --> Definition
 JavaTypescriptParser --> EnumValues
+JavaTypescriptParser --> JavaArrayType
+JavaTypescriptParser --> JavaBase
 JavaTypescriptParser --> JavaDefinition
 JavaTypescriptParser --> JavaMethod
 JavaTypescriptParser --> JavaMethodHeader
@@ -1086,18 +1082,24 @@ JavaTypescriptParser --> JavaParameter
 JavaTypescriptParser --> JavaRootSegment
 JavaTypescriptParser --> JavaStructureMember
 JavaTypescriptParser --> JavaStructureNode
+JavaTypescriptParser --> JavaTemplateType
 JavaTypescriptParser --> JavaType
 JavaTypescriptParser --> ParameterizedMethodHeader
+JavaTypescriptParser --> QualifiedType
 JavaTypescriptParser --> Root
 JavaTypescriptParser --> Segment
 JavaTypescriptParser --> StructureStatement
 JavaTypescriptParser --> StructureValue
+JavaTypescriptParser --> Symbol
+JavaTypescriptParser --> TypeArguments
 JavaTypescriptParser --> TypeScriptDefinition
 JavaTypescriptParser --> TypeScriptImport
 JavaTypescriptParser --> TypeScriptMethodHeader
 JavaTypescriptParser --> TypeScriptParameter
 JavaTypescriptParser --> TypeScriptRootSegment
+JavaTypescriptParser --> TypeScriptTemplateType
 JavaTypescriptParser --> TypeScriptType
+JavaTypescriptParser --> TypescriptArrayType
 JavaTypescriptParser --> TypescriptMethod
 JavaTypescriptParser --> TypescriptRoot
 JavaTypescriptParser --> TypescriptStructureMember
@@ -1125,6 +1127,10 @@ NodeList --> Iter
 NodeList --> CompileResult
 NodeList --> Function
 interface NodeList
+TypescriptArrayType --> MapNode
+TypescriptArrayType --> Node
+class TypescriptArrayType
+TypeScriptType <|-- TypescriptArrayType
 LastSelector --> Option
 LastSelector --> Tuple2
 LastSelector --> List
@@ -1251,6 +1257,8 @@ NumberNode --> TypeRule
 NumberNode --> Deserializers
 class NumberNode
 Value <|-- NumberNode
+TypeArguments --> List
+class TypeArguments
 Option --> Consumer
 Option --> Function
 Option --> Predicate
@@ -1317,6 +1325,10 @@ MutableDivideState --> Lists
 MutableDivideState --> Iter
 class MutableDivideState
 DivideState <|-- MutableDivideState
+TypeScriptTemplateType --> MapNode
+TypeScriptTemplateType --> Node
+class TypeScriptTemplateType
+TypeScriptType <|-- TypeScriptTemplateType
 CompileError --> Error
 interface CompileError
 Error <|-- CompileError
@@ -1336,7 +1348,7 @@ QualifiedType --> TypeRule
 QualifiedType --> DelimitedFolder
 QualifiedType --> Deserializers
 class QualifiedType
-Base <|-- QualifiedType
+JavaBase <|-- QualifiedType
 TypeSeparatorFolder --> DivideState
 TypeSeparatorFolder --> Folder
 class TypeSeparatorFolder
@@ -1413,6 +1425,22 @@ InvocationFolder --> DivideState
 InvocationFolder --> Folder
 class InvocationFolder
 Folder <|-- InvocationFolder
+JavaTemplateType --> Option
+JavaTemplateType --> Lists
+JavaTemplateType --> CompileResult
+JavaTemplateType --> MapNode
+JavaTemplateType --> Node
+JavaTemplateType --> LocatingRule
+JavaTemplateType --> NodeListRule
+JavaTemplateType --> NodeRule
+JavaTemplateType --> OrRule
+JavaTemplateType --> Rule
+JavaTemplateType --> StripRule
+JavaTemplateType --> SuffixRule
+JavaTemplateType --> TypeRule
+JavaTemplateType --> Deserializers
+class JavaTemplateType
+JavaType <|-- JavaTemplateType
 JavaLang --> Lists
 JavaLang --> FilterRule
 JavaLang --> LocatingRule
@@ -1494,7 +1522,7 @@ Symbol --> Node
 class Symbol
 JavaType <|-- Symbol
 Value <|-- Symbol
-Base <|-- Symbol
+JavaBase <|-- Symbol
 TypeScriptType <|-- Symbol
 NodeContext --> Node
 class NodeContext
@@ -1541,19 +1569,7 @@ LexingStage --> UnitSet
 LexingStage --> Function
 class LexingStage
 enum AccessType
-ArrayType --> Option
-ArrayType --> CompileResult
-ArrayType --> MapNode
-ArrayType --> Node
-ArrayType --> NodeRule
-ArrayType --> Rule
-ArrayType --> StripRule
-ArrayType --> SuffixRule
-ArrayType --> TypeRule
-ArrayType --> Deserializers
 class ArrayType
-JavaType <|-- ArrayType
-TypeScriptType <|-- ArrayType
 PathSource --> List
 PathSource --> Lists
 PathSource --> IOResult
@@ -1620,13 +1636,13 @@ Definition --> Node
 Definition --> Deserializers
 Definition --> Serializable
 class Definition
-Serializable <|-- Definition
 Iters --> Option
 Iters --> EmptyHead
 Iters --> HeadedIter
 Iters --> RangeHead
 Iters --> SingleHead
 class Iters
+TypeScriptDefinition --> MapNode
 TypeScriptDefinition --> Node
 class TypeScriptDefinition
 TypeScriptParameter <|-- TypeScriptDefinition
@@ -1745,9 +1761,8 @@ ReturnNode --> Deserializers
 class ReturnNode
 FunctionSegmentValue <|-- ReturnNode
 FunctionSegment <|-- ReturnNode
-JavaType --> Serializable
 interface JavaType
-Serializable <|-- JavaType
+TypescriptStructureNode --> MapNode
 TypescriptStructureNode --> Node
 TypescriptStructureNode --> LocatingRule
 TypescriptStructureNode --> PrefixRule
@@ -1757,6 +1772,7 @@ TypescriptStructureNode --> SuffixRule
 TypescriptStructureNode --> TypeRule
 TypescriptStructureNode --> CommonLang
 TypescriptStructureNode --> JavaLang
+TypescriptStructureNode --> Serializable
 TypescriptStructureNode --> TypescriptLang
 class TypescriptStructureNode
 TypeScriptRootSegment <|-- TypescriptStructureNode

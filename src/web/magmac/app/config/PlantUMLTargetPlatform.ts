@@ -12,10 +12,10 @@ import { RuleGenerator } from "../../../magmac/app/stage/generate/RuleGenerator"
 import { Path } from "../../../java/nio/file/Path";
 import { Paths } from "../../../java/nio/file/Paths";
 export class PlantUMLTargetPlatform {
-	createTargetPath : Path;
-	createExtension : String;
-	createRule : Rule;
-	createCompiler : Compiler;
-	createApplication0 : Application;
-	createApplication : Application;
+	createTargetPath() : Path;
+	createExtension() : String;
+	createRule() : Rule;
+	createCompiler() : Compiler;
+	createApplication0(targets : Targets) : Application;
+	createApplication() : Application;
 }

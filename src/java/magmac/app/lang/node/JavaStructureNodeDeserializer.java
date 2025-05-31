@@ -33,7 +33,7 @@ public record JavaStructureNodeDeserializer(JavaStructureType type) implements T
             JavaStructureType type,
             Tuple2<Tuple2<Tuple2<Tuple2<Tuple2<Tuple2<Tuple2<String, List<Modifier>>, List<JavaStructureMember>>, Option<List<JavaType>>>, Option<List<TypeParam>>>, Option<List<JavaParameter>>>, Option<List<JavaType>>>, Option<List<JavaType>>> tuple) {
         return new JavaStructureNode(type,
-                new StructureValue<JavaStructureMember>(tuple.left().left().left().left().left().left().left(), tuple.left().left().left().left().left().left().right(), tuple.left().left().left().left().left().right(), tuple.left().left().left().right(), tuple.left().right(), tuple.left().left().left().left().right()), tuple.left().left().right(),
+                new StructureValue<JavaType, JavaStructureMember>(tuple.left().left().left().left().left().left().left(), tuple.left().left().left().left().left().left().right(), tuple.left().left().left().left().left().right(), tuple.left().left().left().right(), tuple.left().right(), tuple.left().left().left().left().right()), tuple.left().left().right(),
                 tuple.right()
         );
     }

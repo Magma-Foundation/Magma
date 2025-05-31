@@ -26,8 +26,8 @@ public final class TypescriptLang {
         return new TypeRule("root", CommonLang.Statements("children", new OrRule(Lists.of(
                 Whitespace.createWhitespaceRule(),
                 TypeScriptImport.createImportRule(),
-                TypescriptStructureNode.createClassRule("class"),
-                TypescriptStructureNode.createClassRule("interface")
+                TypescriptStructureNode.createStructureRule("class"),
+                TypescriptStructureNode.createStructureRule("interface")
         ))));
     }
 

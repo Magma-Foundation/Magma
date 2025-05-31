@@ -3,5 +3,5 @@ import { CompileResult } from "../../../../magmac/app/compile/error/CompileResul
 import { Node } from "../../../../magmac/app/compile/node/Node";
 import { Deserializers } from "../../../../magmac/app/lang/Deserializers";
 export class Else {
-	deserialize : Option<CompileResult<Else>>;
+	deserialize(node : Node) : Option<CompileResult<Else>>;
 }

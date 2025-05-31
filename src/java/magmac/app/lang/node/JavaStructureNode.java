@@ -7,13 +7,13 @@ import magmac.app.compile.node.Node;
 
 public final class JavaStructureNode implements JavaRootSegment {
     private final JavaStructureType type;
-    public final StructureValue<JavaStructureMember> value;
+    public final StructureValue<JavaType, JavaStructureMember> value;
     private final Option<List<JavaParameter>> parameters;
     private final Option<List<JavaType>> variants;
 
     public JavaStructureNode(
             JavaStructureType type,
-            StructureValue<JavaStructureMember> structureNode,
+            StructureValue<JavaType, JavaStructureMember> structureNode,
             Option<List<JavaParameter>> parameters,
             Option<List<JavaType>> variants
     ) {

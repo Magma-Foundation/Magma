@@ -13,17 +13,17 @@ import { Modifier } from "../../../magmac/app/lang/node/Modifier";
 import { Parameters } from "../../../magmac/app/lang/node/Parameters";
 import { StructureStatement } from "../../../magmac/app/lang/node/StructureStatement";
 import { Symbols } from "../../../magmac/app/lang/node/Symbols";
-import { TemplateType } from "../../../magmac/app/lang/node/TemplateType";
+import { JavaTemplateType } from "../../../magmac/app/lang/node/JavaTemplateType";
 import { TypeScriptImport } from "../../../magmac/app/lang/node/TypeScriptImport";
 import { TypescriptStructureNode } from "../../../magmac/app/lang/node/TypescriptStructureNode";
 import { Values } from "../../../magmac/app/lang/node/Values";
 import { Whitespace } from "../../../magmac/app/lang/node/Whitespace";
 export class TypescriptLang {
-	createRule : Rule;
-	createStructureMemberRule : Rule;
-	createMethodRule : Rule;
-	createConstructorRule : Rule;
-	createDefinitionRule : Rule;
-	createTypeRule : Rule;
-	createArrayRule : TypeRule;
+	createRule() : Rule;
+	createStructureMemberRule() : Rule;
+	createMethodRule(definition : Rule, valueLazy : LazyRule) : Rule;
+	createConstructorRule(definition : Rule) : Rule;
+	createDefinitionRule() : Rule;
+	createTypeRule() : Rule;
+	createArrayRule(orRule : LazyRule) : TypeRule;
 }

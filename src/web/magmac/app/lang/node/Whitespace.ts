@@ -8,7 +8,7 @@ import { StripRule } from "../../../../magmac/app/compile/rule/StripRule";
 import { TypeRule } from "../../../../magmac/app/compile/rule/TypeRule";
 import { Deserializers } from "../../../../magmac/app/lang/Deserializers";
 export class Whitespace {
-	deserialize : Option<CompileResult<Whitespace>>;
-	createWhitespaceRule : Rule;
-	serialize : Node;
+	deserialize(node : Node) : Option<CompileResult<Whitespace>>;
+	createWhitespaceRule() : Rule;
+	serialize() : Node;
 }
