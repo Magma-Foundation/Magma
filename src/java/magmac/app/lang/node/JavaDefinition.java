@@ -4,8 +4,8 @@ import magmac.api.Option;
 import magmac.app.compile.error.CompileResult;
 import magmac.app.compile.node.Node;
 
-public final class JavaDefinition implements Parameter, Assignable, MethodHeader {
-    private final Definition<JavaType> definition;
+public final class JavaDefinition implements Parameter, Assignable, JavaMethodHeader {
+    public final Definition<JavaType> definition;
 
     public JavaDefinition(Definition<JavaType> definition) {
         this.definition = definition;

@@ -11,7 +11,7 @@ import magmac.app.compile.rule.SuffixRule;
 import magmac.app.compile.rule.TypeRule;
 import magmac.app.lang.Deserializers;
 
-public record ArrayType(JavaType type) implements JavaType {
+public record ArrayType(JavaType type) implements JavaType, TypeScriptType {
     public static Rule createArrayRule(Rule rule) {
         NodeRule child = new NodeRule("child", rule);
         return new TypeRule("array", new StripRule(new SuffixRule(child, "[]")));

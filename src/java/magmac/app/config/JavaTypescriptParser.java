@@ -6,28 +6,37 @@ import magmac.api.iter.collect.ListCollector;
 import magmac.app.compile.error.CompileResult;
 import magmac.app.compile.error.CompileResultCollector;
 import magmac.app.compile.error.CompileResults;
-import magmac.app.lang.node.ParameterizedMethodHeader;
 import magmac.app.io.Location;
 import magmac.app.io.sources.UnitSetCollector;
+import magmac.app.lang.node.ArrayType;
+import magmac.app.lang.node.Constructor;
+import magmac.app.lang.node.Definition;
 import magmac.app.lang.node.EnumValues;
+import magmac.app.lang.node.JavaDefinition;
 import magmac.app.lang.node.JavaMethod;
+import magmac.app.lang.node.JavaMethodHeader;
 import magmac.app.lang.node.JavaNamespacedNode;
 import magmac.app.lang.node.JavaRootSegment;
 import magmac.app.lang.node.JavaStructureMember;
 import magmac.app.lang.node.JavaStructureNode;
-import magmac.app.lang.node.MethodHeader;
+import magmac.app.lang.node.JavaType;
 import magmac.app.lang.node.Parameter;
+import magmac.app.lang.node.ParameterizedMethodHeader;
 import magmac.app.lang.node.Root;
 import magmac.app.lang.node.Segment;
 import magmac.app.lang.node.StructureStatement;
 import magmac.app.lang.node.StructureValue;
+import magmac.app.lang.node.TypeScriptDefinition;
 import magmac.app.lang.node.TypeScriptImport;
+import magmac.app.lang.node.TypeScriptMethodHeader;
 import magmac.app.lang.node.TypeScriptRootSegment;
+import magmac.app.lang.node.TypeScriptType;
 import magmac.app.lang.node.TypescriptMethod;
 import magmac.app.lang.node.TypescriptRoot;
 import magmac.app.lang.node.TypescriptStructureMember;
 import magmac.app.lang.node.TypescriptStructureNode;
 import magmac.app.lang.node.TypescriptStructureType;
+import magmac.app.lang.node.VariadicType;
 import magmac.app.lang.node.Whitespace;
 import magmac.app.stage.parse.Parser;
 import magmac.app.stage.unit.SimpleUnit;
@@ -95,13 +104,25 @@ class JavaTypescriptParser implements Parser<Root<JavaRootSegment>, TypescriptRo
 
     private static TypescriptStructureMember parseMethod(JavaMethod methodNode) {
         List<Parameter> parameters = methodNode.parameters();
-        MethodHeader header1 = methodNode.header();
-        MethodHeader header = JavaTypescriptParser.parseMethodHeader(header1, parameters);
-        return new TypescriptMethod(header);
+        JavaMethodHeader header1 = methodNode.header();
+        TypeScriptMethodHeader header = JavaTypescriptParser.parseMethodHeader(header1);
+        return new TypescriptMethod(new ParameterizedMethodHeader(header, parameters));
     }
 
-    private static MethodHeader parseMethodHeader(MethodHeader header, List<Parameter> parameters) {
-        return new ParameterizedMethodHeader(header, parameters);
+    private static TypeScriptMethodHeader parseMethodHeader(JavaMethodHeader header) {
+        return switch (header) {
+            case Constructor constructor -> constructor;
+            case JavaDefinition javaDefinition -> new TypeScriptDefinition(JavaTypescriptParser.parseDefinition(javaDefinition.definition));
+        };
+    }
+
+    private static Definition<TypeScriptType> parseDefinition(Definition<JavaType> definition) {
+        return switch (definition.type()) {
+            case TypeScriptType type -> definition.withType(type);
+            case VariadicType variadicType -> definition
+                    .withName("..." + definition.name())
+                    .withType(new ArrayType(variadicType.child()));
+        };
     }
 
     private static TypeScriptRootSegment parseNamespaced(Location location, JavaNamespacedNode namespaced) {

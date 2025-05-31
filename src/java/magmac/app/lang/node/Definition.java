@@ -10,11 +10,11 @@ import magmac.app.lang.Deserializers;
 import magmac.app.lang.Serializable;
 
 public record Definition<T extends Serializable>(
-        String name,
-        T type,
-        List<Modifier> modifiers,
         Option<List<Annotation>> maybeAnnotations,
-        Option<List<TypeParam>> typeParams
+        List<Modifier> modifiers,
+        String name,
+        Option<List<TypeParam>> maybeTypeParams,
+        T type
 ) implements Serializable {
     static CompileResult<Definition<JavaType>> deserialize0(InitialDestructor deserialize) {
         return deserialize.withString("name")
@@ -22,11 +22,11 @@ public record Definition<T extends Serializable>(
                 .withNodeList("modifiers", Modifier::deserialize)
                 .withNodeListOptionally("annotations", Annotation::deserialize)
                 .withNodeListOptionally("type-parameters", TypeParam::deserialize)
-                .complete((result) -> new Definition<JavaType>(result.left().left().left().left(), result.left().left().left().right(), result.left().left().right(), result.left().right(), result.right()));
+                .complete((result) -> new Definition<JavaType>(result.left().right(), result.left().left().right(), result.left().left().left().left(), result.right(), result.left().left().left().right()));
     }
 
     static CompileResult<Definition<JavaType>> deserialize(Node node) {
-        return deserialize0(Deserializers.destruct(node));
+        return Definition.deserialize0(Deserializers.destruct(node));
     }
 
     static Option<CompileResult<Definition<JavaType>>> deserializeWithType(Node node) {
@@ -39,5 +39,13 @@ public record Definition<T extends Serializable>(
         return new MapNode("definition")
                 .withString("name", this.name)
                 .withNodeSerialized("type", this.type);
+    }
+
+    public <T extends Serializable> Definition<T> withType(T newType) {
+        return new Definition<T>(this.maybeAnnotations, this.modifiers, this.name, this.maybeTypeParams, newType);
+    }
+
+    public Definition<T> withName(String name) {
+        return new Definition<>(this.maybeAnnotations, this.modifiers, name, this.maybeTypeParams, this.type);
     }
 }

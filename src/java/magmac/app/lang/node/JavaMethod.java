@@ -23,13 +23,13 @@ import magmac.app.lang.JavaLang;
 import magmac.app.lang.OptionNodeListRule;
 
 public record JavaMethod(
-        MethodHeader header,
+        JavaMethodHeader header,
         List<Parameter> parameters,
         Option<List<FunctionSegment>> maybeChildren
 ) implements JavaStructureMember {
     public static Option<CompileResult<JavaStructureMember>> deserialize(Node node) {
         return Deserializers.deserializeWithType(node, "method").map((InitialDestructor deserializer) -> deserializer
-                .withNode("header", MethodHeader::deserializeError)
+                .withNode("header", JavaMethodHeader::deserializeError)
                 .withNodeListOptionally("children", FunctionSegment::deserialize)
                 .withNodeList("parameters", Parameters::deserialize)
                 .complete((tuple) -> new JavaMethod(tuple.left().left(), tuple.right(), tuple.left().right()))

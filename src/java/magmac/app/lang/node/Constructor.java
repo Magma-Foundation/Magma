@@ -6,10 +6,10 @@ import magmac.app.compile.node.MapNode;
 import magmac.app.compile.node.Node;
 import magmac.app.lang.Deserializers;
 
-public final class JavaConstructor implements MethodHeader {
-    public static Option<CompileResult<MethodHeader>> deserialize(Node node) {
+public final class Constructor implements JavaMethodHeader, TypeScriptMethodHeader {
+    public static Option<CompileResult<JavaMethodHeader>> deserialize(Node node) {
         return Deserializers.deserializeWithType(node, "constructor")
-                .map(constructor -> constructor.complete(JavaConstructor::new));
+                .map(constructor -> constructor.complete(Constructor::new));
     }
 
     @Override
