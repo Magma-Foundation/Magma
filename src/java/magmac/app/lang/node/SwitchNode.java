@@ -4,11 +4,11 @@ import magmac.api.Option;
 import magmac.app.compile.error.CompileResult;
 import magmac.app.compile.node.MapNode;
 import magmac.app.compile.node.Node;
-import magmac.app.lang.Deserializers;
+import magmac.app.lang.Destructors;
 
 public record SwitchNode() implements Value {
     public static Option<CompileResult<Value>> deserialize(Node node) {
-        return Deserializers.deserializeWithType("switch", node).map(deserializer -> {
+        return Destructors.destructWithType("switch", node).map(deserializer -> {
             return deserializer.complete(SwitchNode::new);
         });
     }

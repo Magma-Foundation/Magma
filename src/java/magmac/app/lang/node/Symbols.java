@@ -8,11 +8,11 @@ import magmac.app.compile.rule.Rule;
 import magmac.app.compile.rule.StringRule;
 import magmac.app.compile.rule.StripRule;
 import magmac.app.compile.rule.TypeRule;
-import magmac.app.lang.Deserializers;
+import magmac.app.lang.Destructors;
 
 public final class Symbols {
     public static Option<CompileResult<Symbol>> deserialize(Node node) {
-        return Deserializers.deserializeWithType("symbol", node).map(deserializer -> deserializer.withString("value")
+        return Destructors.destructWithType("symbol", node).map(deserializer -> deserializer.withString("value")
                 .complete(Symbol::new)
                 .mapValue(type -> type));
     }

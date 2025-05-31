@@ -10,11 +10,11 @@ import magmac.app.compile.rule.NodeRule;
 import magmac.app.compile.rule.OrRule;
 import magmac.app.compile.rule.Rule;
 import magmac.app.compile.rule.TypeRule;
-import magmac.app.lang.Deserializers;
+import magmac.app.lang.Destructors;
 
 record AssignmentNode(Assignable assignable, Value value) implements FunctionSegmentValue {
     public static Option<CompileResult<FunctionSegmentValue>> deserialize(Node node) {
-        return Deserializers.deserializeWithType("assignment", node).map(deserializer -> deserializer
+        return Destructors.destructWithType("assignment", node).map(deserializer -> deserializer
                 .withNode("destination", Assignables::deserializeError)
                 .withNode("source", Values::deserializeOrError)
                 .complete(tuple -> new AssignmentNode(tuple.left(), tuple.right())));

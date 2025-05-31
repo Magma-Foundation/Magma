@@ -9,11 +9,11 @@ import magmac.app.compile.rule.Rule;
 import magmac.app.compile.rule.StripRule;
 import magmac.app.compile.rule.SuffixRule;
 import magmac.app.compile.rule.TypeRule;
-import magmac.app.lang.Deserializers;
+import magmac.app.lang.Destructors;
 
 record Conditional(ConditionalType type, Value condition) implements BlockHeader {
     public static Option<CompileResult<Conditional>> deserialize(ConditionalType type, Node node) {
-        return Deserializers.deserializeWithType(type.name().toLowerCase(), node).map(deserializer -> deserializer.withNode("condition", Values::deserializeOrError)
+        return Destructors.destructWithType(type.name().toLowerCase(), node).map(deserializer -> deserializer.withNode("condition", Values::deserializeOrError)
                 .complete(value -> new Conditional(type, value)));
     }
 

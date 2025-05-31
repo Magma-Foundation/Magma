@@ -17,7 +17,7 @@ import magmac.app.compile.rule.StripRule;
 import magmac.app.compile.rule.SuffixRule;
 import magmac.app.compile.rule.TypeRule;
 import magmac.app.lang.CommonLang;
-import magmac.app.lang.Deserializers;
+import magmac.app.lang.Destructors;
 import magmac.app.lang.JavaLang;
 import magmac.app.lang.OptionNodeListRule;
 
@@ -27,7 +27,7 @@ public record JavaMethod(
         Option<List<FunctionSegment>> maybeChildren
 ) implements JavaStructureMember {
     public static Option<CompileResult<JavaStructureMember>> deserialize(Node node) {
-        return Deserializers.deserializeWithType("method", node).map((InitialDestructor deserializer) -> deserializer
+        return Destructors.destructWithType("method", node).map((InitialDestructor deserializer) -> deserializer
                 .withNode("header", JavaMethodHeader::deserializeError)
                 .withNodeListOptionally("children", FunctionSegment::deserialize)
                 .withNodeList("parameters", Parameters::deserialize)

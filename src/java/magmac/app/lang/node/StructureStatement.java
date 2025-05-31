@@ -10,12 +10,12 @@ import magmac.app.compile.rule.Rule;
 import magmac.app.compile.rule.StripRule;
 import magmac.app.compile.rule.SuffixRule;
 import magmac.app.compile.rule.TypeRule;
-import magmac.app.lang.Deserializers;
+import magmac.app.lang.Destructors;
 import magmac.app.lang.LazyRule;
 
 public record StructureStatement() implements JavaStructureMember {
     public static Option<CompileResult<JavaStructureMember>> deserialize(Node node) {
-        return Deserializers.deserializeWithType("structure-statement", node).map(deserializer -> deserializer.complete(StructureStatement::new));
+        return Destructors.destructWithType("structure-statement", node).map(deserializer -> deserializer.complete(StructureStatement::new));
     }
 
     public static Rule createStructureStatementRule(Rule definitionRule, LazyRule valueRule) {

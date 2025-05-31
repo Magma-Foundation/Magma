@@ -9,11 +9,11 @@ import magmac.app.compile.rule.NodeListRule;
 import magmac.app.compile.rule.Rule;
 import magmac.app.compile.rule.TypeRule;
 import magmac.app.compile.rule.fold.DelimitedFolder;
-import magmac.app.lang.Deserializers;
+import magmac.app.lang.Destructors;
 
 public record QualifiedType(List<Segment> segments) implements JavaBase {
     public static Option<CompileResult<JavaBase>> deserializeQualified(Node node) {
-        return Deserializers.deserializeWithType("qualified", node).map(deserializer -> deserializer.withNodeList("segments", Segment::deserialize).complete(QualifiedType::new));
+        return Destructors.destructWithType("qualified", node).map(deserializer -> deserializer.withNodeList("segments", Segment::deserialize).complete(QualifiedType::new));
     }
 
     public static TypeRule createQualifiedRule() {

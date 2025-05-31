@@ -8,8 +8,8 @@ import magmac.app.compile.rule.NodeRule;
 import magmac.app.compile.rule.PrefixRule;
 import magmac.app.compile.rule.StripRule;
 import magmac.app.compile.rule.TypeRule;
+import magmac.app.lang.Destructors;
 import magmac.app.lang.LazyRule;
-import magmac.app.lang.Deserializers;
 
 record Not(Value value) implements Value {
     public static TypeRule createNotRule(LazyRule value) {
@@ -17,7 +17,7 @@ record Not(Value value) implements Value {
     }
 
     public static Option<CompileResult<Value>> deserialize(Node node) {
-        return Deserializers.deserializeWithType("not", node).map(deserializer -> deserializer.withNode("child", Values::deserializeOrError)
+        return Destructors.destructWithType("not", node).map(deserializer -> deserializer.withNode("child", Values::deserializeOrError)
                 .complete(Not::new));
     }
 

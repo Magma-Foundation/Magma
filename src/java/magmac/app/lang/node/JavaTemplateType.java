@@ -13,6 +13,7 @@ import magmac.app.compile.rule.StripRule;
 import magmac.app.compile.rule.SuffixRule;
 import magmac.app.compile.rule.TypeRule;
 import magmac.app.lang.Deserializers;
+import magmac.app.lang.Destructors;
 
 public final class JavaTemplateType implements JavaType {
     public final JavaBase base;
@@ -24,7 +25,7 @@ public final class JavaTemplateType implements JavaType {
     }
 
     public static Option<CompileResult<JavaTemplateType>> deserialize(Node node) {
-        return Deserializers.deserializeWithType("template", node).map(deserializer -> deserializer
+        return Destructors.destructWithType("template", node).map(deserializer -> deserializer
                 .withNode("base", JavaTemplateType::deserializeBase)
                 .withNodeList("arguments", Types::deserialize)
                 .complete(tuple -> new JavaTemplateType(tuple.left(), new TypeArguments<JavaType>(tuple.right()))));

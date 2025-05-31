@@ -16,12 +16,12 @@ import magmac.app.compile.rule.divide.FoldingDivider;
 import magmac.app.compile.rule.split.DividingSplitter;
 import magmac.app.lang.BlockFolder;
 import magmac.app.lang.CommonLang;
+import magmac.app.lang.Destructors;
 import magmac.app.lang.LazyRule;
-import magmac.app.lang.Deserializers;
 
 record Block(List<FunctionSegment> segments, BlockHeader header) implements FunctionSegment {
     public static Option<CompileResult<Block>> deserialize(Node node) {
-        return Deserializers.deserializeWithType("block", node).map(deserializer -> deserializer
+        return Destructors.destructWithType("block", node).map(deserializer -> deserializer
                 .withNodeList("children", FunctionSegment::deserialize)
                 .withNode("header", BlockHeader::deserialize)
                 .complete(tuple -> new Block(tuple.left(), tuple.right())));

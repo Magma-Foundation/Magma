@@ -9,11 +9,11 @@ import magmac.app.compile.rule.PrefixRule;
 import magmac.app.compile.rule.Rule;
 import magmac.app.compile.rule.StripRule;
 import magmac.app.compile.rule.TypeRule;
-import magmac.app.lang.Deserializers;
+import magmac.app.lang.Destructors;
 
 record ReturnNode(Value child) implements FunctionSegmentValue, FunctionSegment {
     public static Option<CompileResult<ReturnNode>> deserialize(Node node) {
-        return Deserializers.deserializeWithType("return", node)
+        return Destructors.destructWithType("return", node)
                 .map(deserializer -> deserializer.withNode("child", Values::deserializeOrError).complete(ReturnNode::new));
     }
 

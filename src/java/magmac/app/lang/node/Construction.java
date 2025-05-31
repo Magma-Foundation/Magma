@@ -9,11 +9,11 @@ import magmac.app.compile.rule.PrefixRule;
 import magmac.app.compile.rule.Rule;
 import magmac.app.compile.rule.StripRule;
 import magmac.app.compile.rule.TypeRule;
-import magmac.app.lang.Deserializers;
+import magmac.app.lang.Destructors;
 
 record Construction(JavaType type) implements Caller {
     public static Option<CompileResult<Caller>> deserialize(Node node) {
-        return Deserializers.deserializeWithType("construction", node).map(deserializer -> deserializer.withNode("type", Types::deserialize).complete(Construction::new));
+        return Destructors.destructWithType("construction", node).map(deserializer -> deserializer.withNode("type", Types::deserialize).complete(Construction::new));
     }
 
     public static Rule createConstructionRule() {

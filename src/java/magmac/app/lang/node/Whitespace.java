@@ -8,7 +8,7 @@ import magmac.app.compile.rule.ExactRule;
 import magmac.app.compile.rule.Rule;
 import magmac.app.compile.rule.StripRule;
 import magmac.app.compile.rule.TypeRule;
-import magmac.app.lang.Deserializers;
+import magmac.app.lang.Destructors;
 
 public final class Whitespace implements
         Argument,
@@ -20,7 +20,7 @@ public final class Whitespace implements
         TypescriptStructureMember,
         TypeScriptParameter {
     public static Option<CompileResult<Whitespace>> deserialize(Node node) {
-        return Deserializers.deserializeWithType("whitespace", node).map(deserializer -> deserializer.complete(Whitespace::new));
+        return Destructors.destructWithType("whitespace", node).map(deserializer -> deserializer.complete(Whitespace::new));
     }
 
     public static Rule createWhitespaceRule() {

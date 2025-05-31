@@ -1,8 +1,6 @@
 package magmac.app.lang;
 
-import magmac.api.None;
 import magmac.api.Option;
-import magmac.api.Some;
 import magmac.api.collect.list.List;
 import magmac.api.collect.list.Lists;
 import magmac.api.iter.Iters;
@@ -10,8 +8,6 @@ import magmac.app.compile.error.CompileResult;
 import magmac.app.compile.error.CompileResults;
 import magmac.app.compile.error.context.NodeContext;
 import magmac.app.compile.error.error.CompileError;
-import magmac.app.compile.node.InitialDestructor;
-import magmac.app.compile.node.InitialDestructorImpl;
 import magmac.app.compile.node.Node;
 import magmac.app.error.ImmutableCompileError;
 import magmac.app.lang.node.TypedDeserializer;
@@ -38,15 +34,4 @@ public final class Deserializers {
         return node -> deserializer.deserialize(node).map(result -> result.mapValue(value -> value));
     }
 
-    public static Option<InitialDestructor> deserializeWithType(String type, Node node) {
-        if (node.is(type)) {
-            return new Some<>(new InitialDestructorImpl(node));
-        }
-
-        return new None<>();
-    }
-
-    public static InitialDestructor destruct(Node node) {
-        return new InitialDestructorImpl(node);
-    }
 }

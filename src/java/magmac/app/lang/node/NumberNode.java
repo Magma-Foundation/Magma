@@ -9,11 +9,11 @@ import magmac.app.compile.rule.Rule;
 import magmac.app.compile.rule.StringRule;
 import magmac.app.compile.rule.StripRule;
 import magmac.app.compile.rule.TypeRule;
-import magmac.app.lang.Deserializers;
+import magmac.app.lang.Destructors;
 
 record NumberNode(String value) implements Value {
     public static Option<CompileResult<Value>> deserialize(Node node) {
-        return Deserializers.deserializeWithType("number", node).map(deserializer -> deserializer.withString("value").complete(NumberNode::new));
+        return Destructors.destructWithType("number", node).map(deserializer -> deserializer.withString("value").complete(NumberNode::new));
     }
 
     public static Rule createNumberRule() {

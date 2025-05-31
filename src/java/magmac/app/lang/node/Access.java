@@ -8,12 +8,12 @@ import magmac.app.compile.rule.LocatingRule;
 import magmac.app.compile.rule.NodeRule;
 import magmac.app.compile.rule.Rule;
 import magmac.app.compile.rule.TypeRule;
-import magmac.app.lang.Deserializers;
+import magmac.app.lang.Destructors;
 import magmac.app.lang.LazyRule;
 
 record Access(AccessType type, Value receiver, String property) implements Value {
     public static Option<CompileResult<Value>> deserialize(AccessType type, Node node) {
-        return Deserializers.deserializeWithType(type.type(), node)
+        return Destructors.destructWithType(type.type(), node)
                 .map(deserializer -> deserializer.withString("property")
                         .withNode("receiver", Values::deserializeOrError)
                         .complete(tuple -> new Access(type, tuple.right(), tuple.left())));

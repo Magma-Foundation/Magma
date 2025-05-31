@@ -14,11 +14,11 @@ import magmac.app.compile.rule.StripRule;
 import magmac.app.compile.rule.SuffixRule;
 import magmac.app.compile.rule.TypeRule;
 import magmac.app.compile.rule.fold.DelimitedFolder;
-import magmac.app.lang.Deserializers;
+import magmac.app.lang.Destructors;
 
 public record JavaNamespacedNode(NamespacedType type, List<Segment> segments) implements JavaRootSegment {
     private static Option<CompileResult<JavaRootSegment>> deserialize(NamespacedType type, Node node) {
-        return Deserializers.deserializeWithType(type.type(), node).map((InitialDestructor deserializer) -> deserializer
+        return Destructors.destructWithType(type.type(), node).map((InitialDestructor deserializer) -> deserializer
                 .withNodeList("segments", Segment::deserialize)
                 .complete((List<Segment> segments1) -> new JavaNamespacedNode(type, segments1)));
     }

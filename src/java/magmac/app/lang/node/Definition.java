@@ -5,7 +5,7 @@ import magmac.api.collect.list.List;
 import magmac.app.compile.error.CompileResult;
 import magmac.app.compile.node.InitialDestructor;
 import magmac.app.compile.node.Node;
-import magmac.app.lang.Deserializers;
+import magmac.app.lang.Destructors;
 import magmac.app.lang.Serializable;
 
 public record Definition<T>(
@@ -25,11 +25,11 @@ public record Definition<T>(
     }
 
     static CompileResult<Definition<JavaType>> deserialize(Node node) {
-        return Definition.deserialize0(Deserializers.destruct(node));
+        return Definition.deserialize0(Destructors.destruct(node));
     }
 
     static Option<CompileResult<Definition<JavaType>>> deserializeWithType(Node node) {
-        return Deserializers.deserializeWithType("definition", node)
+        return Destructors.destructWithType("definition", node)
                 .map(Definition::deserialize0);
     }
 

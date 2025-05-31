@@ -8,12 +8,12 @@ import magmac.app.compile.rule.Rule;
 import magmac.app.compile.rule.StringRule;
 import magmac.app.compile.rule.StripRule;
 import magmac.app.compile.rule.fold.DelimitedFolder;
-import magmac.app.lang.Deserializers;
+import magmac.app.lang.Destructors;
 import magmac.app.lang.Serializable;
 
 public record Modifier(String value) implements Serializable {
     public static CompileResult<Modifier> deserialize(Node node) {
-        return Deserializers.destruct(node)
+        return Destructors.destruct(node)
                 .withString("value")
                 .complete(Modifier::new);
     }

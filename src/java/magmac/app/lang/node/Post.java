@@ -9,7 +9,7 @@ import magmac.app.compile.rule.Rule;
 import magmac.app.compile.rule.StripRule;
 import magmac.app.compile.rule.SuffixRule;
 import magmac.app.compile.rule.TypeRule;
-import magmac.app.lang.Deserializers;
+import magmac.app.lang.Destructors;
 
 record Post(PostVariant variant, Value value) implements FunctionSegmentValue {
     public static Rule createPostRule(String type, String suffix, Rule value) {
@@ -17,7 +17,7 @@ record Post(PostVariant variant, Value value) implements FunctionSegmentValue {
     }
 
     public static Option<CompileResult<FunctionSegmentValue>> deserialize(PostVariant variant, Node node) {
-        return Deserializers.deserializeWithType(variant.type(), node).map(deserializer -> deserializer
+        return Destructors.destructWithType(variant.type(), node).map(deserializer -> deserializer
                 .withNode("child", Values::deserializeOrError)
                 .complete(child -> new Post(variant, child)));
     }

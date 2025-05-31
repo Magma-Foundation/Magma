@@ -9,11 +9,11 @@ import magmac.app.compile.rule.Rule;
 import magmac.app.compile.rule.StripRule;
 import magmac.app.compile.rule.SuffixRule;
 import magmac.app.compile.rule.TypeRule;
-import magmac.app.lang.Deserializers;
+import magmac.app.lang.Destructors;
 
 record FunctionStatement(FunctionSegmentValue child) implements FunctionSegment {
     public static Option<CompileResult<FunctionSegment>> deserialize(Node node) {
-        return Deserializers.deserializeWithType("statement", node)
+        return Destructors.destructWithType("statement", node)
                 .map(deserializer -> deserializer.withNode("child", FunctionSegmentValues::deserialize)
                         .complete(FunctionStatement::new)
                         .mapValue(value -> value));

@@ -16,12 +16,12 @@ import magmac.app.compile.rule.SuffixRule;
 import magmac.app.compile.rule.TypeRule;
 import magmac.app.compile.rule.divide.FoldingDivider;
 import magmac.app.compile.rule.split.DividingSplitter;
-import magmac.app.lang.Deserializers;
+import magmac.app.lang.Destructors;
 import magmac.app.lang.InvocationFolder;
 
 record InvokableNode(Caller caller, List<Argument> arguments) implements Value, FunctionSegmentValue {
     public static Option<CompileResult<InvokableNode>> deserialize(Node node) {
-        return Deserializers.deserializeWithType("invokable", node).map(deserializer -> deserializer.withNode("caller", Caller::deserialize)
+        return Destructors.destructWithType("invokable", node).map(deserializer -> deserializer.withNode("caller", Caller::deserialize)
                 .withNodeList("arguments", Arguments::deserialize)
                 .complete(tuple -> new InvokableNode(tuple.left(), tuple.right())));
     }

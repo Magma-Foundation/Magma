@@ -7,7 +7,7 @@ import magmac.app.compile.error.CompileResult;
 import magmac.app.compile.node.CompoundDestructor;
 import magmac.app.compile.node.InitialDestructor;
 import magmac.app.compile.node.Node;
-import magmac.app.lang.Deserializers;
+import magmac.app.lang.Destructors;
 
 public record JavaStructureNodeDeserializer(JavaStructureType type) implements TypedDeserializer<JavaStructureNode> {
     private static CompileResult<JavaStructureNode> deserializeHelper(JavaStructureType type, InitialDestructor deserializer) {
@@ -39,7 +39,7 @@ public record JavaStructureNodeDeserializer(JavaStructureType type) implements T
     }
 
     public Option<CompileResult<JavaStructureNode>> deserialize(Node node) {
-        return Deserializers.deserializeWithType(this.type().name().toLowerCase(), node)
+        return Destructors.destructWithType(this.type().name().toLowerCase(), node)
                 .map((InitialDestructor deserializer) -> JavaStructureNodeDeserializer.deserializeHelper(this.type(), deserializer));
     }
 }

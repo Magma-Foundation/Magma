@@ -9,11 +9,11 @@ import magmac.app.compile.rule.PrefixRule;
 import magmac.app.compile.rule.Rule;
 import magmac.app.compile.rule.StripRule;
 import magmac.app.compile.rule.TypeRule;
-import magmac.app.lang.Deserializers;
+import magmac.app.lang.Destructors;
 
 record YieldNode(Value value) implements FunctionSegmentValue {
     public static Option<CompileResult<FunctionSegmentValue>> deserialize(Node node) {
-        return Deserializers.deserializeWithType("yield", node).map(deserializer -> deserializer.withNode("yield", Values::deserializeOrError).complete(YieldNode::new));
+        return Destructors.destructWithType("yield", node).map(deserializer -> deserializer.withNode("yield", Values::deserializeOrError).complete(YieldNode::new));
     }
 
     public static Rule createYieldRule(Rule value) {
