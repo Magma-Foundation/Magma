@@ -151,7 +151,7 @@ class JavaTypescriptParser implements Parser<Root<JavaRootSegment>, TypescriptRo
                     new TypeScriptDefinition(definition.withType(JavaTypescriptParser.parseTemplateType(javaTemplateType)));
             case VariadicType variadicType -> new TypeScriptDefinition(definition
                     .withName("..." + definition.name())
-                    .withType(new TypescriptArrayType(new ArrayType<TypeScriptType>(JavaTypescriptParser.parseType(variadicType)))));
+                    .withType(new TypescriptArrayType(new ArrayType<TypeScriptType>(JavaTypescriptParser.parseType(variadicType.child())))));
         };
     }
 

@@ -10,7 +10,7 @@ import { Function } from "../../../../java/util/function/Function";
 export class InlineNodeList {
 	InlineNodeList(elements : List<Node>) : public;
 	empty() : NodeList;
-	of(...elements : ?[]) : NodeList;
+	of(...elements : Node[]) : NodeList;
 	iter() : Iter<Node>;
 	add(element : Node) : NodeList;
 	addAll(others : NodeList) : NodeList;

@@ -6,6 +6,6 @@ import { SingleHead } from "../../../magmac/api/head/SingleHead";
 export class Iters {
 	fromArray(array : T[]) : Iter<T>;
 	fromOption(option : Option<T>) : Iter<T>;
-	fromValues(...values : ?[]) : Iter<T>;
+	fromValues(...values : T[]) : Iter<T>;
 	empty() : Iter<T>;
 }
