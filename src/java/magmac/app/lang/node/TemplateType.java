@@ -15,9 +15,8 @@ import magmac.app.compile.rule.StripRule;
 import magmac.app.compile.rule.SuffixRule;
 import magmac.app.compile.rule.TypeRule;
 import magmac.app.lang.Deserializers;
-import magmac.app.lang.Serializable;
 
-public record TemplateType(Base base, List<Type> arguments) implements Type {
+public record TemplateType(Base base, List<JavaType> arguments) implements JavaType {
     public static Option<CompileResult<TemplateType>> deserialize(Node node) {
         return Deserializers.deserializeWithType(node, "template").map(deserializer -> deserializer
                 .withNode("base", TemplateType::deserializeBase)

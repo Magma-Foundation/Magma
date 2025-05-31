@@ -11,13 +11,13 @@ import magmac.app.compile.rule.SuffixRule;
 import magmac.app.compile.rule.TypeRule;
 import magmac.app.lang.Deserializers;
 
-public record ArrayType(Type type) implements Type {
+public record ArrayType(JavaType type) implements JavaType {
     public static Rule createArrayRule(Rule rule) {
         NodeRule child = new NodeRule("child", rule);
         return new TypeRule("array", new StripRule(new SuffixRule(child, "[]")));
     }
 
-    public static Option<CompileResult<Type>> deserialize(Node node) {
+    public static Option<CompileResult<JavaType>> deserialize(Node node) {
         return Deserializers.deserializeWithType(node, "array").map(deserializer -> deserializer.withNode("child", Types::deserialize)
                 .complete(ArrayType::new));
     }

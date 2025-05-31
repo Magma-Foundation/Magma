@@ -10,7 +10,7 @@ import magmac.app.compile.rule.StripRule;
 import magmac.app.compile.rule.TypeRule;
 import magmac.app.lang.Deserializers;
 
-record Construction(Type type) implements Caller {
+record Construction(JavaType type) implements Caller {
     public static Option<CompileResult<Caller>> deserialize(Node node) {
         return Deserializers.deserializeWithType(node, "construction").map(deserializer -> deserializer.withNode("type", Types::deserialize).complete(Construction::new));
     }

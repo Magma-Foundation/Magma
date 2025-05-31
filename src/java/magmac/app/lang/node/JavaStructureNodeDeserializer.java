@@ -21,7 +21,7 @@ public record JavaStructureNodeDeserializer(JavaStructureType type) implements T
                 .withNodeList("children", StructureMembers::deserialize);
     }
 
-    private static CompoundDestructor<Tuple2<Tuple2<Tuple2<Tuple2<Tuple2<Tuple2<Tuple2<String, List<Modifier>>, List<JavaStructureMember>>, Option<List<Type>>>, Option<List<TypeParam>>>, Option<List<Parameter>>>, Option<List<Type>>>, Option<List<Type>>>> attachOptionals(CompoundDestructor<Tuple2<Tuple2<String, List<Modifier>>, List<JavaStructureMember>>> attachRequired) {
+    private static CompoundDestructor<Tuple2<Tuple2<Tuple2<Tuple2<Tuple2<Tuple2<Tuple2<String, List<Modifier>>, List<JavaStructureMember>>, Option<List<JavaType>>>, Option<List<TypeParam>>>, Option<List<Parameter>>>, Option<List<JavaType>>>, Option<List<JavaType>>>> attachOptionals(CompoundDestructor<Tuple2<Tuple2<String, List<Modifier>>, List<JavaStructureMember>>> attachRequired) {
         return attachRequired.withNodeListOptionally("implemented", Types::deserialize)
                 .withNodeListOptionally("type-parameters", TypeParam::deserialize)
                 .withNodeListOptionally("parameters", Parameters::deserialize)
@@ -31,7 +31,7 @@ public record JavaStructureNodeDeserializer(JavaStructureType type) implements T
 
     private static JavaStructureNode from(
             JavaStructureType type,
-            Tuple2<Tuple2<Tuple2<Tuple2<Tuple2<Tuple2<Tuple2<String, List<Modifier>>, List<JavaStructureMember>>, Option<List<Type>>>, Option<List<TypeParam>>>, Option<List<Parameter>>>, Option<List<Type>>>, Option<List<Type>>> tuple) {
+            Tuple2<Tuple2<Tuple2<Tuple2<Tuple2<Tuple2<Tuple2<String, List<Modifier>>, List<JavaStructureMember>>, Option<List<JavaType>>>, Option<List<TypeParam>>>, Option<List<Parameter>>>, Option<List<JavaType>>>, Option<List<JavaType>>> tuple) {
         return new JavaStructureNode(type,
                 new StructureValue<JavaStructureMember>(tuple.left().left().left().left().left().left().left(), tuple.left().left().left().left().left().left().right(), tuple.left().left().left().left().left().right(), tuple.left().left().left().right(), tuple.left().right(), tuple.left().left().left().left().right()), tuple.left().left().right(),
                 tuple.right()

@@ -11,8 +11,8 @@ import magmac.app.compile.rule.SuffixRule;
 import magmac.app.compile.rule.TypeRule;
 import magmac.app.lang.Deserializers;
 
-public record VariadicType(Type node) implements Type {
-    public static Option<CompileResult<Type>> deserialize(Node node) {
+public record VariadicType(JavaType node) implements JavaType {
+    public static Option<CompileResult<JavaType>> deserialize(Node node) {
         return Deserializers.deserializeWithType(node, "variadic").map(deserializer -> deserializer.withNode("child", Types::deserialize)
                 .complete(VariadicType::new));
     }

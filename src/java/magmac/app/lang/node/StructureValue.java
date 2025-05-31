@@ -11,8 +11,8 @@ public record StructureValue<T extends Serializable>(
         List<Modifier> modifiers,
         List<T> members,
         Option<List<TypeParam>> maybeTypeParams,
-        Option<List<Type>> maybeExtended,
-        Option<List<Type>> maybeImplemented
+        Option<List<JavaType>> maybeExtended,
+        Option<List<JavaType>> maybeImplemented
 ) {
     public Node serialize(String type) {
         return new MapNode(type)

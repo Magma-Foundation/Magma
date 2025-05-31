@@ -31,7 +31,7 @@ import magmac.app.lang.ValueFolder;
 
 public record JavaDefinition(
         String name,
-        Type type,
+        JavaType type,
         List<Modifier> modifiers,
         Option<List<Annotation>> annotations,
         Option<List<TypeParam>> typeParams

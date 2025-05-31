@@ -9,13 +9,13 @@ public final class JavaStructureNode implements JavaRootSegment {
     private final JavaStructureType type;
     public final StructureValue<JavaStructureMember> value;
     private final Option<List<Parameter>> parameters;
-    private final Option<List<Type>> variants;
+    private final Option<List<JavaType>> variants;
 
     public JavaStructureNode(
             JavaStructureType type,
             StructureValue<JavaStructureMember> structureNode,
             Option<List<Parameter>> parameters,
-            Option<List<Type>> variants
+            Option<List<JavaType>> variants
     ) {
         this.type = type;
         this.value = structureNode;
@@ -36,11 +36,11 @@ public final class JavaStructureNode implements JavaRootSegment {
         return this.value.name();
     }
 
-    public Option<List<Type>> implemented() {
+    public Option<List<JavaType>> implemented() {
         return this.value.maybeImplemented();
     }
 
-    public Option<List<Type>> extended() {
+    public Option<List<JavaType>> extended() {
         return this.value.maybeExtended();
     }
 }

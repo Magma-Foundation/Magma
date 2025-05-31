@@ -29,7 +29,7 @@ import magmac.app.lang.node.JavaStructureNode;
 import magmac.app.lang.node.JavaStructureType;
 import magmac.app.lang.node.Symbol;
 import magmac.app.lang.node.TemplateType;
-import magmac.app.lang.node.Type;
+import magmac.app.lang.node.JavaType;
 import magmac.app.lang.node.VariadicType;
 import magmac.app.lang.node.Whitespace;
 import magmac.app.stage.parse.Parser;
@@ -77,7 +77,7 @@ public class JavaPlantUMLParser implements Parser<Root<JavaRootSegment>, PlantUM
         };
     }
 
-    private static String createSimpleNameFromType(Type type) {
+    private static String createSimpleNameFromType(JavaType type) {
         return switch (type) {
             case ArrayType _, VariadicType _ -> "?";
             case Symbol symbol -> symbol.value();
@@ -124,7 +124,7 @@ public class JavaPlantUMLParser implements Parser<Root<JavaRootSegment>, PlantUM
                 .iter();
     }
 
-    private static List<PlantUMLRootSegment> toInherits(String child, Option<List<Type>> maybeOption) {
+    private static List<PlantUMLRootSegment> toInherits(String child, Option<List<JavaType>> maybeOption) {
         return maybeOption.orElse(Lists.empty())
                 .iter()
                 .map(JavaPlantUMLParser::createSimpleNameFromType)
