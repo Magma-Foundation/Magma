@@ -457,28 +457,6 @@ UnitSetCollector --> UnitSet
 class UnitSetCollector
 Collector <|-- UnitSetCollector
 enum ConditionalType
-MethodNode --> Option
-MethodNode --> List
-MethodNode --> Lists
-MethodNode --> CompileResult
-MethodNode --> InitialDestructor
-MethodNode --> MapNode
-MethodNode --> Node
-MethodNode --> FilterRule
-MethodNode --> LocatingRule
-MethodNode --> NodeRule
-MethodNode --> OrRule
-MethodNode --> PrefixRule
-MethodNode --> Rule
-MethodNode --> StringRule
-MethodNode --> StripRule
-MethodNode --> SuffixRule
-MethodNode --> TypeRule
-MethodNode --> CommonLang
-MethodNode --> Deserializers
-MethodNode --> OptionNodeListRule
-class MethodNode
-JavaStructureMember <|-- MethodNode
 TypedDeserializer --> Option
 TypedDeserializer --> CompileResult
 TypedDeserializer --> Node
@@ -689,13 +667,6 @@ FirstSelector --> List
 FirstSelector --> Joiner
 class FirstSelector
 Selector <|-- FirstSelector
-Constructor --> Option
-Constructor --> CompileResult
-Constructor --> MapNode
-Constructor --> Node
-Constructor --> Deserializers
-class Constructor
-MethodHeader <|-- Constructor
 ExactRule --> Ok
 ExactRule --> CompileResult
 ExactRule --> CompileResults
@@ -706,6 +677,28 @@ class ExactRule
 Rule <|-- ExactRule
 class StringContext
 Context <|-- StringContext
+JavaMethod --> Option
+JavaMethod --> List
+JavaMethod --> Lists
+JavaMethod --> CompileResult
+JavaMethod --> InitialDestructor
+JavaMethod --> MapNode
+JavaMethod --> Node
+JavaMethod --> FilterRule
+JavaMethod --> LocatingRule
+JavaMethod --> NodeRule
+JavaMethod --> OrRule
+JavaMethod --> PrefixRule
+JavaMethod --> Rule
+JavaMethod --> StringRule
+JavaMethod --> StripRule
+JavaMethod --> SuffixRule
+JavaMethod --> TypeRule
+JavaMethod --> CommonLang
+JavaMethod --> Deserializers
+JavaMethod --> OptionNodeListRule
+class JavaMethod
+JavaStructureMember <|-- JavaMethod
 InlinePassResult --> None
 InlinePassResult --> Option
 InlinePassResult --> Some
@@ -812,6 +805,10 @@ YieldNode --> TypeRule
 YieldNode --> Deserializers
 class YieldNode
 FunctionSegmentValue <|-- YieldNode
+ParameterizedMethodHeader --> List
+ParameterizedMethodHeader --> Node
+class ParameterizedMethodHeader
+MethodHeader <|-- ParameterizedMethodHeader
 Sources --> IOResult
 Sources --> UnitSet
 interface Sources
@@ -1050,17 +1047,17 @@ JavaTypescriptParser --> ListCollector
 JavaTypescriptParser --> CompileResult
 JavaTypescriptParser --> CompileResultCollector
 JavaTypescriptParser --> CompileResults
+JavaTypescriptParser --> ParameterizedMethodHeader
 JavaTypescriptParser --> Location
 JavaTypescriptParser --> UnitSetCollector
-JavaTypescriptParser --> Constructor
-JavaTypescriptParser --> Definition
 JavaTypescriptParser --> EnumValues
+JavaTypescriptParser --> JavaMethod
 JavaTypescriptParser --> JavaNamespacedNode
 JavaTypescriptParser --> JavaRootSegment
 JavaTypescriptParser --> JavaStructureMember
 JavaTypescriptParser --> JavaStructureNode
 JavaTypescriptParser --> MethodHeader
-JavaTypescriptParser --> MethodNode
+JavaTypescriptParser --> Parameter
 JavaTypescriptParser --> Root
 JavaTypescriptParser --> Segment
 JavaTypescriptParser --> StructureStatement
@@ -1157,7 +1154,9 @@ OperationDeserializer --> Node
 OperationDeserializer --> Deserializers
 class OperationDeserializer
 TypedDeserializer <|-- OperationDeserializer
+Parameter --> Serializable
 interface Parameter
+Serializable <|-- Parameter
 TypeScriptImport --> List
 TypeScriptImport --> MapNode
 TypeScriptImport --> Node
@@ -1397,6 +1396,13 @@ ResultCollector --> Ok
 ResultCollector --> Result
 class ResultCollector
 Collector <|-- ResultCollector
+JavaConstructor --> Option
+JavaConstructor --> CompileResult
+JavaConstructor --> MapNode
+JavaConstructor --> Node
+JavaConstructor --> Deserializers
+class JavaConstructor
+MethodHeader <|-- JavaConstructor
 FunctionSegmentValues --> Lists
 FunctionSegmentValues --> CompileResult
 FunctionSegmentValues --> Node
@@ -1560,38 +1566,6 @@ NodeListRule --> Folder
 NodeListRule --> ValueFolder
 class NodeListRule
 Rule <|-- NodeListRule
-Definition --> Option
-Definition --> List
-Definition --> Lists
-Definition --> CompileResult
-Definition --> InitialDestructor
-Definition --> MapNode
-Definition --> Node
-Definition --> FilterRule
-Definition --> LocatingRule
-Definition --> NodeListRule
-Definition --> NodeRule
-Definition --> OrRule
-Definition --> PrefixRule
-Definition --> Rule
-Definition --> Splitter
-Definition --> StringRule
-Definition --> StripRule
-Definition --> SuffixRule
-Definition --> TypeRule
-Definition --> Divider
-Definition --> FoldingDivider
-Definition --> DelimitedFolder
-Definition --> DividingSplitter
-Definition --> Deserializers
-Definition --> OptionNodeListRule
-Definition --> Serializable
-Definition --> TypeSeparatorFolder
-Definition --> ValueFolder
-class Definition
-Parameter <|-- Definition
-Assignable <|-- Definition
-MethodHeader <|-- Definition
 Iters --> Option
 Iters --> EmptyHead
 Iters --> HeadedIter
@@ -1771,6 +1745,38 @@ Iter <|-- HeadedIter
 Splitter --> Option
 Splitter --> Tuple2
 interface Splitter
+JavaDefinition --> Option
+JavaDefinition --> List
+JavaDefinition --> Lists
+JavaDefinition --> CompileResult
+JavaDefinition --> InitialDestructor
+JavaDefinition --> MapNode
+JavaDefinition --> Node
+JavaDefinition --> FilterRule
+JavaDefinition --> LocatingRule
+JavaDefinition --> NodeListRule
+JavaDefinition --> NodeRule
+JavaDefinition --> OrRule
+JavaDefinition --> PrefixRule
+JavaDefinition --> Rule
+JavaDefinition --> Splitter
+JavaDefinition --> StringRule
+JavaDefinition --> StripRule
+JavaDefinition --> SuffixRule
+JavaDefinition --> TypeRule
+JavaDefinition --> Divider
+JavaDefinition --> FoldingDivider
+JavaDefinition --> DelimitedFolder
+JavaDefinition --> DividingSplitter
+JavaDefinition --> Deserializers
+JavaDefinition --> OptionNodeListRule
+JavaDefinition --> Serializable
+JavaDefinition --> TypeSeparatorFolder
+JavaDefinition --> ValueFolder
+class JavaDefinition
+Parameter <|-- JavaDefinition
+Assignable <|-- JavaDefinition
+MethodHeader <|-- JavaDefinition
 MapNode --> None
 MapNode --> Option
 MapNode --> Some

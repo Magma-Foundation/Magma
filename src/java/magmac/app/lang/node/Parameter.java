@@ -1,4 +1,6 @@
 package magmac.app.lang.node;
 
-public interface Parameter {
+import magmac.app.lang.Serializable;
+
+public interface Parameter extends Serializable {
 }

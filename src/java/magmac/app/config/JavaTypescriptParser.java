@@ -6,17 +6,16 @@ import magmac.api.iter.collect.ListCollector;
 import magmac.app.compile.error.CompileResult;
 import magmac.app.compile.error.CompileResultCollector;
 import magmac.app.compile.error.CompileResults;
+import magmac.app.lang.node.ParameterizedMethodHeader;
 import magmac.app.io.Location;
 import magmac.app.io.sources.UnitSetCollector;
-import magmac.app.lang.node.JavaConstructor;
-import magmac.app.lang.node.JavaDefinition;
 import magmac.app.lang.node.EnumValues;
+import magmac.app.lang.node.JavaMethod;
 import magmac.app.lang.node.JavaNamespacedNode;
 import magmac.app.lang.node.JavaRootSegment;
 import magmac.app.lang.node.JavaStructureMember;
 import magmac.app.lang.node.JavaStructureNode;
 import magmac.app.lang.node.MethodHeader;
-import magmac.app.lang.node.JavaMethod;
 import magmac.app.lang.node.Parameter;
 import magmac.app.lang.node.Root;
 import magmac.app.lang.node.Segment;
@@ -102,10 +101,7 @@ class JavaTypescriptParser implements Parser<Root<JavaRootSegment>, TypescriptRo
     }
 
     private static MethodHeader parseMethodHeader(MethodHeader header, List<Parameter> parameters) {
-        return switch (header) {
-            case JavaConstructor constructor -> constructor;
-            case JavaDefinition definition -> definition;
-        };
+        return new ParameterizedMethodHeader(header, parameters);
     }
 
     private static TypeScriptRootSegment parseNamespaced(Location location, JavaNamespacedNode namespaced) {
