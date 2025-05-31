@@ -13,7 +13,7 @@ import magmac.app.lang.Deserializers;
 
 public record QualifiedType(List<Segment> segments) implements JavaBase {
     public static Option<CompileResult<JavaBase>> deserializeQualified(Node node) {
-        return Deserializers.deserializeWithType(node, "qualified").map(deserializer -> deserializer.withNodeList("segments", Segment::deserialize).complete(QualifiedType::new));
+        return Deserializers.deserializeWithType("qualified", node).map(deserializer -> deserializer.withNodeList("segments", Segment::deserialize).complete(QualifiedType::new));
     }
 
     public static TypeRule createQualifiedRule() {

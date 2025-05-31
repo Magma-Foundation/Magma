@@ -17,7 +17,7 @@ record Not(Value value) implements Value {
     }
 
     public static Option<CompileResult<Value>> deserialize(Node node) {
-        return Deserializers.deserializeWithType(node, "not").map(deserializer -> deserializer.withNode("child", Values::deserializeOrError)
+        return Deserializers.deserializeWithType("not", node).map(deserializer -> deserializer.withNode("child", Values::deserializeOrError)
                 .complete(Not::new));
     }
 

@@ -12,7 +12,7 @@ import magmac.app.lang.Deserializers;
 
 public final class Symbols {
     public static Option<CompileResult<Symbol>> deserialize(Node node) {
-        return Deserializers.deserializeWithType(node, "symbol").map(deserializer -> deserializer.withString("value")
+        return Deserializers.deserializeWithType("symbol", node).map(deserializer -> deserializer.withString("value")
                 .complete(Symbol::new)
                 .mapValue(type -> type));
     }

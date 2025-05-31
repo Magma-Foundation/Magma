@@ -13,7 +13,7 @@ import magmac.app.lang.Deserializers;
 
 record Conditional(ConditionalType type, Value condition) implements BlockHeader {
     public static Option<CompileResult<Conditional>> deserialize(ConditionalType type, Node node) {
-        return Deserializers.deserializeWithType(node, type.name().toLowerCase()).map(deserializer -> deserializer.withNode("condition", Values::deserializeOrError)
+        return Deserializers.deserializeWithType(type.name().toLowerCase(), node).map(deserializer -> deserializer.withNode("condition", Values::deserializeOrError)
                 .complete(value -> new Conditional(type, value)));
     }
 

@@ -8,7 +8,7 @@ import magmac.app.lang.Deserializers;
 
 class Break implements FunctionSegmentValue {
     public static Option<CompileResult<FunctionSegmentValue>> deserialize(Node node) {
-        return Deserializers.deserializeWithType(node, "break").map(deserializer -> deserializer.complete(Break::new));
+        return Deserializers.deserializeWithType("break", node).map(deserializer -> deserializer.complete(Break::new));
     }
 
     @Override

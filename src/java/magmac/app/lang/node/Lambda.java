@@ -19,10 +19,11 @@ import magmac.app.lang.Deserializers;
 import magmac.app.lang.LazyRule;
 import magmac.app.lang.ValueFolder;
 
-record Lambda() implements Value {
+record Lambda(LambdaHeader header) implements Value {
     public static Option<CompileResult<Lambda>> deserialize(Node node) {
-        return Deserializers.deserializeWithType(node, "lambda")
-                .map(deserializer -> deserializer.complete(Lambda::new));
+        return Deserializers.deserializeWithType("lambda", node).map(deserializer -> deserializer
+                .withNode("header", LambdaHeaders::deserialize)
+                .complete(Lambda::new));
     }
 
     public static Rule createLambdaRule(LazyRule value, Rule functionSegment, String infix, Rule definition) {
@@ -32,15 +33,15 @@ record Lambda() implements Value {
         ));
 
         Rule parameters = Lambda.createLambdaParameterRule(definition);
-        Rule withParentheses = new PrefixRule("(", new SuffixRule(parameters, ")"));
-        Rule withoutParentheses = Symbols.createSymbolRule("param");
+        Rule withParentheses = new TypeRule("multiple", new StripRule(new PrefixRule("(", new SuffixRule(parameters, ")"))));
+        Rule withoutParentheses = new TypeRule("single", new StripRule(Symbols.createSymbolRule("name")));
 
         Rule header = new NodeRule("header", new OrRule(Lists.of(
                 withParentheses,
                 withoutParentheses
         )));
 
-        return new TypeRule("lambda", LocatingRule.First(new StripRule(header), infix, afterInfix));
+        return new TypeRule("lambda", LocatingRule.First(header, infix, afterInfix));
     }
 
     private static Rule createLambdaParameterRule(Rule definition) {

@@ -21,7 +21,7 @@ import magmac.app.lang.Deserializers;
 
 record Block(List<FunctionSegment> segments, BlockHeader header) implements FunctionSegment {
     public static Option<CompileResult<Block>> deserialize(Node node) {
-        return Deserializers.deserializeWithType(node, "block").map(deserializer -> deserializer
+        return Deserializers.deserializeWithType("block", node).map(deserializer -> deserializer
                 .withNodeList("children", FunctionSegment::deserialize)
                 .withNode("header", BlockHeader::deserialize)
                 .complete(tuple -> new Block(tuple.left(), tuple.right())));

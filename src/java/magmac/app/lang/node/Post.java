@@ -17,7 +17,7 @@ record Post(PostVariant variant, Value value) implements FunctionSegmentValue {
     }
 
     public static Option<CompileResult<FunctionSegmentValue>> deserialize(PostVariant variant, Node node) {
-        return Deserializers.deserializeWithType(node, variant.type()).map(deserializer -> deserializer
+        return Deserializers.deserializeWithType(variant.type(), node).map(deserializer -> deserializer
                 .withNode("child", Values::deserializeOrError)
                 .complete(child -> new Post(variant, child)));
     }

@@ -13,7 +13,7 @@ import magmac.app.lang.Deserializers;
 
 record YieldNode(Value value) implements FunctionSegmentValue {
     public static Option<CompileResult<FunctionSegmentValue>> deserialize(Node node) {
-        return Deserializers.deserializeWithType(node, "yield").map(deserializer -> deserializer.withNode("yield", Values::deserializeOrError).complete(YieldNode::new));
+        return Deserializers.deserializeWithType("yield", node).map(deserializer -> deserializer.withNode("yield", Values::deserializeOrError).complete(YieldNode::new));
     }
 
     public static Rule createYieldRule(Rule value) {

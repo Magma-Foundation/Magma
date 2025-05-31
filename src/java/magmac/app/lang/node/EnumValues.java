@@ -4,7 +4,6 @@ import magmac.api.Option;
 import magmac.api.collect.list.List;
 import magmac.api.collect.list.Lists;
 import magmac.app.compile.error.CompileResult;
-import magmac.app.compile.node.MapNode;
 import magmac.app.compile.node.Node;
 import magmac.app.compile.rule.FilterRule;
 import magmac.app.compile.rule.LocatingRule;
@@ -36,7 +35,7 @@ public record EnumValues(List<EnumValue> values) implements JavaStructureMember 
     }
 
     public static Option<CompileResult<JavaStructureMember>> deserialize(Node node) {
-        return Deserializers.deserializeWithType(node, "enum-values").map(deserializer -> deserializer.withNodeList("children", EnumValue::deserialize)
+        return Deserializers.deserializeWithType("enum-values", node).map(deserializer -> deserializer.withNodeList("children", EnumValue::deserialize)
                 .complete(EnumValues::new));
     }
 }

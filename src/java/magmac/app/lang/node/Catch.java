@@ -7,7 +7,7 @@ import magmac.app.lang.Deserializers;
 
 record Catch(JavaDefinition definition) implements BlockHeader {
     public static Option<CompileResult<BlockHeader>> deserialize(Node node) {
-        return Deserializers.deserializeWithType(node, "catch").map(deserializer -> deserializer.withNode("definition", JavaDefinition::deserialize)
+        return Deserializers.deserializeWithType("catch", node).map(deserializer -> deserializer.withNode("definition", JavaDefinition::deserialize)
                 .complete(Catch::new));
     }
 }

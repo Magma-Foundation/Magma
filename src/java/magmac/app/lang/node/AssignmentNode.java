@@ -14,7 +14,7 @@ import magmac.app.lang.Deserializers;
 
 record AssignmentNode(Assignable assignable, Value value) implements FunctionSegmentValue {
     public static Option<CompileResult<FunctionSegmentValue>> deserialize(Node node) {
-        return Deserializers.deserializeWithType(node, "assignment").map(deserializer -> deserializer
+        return Deserializers.deserializeWithType("assignment", node).map(deserializer -> deserializer
                 .withNode("destination", Assignables::deserializeError)
                 .withNode("source", Values::deserializeOrError)
                 .complete(tuple -> new AssignmentNode(tuple.left(), tuple.right())));

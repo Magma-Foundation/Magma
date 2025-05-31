@@ -5,7 +5,6 @@ import magmac.api.collect.list.List;
 import magmac.api.iter.Iters;
 import magmac.app.compile.error.CompileResult;
 import magmac.app.compile.node.InitialDestructor;
-import magmac.app.compile.node.MapNode;
 import magmac.app.compile.node.Node;
 import magmac.app.compile.rule.NodeListRule;
 import magmac.app.compile.rule.PrefixRule;
@@ -19,7 +18,7 @@ import magmac.app.lang.Deserializers;
 
 public record JavaNamespacedNode(NamespacedType type, List<Segment> segments) implements JavaRootSegment {
     private static Option<CompileResult<JavaRootSegment>> deserialize(NamespacedType type, Node node) {
-        return Deserializers.deserializeWithType(node, type.type()).map((InitialDestructor deserializer) -> deserializer
+        return Deserializers.deserializeWithType(type.type(), node).map((InitialDestructor deserializer) -> deserializer
                 .withNodeList("segments", Segment::deserialize)
                 .complete((List<Segment> segments1) -> new JavaNamespacedNode(type, segments1)));
     }

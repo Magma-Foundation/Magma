@@ -20,7 +20,7 @@ public final class Whitespace implements
         TypescriptStructureMember,
         TypeScriptParameter {
     public static Option<CompileResult<Whitespace>> deserialize(Node node) {
-        return Deserializers.deserializeWithType(node, "whitespace").map(deserializer -> deserializer.complete(Whitespace::new));
+        return Deserializers.deserializeWithType("whitespace", node).map(deserializer -> deserializer.complete(Whitespace::new));
     }
 
     public static Rule createWhitespaceRule() {

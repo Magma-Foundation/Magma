@@ -2,7 +2,6 @@ package magmac.app.lang.node;
 
 import magmac.api.Option;
 import magmac.app.compile.error.CompileResult;
-import magmac.app.compile.node.MapNode;
 import magmac.app.compile.node.Node;
 import magmac.app.compile.rule.NodeRule;
 import magmac.app.compile.rule.Rule;
@@ -13,7 +12,7 @@ import magmac.app.lang.Deserializers;
 
 public record VariadicType(JavaType child) implements JavaType {
     public static Option<CompileResult<JavaType>> deserialize(Node node) {
-        return Deserializers.deserializeWithType(node, "variadic").map(deserializer -> deserializer.withNode("child", Types::deserialize)
+        return Deserializers.deserializeWithType("variadic", node).map(deserializer -> deserializer.withNode("child", Types::deserialize)
                 .complete(VariadicType::new));
     }
 

@@ -8,7 +8,7 @@ import magmac.app.lang.Deserializers;
 
 public final class Constructor implements JavaMethodHeader, TypeScriptMethodHeader {
     public static Option<CompileResult<JavaMethodHeader>> deserialize(Node node) {
-        return Deserializers.deserializeWithType(node, "constructor")
+        return Deserializers.deserializeWithType("constructor", node)
                 .map(constructor -> constructor.complete(Constructor::new));
     }
 

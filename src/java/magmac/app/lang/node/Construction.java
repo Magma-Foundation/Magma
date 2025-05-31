@@ -13,7 +13,7 @@ import magmac.app.lang.Deserializers;
 
 record Construction(JavaType type) implements Caller {
     public static Option<CompileResult<Caller>> deserialize(Node node) {
-        return Deserializers.deserializeWithType(node, "construction").map(deserializer -> deserializer.withNode("type", Types::deserialize).complete(Construction::new));
+        return Deserializers.deserializeWithType("construction", node).map(deserializer -> deserializer.withNode("type", Types::deserialize).complete(Construction::new));
     }
 
     public static Rule createConstructionRule() {

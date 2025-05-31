@@ -13,7 +13,7 @@ import magmac.app.lang.LazyRule;
 
 record Access(AccessType type, Value receiver, String property) implements Value {
     public static Option<CompileResult<Value>> deserialize(AccessType type, Node node) {
-        return Deserializers.deserializeWithType(node, type.type())
+        return Deserializers.deserializeWithType(type.type(), node)
                 .map(deserializer -> deserializer.withString("property")
                         .withNode("receiver", Values::deserializeOrError)
                         .complete(tuple -> new Access(type, tuple.right(), tuple.left())));

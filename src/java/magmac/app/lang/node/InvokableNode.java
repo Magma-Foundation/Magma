@@ -21,7 +21,7 @@ import magmac.app.lang.InvocationFolder;
 
 record InvokableNode(Caller caller, List<Argument> arguments) implements Value, FunctionSegmentValue {
     public static Option<CompileResult<InvokableNode>> deserialize(Node node) {
-        return Deserializers.deserializeWithType(node, "invokable").map(deserializer -> deserializer.withNode("caller", Caller::deserialize)
+        return Deserializers.deserializeWithType("invokable", node).map(deserializer -> deserializer.withNode("caller", Caller::deserialize)
                 .withNodeList("arguments", Arguments::deserialize)
                 .complete(tuple -> new InvokableNode(tuple.left(), tuple.right())));
     }

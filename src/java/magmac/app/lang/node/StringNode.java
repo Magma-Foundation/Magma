@@ -14,7 +14,7 @@ import magmac.app.lang.Deserializers;
 
 record StringNode(String value) implements Value {
     public static Option<CompileResult<Value>> deserialize(Node node) {
-        return Deserializers.deserializeWithType(node, "string").map(deserializer -> deserializer.withString("value").complete(StringNode::new));
+        return Deserializers.deserializeWithType("string", node).map(deserializer -> deserializer.withString("value").complete(StringNode::new));
     }
 
     public static Rule createStringRule() {

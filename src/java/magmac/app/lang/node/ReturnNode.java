@@ -13,7 +13,7 @@ import magmac.app.lang.Deserializers;
 
 record ReturnNode(Value child) implements FunctionSegmentValue, FunctionSegment {
     public static Option<CompileResult<ReturnNode>> deserialize(Node node) {
-        return Deserializers.deserializeWithType(node, "return")
+        return Deserializers.deserializeWithType("return", node)
                 .map(deserializer -> deserializer.withNode("child", Values::deserializeOrError).complete(ReturnNode::new));
     }
 

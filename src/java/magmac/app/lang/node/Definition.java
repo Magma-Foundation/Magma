@@ -4,7 +4,6 @@ import magmac.api.Option;
 import magmac.api.collect.list.List;
 import magmac.app.compile.error.CompileResult;
 import magmac.app.compile.node.InitialDestructor;
-import magmac.app.compile.node.MapNode;
 import magmac.app.compile.node.Node;
 import magmac.app.lang.Deserializers;
 import magmac.app.lang.Serializable;
@@ -30,7 +29,7 @@ public record Definition<T>(
     }
 
     static Option<CompileResult<Definition<JavaType>>> deserializeWithType(Node node) {
-        return Deserializers.deserializeWithType(node, "definition")
+        return Deserializers.deserializeWithType("definition", node)
                 .map(Definition::deserialize0);
     }
 

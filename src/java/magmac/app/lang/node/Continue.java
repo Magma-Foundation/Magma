@@ -8,7 +8,7 @@ import magmac.app.lang.Deserializers;
 
 class Continue implements FunctionSegmentValue {
     public static Option<CompileResult<FunctionSegmentValue>> deserialize(Node node) {
-        return Deserializers.deserializeWithType(node, "continue").map(deserializer -> deserializer.complete(Continue::new));
+        return Deserializers.deserializeWithType("continue", node).map(deserializer -> deserializer.complete(Continue::new));
     }
 
     @Override

@@ -38,7 +38,7 @@ public final class Deserializers {
         return node -> deserializer.deserialize(node).map(result -> result.mapValue(value -> value));
     }
 
-    public static Option<InitialDestructor> deserializeWithType(Node node, String type) {
+    public static Option<InitialDestructor> deserializeWithType(String type, Node node) {
         if (node.is(type)) {
             return new Some<>(new InitialDestructorImpl(node));
         }

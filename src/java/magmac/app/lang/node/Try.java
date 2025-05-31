@@ -7,6 +7,6 @@ import magmac.app.lang.Deserializers;
 
 class Try implements BlockHeader {
     public static Option<CompileResult<Try>> deserialize(Node node) {
-        return Deserializers.deserializeWithType(node, "try").map(deserializer -> deserializer.complete(Try::new));
+        return Deserializers.deserializeWithType("try", node).map(deserializer -> deserializer.complete(Try::new));
     }
 }

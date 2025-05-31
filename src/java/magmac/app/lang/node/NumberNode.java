@@ -13,7 +13,7 @@ import magmac.app.lang.Deserializers;
 
 record NumberNode(String value) implements Value {
     public static Option<CompileResult<Value>> deserialize(Node node) {
-        return Deserializers.deserializeWithType(node, "number").map(deserializer -> deserializer.withString("value").complete(NumberNode::new));
+        return Deserializers.deserializeWithType("number", node).map(deserializer -> deserializer.withString("value").complete(NumberNode::new));
     }
 
     public static Rule createNumberRule() {

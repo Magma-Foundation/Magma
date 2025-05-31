@@ -39,7 +39,7 @@ public record JavaStructureNodeDeserializer(JavaStructureType type) implements T
     }
 
     public Option<CompileResult<JavaStructureNode>> deserialize(Node node) {
-        return Deserializers.deserializeWithType(node, this.type().name().toLowerCase())
+        return Deserializers.deserializeWithType(this.type().name().toLowerCase(), node)
                 .map((InitialDestructor deserializer) -> JavaStructureNodeDeserializer.deserializeHelper(this.type(), deserializer));
     }
 }

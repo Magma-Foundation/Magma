@@ -3,7 +3,6 @@ package magmac.app.lang.node;
 import magmac.api.Option;
 import magmac.api.collect.list.Lists;
 import magmac.app.compile.error.CompileResult;
-import magmac.app.compile.node.MapNode;
 import magmac.app.compile.node.Node;
 import magmac.app.compile.rule.LocatingRule;
 import magmac.app.compile.rule.NodeListRule;
@@ -25,7 +24,7 @@ public final class JavaTemplateType implements JavaType {
     }
 
     public static Option<CompileResult<JavaTemplateType>> deserialize(Node node) {
-        return Deserializers.deserializeWithType(node, "template").map(deserializer -> deserializer
+        return Deserializers.deserializeWithType("template", node).map(deserializer -> deserializer
                 .withNode("base", JavaTemplateType::deserializeBase)
                 .withNodeList("arguments", Types::deserialize)
                 .complete(tuple -> new JavaTemplateType(tuple.left(), new TypeArguments<JavaType>(tuple.right()))));
