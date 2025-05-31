@@ -23,6 +23,6 @@ record StringNode(String value) implements Value {
 
     @Override
     public Node serialize() {
-        return new MapNode("string");
+        return new MapNode("string").withString("value", this.value);
     }
 }

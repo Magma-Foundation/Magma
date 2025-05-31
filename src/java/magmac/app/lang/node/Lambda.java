@@ -21,7 +21,8 @@ import magmac.app.lang.Deserializers;
 
 record Lambda() implements Value {
     public static Option<CompileResult<Lambda>> deserialize(Node node) {
-        return Deserializers.deserializeWithType(node, "lambda").map(deserializer -> deserializer.complete(Lambda::new));
+        return Deserializers.deserializeWithType(node, "lambda")
+                .map(deserializer -> deserializer.complete(Lambda::new));
     }
 
     public static Rule createLambdaRule(LazyRule value, Rule functionSegment, String infix, Rule definition) {
