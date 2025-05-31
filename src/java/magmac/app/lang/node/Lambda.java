@@ -30,7 +30,7 @@ record Lambda(LambdaHeader header, LambdaContent right) implements Value {
     public static Rule createLambdaRule(LazyRule value, Rule functionSegment, String infix, Rule definition) {
         Rule afterInfix = new OrRule(Lists.of(
                 new TypeRule("block", new StripRule(new PrefixRule("{", new SuffixRule(CommonLang.Statements("children", functionSegment), "}")))),
-                new TypeRule("value", value)
+                new TypeRule("value", new NodeRule("value", value))
         ));
 
         Rule parameters = Lambda.createLambdaParameterRule(definition);
