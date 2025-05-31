@@ -13,9 +13,11 @@ import magmac.app.compile.rule.TypeRule;
 import magmac.app.lang.Destructors;
 import magmac.app.lang.LazyRule;
 
-public record StructureStatement() implements JavaStructureMember {
+public record StructureStatement(StructureStatementValue value) implements JavaStructureMember {
     public static Option<CompileResult<JavaStructureMember>> deserialize(Node node) {
-        return Destructors.destructWithType("structure-statement", node).map(deserializer -> deserializer.complete(StructureStatement::new));
+        return Destructors.destructWithType("structure-statement", node).map(deserializer -> deserializer
+                .withNode("value", StructureStatementValues::deserialize)
+                .complete(StructureStatement::new));
     }
 
     public static Rule createStructureStatementRule(Rule definitionRule, LazyRule valueRule) {

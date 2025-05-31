@@ -4,7 +4,8 @@ import magmac.api.Option;
 import magmac.app.compile.error.CompileResult;
 import magmac.app.compile.node.Node;
 
-public record JavaDefinition(Definition<JavaType> definition) implements JavaParameter, Assignable, JavaMethodHeader {
+public record JavaDefinition(Definition<JavaType> definition)
+        implements JavaParameter, Assignable, JavaMethodHeader, StructureStatementValue {
     public static CompileResult<JavaDefinition> deserialize(Node node) {
         return Definition.deserialize(node).mapValue(JavaDefinition::new);
     }

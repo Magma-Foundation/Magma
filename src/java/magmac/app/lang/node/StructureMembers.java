@@ -13,7 +13,7 @@ import magmac.app.lang.Deserializers;
 
 final class StructureMembers {
     public static CompileResult<JavaStructureMember> deserialize(Node node) {
-        return Deserializers.orError("structure-member", node, Lists.of(
+        return Deserializers.orError("structure-members", node, Lists.of(
                 Deserializers.wrap(Whitespace::deserialize),
                 Deserializers.wrap(JavaMethod::deserialize),
                 Deserializers.wrap(StructureStatement::deserialize),
