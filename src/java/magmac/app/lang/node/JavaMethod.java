@@ -24,7 +24,7 @@ import magmac.app.lang.OptionNodeListRule;
 
 public record JavaMethod(
         JavaMethodHeader header,
-        List<Parameter> parameters,
+        List<JavaParameter> parameters,
         Option<List<FunctionSegment>> maybeChildren
 ) implements JavaStructureMember {
     public static Option<CompileResult<JavaStructureMember>> deserialize(Node node) {

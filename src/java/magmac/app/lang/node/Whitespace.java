@@ -14,10 +14,11 @@ public final class Whitespace implements
         Argument,
         FunctionSegment,
         JavaRootSegment,
-        Parameter,
+        JavaParameter,
         JavaStructureMember,
         TypeScriptRootSegment,
-        TypescriptStructureMember {
+        TypescriptStructureMember,
+        TypeScriptParameter {
     public static Option<CompileResult<Whitespace>> deserialize(Node node) {
         return Deserializers.deserializeWithType(node, "whitespace").map(deserializer -> deserializer.complete(Whitespace::new));
     }

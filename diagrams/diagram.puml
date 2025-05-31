@@ -521,6 +521,9 @@ enum PlantUMLStructureType
 TypeScriptType --> Serializable
 interface TypeScriptType
 Serializable <|-- TypeScriptType
+TypeScriptParameter --> Serializable
+interface TypeScriptParameter
+Serializable <|-- TypeScriptParameter
 Deserializer --> Option
 Deserializer --> CompileResult
 Deserializer --> Node
@@ -954,6 +957,7 @@ SafeFiles --> Path
 SafeFiles --> Collectors
 SafeFiles --> Stream
 class SafeFiles
+interface JavaParameter
 interface Assignable
 TypeParam --> CompileResult
 TypeParam --> MapNode
@@ -1078,11 +1082,11 @@ JavaTypescriptParser --> JavaDefinition
 JavaTypescriptParser --> JavaMethod
 JavaTypescriptParser --> JavaMethodHeader
 JavaTypescriptParser --> JavaNamespacedNode
+JavaTypescriptParser --> JavaParameter
 JavaTypescriptParser --> JavaRootSegment
 JavaTypescriptParser --> JavaStructureMember
 JavaTypescriptParser --> JavaStructureNode
 JavaTypescriptParser --> JavaType
-JavaTypescriptParser --> Parameter
 JavaTypescriptParser --> ParameterizedMethodHeader
 JavaTypescriptParser --> Root
 JavaTypescriptParser --> Segment
@@ -1091,6 +1095,7 @@ JavaTypescriptParser --> StructureValue
 JavaTypescriptParser --> TypeScriptDefinition
 JavaTypescriptParser --> TypeScriptImport
 JavaTypescriptParser --> TypeScriptMethodHeader
+JavaTypescriptParser --> TypeScriptParameter
 JavaTypescriptParser --> TypeScriptRootSegment
 JavaTypescriptParser --> TypeScriptType
 JavaTypescriptParser --> TypescriptMethod
@@ -1184,9 +1189,6 @@ OperationDeserializer --> Node
 OperationDeserializer --> Deserializers
 class OperationDeserializer
 TypedDeserializer <|-- OperationDeserializer
-Parameter --> Serializable
-interface Parameter
-Serializable <|-- Parameter
 TypeScriptImport --> List
 TypeScriptImport --> MapNode
 TypeScriptImport --> Node
@@ -1389,10 +1391,11 @@ class Whitespace
 Argument <|-- Whitespace
 FunctionSegment <|-- Whitespace
 JavaRootSegment <|-- Whitespace
-Parameter <|-- Whitespace
+JavaParameter <|-- Whitespace
 JavaStructureMember <|-- Whitespace
 TypeScriptRootSegment <|-- Whitespace
 TypescriptStructureMember <|-- Whitespace
+TypeScriptParameter <|-- Whitespace
 CommonLang --> LocatingRule
 CommonLang --> NodeListRule
 CommonLang --> NodeRule
@@ -1626,7 +1629,7 @@ Iters --> SingleHead
 class Iters
 TypeScriptDefinition --> Node
 class TypeScriptDefinition
-Parameter <|-- TypeScriptDefinition
+TypeScriptParameter <|-- TypeScriptDefinition
 Assignable <|-- TypeScriptDefinition
 TypeScriptMethodHeader <|-- TypeScriptDefinition
 Assignables --> Lists
@@ -1803,7 +1806,7 @@ JavaDefinition --> Option
 JavaDefinition --> CompileResult
 JavaDefinition --> Node
 class JavaDefinition
-Parameter <|-- JavaDefinition
+JavaParameter <|-- JavaDefinition
 Assignable <|-- JavaDefinition
 JavaMethodHeader <|-- JavaDefinition
 MapNode --> None

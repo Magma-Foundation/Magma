@@ -16,11 +16,11 @@ import magmac.app.lang.node.JavaDefinition;
 import magmac.app.lang.node.JavaMethod;
 import magmac.app.lang.node.JavaMethodHeader;
 import magmac.app.lang.node.JavaNamespacedNode;
+import magmac.app.lang.node.JavaParameter;
 import magmac.app.lang.node.JavaRootSegment;
 import magmac.app.lang.node.JavaStructureMember;
 import magmac.app.lang.node.JavaStructureNode;
 import magmac.app.lang.node.JavaType;
-import magmac.app.lang.node.Parameter;
 import magmac.app.lang.node.ParameterizedMethodHeader;
 import magmac.app.lang.node.Root;
 import magmac.app.lang.node.Segment;
@@ -29,6 +29,7 @@ import magmac.app.lang.node.StructureValue;
 import magmac.app.lang.node.TypeScriptDefinition;
 import magmac.app.lang.node.TypeScriptImport;
 import magmac.app.lang.node.TypeScriptMethodHeader;
+import magmac.app.lang.node.TypeScriptParameter;
 import magmac.app.lang.node.TypeScriptRootSegment;
 import magmac.app.lang.node.TypeScriptType;
 import magmac.app.lang.node.TypescriptMethod;
@@ -103,16 +104,32 @@ class JavaTypescriptParser implements Parser<Root<JavaRootSegment>, TypescriptRo
     }
 
     private static TypescriptStructureMember parseMethod(JavaMethod methodNode) {
-        List<Parameter> parameters = methodNode.parameters();
+        List<TypeScriptParameter> parameters = methodNode.parameters()
+                .iter()
+                .map(JavaTypescriptParser::parseParameter)
+                .collect(new ListCollector<>());
+
         JavaMethodHeader header1 = methodNode.header();
         TypeScriptMethodHeader header = JavaTypescriptParser.parseMethodHeader(header1);
-        return new TypescriptMethod(new ParameterizedMethodHeader(header, parameters));
+        return new TypescriptMethod(new ParameterizedMethodHeader<TypeScriptParameter>(header, parameters));
+    }
+
+    private static TypeScriptParameter parseParameter(JavaParameter parameter) {
+        return switch (parameter) {
+            case Whitespace whitespace -> whitespace;
+            case JavaDefinition javaDefinition -> JavaTypescriptParser.parseWrappedDefinition(javaDefinition);
+        };
+    }
+
+    private static TypeScriptDefinition parseWrappedDefinition(JavaDefinition javaDefinition) {
+        return new TypeScriptDefinition(JavaTypescriptParser.parseDefinition(javaDefinition.definition()));
     }
 
     private static TypeScriptMethodHeader parseMethodHeader(JavaMethodHeader header) {
         return switch (header) {
             case Constructor constructor -> constructor;
-            case JavaDefinition javaDefinition -> new TypeScriptDefinition(JavaTypescriptParser.parseDefinition(javaDefinition.definition));
+            case JavaDefinition javaDefinition ->
+                    new TypeScriptDefinition(JavaTypescriptParser.parseDefinition(javaDefinition.definition()));
         };
     }
 
