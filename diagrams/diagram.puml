@@ -934,7 +934,6 @@ StringNode --> TypeRule
 StringNode --> Deserializers
 class StringNode
 Value <|-- StringNode
-JavaStructureMember --> Serializable
 interface JavaStructureMember
 SafeFiles --> None
 SafeFiles --> Option
@@ -1067,7 +1066,6 @@ JavaTypescriptParser --> CompileResultCollector
 JavaTypescriptParser --> CompileResults
 JavaTypescriptParser --> Location
 JavaTypescriptParser --> UnitSetCollector
-JavaTypescriptParser --> ArrayType
 JavaTypescriptParser --> Constructor
 JavaTypescriptParser --> Definition
 JavaTypescriptParser --> EnumValues
@@ -1568,7 +1566,6 @@ LexingStage --> UnitSet
 LexingStage --> Function
 class LexingStage
 enum AccessType
-class ArrayType
 PathSource --> List
 PathSource --> Lists
 PathSource --> IOResult

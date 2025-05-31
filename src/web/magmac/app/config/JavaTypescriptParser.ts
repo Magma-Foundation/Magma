@@ -7,7 +7,6 @@ import { CompileResultCollector } from "../../../magmac/app/compile/error/Compil
 import { CompileResults } from "../../../magmac/app/compile/error/CompileResults";
 import { Location } from "../../../magmac/app/io/Location";
 import { UnitSetCollector } from "../../../magmac/app/io/sources/UnitSetCollector";
-import { ArrayType } from "../../../magmac/app/lang/node/ArrayType";
 import { Constructor } from "../../../magmac/app/lang/node/Constructor";
 import { Definition } from "../../../magmac/app/lang/node/Definition";
 import { EnumValues } from "../../../magmac/app/lang/node/EnumValues";

@@ -8,7 +8,7 @@ import { SuffixRule } from "../../../../magmac/app/compile/rule/SuffixRule";
 import { TypeRule } from "../../../../magmac/app/compile/rule/TypeRule";
 import { Deserializers } from "../../../../magmac/app/lang/Deserializers";
 export class JavaArrayType {
-	JavaArrayType(arrayType : ArrayType<JavaType>) : public;
+	JavaArrayType(arrayType : JavaType) : public;
 	createArrayRule(rule : Rule) : Rule;
 	deserialize(node : Node) : Option<CompileResult<JavaType>>;
 }
