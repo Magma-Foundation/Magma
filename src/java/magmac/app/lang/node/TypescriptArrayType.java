@@ -4,14 +4,14 @@ import magmac.app.compile.node.MapNode;
 import magmac.app.compile.node.Node;
 
 public final class TypescriptArrayType implements TypeScriptType {
-    private final ArrayType<TypeScriptType> arrayType;
+    private final TypeScriptType childType;
 
-    public TypescriptArrayType(ArrayType<TypeScriptType> arrayType) {
-        this.arrayType = arrayType;
+    public TypescriptArrayType(TypeScriptType arrayType) {
+        this.childType = arrayType;
     }
 
     @Override
     public Node serialize() {
-        return new MapNode("array").withNodeSerialized("child", this.arrayType.child());
+        return new MapNode("array").withNodeSerialized("child", this.childType);
     }
 }

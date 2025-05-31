@@ -9,7 +9,6 @@ import magmac.app.compile.error.CompileResultCollector;
 import magmac.app.compile.error.CompileResults;
 import magmac.app.io.Location;
 import magmac.app.io.sources.UnitSetCollector;
-import magmac.app.lang.node.ArrayType;
 import magmac.app.lang.node.Constructor;
 import magmac.app.lang.node.Definition;
 import magmac.app.lang.node.EnumValues;
@@ -152,12 +151,12 @@ class JavaTypescriptParser implements Parser<Root<JavaRootSegment>, TypescriptRo
                     new TypeScriptDefinition(definition.withType(JavaTypescriptParser.parseTemplateType(javaTemplateType)));
             case VariadicType variadicType -> new TypeScriptDefinition(definition
                     .withName("..." + definition.name())
-                    .withType(new TypescriptArrayType(new ArrayType<TypeScriptType>(JavaTypescriptParser.parseType(variadicType.child())))));
+                    .withType(new TypescriptArrayType(JavaTypescriptParser.parseType(variadicType.child()))));
         };
     }
 
     private static TypeScriptType parseArrayType(JavaArrayType type) {
-        return new TypescriptArrayType(new ArrayType<>(JavaTypescriptParser.parseType(type.inner.child())));
+        return new TypescriptArrayType(JavaTypescriptParser.parseType(type.inner));
     }
 
     private static TypeScriptType parseType(JavaType variadicType) {

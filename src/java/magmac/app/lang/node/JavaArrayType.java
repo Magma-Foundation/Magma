@@ -11,9 +11,9 @@ import magmac.app.compile.rule.TypeRule;
 import magmac.app.lang.Deserializers;
 
 public final class JavaArrayType implements JavaType {
-    public final ArrayType<JavaType> inner;
+    public final JavaType inner;
 
-    public JavaArrayType(ArrayType<JavaType> arrayType) {
+    public JavaArrayType(JavaType arrayType) {
         this.inner = arrayType;
     }
 
@@ -25,6 +25,6 @@ public final class JavaArrayType implements JavaType {
     public static Option<CompileResult<JavaType>> deserialize(Node node) {
         return Deserializers.deserializeWithType(node, "array")
                 .map(deserializer -> deserializer.withNode("child", Types::deserialize)
-                        .complete(type1 -> new JavaArrayType(new ArrayType<JavaType>(type1))));
+                        .complete(JavaArrayType::new));
     }
 }
