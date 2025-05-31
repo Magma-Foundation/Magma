@@ -8,7 +8,7 @@ import magmac.app.lang.Deserializers;
 final class Assignables {
     public static CompileResult<Assignable> deserializeError(Node node) {
         return Deserializers.orError("assignable", node, Lists.of(
-                Deserializers.wrap(Definition::deserialize),
+                Deserializers.wrap(JavaDefinition::deserialize),
                 Deserializers.wrap(Values::deserialize)
         ));
     }

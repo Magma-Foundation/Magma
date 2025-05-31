@@ -22,7 +22,7 @@ public final class TypescriptStructureNode implements TypeScriptRootSegment {
     public static Rule createClassRule(String type) {
         Rule children = CommonLang.Statements("members", TypescriptLang.createStructureMemberRule());
         Rule name = new StringRule("name");
-        Rule afterKeyword = LocatingRule.First(Definition.attachTypeParams(name), " {", new SuffixRule(children, "\n}\n"));
+        Rule afterKeyword = LocatingRule.First(JavaDefinition.attachTypeParams(name), " {", new SuffixRule(children, "\n}\n"));
         return new TypeRule(type, new PrefixRule("export " + type + " ", afterKeyword));
     }
 

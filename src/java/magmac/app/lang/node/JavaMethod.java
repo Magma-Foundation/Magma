@@ -21,24 +21,27 @@ import magmac.app.lang.CommonLang;
 import magmac.app.lang.Deserializers;
 import magmac.app.lang.OptionNodeListRule;
 
-public record MethodNode(MethodHeader header, Option<List<FunctionSegment>> maybeChildren,
-                         List<Parameter> right) implements JavaStructureMember {
+public record JavaMethod(
+        MethodHeader header,
+        List<Parameter> parameters,
+        Option<List<FunctionSegment>> maybeChildren
+) implements JavaStructureMember {
     public static Option<CompileResult<JavaStructureMember>> deserialize(Node node) {
         return Deserializers.deserializeWithType(node, "method").map((InitialDestructor deserializer) -> deserializer
                 .withNode("header", MethodHeader::deserializeError)
                 .withNodeListOptionally("children", FunctionSegment::deserialize)
                 .withNodeList("parameters", Parameters::deserialize)
-                .complete((tuple) -> new MethodNode(tuple.left().left(), tuple.left().right(), tuple.right()))
-                .mapValue((MethodNode type) -> type));
+                .complete((tuple) -> new JavaMethod(tuple.left().left(), tuple.right(), tuple.left().right()))
+                .mapValue((JavaMethod type) -> type));
     }
 
     public static Rule createMethodRule(Rule childRule) {
         NodeRule header = new NodeRule("header", new OrRule(Lists.of(
-                Definition.createDefinitionRule(),
+                JavaDefinition.createDefinitionRule(),
                 new TypeRule("constructor", new StripRule(FilterRule.Symbol(new StringRule("name"))))
         )));
 
-        Rule parameters = Parameters.createParametersRule(Definition.createDefinitionRule());
+        Rule parameters = Parameters.createParametersRule(JavaDefinition.createDefinitionRule());
         Rule content = CommonLang.Statements("children", childRule);
         Rule rightRule = new StripRule(new PrefixRule("{", new SuffixRule(new StripRule("", content, "after-children"), "}")));
         Rule withParams = new OptionNodeListRule("parameters",

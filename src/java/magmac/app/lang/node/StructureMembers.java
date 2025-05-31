@@ -14,7 +14,7 @@ final class StructureMembers {
     public static CompileResult<JavaStructureMember> deserialize(Node node) {
         return Deserializers.orError("structure-member", node, Lists.of(
                 Deserializers.wrap(Whitespace::deserialize),
-                Deserializers.wrap(MethodNode::deserialize),
+                Deserializers.wrap(JavaMethod::deserialize),
                 Deserializers.wrap(StructureStatement::deserialize),
                 Deserializers.wrap(EnumValues::deserialize)
         ));
@@ -23,12 +23,12 @@ final class StructureMembers {
     public static Rule createClassMemberRule() {
         LazyRule functionSegmentRule = new MutableLazyRule();
         LazyRule valueLazy = new MutableLazyRule();
-        LazyRule value = Values.initValueRule(functionSegmentRule, valueLazy, "->", Definition.createDefinitionRule());
-        Rule functionSegment = FunctionSegment.initFunctionSegmentRule(functionSegmentRule, value, Definition.createDefinitionRule());
+        LazyRule value = Values.initValueRule(functionSegmentRule, valueLazy, "->", JavaDefinition.createDefinitionRule());
+        Rule functionSegment = FunctionSegment.initFunctionSegmentRule(functionSegmentRule, value, JavaDefinition.createDefinitionRule());
         return new OrRule(Lists.of(
                 Whitespace.createWhitespaceRule(),
-                StructureStatement.createStructureStatementRule(new TypeRule("definition", Definition.createDefinitionRule()), value),
-                MethodNode.createMethodRule(functionSegment),
+                StructureStatement.createStructureStatementRule(new TypeRule("definition", JavaDefinition.createDefinitionRule()), value),
+                JavaMethod.createMethodRule(functionSegment),
                 EnumValues.createEnumValuesRule(value)
         ));
     }

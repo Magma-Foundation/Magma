@@ -13,7 +13,7 @@ public final class Parameters {
     public static CompileResult<Parameter> deserialize(Node node) {
         return Deserializers.orError("parameter", node, Lists.of(
                 Deserializers.wrap(Whitespace::deserialize),
-                Deserializers.wrap(Definition::deserialize)
+                Deserializers.wrap(JavaDefinition::deserialize)
         ));
     }
 

@@ -17,10 +17,10 @@ import magmac.app.lang.ValueFolder;
 final class Structures {
     public static Rule createStructureRule(String keyword) {
         Rule name = new StripRule(FilterRule.Symbol(new StringRule("name")));
-        Rule beforeContent = Definition.attachTypeParams(name);
+        Rule beforeContent = JavaDefinition.attachTypeParams(name);
 
         Rule withParameters = new OrRule(Lists.of(
-                new StripRule(new SuffixRule(LocatingRule.First(beforeContent, "(", Parameters.createParametersRule(Definition.createDefinitionRule())), ")")),
+                new StripRule(new SuffixRule(LocatingRule.First(beforeContent, "(", Parameters.createParametersRule(JavaDefinition.createDefinitionRule())), ")")),
                 beforeContent
         ));
 

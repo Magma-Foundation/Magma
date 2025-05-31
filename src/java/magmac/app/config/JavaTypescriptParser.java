@@ -8,15 +8,16 @@ import magmac.app.compile.error.CompileResultCollector;
 import magmac.app.compile.error.CompileResults;
 import magmac.app.io.Location;
 import magmac.app.io.sources.UnitSetCollector;
-import magmac.app.lang.node.Constructor;
-import magmac.app.lang.node.Definition;
+import magmac.app.lang.node.JavaConstructor;
+import magmac.app.lang.node.JavaDefinition;
 import magmac.app.lang.node.EnumValues;
 import magmac.app.lang.node.JavaNamespacedNode;
 import magmac.app.lang.node.JavaRootSegment;
 import magmac.app.lang.node.JavaStructureMember;
 import magmac.app.lang.node.JavaStructureNode;
 import magmac.app.lang.node.MethodHeader;
-import magmac.app.lang.node.MethodNode;
+import magmac.app.lang.node.JavaMethod;
+import magmac.app.lang.node.Parameter;
 import magmac.app.lang.node.Root;
 import magmac.app.lang.node.Segment;
 import magmac.app.lang.node.StructureStatement;
@@ -89,18 +90,21 @@ class JavaTypescriptParser implements Parser<Root<JavaRootSegment>, TypescriptRo
             case Whitespace whitespace -> new Whitespace();
             case EnumValues enumValues -> new Whitespace();
             case StructureStatement structureStatement -> new Whitespace();
-            case MethodNode methodNode -> JavaTypescriptParser.parseMethod(methodNode);
+            case JavaMethod methodNode -> JavaTypescriptParser.parseMethod(methodNode);
         };
     }
 
-    private static TypescriptStructureMember parseMethod(MethodNode methodNode) {
-        return new TypescriptMethod(JavaTypescriptParser.parseMethodHeader(methodNode.header()));
+    private static TypescriptStructureMember parseMethod(JavaMethod methodNode) {
+        List<Parameter> parameters = methodNode.parameters();
+        MethodHeader header1 = methodNode.header();
+        MethodHeader header = JavaTypescriptParser.parseMethodHeader(header1, parameters);
+        return new TypescriptMethod(header);
     }
 
-    private static MethodHeader parseMethodHeader(MethodHeader header) {
+    private static MethodHeader parseMethodHeader(MethodHeader header, List<Parameter> parameters) {
         return switch (header) {
-            case Constructor constructor -> constructor;
-            case Definition definition -> definition;
+            case JavaConstructor constructor -> constructor;
+            case JavaDefinition definition -> definition;
         };
     }
 

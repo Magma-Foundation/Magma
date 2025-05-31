@@ -29,24 +29,24 @@ import magmac.app.lang.Serializable;
 import magmac.app.lang.TypeSeparatorFolder;
 import magmac.app.lang.ValueFolder;
 
-public record Definition(
+public record JavaDefinition(
         String name,
         Type type,
         List<Modifier> modifiers,
         Option<List<Annotation>> annotations,
         Option<List<TypeParam>> typeParams
 ) implements Parameter, Assignable, MethodHeader {
-    public static CompileResult<Definition> deserializeError(Node node) {
-        return Definition.complete(Deserializers.destruct(node));
+    public static CompileResult<JavaDefinition> deserializeError(Node node) {
+        return JavaDefinition.complete(Deserializers.destruct(node));
     }
 
-    private static CompileResult<Definition> complete(InitialDestructor deserialize) {
+    private static CompileResult<JavaDefinition> complete(InitialDestructor deserialize) {
         return deserialize.withString("name")
                 .withNode("type", Types::deserialize)
                 .withNodeList("modifiers", Modifier::deserialize)
                 .withNodeListOptionally("annotations", Annotation::deserialize)
                 .withNodeListOptionally("type-parameters", TypeParam::deserialize)
-                .complete((result) -> new Definition(
+                .complete((result) -> new JavaDefinition(
                         result.left().left().left().left(),
                         result.left().left().left().right(),
                         result.left().left().right(),
@@ -54,8 +54,8 @@ public record Definition(
                         result.right()));
     }
 
-    public static Option<CompileResult<Definition>> deserialize(Node node) {
-        return Deserializers.deserializeWithType(node, "definition").map(Definition::complete);
+    public static Option<CompileResult<JavaDefinition>> deserialize(Node node) {
+        return Deserializers.deserializeWithType(node, "definition").map(JavaDefinition::complete);
     }
 
     public static Rule createDefinitionRule() {
@@ -66,7 +66,7 @@ public record Definition(
                 modifiers
         ));
 
-        Rule leftRule1 = Definition.attachTypeParams(beforeTypeParams);
+        Rule leftRule1 = JavaDefinition.attachTypeParams(beforeTypeParams);
 
         Rule rightRule = new NodeRule("type", Types.createTypeRule());
         Divider divider = new FoldingDivider(new TypeSeparatorFolder());

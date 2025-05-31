@@ -6,11 +6,11 @@ import magmac.app.compile.node.Node;
 import magmac.app.lang.Deserializers;
 import magmac.app.lang.Serializable;
 
-public sealed interface MethodHeader extends Serializable permits Constructor, Definition {
+public sealed interface MethodHeader extends Serializable permits JavaConstructor, JavaDefinition {
     static CompileResult<MethodHeader> deserializeError(Node node) {
         return Deserializers.orError("header", node, Lists.of(
-                Deserializers.wrap(Definition::deserialize),
-                Deserializers.wrap(Constructor::deserialize)
+                Deserializers.wrap(JavaDefinition::deserialize),
+                Deserializers.wrap(JavaConstructor::deserialize)
         ));
     }
 }
