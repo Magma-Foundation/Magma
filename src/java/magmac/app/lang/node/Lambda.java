@@ -15,9 +15,9 @@ import magmac.app.compile.rule.StripRule;
 import magmac.app.compile.rule.SuffixRule;
 import magmac.app.compile.rule.TypeRule;
 import magmac.app.lang.CommonLang;
+import magmac.app.lang.Deserializers;
 import magmac.app.lang.LazyRule;
 import magmac.app.lang.ValueFolder;
-import magmac.app.lang.Deserializers;
 
 record Lambda() implements Value {
     public static Option<CompileResult<Lambda>> deserialize(Node node) {
@@ -35,12 +35,12 @@ record Lambda() implements Value {
         Rule withParentheses = new PrefixRule("(", new SuffixRule(parameters, ")"));
         Rule withoutParentheses = Symbols.createSymbolRule("param");
 
-        Rule beforeInfix = new OrRule(Lists.of(
+        Rule header = new NodeRule("header", new OrRule(Lists.of(
                 withParentheses,
                 withoutParentheses
-        ));
+        )));
 
-        return new TypeRule("lambda", LocatingRule.First(new StripRule(beforeInfix), infix, afterInfix));
+        return new TypeRule("lambda", LocatingRule.First(new StripRule(header), infix, afterInfix));
     }
 
     private static Rule createLambdaParameterRule(Rule definition) {
