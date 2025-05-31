@@ -8,7 +8,8 @@ import magmac.app.lang.Deserializers;
 public class LambdaHeaders {
     public static CompileResult<LambdaHeader> deserialize(Node node) {
         return Deserializers.orError("lambda-header", node, Lists.of(
-                Deserializers.wrap(SingleHeader::deserialize)
+                Deserializers.wrap(SingleHeader::deserialize),
+                Deserializers.wrap(MultipleHeader::deserialize)
         ));
     }
 }
