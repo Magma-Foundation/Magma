@@ -24,6 +24,6 @@ record Post(PostVariant variant, Value value) implements FunctionSegmentValue {
 
     @Override
     public Node serialize() {
-        return new MapNode();
+        return new MapNode(this.variant.type());
     }
 }

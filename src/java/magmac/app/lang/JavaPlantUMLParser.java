@@ -12,7 +12,7 @@ import magmac.app.compile.error.CompileResults;
 import magmac.app.io.Location;
 import magmac.app.lang.node.JavaArrayType;
 import magmac.app.lang.node.JavaBase;
-import magmac.app.lang.node.Root;
+import magmac.app.lang.node.JavaRoot;
 import magmac.app.lang.node.JavaRootSegment;
 import magmac.app.lang.node.JavaNamespacedNode;
 import magmac.app.lang.node.PlantUMLDependency;
@@ -38,7 +38,7 @@ import magmac.app.stage.unit.SimpleUnit;
 import magmac.app.stage.unit.Unit;
 import magmac.app.stage.unit.UnitSet;
 
-public class JavaPlantUMLParser implements Parser<Root<JavaRootSegment>, PlantUMLRoot> {
+public class JavaPlantUMLParser implements Parser<JavaRoot, PlantUMLRoot> {
     private static Iter<PlantUMLRootSegment> parseNamespaced(String child, JavaNamespacedNode namespaced) {
         return switch (namespaced.type()) {
             case Package -> Iters.empty();
@@ -86,7 +86,7 @@ public class JavaPlantUMLParser implements Parser<Root<JavaRootSegment>, PlantUM
     }
 
     @Override
-    public CompileResult<UnitSet<PlantUMLRoot>> apply(UnitSet<Root<JavaRootSegment>> initial) {
+    public CompileResult<UnitSet<PlantUMLRoot>> apply(UnitSet<JavaRoot> initial) {
         List<PlantUMLRootSegment> roots = initial.iter()
                 .flatMap(JavaPlantUMLParser::parseRoot)
                 .collect(new ListCollector<>())
@@ -100,7 +100,7 @@ public class JavaPlantUMLParser implements Parser<Root<JavaRootSegment>, PlantUM
                 .add(new SimpleUnit<>(defaultLocation, mergedRoot)));
     }
 
-    private static Iter<PlantUMLRootSegment> parseRoot(Unit<Root<JavaRootSegment>> unit) {
+    private static Iter<PlantUMLRootSegment> parseRoot(Unit<JavaRoot> unit) {
         return unit.destruct((location, root) -> root.children()
                 .iter()
                 .flatMap(segment -> JavaPlantUMLParser.parseRootSegment(location.name(), segment)));

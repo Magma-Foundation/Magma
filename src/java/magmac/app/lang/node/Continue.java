@@ -13,6 +13,6 @@ class Continue implements FunctionSegmentValue {
 
     @Override
     public Node serialize() {
-        return new MapNode();
+        return new MapNode("continue");
     }
 }

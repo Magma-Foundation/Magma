@@ -69,7 +69,7 @@ public final class Values {
         );
 
         List<Rule> operatorLists = Iters.fromValues(Operator.values())
-                .map(operator -> Operation.createOperationRule(value, operator.type(), operator.text()))
+                .map(operator -> Operation.createOperationRule(operator, value))
                 .collect(new ListCollector<>());
 
         return ruleList.addAllLast(operatorLists);

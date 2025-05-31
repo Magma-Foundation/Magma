@@ -36,6 +36,6 @@ record InvokableNode(Caller left, List<Argument> right) implements Value, Functi
 
     @Override
     public Node serialize() {
-        return new MapNode();
+        return new MapNode("invokable");
     }
 }

@@ -36,15 +36,6 @@ PlantUMLInherits --> StringRule
 PlantUMLInherits --> TypeRule
 class PlantUMLInherits
 PlantUMLRootSegment <|-- PlantUMLInherits
-Root --> List
-Root --> MapNode
-Root --> Node
-Root --> Rule
-Root --> TypeRule
-Root --> CommonLang
-Root --> Serializable
-class Root
-Serializable <|-- Root
 TargetPlatform --> Application
 TargetPlatform --> Compiler
 TargetPlatform --> Rule
@@ -130,8 +121,8 @@ Access --> LocatingRule
 Access --> NodeRule
 Access --> Rule
 Access --> TypeRule
-Access --> LazyRule
 Access --> Deserializers
+Access --> LazyRule
 class Access
 Value <|-- Access
 AfterAll --> Node
@@ -162,8 +153,7 @@ Not --> Deserializers
 class Not
 Value <|-- Not
 Compiler --> CompileResult
-Compiler --> JavaRootSegment
-Compiler --> Root
+Compiler --> JavaRoot
 Compiler --> UnitSet
 interface Compiler
 MapCollector --> Tuple2
@@ -256,8 +246,7 @@ CompileApplication --> ApplicationError
 CompileApplication --> ThrowableError
 CompileApplication --> Targets
 CompileApplication --> Serializable
-CompileApplication --> JavaRootSegment
-CompileApplication --> Root
+CompileApplication --> JavaRoot
 CompileApplication --> UnitSet
 class CompileApplication
 Application <|-- CompileApplication
@@ -307,6 +296,11 @@ TypescriptMethod --> MapNode
 TypescriptMethod --> Node
 class TypescriptMethod
 TypescriptStructureMember <|-- TypescriptMethod
+JavaRoot --> List
+JavaRoot --> CompileResult
+JavaRoot --> Node
+JavaRoot --> Deserializers
+class JavaRoot
 JavaMethodHeader --> Lists
 JavaMethodHeader --> CompileResult
 JavaMethodHeader --> Node
@@ -407,6 +401,10 @@ Parser --> UnitSet
 Parser --> Stage
 interface Parser
 Stage <|-- Parser
+Roots --> Rule
+Roots --> TypeRule
+Roots --> CommonLang
+class Roots
 Lexer --> Node
 Lexer --> UnitSet
 Lexer --> Stage
@@ -454,9 +452,9 @@ Main --> TypeScriptTargetPlatform
 Main --> ApplicationError
 Main --> PathSources
 Main --> Sources
-Main --> JavaLang
-Main --> JavaRootSegment
-Main --> Root
+Main --> JavaRoot
+Main --> JavaRootSegments
+Main --> Roots
 Main --> Lexer
 Main --> RuleLexer
 Main --> UnitSet
@@ -573,9 +571,7 @@ Stage <|-- Generator
 Max --> Optional
 class Max
 Collector <|-- Max
-JavaRootSegment --> Serializable
 interface JavaRootSegment
-Serializable <|-- JavaRootSegment
 DividingSplitter --> Option
 DividingSplitter --> Tuple2
 DividingSplitter --> List
@@ -885,7 +881,7 @@ JavaPlantUMLParser --> CompileResults
 JavaPlantUMLParser --> Location
 JavaPlantUMLParser --> JavaArrayType
 JavaPlantUMLParser --> JavaBase
-JavaPlantUMLParser --> Root
+JavaPlantUMLParser --> JavaRoot
 JavaPlantUMLParser --> JavaRootSegment
 JavaPlantUMLParser --> JavaNamespacedNode
 JavaPlantUMLParser --> PlantUMLDependency
@@ -1011,8 +1007,7 @@ TypeScriptTargetPlatform --> Rule
 TypeScriptTargetPlatform --> PathTargets
 TypeScriptTargetPlatform --> Targets
 TypeScriptTargetPlatform --> TypescriptLang
-TypeScriptTargetPlatform --> JavaRootSegment
-TypeScriptTargetPlatform --> Root
+TypeScriptTargetPlatform --> JavaRoot
 TypeScriptTargetPlatform --> TypescriptRoot
 TypeScriptTargetPlatform --> Generator
 TypeScriptTargetPlatform --> RuleGenerator
@@ -1064,8 +1059,7 @@ class Maps
 class Tuple2
 StagedCompiler --> CompileResult
 StagedCompiler --> Serializable
-StagedCompiler --> JavaRootSegment
-StagedCompiler --> Root
+StagedCompiler --> JavaRoot
 StagedCompiler --> Generator
 StagedCompiler --> Parser
 StagedCompiler --> UnitSet
@@ -1100,7 +1094,7 @@ JavaTypescriptParser --> JavaTemplateType
 JavaTypescriptParser --> JavaType
 JavaTypescriptParser --> ParameterizedMethodHeader
 JavaTypescriptParser --> QualifiedType
-JavaTypescriptParser --> Root
+JavaTypescriptParser --> JavaRoot
 JavaTypescriptParser --> Segment
 JavaTypescriptParser --> StructureStatement
 JavaTypescriptParser --> StructureValue
@@ -1151,12 +1145,6 @@ LastSelector --> List
 LastSelector --> Joiner
 class LastSelector
 Selector <|-- LastSelector
-RootDeserializer --> CompileResult
-RootDeserializer --> Node
-RootDeserializer --> Deserializers
-RootDeserializer --> Serializable
-class RootDeserializer
-Deserializer <|-- RootDeserializer
 InlineCompileResult --> Tuple2
 InlineCompileResult --> Result
 InlineCompileResult --> CompileError
@@ -1477,10 +1465,7 @@ JavaLang --> Divider
 JavaLang --> FoldingDivider
 JavaLang --> DelimitedFolder
 JavaLang --> DividingSplitter
-JavaLang --> JavaRootSegment
-JavaLang --> JavaRootSegments
 JavaLang --> Modifier
-JavaLang --> RootDeserializer
 JavaLang --> Types
 class JavaLang
 StringRule --> Ok
@@ -1645,6 +1630,12 @@ NodeListRule --> Folder
 NodeListRule --> ValueFolder
 class NodeListRule
 Rule <|-- NodeListRule
+TypeScriptRoots --> List
+TypeScriptRoots --> MapNode
+TypeScriptRoots --> Node
+TypeScriptRoots --> Serializable
+class TypeScriptRoots
+Serializable <|-- TypeScriptRoots
 Definition --> Option
 Definition --> List
 Definition --> CompileResult
@@ -1672,25 +1663,6 @@ Assignables --> Node
 Assignables --> Deserializers
 class Assignables
 enum NamespacedType
-TypeScriptAfterPasser --> None
-TypeScriptAfterPasser --> Option
-TypeScriptAfterPasser --> Some
-TypeScriptAfterPasser --> Lists
-TypeScriptAfterPasser --> CompileResult
-TypeScriptAfterPasser --> CompileResults
-TypeScriptAfterPasser --> InlineNodeList
-TypeScriptAfterPasser --> MapNode
-TypeScriptAfterPasser --> Node
-TypeScriptAfterPasser --> NodeList
-TypeScriptAfterPasser --> NodeListCollector
-TypeScriptAfterPasser --> Passer
-TypeScriptAfterPasser --> ParseState
-TypeScriptAfterPasser --> InlinePassResult
-TypeScriptAfterPasser --> ParseResult
-TypeScriptAfterPasser --> ParseUnit
-TypeScriptAfterPasser --> ParseUnitImpl
-class TypeScriptAfterPasser
-Passer <|-- TypeScriptAfterPasser
 interface Collector
 LocatingSplitter --> Option
 LocatingSplitter --> Tuple2
@@ -1736,8 +1708,7 @@ Segment --> Deserializers
 class Segment
 Application --> Option
 Application --> Error
-Application --> JavaRootSegment
-Application --> Root
+Application --> JavaRoot
 Application --> UnitSet
 interface Application
 ImmutableParseState --> Location
@@ -1761,6 +1732,7 @@ Operation --> LocatingRule
 Operation --> NodeRule
 Operation --> Rule
 Operation --> TypeRule
+Operation --> LazyRule
 class Operation
 Value <|-- Operation
 Divider --> Iter
@@ -1821,7 +1793,6 @@ class PlantUMLAfterPasser
 Passer <|-- PlantUMLAfterPasser
 JavaRootSegments --> Lists
 JavaRootSegments --> CompileResult
-JavaRootSegments --> MapNode
 JavaRootSegments --> Node
 JavaRootSegments --> OrRule
 JavaRootSegments --> Rule

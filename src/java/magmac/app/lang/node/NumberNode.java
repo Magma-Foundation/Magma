@@ -22,6 +22,6 @@ record NumberNode(String value) implements Value {
 
     @Override
     public Node serialize() {
-        return new MapNode();
+        return new MapNode("number");
     }
 }

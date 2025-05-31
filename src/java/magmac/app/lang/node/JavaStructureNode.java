@@ -23,11 +23,6 @@ public final class JavaStructureNode implements JavaRootSegment {
         this.variants = variants;
     }
 
-    @Override
-    public Node serialize() {
-        return new MapNode();
-    }
-
     public JavaStructureType type() {
         return this.type;
     }

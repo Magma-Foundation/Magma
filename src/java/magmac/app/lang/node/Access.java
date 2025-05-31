@@ -8,8 +8,8 @@ import magmac.app.compile.rule.LocatingRule;
 import magmac.app.compile.rule.NodeRule;
 import magmac.app.compile.rule.Rule;
 import magmac.app.compile.rule.TypeRule;
-import magmac.app.lang.LazyRule;
 import magmac.app.lang.Deserializers;
+import magmac.app.lang.LazyRule;
 
 record Access(AccessType type, String property, Value caller) implements Value {
     public static Option<CompileResult<Value>> deserialize(AccessType type, Node node) {
@@ -25,6 +25,6 @@ record Access(AccessType type, String property, Value caller) implements Value {
 
     @Override
     public Node serialize() {
-        return new MapNode();
+        return new MapNode(this.type.type());
     }
 }

@@ -2,7 +2,6 @@ package magmac.app.lang.node;
 
 import magmac.api.collect.list.Lists;
 import magmac.app.compile.error.CompileResult;
-import magmac.app.compile.node.MapNode;
 import magmac.app.compile.node.Node;
 import magmac.app.compile.rule.OrRule;
 import magmac.app.compile.rule.Rule;
@@ -18,10 +17,6 @@ public final class JavaRootSegments {
                 Deserializers.wrap(new JavaStructureNodeDeserializer(JavaStructureType.Record)),
                 Deserializers.wrap(new JavaStructureNodeDeserializer(JavaStructureType.Enum))
         ));
-    }
-
-    public static Node serialize(JavaRootSegment segment) {
-        return new MapNode();
     }
 
     static Rule getChildRule() {

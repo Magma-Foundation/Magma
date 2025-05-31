@@ -32,6 +32,6 @@ record AssignmentNode(Assignable assignable, Value value) implements FunctionSeg
 
     @Override
     public Node serialize() {
-        return new MapNode();
+        return new MapNode("assignment");
     }
 }

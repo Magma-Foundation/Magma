@@ -35,9 +35,4 @@ public record JavaNamespacedNode(NamespacedType type, List<Segment> segments) im
         Rule childRule = NodeListRule.createNodeListRule("segments", new DelimitedFolder('.'), new StringRule("value"));
         return new TypeRule(type, new StripRule(new SuffixRule(new PrefixRule(type + " ", childRule), ";")));
     }
-
-    @Override
-    public Node serialize() {
-        return new MapNode();
-    }
 }

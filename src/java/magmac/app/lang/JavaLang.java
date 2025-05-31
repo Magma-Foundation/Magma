@@ -17,17 +17,10 @@ import magmac.app.compile.rule.divide.Divider;
 import magmac.app.compile.rule.divide.FoldingDivider;
 import magmac.app.compile.rule.fold.DelimitedFolder;
 import magmac.app.compile.rule.split.DividingSplitter;
-import magmac.app.lang.node.JavaRootSegment;
-import magmac.app.lang.node.JavaRootSegments;
 import magmac.app.lang.node.Modifier;
-import magmac.app.lang.node.RootDeserializer;
 import magmac.app.lang.node.Types;
 
 public class JavaLang {
-    public static RootDeserializer<JavaRootSegment> createDeserializer() {
-        return new RootDeserializer<JavaRootSegment>(JavaRootSegments::deserialize);
-    }
-
     public static Rule createRule() {
         Rule modifiers = Modifier.createModifiersRule();
         Rule annotations = NodeListRule.createNodeListRule("annotations", new DelimitedFolder('\n'), new StripRule(new PrefixRule("@", new StringRule("value"))));
@@ -36,7 +29,7 @@ public class JavaLang {
                 modifiers
         ));
 
-        Rule leftRule1 = attachTypeParams(beforeTypeParams);
+        Rule leftRule1 = JavaLang.attachTypeParams(beforeTypeParams);
 
         Rule rightRule = new NodeRule("type", Types.createTypeRule());
         Divider divider = new FoldingDivider(new TypeSeparatorFolder());

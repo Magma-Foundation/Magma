@@ -24,6 +24,6 @@ public record Modifier(String value) implements Serializable {
 
     @Override
     public Node serialize() {
-        return new MapNode().withString("value", this.value);
+        return new MapNode("modifier").withString("value", this.value);
     }
 }
