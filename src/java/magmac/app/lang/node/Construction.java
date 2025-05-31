@@ -2,6 +2,7 @@ package magmac.app.lang.node;
 
 import magmac.api.Option;
 import magmac.app.compile.error.CompileResult;
+import magmac.app.compile.node.MapNode;
 import magmac.app.compile.node.Node;
 import magmac.app.compile.rule.NodeRule;
 import magmac.app.compile.rule.PrefixRule;
@@ -17,5 +18,10 @@ record Construction(JavaType type) implements Caller {
 
     public static Rule createConstructionRule() {
         return new TypeRule("construction", new StripRule(new PrefixRule("new ", new NodeRule("type", Types.createTypeRule()))));
+    }
+
+    @Override
+    public Node serialize() {
+        return new MapNode(this.getClass().getName());
     }
 }

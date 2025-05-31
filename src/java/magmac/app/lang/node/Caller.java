@@ -4,8 +4,9 @@ import magmac.api.collect.list.Lists;
 import magmac.app.compile.error.CompileResult;
 import magmac.app.compile.node.Node;
 import magmac.app.lang.Deserializers;
+import magmac.app.lang.Serializable;
 
-interface Caller {
+interface Caller extends Serializable {
     static CompileResult<Caller> deserialize(Node node) {
         return Deserializers.orError("caller", node, Lists.of(
                 Construction::deserialize,

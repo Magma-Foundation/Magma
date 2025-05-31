@@ -16,10 +16,10 @@ import magmac.app.compile.rule.SuffixRule;
 import magmac.app.compile.rule.TypeRule;
 import magmac.app.compile.rule.divide.FoldingDivider;
 import magmac.app.compile.rule.split.DividingSplitter;
-import magmac.app.lang.InvocationFolder;
 import magmac.app.lang.Deserializers;
+import magmac.app.lang.InvocationFolder;
 
-record InvokableNode(Caller left, List<Argument> right) implements Value, FunctionSegmentValue {
+record InvokableNode(Caller caller, List<Argument> arguments) implements Value, FunctionSegmentValue {
     public static Option<CompileResult<InvokableNode>> deserialize(Node node) {
         return Deserializers.deserializeWithType(node, "invokable").map(deserializer -> deserializer.withNode("caller", Caller::deserialize)
                 .withNodeList("arguments", Arguments::deserialize)
@@ -36,6 +36,8 @@ record InvokableNode(Caller left, List<Argument> right) implements Value, Functi
 
     @Override
     public Node serialize() {
-        return new MapNode("invokable");
+        return new MapNode("invokable")
+                .withNodeSerialized("caller", this.caller)
+                .withNodeListSerialized("arguments", this.arguments);
     }
 }

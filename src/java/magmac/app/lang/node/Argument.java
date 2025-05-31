@@ -1,4 +1,6 @@
 package magmac.app.lang.node;
 
-interface Argument {
+import magmac.app.lang.Serializable;
+
+interface Argument extends Serializable {
 }

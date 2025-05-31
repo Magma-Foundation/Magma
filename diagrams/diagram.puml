@@ -929,8 +929,8 @@ InvokableNode --> SuffixRule
 InvokableNode --> TypeRule
 InvokableNode --> FoldingDivider
 InvokableNode --> DividingSplitter
-InvokableNode --> InvocationFolder
 InvokableNode --> Deserializers
+InvokableNode --> InvocationFolder
 class InvokableNode
 Value <|-- InvokableNode
 FunctionSegmentValue <|-- InvokableNode
@@ -1024,7 +1024,9 @@ Caller --> Lists
 Caller --> CompileResult
 Caller --> Node
 Caller --> Deserializers
+Caller --> Serializable
 interface Caller
+Serializable <|-- Caller
 Unit --> CompileResult
 Unit --> Location
 Unit --> BiFunction
@@ -1044,7 +1046,9 @@ FlattenJava --> Passer
 FlattenJava --> ParseState
 class FlattenJava
 Passer <|-- FlattenJava
+Argument --> Serializable
 interface Argument
+Serializable <|-- Argument
 Parameters --> Lists
 Parameters --> CompileResult
 Parameters --> Node
@@ -1422,12 +1426,12 @@ CommonLang --> SuffixRule
 CommonLang --> TypeRule
 CommonLang --> StatementFolder
 class CommonLang
-Value --> Serializable
+Value --> MapNode
+Value --> Node
 interface Value
 Caller <|-- Value
 Argument <|-- Value
 Assignable <|-- Value
-Serializable <|-- Value
 InvocationFolder --> DivideState
 InvocationFolder --> Folder
 class InvocationFolder
@@ -1601,6 +1605,7 @@ class FirstLocator
 Locator <|-- FirstLocator
 Construction --> Option
 Construction --> CompileResult
+Construction --> MapNode
 Construction --> Node
 Construction --> NodeRule
 Construction --> PrefixRule

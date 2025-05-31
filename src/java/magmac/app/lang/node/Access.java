@@ -11,20 +11,23 @@ import magmac.app.compile.rule.TypeRule;
 import magmac.app.lang.Deserializers;
 import magmac.app.lang.LazyRule;
 
-record Access(AccessType type, String property, Value caller) implements Value {
+record Access(AccessType type, Value receiver, String property) implements Value {
     public static Option<CompileResult<Value>> deserialize(AccessType type, Node node) {
-        return Deserializers.deserializeWithType(node, type.type()).map(deserializer -> deserializer.withString("property")
-                .withNode("instance", Values::deserializeOrError)
-                .complete(tuple -> new Access(type, tuple.left(), tuple.right())));
+        return Deserializers.deserializeWithType(node, type.type())
+                .map(deserializer -> deserializer.withString("property")
+                        .withNode("receiver", Values::deserializeOrError)
+                        .complete(tuple -> new Access(type, tuple.right(), tuple.left())));
     }
 
     public static Rule createAccessRule(String type, String infix, LazyRule value) {
         Rule property = Symbols.createSymbolRule("property");
-        return new TypeRule(type, LocatingRule.Last(new NodeRule("instance", value), infix, property));
+        return new TypeRule(type, LocatingRule.Last(new NodeRule("receiver", value), infix, property));
     }
 
     @Override
     public Node serialize() {
-        return new MapNode(this.type.type());
+        return new MapNode(this.type.type())
+                .withNodeSerialized("receiver", this.receiver)
+                .withString("property", this.property);
     }
 }
