@@ -10,8 +10,8 @@ import magmac.api.iter.collect.ListCollector;
 import magmac.app.compile.error.CompileResult;
 import magmac.app.compile.error.CompileResults;
 import magmac.app.io.Location;
-import magmac.app.lang.node.ArrayType;
-import magmac.app.lang.node.Base;
+import magmac.app.lang.node.JavaArrayType;
+import magmac.app.lang.node.JavaBase;
 import magmac.app.lang.node.Root;
 import magmac.app.lang.node.JavaRootSegment;
 import magmac.app.lang.node.JavaNamespacedNode;
@@ -28,7 +28,7 @@ import magmac.app.lang.node.Segment;
 import magmac.app.lang.node.JavaStructureNode;
 import magmac.app.lang.node.JavaStructureType;
 import magmac.app.lang.node.Symbol;
-import magmac.app.lang.node.TemplateType;
+import magmac.app.lang.node.JavaTemplateType;
 import magmac.app.lang.node.JavaType;
 import magmac.app.lang.node.VariadicType;
 import magmac.app.lang.node.Whitespace;
@@ -51,7 +51,7 @@ public class JavaPlantUMLParser implements Parser<Root<JavaRootSegment>, PlantUM
         };
     }
 
-    private static String createSimpleName(Base base) {
+    private static String createSimpleName(JavaBase base) {
         return switch (base) {
             case QualifiedType qualifiedType -> JavaPlantUMLParser.createSimpleNameFromQualifiedType(qualifiedType);
             case Symbol symbol -> symbol.value();
@@ -79,9 +79,9 @@ public class JavaPlantUMLParser implements Parser<Root<JavaRootSegment>, PlantUM
 
     private static String createSimpleNameFromType(JavaType type) {
         return switch (type) {
-            case ArrayType _, VariadicType _ -> "?";
+            case JavaArrayType _, VariadicType _ -> "?";
             case Symbol symbol -> symbol.value();
-            case TemplateType templateType -> JavaPlantUMLParser.createSimpleName(templateType.base());
+            case JavaTemplateType templateType -> JavaPlantUMLParser.createSimpleName(templateType.base);
         };
     }
 

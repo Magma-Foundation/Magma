@@ -21,9 +21,4 @@ public record VariadicType(JavaType child) implements JavaType {
         NodeRule child = new NodeRule("child", rule);
         return new TypeRule("variadic", new StripRule(new SuffixRule(child, "...")));
     }
-
-    @Override
-    public Node serialize() {
-        return new MapNode("variadic");
-    }
 }

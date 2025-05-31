@@ -1,5 +1,6 @@
 package magmac.app.lang.node;
 
+import magmac.app.compile.node.MapNode;
 import magmac.app.compile.node.Node;
 
 public final class TypeScriptDefinition implements TypeScriptParameter, Assignable, TypeScriptMethodHeader {
@@ -11,6 +12,8 @@ public final class TypeScriptDefinition implements TypeScriptParameter, Assignab
 
     @Override
     public Node serialize() {
-        return this.definition.serialize();
+        return new MapNode("definition")
+                .withString("name", this.definition.name())
+                .withNodeSerialized("type", this.definition.type());
     }
 }

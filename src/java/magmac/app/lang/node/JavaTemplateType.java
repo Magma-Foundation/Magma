@@ -1,7 +1,6 @@
 package magmac.app.lang.node;
 
 import magmac.api.Option;
-import magmac.api.collect.list.List;
 import magmac.api.collect.list.Lists;
 import magmac.app.compile.error.CompileResult;
 import magmac.app.compile.node.MapNode;
@@ -16,15 +15,23 @@ import magmac.app.compile.rule.SuffixRule;
 import magmac.app.compile.rule.TypeRule;
 import magmac.app.lang.Deserializers;
 
-public record TemplateType(Base base, List<JavaType> arguments) implements JavaType, TypeScriptType {
-    public static Option<CompileResult<TemplateType>> deserialize(Node node) {
-        return Deserializers.deserializeWithType(node, "template").map(deserializer -> deserializer
-                .withNode("base", TemplateType::deserializeBase)
-                .withNodeList("arguments", Types::deserialize)
-                .complete(tuple -> new TemplateType(tuple.left(), tuple.right())));
+public final class JavaTemplateType implements JavaType {
+    public final JavaBase base;
+    public final TypeArguments<JavaType> typeArguments;
+
+    public JavaTemplateType(JavaBase base, TypeArguments<JavaType> typeArguments) {
+        this.base = base;
+        this.typeArguments = typeArguments;
     }
 
-    private static CompileResult<Base> deserializeBase(Node node) {
+    public static Option<CompileResult<JavaTemplateType>> deserialize(Node node) {
+        return Deserializers.deserializeWithType(node, "template").map(deserializer -> deserializer
+                .withNode("base", JavaTemplateType::deserializeBase)
+                .withNodeList("arguments", Types::deserialize)
+                .complete(tuple -> new JavaTemplateType(tuple.left(), new TypeArguments<JavaType>(tuple.right()))));
+    }
+
+    private static CompileResult<JavaBase> deserializeBase(Node node) {
         return Deserializers.orError("base", node, Lists.of(
                 Deserializers.wrap(Symbols::deserialize),
                 Deserializers.wrap(QualifiedType::deserializeQualified)
@@ -39,12 +46,5 @@ public record TemplateType(Base base, List<JavaType> arguments) implements JavaT
 
         Rule arguments = NodeListRule.Values("arguments", type);
         return new TypeRule("template", new StripRule(new SuffixRule(LocatingRule.First(base, "<", arguments), ">")));
-    }
-
-    @Override
-    public Node serialize() {
-        return new MapNode("template")
-                .withNodeSerialized("base", this.base)
-                .withNodeListSerialized("arguments", this.arguments);
     }
 }

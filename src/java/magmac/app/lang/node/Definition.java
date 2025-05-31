@@ -9,13 +9,13 @@ import magmac.app.compile.node.Node;
 import magmac.app.lang.Deserializers;
 import magmac.app.lang.Serializable;
 
-public record Definition<T extends Serializable>(
+public record Definition<T>(
         Option<List<Annotation>> maybeAnnotations,
         List<Modifier> modifiers,
         String name,
         Option<List<TypeParam>> maybeTypeParams,
         T type
-) implements Serializable {
+) {
     static CompileResult<Definition<JavaType>> deserialize0(InitialDestructor deserialize) {
         return deserialize.withString("name")
                 .withNode("type", Types::deserialize)
@@ -32,13 +32,6 @@ public record Definition<T extends Serializable>(
     static Option<CompileResult<Definition<JavaType>>> deserializeWithType(Node node) {
         return Deserializers.deserializeWithType(node, "definition")
                 .map(Definition::deserialize0);
-    }
-
-    @Override
-    public Node serialize() {
-        return new MapNode("definition")
-                .withString("name", this.name)
-                .withNodeSerialized("type", this.type);
     }
 
     public <T extends Serializable> Definition<T> withType(T newType) {

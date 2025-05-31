@@ -13,9 +13,9 @@ public final class Types {
     public static CompileResult<JavaType> deserialize(Node node) {
         return Deserializers.orError("type", node, Lists.of(
                 Deserializers.wrap(Symbols::deserialize),
-                Deserializers.wrap(TemplateType::deserialize),
+                Deserializers.wrap(JavaTemplateType::deserialize),
                 Deserializers.wrap(VariadicType::deserialize),
-                Deserializers.wrap(ArrayType::deserialize)
+                Deserializers.wrap(JavaArrayType::deserialize)
         ));
     }
 
@@ -23,8 +23,8 @@ public final class Types {
         LazyRule type = new MutableLazyRule();
         return type.set(new OrRule(Lists.of(
                 VariadicType.createVariadicRule(type),
-                ArrayType.createArrayRule(type),
-                TemplateType.createTemplateRule(type),
+                JavaArrayType.createArrayRule(type),
+                JavaTemplateType.createTemplateRule(type),
                 Symbols.createSymbolRule(),
                 QualifiedType.createQualifiedRule()
         )));

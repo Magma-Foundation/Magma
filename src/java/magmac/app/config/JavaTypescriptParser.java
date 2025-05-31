@@ -2,6 +2,7 @@ package magmac.app.config;
 
 import magmac.api.collect.list.List;
 import magmac.api.collect.list.Lists;
+import magmac.api.iter.collect.Joiner;
 import magmac.api.iter.collect.ListCollector;
 import magmac.app.compile.error.CompileResult;
 import magmac.app.compile.error.CompileResultCollector;
@@ -12,6 +13,8 @@ import magmac.app.lang.node.ArrayType;
 import magmac.app.lang.node.Constructor;
 import magmac.app.lang.node.Definition;
 import magmac.app.lang.node.EnumValues;
+import magmac.app.lang.node.JavaArrayType;
+import magmac.app.lang.node.JavaBase;
 import magmac.app.lang.node.JavaDefinition;
 import magmac.app.lang.node.JavaMethod;
 import magmac.app.lang.node.JavaMethodHeader;
@@ -20,18 +23,24 @@ import magmac.app.lang.node.JavaParameter;
 import magmac.app.lang.node.JavaRootSegment;
 import magmac.app.lang.node.JavaStructureMember;
 import magmac.app.lang.node.JavaStructureNode;
+import magmac.app.lang.node.JavaTemplateType;
 import magmac.app.lang.node.JavaType;
 import magmac.app.lang.node.ParameterizedMethodHeader;
+import magmac.app.lang.node.QualifiedType;
 import magmac.app.lang.node.Root;
 import magmac.app.lang.node.Segment;
 import magmac.app.lang.node.StructureStatement;
 import magmac.app.lang.node.StructureValue;
+import magmac.app.lang.node.Symbol;
+import magmac.app.lang.node.TypeArguments;
 import magmac.app.lang.node.TypeScriptDefinition;
 import magmac.app.lang.node.TypeScriptImport;
 import magmac.app.lang.node.TypeScriptMethodHeader;
 import magmac.app.lang.node.TypeScriptParameter;
 import magmac.app.lang.node.TypeScriptRootSegment;
+import magmac.app.lang.node.TypeScriptTemplateType;
 import magmac.app.lang.node.TypeScriptType;
+import magmac.app.lang.node.TypescriptArrayType;
 import magmac.app.lang.node.TypescriptMethod;
 import magmac.app.lang.node.TypescriptRoot;
 import magmac.app.lang.node.TypescriptStructureMember;
@@ -117,28 +126,67 @@ class JavaTypescriptParser implements Parser<Root<JavaRootSegment>, TypescriptRo
     private static TypeScriptParameter parseParameter(JavaParameter parameter) {
         return switch (parameter) {
             case Whitespace whitespace -> whitespace;
-            case JavaDefinition javaDefinition -> JavaTypescriptParser.parseWrappedDefinition(javaDefinition);
+            case JavaDefinition javaDefinition -> JavaTypescriptParser.parseDefinition(javaDefinition);
         };
-    }
-
-    private static TypeScriptDefinition parseWrappedDefinition(JavaDefinition javaDefinition) {
-        return new TypeScriptDefinition(JavaTypescriptParser.parseDefinition(javaDefinition.definition()));
     }
 
     private static TypeScriptMethodHeader parseMethodHeader(JavaMethodHeader header) {
         return switch (header) {
             case Constructor constructor -> constructor;
-            case JavaDefinition javaDefinition ->
-                    new TypeScriptDefinition(JavaTypescriptParser.parseDefinition(javaDefinition.definition()));
+            case JavaDefinition javaDefinition -> JavaTypescriptParser.parseDefinition(javaDefinition);
         };
     }
 
-    private static Definition<TypeScriptType> parseDefinition(Definition<JavaType> definition) {
+    private static TypeScriptDefinition parseDefinition(JavaDefinition javaDefinition) {
+        Definition<JavaType> definition = javaDefinition.definition();
         return switch (definition.type()) {
-            case TypeScriptType type -> definition.withType(type);
-            case VariadicType variadicType -> definition
+            case TypeScriptType type -> new TypeScriptDefinition(definition.withType(type));
+            case JavaArrayType javaArrayType ->
+                    new TypeScriptDefinition(definition.withType(JavaTypescriptParser.parseArrayType(javaArrayType)));
+            case JavaTemplateType javaTemplateType ->
+                    new TypeScriptDefinition(definition.withType(JavaTypescriptParser.parseTemplateType(javaTemplateType)));
+            case VariadicType variadicType -> new TypeScriptDefinition(definition
                     .withName("..." + definition.name())
-                    .withType(new ArrayType(variadicType.child()));
+                    .withType(new TypescriptArrayType(new ArrayType<TypeScriptType>(JavaTypescriptParser.parseType(variadicType)))));
+        };
+    }
+
+    private static TypeScriptType parseArrayType(JavaArrayType type) {
+        return new TypescriptArrayType(new ArrayType<>(JavaTypescriptParser.parseType(type.inner.child())));
+    }
+
+    private static TypeScriptType parseType(JavaType variadicType) {
+        return switch (variadicType) {
+            case Symbol symbol -> symbol;
+            case JavaArrayType type -> JavaTypescriptParser.parseArrayType(type);
+            case JavaTemplateType templateType -> JavaTypescriptParser.parseTemplateType(templateType);
+            case VariadicType type -> new Symbol("?");
+        };
+    }
+
+    private static TypeScriptTemplateType parseTemplateType(JavaTemplateType type) {
+        Symbol base = JavaTypescriptParser.parseBaseType(type.base);
+        List<TypeScriptType> collect = type.typeArguments
+                .arguments()
+                .iter()
+                .map(JavaTypescriptParser::parseType)
+                .collect(new ListCollector<>());
+
+        return new TypeScriptTemplateType(base, new TypeArguments<>(collect));
+    }
+
+    private static Symbol parseBaseType(JavaBase base) {
+        return switch (base) {
+            case QualifiedType qualifiedType -> {
+                String joined = qualifiedType.segments()
+                        .iter()
+                        .map(Segment::value)
+                        .collect(new Joiner("."))
+                        .orElse("");
+
+                yield new Symbol(joined);
+            }
+            case Symbol symbol -> symbol;
         };
     }
 

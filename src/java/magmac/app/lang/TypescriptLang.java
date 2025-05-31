@@ -15,7 +15,7 @@ import magmac.app.lang.node.Modifier;
 import magmac.app.lang.node.Parameters;
 import magmac.app.lang.node.StructureStatement;
 import magmac.app.lang.node.Symbols;
-import magmac.app.lang.node.TemplateType;
+import magmac.app.lang.node.JavaTemplateType;
 import magmac.app.lang.node.TypeScriptImport;
 import magmac.app.lang.node.TypescriptStructureNode;
 import magmac.app.lang.node.Values;
@@ -80,7 +80,7 @@ public final class TypescriptLang {
     private static Rule createTypeRule() {
         LazyRule type = new MutableLazyRule();
         return type.set(new OrRule(Lists.of(
-                TemplateType.createTemplateRule(type),
+                JavaTemplateType.createTemplateRule(type),
                 TypescriptLang.createArrayRule(type),
                 Symbols.createSymbolRule()
         )));
