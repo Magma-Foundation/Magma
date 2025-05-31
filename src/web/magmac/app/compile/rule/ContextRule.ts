@@ -5,3 +5,7 @@ import { CompileError } from "../../../../magmac/app/compile/error/error/Compile
 import { Node } from "../../../../magmac/app/compile/node/Node";
 import { StringContext } from "../../../../magmac/app/compile/error/context/StringContext";
 import { ImmutableCompileError } from "../../../../magmac/app/error/ImmutableCompileError";
+export class ContextRule {
+	lex(input : String) : CompileResult<Node>;
+	generate(node : Node) : CompileResult<String>;
+}

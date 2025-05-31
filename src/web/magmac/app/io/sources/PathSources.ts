@@ -12,3 +12,10 @@ import { UnitSet } from "../../../../magmac/app/stage/unit/UnitSet";
 import { IOException } from "../../../../java/io/IOException";
 import { Files } from "../../../../java/nio/file/Files";
 import { Path } from "../../../../java/nio/file/Path";
+export class PathSources {
+	getTuple2IOResult(source : PathSource) : IOResult<Unit<String>>;
+	readAll() : IOResult<UnitSet<String>>;
+	apply(sources : Iter<Path>) : IOResult<UnitSet<String>>;
+	getCollect(sources : Iter<Path>) : Result<UnitSet<String>, IOException>;
+	getCollected(sources : Iter<Path>) : List<PathSource>;
+}

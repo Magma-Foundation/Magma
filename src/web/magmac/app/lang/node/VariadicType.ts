@@ -8,3 +8,7 @@ import { StripRule } from "../../../../magmac/app/compile/rule/StripRule";
 import { SuffixRule } from "../../../../magmac/app/compile/rule/SuffixRule";
 import { TypeRule } from "../../../../magmac/app/compile/rule/TypeRule";
 import { Deserializers } from "../../../../magmac/app/lang/Deserializers";
+export class VariadicType {
+	deserialize(node : Node) : Option<CompileResult<JavaType>>;
+	createVariadicRule(rule : Rule) : Rule;
+}

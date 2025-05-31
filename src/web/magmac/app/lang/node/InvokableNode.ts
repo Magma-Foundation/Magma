@@ -15,3 +15,7 @@ import { FoldingDivider } from "../../../../magmac/app/compile/rule/divide/Foldi
 import { DividingSplitter } from "../../../../magmac/app/compile/rule/split/DividingSplitter";
 import { InvocationFolder } from "../../../../magmac/app/lang/InvocationFolder";
 import { Deserializers } from "../../../../magmac/app/lang/Deserializers";
+export class InvokableNode {
+	deserialize(node : Node) : Option<CompileResult<InvokableNode>>;
+	createInvokableRule(value : Rule) : Rule;
+}

@@ -8,3 +8,8 @@ import { StripRule } from "../../../../magmac/app/compile/rule/StripRule";
 import { DelimitedFolder } from "../../../../magmac/app/compile/rule/fold/DelimitedFolder";
 import { Deserializers } from "../../../../magmac/app/lang/Deserializers";
 import { Serializable } from "../../../../magmac/app/lang/Serializable";
+export class Modifier {
+	deserialize(node : Node) : CompileResult<Modifier>;
+	createModifiersRule() : Rule;
+	serialize() : Node;
+}

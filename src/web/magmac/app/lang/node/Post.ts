@@ -7,3 +7,7 @@ import { StripRule } from "../../../../magmac/app/compile/rule/StripRule";
 import { SuffixRule } from "../../../../magmac/app/compile/rule/SuffixRule";
 import { TypeRule } from "../../../../magmac/app/compile/rule/TypeRule";
 import { Deserializers } from "../../../../magmac/app/lang/Deserializers";
+export class Post {
+	createPostRule(type : String, suffix : String, value : Rule) : Rule;
+	deserialize(variant : PostVariant, node : Node) : Option<CompileResult<FunctionSegmentValue>>;
+}

@@ -11,3 +11,8 @@ import { SuffixRule } from "../../../../magmac/app/compile/rule/SuffixRule";
 import { TypeRule } from "../../../../magmac/app/compile/rule/TypeRule";
 import { Deserializers } from "../../../../magmac/app/lang/Deserializers";
 import { LazyRule } from "../../../../magmac/app/lang/LazyRule";
+export class StructureStatement {
+	deserialize(node : Node) : Option<CompileResult<JavaStructureMember>>;
+	createStructureStatementRule(definitionRule : Rule, valueRule : LazyRule) : Rule;
+	serialize() : Node;
+}

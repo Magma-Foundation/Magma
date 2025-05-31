@@ -78,8 +78,8 @@ class JavaTypescriptParser implements Parser<Root<JavaRootSegment>, TypescriptRo
     private static TypeScriptRootSegment parseStructure(JavaStructureNode structureNode) {
         return switch (structureNode.type()) {
             case Class -> JavaTypescriptParser.parseStructureWithType(TypescriptStructureType.Class, structureNode);
+            case Record -> JavaTypescriptParser.parseStructureWithType(TypescriptStructureType.Class, structureNode);
             case Interface -> JavaTypescriptParser.parseStructureWithType(TypescriptStructureType.Interface, structureNode);
-            case Record -> new Whitespace();
             case Enum -> new Whitespace();
         };
     }

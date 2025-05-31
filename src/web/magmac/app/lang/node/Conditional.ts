@@ -8,3 +8,7 @@ import { StripRule } from "../../../../magmac/app/compile/rule/StripRule";
 import { SuffixRule } from "../../../../magmac/app/compile/rule/SuffixRule";
 import { TypeRule } from "../../../../magmac/app/compile/rule/TypeRule";
 import { Deserializers } from "../../../../magmac/app/lang/Deserializers";
+export class Conditional {
+	deserialize(type : ConditionalType, node : Node) : Option<CompileResult<Conditional>>;
+	createConditionalRule(type : String, value : Rule) : Rule;
+}

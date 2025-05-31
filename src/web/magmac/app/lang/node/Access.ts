@@ -7,3 +7,7 @@ import { Rule } from "../../../../magmac/app/compile/rule/Rule";
 import { TypeRule } from "../../../../magmac/app/compile/rule/TypeRule";
 import { LazyRule } from "../../../../magmac/app/lang/LazyRule";
 import { Deserializers } from "../../../../magmac/app/lang/Deserializers";
+export class Access {
+	deserialize(type : AccessType, node : Node) : Option<CompileResult<Value>>;
+	createAccessRule(type : String, infix : String, value : LazyRule) : Rule;
+}

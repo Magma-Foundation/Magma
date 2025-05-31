@@ -15,3 +15,8 @@ import { CommonLang } from "../../../../magmac/app/lang/CommonLang";
 import { LazyRule } from "../../../../magmac/app/lang/LazyRule";
 import { ValueFolder } from "../../../../magmac/app/lang/ValueFolder";
 import { Deserializers } from "../../../../magmac/app/lang/Deserializers";
+export class Lambda {
+	deserialize(node : Node) : Option<CompileResult<Lambda>>;
+	createLambdaRule(value : LazyRule, functionSegment : Rule, infix : String, definition : Rule) : Rule;
+	createLambdaParameterRule(definition : Rule) : Rule;
+}

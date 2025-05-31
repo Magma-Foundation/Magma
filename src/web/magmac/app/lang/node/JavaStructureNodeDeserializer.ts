@@ -6,3 +6,10 @@ import { CompoundDestructor } from "../../../../magmac/app/compile/node/Compound
 import { InitialDestructor } from "../../../../magmac/app/compile/node/InitialDestructor";
 import { Node } from "../../../../magmac/app/compile/node/Node";
 import { Deserializers } from "../../../../magmac/app/lang/Deserializers";
+export class JavaStructureNodeDeserializer {
+	deserializeHelper(type : JavaStructureType, deserializer : InitialDestructor) : CompileResult<JavaStructureNode>;
+	attachRequired(deserializer : InitialDestructor) : CompoundDestructor<Tuple2<Tuple2<String, List<Modifier>>, List<JavaStructureMember>>>;
+	attachOptionals(attachRequired : CompoundDestructor<Tuple2<Tuple2<String, List<Modifier>>, List<JavaStructureMember>>>) : CompoundDestructor<Tuple2<Tuple2<Tuple2<Tuple2<Tuple2<Tuple2<Tuple2<String, List<Modifier>>, List<JavaStructureMember>>, Option<List<JavaType>>>, Option<List<TypeParam>>>, Option<List<JavaParameter>>>, Option<List<JavaType>>>, Option<List<JavaType>>>>;
+	from(type : JavaStructureType, tuple : Tuple2<Tuple2<Tuple2<Tuple2<Tuple2<Tuple2<Tuple2<String, List<Modifier>>, List<JavaStructureMember>>, Option<List<JavaType>>>, Option<List<TypeParam>>>, Option<List<JavaParameter>>>, Option<List<JavaType>>>, Option<List<JavaType>>>) : JavaStructureNode;
+	deserialize(node : Node) : Option<CompileResult<JavaStructureNode>>;
+}

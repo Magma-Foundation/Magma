@@ -10,3 +10,9 @@ import { CompileResults } from "../../../../magmac/app/compile/error/CompileResu
 import { Context } from "../../../../magmac/app/compile/error/context/Context";
 import { CompileError } from "../../../../magmac/app/compile/error/error/CompileError";
 import { ImmutableCompileError } from "../../../../magmac/app/error/ImmutableCompileError";
+export class OrState<T> {
+	constructor();
+	withValue(value : T) : OrState<T>;
+	toResult(context : Context) : CompileResult<T>;
+	withError(error : CompileError) : OrState<T>;
+}

@@ -7,3 +7,11 @@ import { CompileResult } from "../../../../magmac/app/compile/error/CompileResul
 import { CompileResultCollector } from "../../../../magmac/app/compile/error/CompileResultCollector";
 import { Location } from "../../../../magmac/app/io/Location";
 import { Function } from "../../../../java/util/function/Function";
+export class MapUnitSet<T> {
+	MapUnitSet() : public;
+	iter() : Iter<Unit<T>>;
+	add(element : Unit<T>) : UnitSet<T>;
+	mapValuesToResult(deserializer : Function<T, CompileResult<R>>) : CompileResult<UnitSet<R>>;
+	mapValues(serializer : Function<T, R>) : UnitSet<R>;
+	iterValues() : Iter<T>;
+}

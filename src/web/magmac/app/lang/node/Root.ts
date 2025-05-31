@@ -5,3 +5,7 @@ import { Rule } from "../../../../magmac/app/compile/rule/Rule";
 import { TypeRule } from "../../../../magmac/app/compile/rule/TypeRule";
 import { CommonLang } from "../../../../magmac/app/lang/CommonLang";
 import { Serializable } from "../../../../magmac/app/lang/Serializable";
+export class Root<T extends Serializable> {
+	createRule() : Rule;
+	serialize() : Node;
+}

@@ -15,3 +15,8 @@ import { BlockFolder } from "../../../../magmac/app/lang/BlockFolder";
 import { CommonLang } from "../../../../magmac/app/lang/CommonLang";
 import { LazyRule } from "../../../../magmac/app/lang/LazyRule";
 import { Deserializers } from "../../../../magmac/app/lang/Deserializers";
+export class Block {
+	deserialize(node : Node) : Option<CompileResult<Block>>;
+	createBlockRule(functionSegmentRule : LazyRule, value : Rule, definition : Rule) : Rule;
+	createBlockRule0(header : Rule, functionSegmentRule : Rule) : TypeRule;
+}

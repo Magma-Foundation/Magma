@@ -19,3 +19,8 @@ import { CommonLang } from "../../../../magmac/app/lang/CommonLang";
 import { Deserializers } from "../../../../magmac/app/lang/Deserializers";
 import { JavaLang } from "../../../../magmac/app/lang/JavaLang";
 import { OptionNodeListRule } from "../../../../magmac/app/lang/OptionNodeListRule";
+export class JavaMethod {
+	deserialize(node : Node) : Option<CompileResult<JavaStructureMember>>;
+	createMethodRule(childRule : Rule) : Rule;
+	serialize() : Node;
+}

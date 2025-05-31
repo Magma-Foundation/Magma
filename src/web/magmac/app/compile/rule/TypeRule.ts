@@ -8,3 +8,8 @@ import { CompileError } from "../../../../magmac/app/compile/error/error/Compile
 import { CompileErrors } from "../../../../magmac/app/compile/error/error/CompileErrors";
 import { Node } from "../../../../magmac/app/compile/node/Node";
 import { ImmutableCompileError } from "../../../../magmac/app/error/ImmutableCompileError";
+export class TypeRule {
+	createError(context : Context, err : CompileError) : CompileError;
+	lex(input : String) : CompileResult<Node>;
+	generate(node : Node) : CompileResult<String>;
+}

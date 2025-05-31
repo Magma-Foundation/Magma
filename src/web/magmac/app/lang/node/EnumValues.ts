@@ -15,3 +15,8 @@ import { SuffixRule } from "../../../../magmac/app/compile/rule/SuffixRule";
 import { TypeRule } from "../../../../magmac/app/compile/rule/TypeRule";
 import { Deserializers } from "../../../../magmac/app/lang/Deserializers";
 import { ValueFolder } from "../../../../magmac/app/lang/ValueFolder";
+export class EnumValues {
+	createEnumValuesRule(value : Rule) : TypeRule;
+	deserialize(node : Node) : Option<CompileResult<JavaStructureMember>>;
+	serialize() : Node;
+}

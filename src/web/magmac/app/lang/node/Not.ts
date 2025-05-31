@@ -7,3 +7,7 @@ import { StripRule } from "../../../../magmac/app/compile/rule/StripRule";
 import { TypeRule } from "../../../../magmac/app/compile/rule/TypeRule";
 import { LazyRule } from "../../../../magmac/app/lang/LazyRule";
 import { Deserializers } from "../../../../magmac/app/lang/Deserializers";
+export class Not {
+	createNotRule(value : LazyRule) : TypeRule;
+	deserialize(node : Node) : Option<CompileResult<Value>>;
+}

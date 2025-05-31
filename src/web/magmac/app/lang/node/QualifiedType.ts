@@ -8,3 +8,9 @@ import { Rule } from "../../../../magmac/app/compile/rule/Rule";
 import { TypeRule } from "../../../../magmac/app/compile/rule/TypeRule";
 import { DelimitedFolder } from "../../../../magmac/app/compile/rule/fold/DelimitedFolder";
 import { Deserializers } from "../../../../magmac/app/lang/Deserializers";
+export class QualifiedType {
+	deserializeQualified(node : Node) : Option<CompileResult<JavaBase>>;
+	createQualifiedRule() : TypeRule;
+	createSegmentsRule(key : String) : Rule;
+	serialize() : Node;
+}

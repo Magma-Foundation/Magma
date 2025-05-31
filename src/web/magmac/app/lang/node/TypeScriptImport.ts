@@ -10,3 +10,7 @@ import { SuffixRule } from "../../../../magmac/app/compile/rule/SuffixRule";
 import { TypeRule } from "../../../../magmac/app/compile/rule/TypeRule";
 import { DelimitedDivider } from "../../../../magmac/app/compile/rule/divide/DelimitedDivider";
 import { DelimitedFolder } from "../../../../magmac/app/compile/rule/fold/DelimitedFolder";
+export class TypeScriptImport {
+	createImportRule() : Rule;
+	serialize() : Node;
+}
