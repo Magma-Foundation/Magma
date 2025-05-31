@@ -1564,10 +1564,14 @@ class NodeListRule
 Rule <|-- NodeListRule
 Definition --> Option
 Definition --> List
+Definition --> CompileResult
+Definition --> InitialDestructor
 Definition --> MapNode
 Definition --> Node
+Definition --> Deserializers
 Definition --> Serializable
 class Definition
+Serializable <|-- Definition
 Iters --> Option
 Iters --> EmptyHead
 Iters --> HeadedIter
@@ -1753,7 +1757,6 @@ interface Splitter
 JavaDefinition --> Option
 JavaDefinition --> Lists
 JavaDefinition --> CompileResult
-JavaDefinition --> InitialDestructor
 JavaDefinition --> Node
 JavaDefinition --> FilterRule
 JavaDefinition --> LocatingRule

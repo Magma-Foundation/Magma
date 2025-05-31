@@ -2,21 +2,37 @@ package magmac.app.lang.node;
 
 import magmac.api.Option;
 import magmac.api.collect.list.List;
+import magmac.app.compile.error.CompileResult;
+import magmac.app.compile.node.InitialDestructor;
 import magmac.app.compile.node.MapNode;
 import magmac.app.compile.node.Node;
+import magmac.app.lang.Deserializers;
 import magmac.app.lang.Serializable;
 
-public record Definition(
+public record Definition<T extends Serializable>(
         String name,
-        JavaType type,
+        T type,
         List<Modifier> modifiers,
         Option<List<Annotation>> maybeAnnotations,
         Option<List<TypeParam>> typeParams
 ) implements Serializable {
+    static CompileResult<Definition<JavaType>> deserialize0(InitialDestructor deserialize) {
+        return deserialize.withString("name")
+                .withNode("type", Types::deserialize)
+                .withNodeList("modifiers", Modifier::deserialize)
+                .withNodeListOptionally("annotations", Annotation::deserialize)
+                .withNodeListOptionally("type-parameters", TypeParam::deserialize)
+                .complete((result) -> new Definition<JavaType>(result.left().left().left().left(), result.left().left().left().right(), result.left().left().right(), result.left().right(), result.right()));
+    }
+
+    static CompileResult<Definition<JavaType>> deserializeWithDestructor(Node node) {
+        return deserialize0(Deserializers.destruct(node));
+    }
+
     @Override
     public Node serialize() {
         return new MapNode("definition")
-                .withString("name", this.name())
-                .withNodeAndSerializer("type", this.type(), Serializable::serialize);
+                .withString("name", this.name)
+                .withNodeSerialized("type", this.type);
     }
 }

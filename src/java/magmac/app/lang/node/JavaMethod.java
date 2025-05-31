@@ -37,11 +37,11 @@ public record JavaMethod(
 
     public static Rule createMethodRule(Rule childRule) {
         NodeRule header = new NodeRule("header", new OrRule(Lists.of(
-                JavaDefinition.createDefinitionRule(),
+                JavaDefinition.creaeteRule(),
                 new TypeRule("constructor", new StripRule(FilterRule.Symbol(new StringRule("name"))))
         )));
 
-        Rule parameters = Parameters.createParametersRule(JavaDefinition.createDefinitionRule());
+        Rule parameters = Parameters.createParametersRule(JavaDefinition.creaeteRule());
         Rule content = CommonLang.Statements("children", childRule);
         Rule rightRule = new StripRule(new PrefixRule("{", new SuffixRule(new StripRule("", content, "after-children"), "}")));
         Rule withParams = new OptionNodeListRule("parameters",

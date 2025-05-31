@@ -23,11 +23,11 @@ final class StructureMembers {
     public static Rule createClassMemberRule() {
         LazyRule functionSegmentRule = new MutableLazyRule();
         LazyRule valueLazy = new MutableLazyRule();
-        LazyRule value = Values.initValueRule(functionSegmentRule, valueLazy, "->", JavaDefinition.createDefinitionRule());
-        Rule functionSegment = FunctionSegment.initFunctionSegmentRule(functionSegmentRule, value, JavaDefinition.createDefinitionRule());
+        LazyRule value = Values.initValueRule(functionSegmentRule, valueLazy, "->", JavaDefinition.creaeteRule());
+        Rule functionSegment = FunctionSegment.initFunctionSegmentRule(functionSegmentRule, value, JavaDefinition.creaeteRule());
         return new OrRule(Lists.of(
                 Whitespace.createWhitespaceRule(),
-                StructureStatement.createStructureStatementRule(new TypeRule("definition", JavaDefinition.createDefinitionRule()), value),
+                StructureStatement.createStructureStatementRule(new TypeRule("definition", JavaDefinition.creaeteRule()), value),
                 JavaMethod.createMethodRule(functionSegment),
                 EnumValues.createEnumValuesRule(value)
         ));

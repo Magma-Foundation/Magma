@@ -3,7 +3,6 @@ package magmac.app.lang.node;
 import magmac.api.Option;
 import magmac.api.collect.list.Lists;
 import magmac.app.compile.error.CompileResult;
-import magmac.app.compile.node.InitialDestructor;
 import magmac.app.compile.node.Node;
 import magmac.app.compile.rule.FilterRule;
 import magmac.app.compile.rule.LocatingRule;
@@ -27,31 +26,22 @@ import magmac.app.lang.TypeSeparatorFolder;
 import magmac.app.lang.ValueFolder;
 
 public final class JavaDefinition implements Parameter, Assignable, MethodHeader {
-    private final Definition definition;
+    private final Definition<JavaType> definition;
 
-    public JavaDefinition(Definition definition) {
+    public JavaDefinition(Definition<JavaType> definition) {
         this.definition = definition;
     }
 
-    public static CompileResult<JavaDefinition> deserializeError(Node node) {
-        return JavaDefinition.complete(Deserializers.destruct(node));
+    public static CompileResult<JavaDefinition> deserialize(Node node) {
+        return Definition.deserializeWithDestructor(node).mapValue(JavaDefinition::new);
     }
 
-    private static CompileResult<JavaDefinition> complete(InitialDestructor deserialize) {
-        return deserialize.withString("name")
-                .withNode("type", Types::deserialize)
-                .withNodeList("modifiers", Modifier::deserialize)
-                .withNodeListOptionally("annotations", Annotation::deserialize)
-                .withNodeListOptionally("type-parameters", TypeParam::deserialize)
-                .complete((result) -> new JavaDefinition(
-                        new Definition(result.left().left().left().left(), result.left().left().left().right(), result.left().left().right(), result.left().right(), result.right())));
+    public static Option<CompileResult<JavaDefinition>> deserializeTyped(Node node) {
+        return Deserializers.deserializeWithType(node, "definition")
+                .map(deserialize -> Definition.deserialize0(deserialize).mapValue(JavaDefinition::new));
     }
 
-    public static Option<CompileResult<JavaDefinition>> deserialize(Node node) {
-        return Deserializers.deserializeWithType(node, "definition").map(JavaDefinition::complete);
-    }
-
-    public static Rule createDefinitionRule() {
+    public static Rule creaeteRule() {
         Rule modifiers = Modifier.createModifiersRule();
         Rule annotations = NodeListRule.createNodeListRule("annotations", new DelimitedFolder('\n'), new StripRule(new PrefixRule("@", new StringRule("value"))));
         Rule beforeTypeParams = new OrRule(Lists.of(
@@ -69,7 +59,7 @@ public final class JavaDefinition implements Parameter, Assignable, MethodHeader
         return new TypeRule("definition", stripRule);
     }
 
-    public static Rule attachTypeParams(Rule beforeTypeParams) {
+    static Rule attachTypeParams(Rule beforeTypeParams) {
         Rule typeParams = NodeListRule.createNodeListRule("type-parameters", new ValueFolder(), new StringRule("value"));
         return new OptionNodeListRule("type-parameters",
                 new StripRule(new SuffixRule(LocatingRule.First(beforeTypeParams, "<", typeParams), ">")),

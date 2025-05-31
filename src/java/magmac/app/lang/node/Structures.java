@@ -20,7 +20,7 @@ final class Structures {
         Rule beforeContent = JavaDefinition.attachTypeParams(name);
 
         Rule withParameters = new OrRule(Lists.of(
-                new StripRule(new SuffixRule(LocatingRule.First(beforeContent, "(", Parameters.createParametersRule(JavaDefinition.createDefinitionRule())), ")")),
+                new StripRule(new SuffixRule(LocatingRule.First(beforeContent, "(", Parameters.createParametersRule(JavaDefinition.creaeteRule())), ")")),
                 beforeContent
         ));
 
