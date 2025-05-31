@@ -41,6 +41,6 @@ record Block(List<FunctionSegment> segments, BlockHeader header) implements Func
 
     @Override
     public Node serialize() {
-        return new MapNode();
+        return new MapNode("block");
     }
 }

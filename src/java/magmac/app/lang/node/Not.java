@@ -2,6 +2,7 @@ package magmac.app.lang.node;
 
 import magmac.api.Option;
 import magmac.app.compile.error.CompileResult;
+import magmac.app.compile.node.MapNode;
 import magmac.app.compile.node.Node;
 import magmac.app.compile.rule.NodeRule;
 import magmac.app.compile.rule.PrefixRule;
@@ -18,5 +19,10 @@ record Not(Value value) implements Value {
     public static Option<CompileResult<Value>> deserialize(Node node) {
         return Deserializers.deserializeWithType(node, "not").map(deserializer -> deserializer.withNode("child", Values::deserializeOrError)
                 .complete(Not::new));
+    }
+
+    @Override
+    public Node serialize() {
+        return new MapNode();
     }
 }

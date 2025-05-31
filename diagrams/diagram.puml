@@ -59,7 +59,9 @@ ListCollector --> List
 ListCollector --> Lists
 class ListCollector
 Collector <|-- ListCollector
+FunctionSegmentValue --> Serializable
 interface FunctionSegmentValue
+Serializable <|-- FunctionSegmentValue
 JavaStructureNodeDeserializer --> Option
 JavaStructureNodeDeserializer --> Tuple2
 JavaStructureNodeDeserializer --> List
@@ -79,6 +81,7 @@ BlockHeader <|-- Catch
 AssignmentNode --> Option
 AssignmentNode --> Lists
 AssignmentNode --> CompileResult
+AssignmentNode --> MapNode
 AssignmentNode --> Node
 AssignmentNode --> LocatingRule
 AssignmentNode --> NodeRule
@@ -121,6 +124,7 @@ interface FunctionSegment
 Serializable <|-- FunctionSegment
 Access --> Option
 Access --> CompileResult
+Access --> MapNode
 Access --> Node
 Access --> LocatingRule
 Access --> NodeRule
@@ -147,6 +151,7 @@ class CompoundDestructorImpl
 CompoundDestructor <|-- CompoundDestructorImpl
 Not --> Option
 Not --> CompileResult
+Not --> MapNode
 Not --> Node
 Not --> NodeRule
 Not --> PrefixRule
@@ -259,6 +264,7 @@ Application <|-- CompileApplication
 Lambda --> Option
 Lambda --> Lists
 Lambda --> CompileResult
+Lambda --> MapNode
 Lambda --> Node
 Lambda --> LocatingRule
 Lambda --> NodeListRule
@@ -744,6 +750,7 @@ class SymbolFilter
 Filter <|-- SymbolFilter
 Post --> Option
 Post --> CompileResult
+Post --> MapNode
 Post --> Node
 Post --> NodeRule
 Post --> Rule
@@ -787,6 +794,7 @@ class BlockFolder
 Folder <|-- BlockFolder
 Break --> Option
 Break --> CompileResult
+Break --> MapNode
 Break --> Node
 Break --> Deserializers
 class Break
@@ -817,6 +825,7 @@ Deserializer --> Serializable
 interface Deserializer
 YieldNode --> Option
 YieldNode --> CompileResult
+YieldNode --> MapNode
 YieldNode --> Node
 YieldNode --> NodeRule
 YieldNode --> PrefixRule
@@ -836,6 +845,7 @@ Sources --> UnitSet
 interface Sources
 Continue --> Option
 Continue --> CompileResult
+Continue --> MapNode
 Continue --> Node
 Continue --> Deserializers
 class Continue
@@ -911,6 +921,7 @@ InvokableNode --> Option
 InvokableNode --> List
 InvokableNode --> Lists
 InvokableNode --> CompileResult
+InvokableNode --> MapNode
 InvokableNode --> Node
 InvokableNode --> LocatingRule
 InvokableNode --> NodeRule
@@ -929,6 +940,7 @@ Value <|-- InvokableNode
 FunctionSegmentValue <|-- InvokableNode
 StringNode --> Option
 StringNode --> CompileResult
+StringNode --> MapNode
 StringNode --> Node
 StringNode --> PrefixRule
 StringNode --> Rule
@@ -1251,6 +1263,7 @@ class SingleHead
 Head <|-- SingleHead
 NumberNode --> Option
 NumberNode --> CompileResult
+NumberNode --> MapNode
 NumberNode --> Node
 NumberNode --> FilterRule
 NumberNode --> Rule
@@ -1375,6 +1388,7 @@ class PlantUMLDependency
 PlantUMLRootSegment <|-- PlantUMLDependency
 SwitchNode --> Option
 SwitchNode --> CompileResult
+SwitchNode --> MapNode
 SwitchNode --> Node
 SwitchNode --> Deserializers
 class SwitchNode
@@ -1420,10 +1434,12 @@ CommonLang --> SuffixRule
 CommonLang --> TypeRule
 CommonLang --> StatementFolder
 class CommonLang
+Value --> Serializable
 interface Value
 Caller <|-- Value
 Argument <|-- Value
 Assignable <|-- Value
+Serializable <|-- Value
 InvocationFolder --> DivideState
 InvocationFolder --> Folder
 class InvocationFolder
@@ -1683,6 +1699,7 @@ class LocatingSplitter
 Splitter <|-- LocatingSplitter
 CharNode --> Option
 CharNode --> CompileResult
+CharNode --> MapNode
 CharNode --> Node
 CharNode --> PrefixRule
 CharNode --> Rule
@@ -1738,6 +1755,8 @@ Conditional --> TypeRule
 Conditional --> Deserializers
 class Conditional
 BlockHeader <|-- Conditional
+Operation --> MapNode
+Operation --> Node
 Operation --> LocatingRule
 Operation --> NodeRule
 Operation --> Rule

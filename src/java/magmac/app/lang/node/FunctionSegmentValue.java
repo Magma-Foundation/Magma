@@ -1,4 +1,6 @@
 package magmac.app.lang.node;
 
-interface FunctionSegmentValue {
+import magmac.app.lang.Serializable;
+
+interface FunctionSegmentValue extends Serializable {
 }

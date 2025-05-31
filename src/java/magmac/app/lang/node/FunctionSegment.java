@@ -59,6 +59,7 @@ public interface FunctionSegment extends Serializable {
                 rightRule,
                 new StripRule(new PrefixRule("{", new SuffixRule(NodeListRule.createNodeListRule("children", new StatementFolder(), segment), "}")))
         )));
+
         return new TypeRule("case", new StripRule(new PrefixRule("case", childRule)));
     }
 }

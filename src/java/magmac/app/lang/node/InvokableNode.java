@@ -4,6 +4,7 @@ import magmac.api.Option;
 import magmac.api.collect.list.List;
 import magmac.api.collect.list.Lists;
 import magmac.app.compile.error.CompileResult;
+import magmac.app.compile.node.MapNode;
 import magmac.app.compile.node.Node;
 import magmac.app.compile.rule.LocatingRule;
 import magmac.app.compile.rule.NodeRule;
@@ -31,5 +32,10 @@ record InvokableNode(Caller left, List<Argument> right) implements Value, Functi
         Rule arguments = Arguments.createArgumentsRule(value);
         Splitter splitter = DividingSplitter.Last(new FoldingDivider(new InvocationFolder()), "");
         return new TypeRule("invokable", new StripRule(new SuffixRule(new LocatingRule(caller, splitter, arguments), ")")));
+    }
+
+    @Override
+    public Node serialize() {
+        return new MapNode();
     }
 }

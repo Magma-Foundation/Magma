@@ -11,17 +11,18 @@ import magmac.app.compile.rule.StripRule;
 import magmac.app.compile.rule.TypeRule;
 import magmac.app.lang.Deserializers;
 
-record ReturnNode(Value value) implements FunctionSegmentValue, FunctionSegment {
+record ReturnNode(Value child) implements FunctionSegmentValue, FunctionSegment {
     public static Option<CompileResult<ReturnNode>> deserialize(Node node) {
-        return Deserializers.deserializeWithType(node, "return").map(deserializer -> deserializer.withNode("value", Values::deserializeOrError).complete(ReturnNode::new));
+        return Deserializers.deserializeWithType(node, "return")
+                .map(deserializer -> deserializer.withNode("child", Values::deserializeOrError).complete(ReturnNode::new));
     }
 
     public static Rule createReturnRule(Rule value) {
-        return new TypeRule("return", new StripRule(new PrefixRule("return ", new NodeRule("value", value))));
+        return new TypeRule("return", new StripRule(new PrefixRule("return ", new NodeRule("child", value))));
     }
 
     @Override
     public Node serialize() {
-        return new MapNode();
+        return new MapNode("return").withNodeSerialized("child", this.child);
     }
 }

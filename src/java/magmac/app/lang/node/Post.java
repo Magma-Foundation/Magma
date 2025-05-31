@@ -2,6 +2,7 @@ package magmac.app.lang.node;
 
 import magmac.api.Option;
 import magmac.app.compile.error.CompileResult;
+import magmac.app.compile.node.MapNode;
 import magmac.app.compile.node.Node;
 import magmac.app.compile.rule.NodeRule;
 import magmac.app.compile.rule.Rule;
@@ -19,5 +20,10 @@ record Post(PostVariant variant, Value value) implements FunctionSegmentValue {
         return Deserializers.deserializeWithType(node, variant.type()).map(deserializer -> deserializer
                 .withNode("child", Values::deserializeOrError)
                 .complete(child -> new Post(variant, child)));
+    }
+
+    @Override
+    public Node serialize() {
+        return new MapNode();
     }
 }

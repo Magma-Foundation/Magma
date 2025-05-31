@@ -3,6 +3,7 @@ package magmac.app.lang.node;
 import magmac.api.Option;
 import magmac.api.collect.list.Lists;
 import magmac.app.compile.error.CompileResult;
+import magmac.app.compile.node.MapNode;
 import magmac.app.compile.node.Node;
 import magmac.app.compile.rule.LocatingRule;
 import magmac.app.compile.rule.NodeListRule;
@@ -46,5 +47,10 @@ record Lambda() implements Value {
                 definition,
                 Symbols.createSymbolRule("param")
         )));
+    }
+
+    @Override
+    public Node serialize() {
+        return new MapNode();
     }
 }

@@ -2,6 +2,7 @@ package magmac.app.lang.node;
 
 import magmac.api.Option;
 import magmac.app.compile.error.CompileResult;
+import magmac.app.compile.node.MapNode;
 import magmac.app.compile.node.Node;
 import magmac.app.compile.rule.LocatingRule;
 import magmac.app.compile.rule.NodeRule;
@@ -20,5 +21,10 @@ record Access(AccessType type, String property, Value caller) implements Value {
     public static Rule createAccessRule(String type, String infix, LazyRule value) {
         Rule property = Symbols.createSymbolRule("property");
         return new TypeRule(type, LocatingRule.Last(new NodeRule("instance", value), infix, property));
+    }
+
+    @Override
+    public Node serialize() {
+        return new MapNode();
     }
 }

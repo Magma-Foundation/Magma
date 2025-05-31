@@ -2,6 +2,7 @@ package magmac.app.lang.node;
 
 import magmac.api.Option;
 import magmac.app.compile.error.CompileResult;
+import magmac.app.compile.node.MapNode;
 import magmac.app.compile.node.Node;
 import magmac.app.compile.rule.PrefixRule;
 import magmac.app.compile.rule.Rule;
@@ -18,5 +19,10 @@ record CharNode(String value) implements Value {
 
     public static Rule createCharRule() {
         return new TypeRule("char", new StripRule(new PrefixRule("'", new SuffixRule(new StringRule("value"), "'"))));
+    }
+
+    @Override
+    public Node serialize() {
+        return new MapNode();
     }
 }

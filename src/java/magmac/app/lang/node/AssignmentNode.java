@@ -3,6 +3,7 @@ package magmac.app.lang.node;
 import magmac.api.Option;
 import magmac.api.collect.list.Lists;
 import magmac.app.compile.error.CompileResult;
+import magmac.app.compile.node.MapNode;
 import magmac.app.compile.node.Node;
 import magmac.app.compile.rule.LocatingRule;
 import magmac.app.compile.rule.NodeRule;
@@ -27,5 +28,10 @@ record AssignmentNode(Assignable assignable, Value value) implements FunctionSeg
 
         Rule source = new NodeRule("source", value);
         return new TypeRule("assignment", LocatingRule.First(before, "=", source));
+    }
+
+    @Override
+    public Node serialize() {
+        return new MapNode();
     }
 }

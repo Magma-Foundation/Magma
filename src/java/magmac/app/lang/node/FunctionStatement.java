@@ -11,12 +11,12 @@ import magmac.app.compile.rule.SuffixRule;
 import magmac.app.compile.rule.TypeRule;
 import magmac.app.lang.Deserializers;
 
-record FunctionStatement(FunctionSegmentValue value) implements FunctionSegment {
+record FunctionStatement(FunctionSegmentValue child) implements FunctionSegment {
     public static Option<CompileResult<FunctionSegment>> deserialize(Node node) {
         return Deserializers.deserializeWithType(node, "statement")
                 .map(deserializer -> deserializer.withNode("child", FunctionSegmentValues::deserialize)
-                .complete(FunctionStatement::new)
-                .mapValue(value -> value));
+                        .complete(FunctionStatement::new)
+                        .mapValue(value -> value));
     }
 
     public static Rule createStatementRule(Rule rule) {
@@ -26,6 +26,6 @@ record FunctionStatement(FunctionSegmentValue value) implements FunctionSegment 
 
     @Override
     public Node serialize() {
-        return new MapNode();
+        return new MapNode("statement").withNodeSerialized("child", this.child);
     }
 }
