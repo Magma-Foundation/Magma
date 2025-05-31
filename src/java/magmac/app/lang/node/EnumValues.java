@@ -39,9 +39,4 @@ public record EnumValues(List<EnumValue> values) implements JavaStructureMember 
         return Deserializers.deserializeWithType(node, "enum-values").map(deserializer -> deserializer.withNodeList("children", EnumValue::deserialize)
                 .complete(EnumValues::new));
     }
-
-    @Override
-    public Node serialize() {
-        return new MapNode();
-    }
 }

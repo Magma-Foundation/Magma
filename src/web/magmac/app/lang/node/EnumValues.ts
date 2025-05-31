@@ -18,5 +18,4 @@ import { ValueFolder } from "../../../../magmac/app/lang/ValueFolder";
 export class EnumValues {
 	createEnumValuesRule(value : Rule) : TypeRule;
 	deserialize(node : Node) : Option<CompileResult<JavaStructureMember>>;
-	serialize() : Node;
 }

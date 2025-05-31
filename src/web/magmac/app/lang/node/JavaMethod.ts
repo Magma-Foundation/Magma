@@ -22,5 +22,4 @@ import { OptionNodeListRule } from "../../../../magmac/app/lang/OptionNodeListRu
 export class JavaMethod {
 	deserialize(node : Node) : Option<CompileResult<JavaStructureMember>>;
 	createMethodRule(childRule : Rule) : Rule;
-	serialize() : Node;
 }

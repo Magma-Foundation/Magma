@@ -27,9 +27,4 @@ public record StructureStatement() implements JavaStructureMember {
 
         return new TypeRule("structure-statement", new StripRule(new SuffixRule(definition, ";")));
     }
-
-    @Override
-    public Node serialize() {
-        return new MapNode();
-    }
 }

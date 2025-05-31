@@ -52,9 +52,4 @@ public record JavaMethod(
 
         return new TypeRule("method", LocatingRule.First(header, "(", withParams));
     }
-
-    @Override
-    public Node serialize() {
-        return new MapNode();
-    }
 }

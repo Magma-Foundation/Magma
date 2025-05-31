@@ -6,7 +6,7 @@ import magmac.app.compile.node.MapNode;
 import magmac.app.compile.node.Node;
 import magmac.app.lang.Serializable;
 
-public record StructureValue<T, M extends Serializable>(
+public record StructureValue<T, M>(
         String name,
         List<Modifier> modifiers,
         List<M> members,

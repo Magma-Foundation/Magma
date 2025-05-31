@@ -79,7 +79,8 @@ class JavaTypescriptParser implements Parser<Root<JavaRootSegment>, TypescriptRo
         return switch (structureNode.type()) {
             case Class -> JavaTypescriptParser.parseStructureWithType(TypescriptStructureType.Class, structureNode);
             case Record -> JavaTypescriptParser.parseStructureWithType(TypescriptStructureType.Class, structureNode);
-            case Interface -> JavaTypescriptParser.parseStructureWithType(TypescriptStructureType.Interface, structureNode);
+            case Interface ->
+                    JavaTypescriptParser.parseStructureWithType(TypescriptStructureType.Interface, structureNode);
             case Enum -> new Whitespace();
         };
     }
@@ -122,9 +123,9 @@ class JavaTypescriptParser implements Parser<Root<JavaRootSegment>, TypescriptRo
                 .map(JavaTypescriptParser::parseParameter)
                 .collect(new ListCollector<>());
 
-        JavaMethodHeader header1 = methodNode.header();
-        TypeScriptMethodHeader header = JavaTypescriptParser.parseMethodHeader(header1);
-        return new TypescriptMethod(new ParameterizedMethodHeader<TypeScriptParameter>(header, parameters));
+        TypeScriptMethodHeader header = JavaTypescriptParser.parseMethodHeader(methodNode.header());
+        ParameterizedMethodHeader<TypeScriptParameter> parameterizedHeader = new ParameterizedMethodHeader<>(header, parameters);
+        return new TypescriptMethod(parameterizedHeader);
     }
 
     private static TypeScriptParameter parseParameter(JavaParameter parameter) {

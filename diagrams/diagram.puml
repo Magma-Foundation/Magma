@@ -936,7 +936,6 @@ class StringNode
 Value <|-- StringNode
 JavaStructureMember --> Serializable
 interface JavaStructureMember
-Serializable <|-- JavaStructureMember
 SafeFiles --> None
 SafeFiles --> Option
 SafeFiles --> Some
