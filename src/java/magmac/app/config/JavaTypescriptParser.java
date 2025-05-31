@@ -70,21 +70,21 @@ class JavaTypescriptParser implements Parser<Root<JavaRootSegment>, TypescriptRo
     private static TypeScriptRootSegment parseRootSegment(Location location, JavaRootSegment rootSegment) {
         return switch (rootSegment) {
             case JavaNamespacedNode namespaced -> JavaTypescriptParser.parseNamespaced(location, namespaced);
-            case JavaStructureNode structureNode -> JavaTypescriptParser.parseJavaStructure(structureNode);
+            case JavaStructureNode structureNode -> JavaTypescriptParser.parseStructure(structureNode);
             case Whitespace whitespace -> whitespace;
         };
     }
 
-    private static TypeScriptRootSegment parseJavaStructure(JavaStructureNode structureNode) {
+    private static TypeScriptRootSegment parseStructure(JavaStructureNode structureNode) {
         return switch (structureNode.type()) {
-            case Class -> JavaTypescriptParser.parseClass(structureNode);
+            case Class -> JavaTypescriptParser.parseStructureWithType(TypescriptStructureType.Class, structureNode);
+            case Interface -> JavaTypescriptParser.parseStructureWithType(TypescriptStructureType.Interface, structureNode);
             case Record -> new Whitespace();
             case Enum -> new Whitespace();
-            case Interface -> new Whitespace();
         };
     }
 
-    private static TypescriptStructureNode parseClass(JavaStructureNode structureNode) {
+    private static TypescriptStructureNode parseStructureWithType(TypescriptStructureType type, JavaStructureNode structureNode) {
         StructureValue<JavaType, JavaStructureMember> value = structureNode.value;
         List<TypescriptStructureMember> collect = value.members()
                 .iter()
@@ -100,7 +100,7 @@ class JavaTypescriptParser implements Parser<Root<JavaRootSegment>, TypescriptRo
                 value.maybeImplemented().map(JavaTypescriptParser::parseTypeList)
         );
 
-        return new TypescriptStructureNode(TypescriptStructureType.Class, structureNode1);
+        return new TypescriptStructureNode(type, structureNode1);
     }
 
     private static List<TypeScriptType> parseTypeList(List<JavaType> list) {

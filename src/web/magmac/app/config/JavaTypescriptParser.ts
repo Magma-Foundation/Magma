@@ -54,8 +54,8 @@ export class JavaTypescriptParser {
 	parseUnit(unit : Unit<Root<JavaRootSegment>>) : CompileResult<Unit<TypescriptRoot>>;
 	parseRoot(location : Location, root : Root<JavaRootSegment>) : CompileResult<Unit<TypescriptRoot>>;
 	parseRootSegment(location : Location, rootSegment : JavaRootSegment) : TypeScriptRootSegment;
-	parseJavaStructure(structureNode : JavaStructureNode) : TypeScriptRootSegment;
-	parseClass(structureNode : JavaStructureNode) : TypescriptStructureNode;
+	parseStructure(structureNode : JavaStructureNode) : TypeScriptRootSegment;
+	parseStructureWithType(type : TypescriptStructureType, structureNode : JavaStructureNode) : TypescriptStructureNode;
 	parseTypeList(list : List<JavaType>) : List<TypeScriptType>;
 	parseStructureMember(structureNode : JavaStructureMember) : TypescriptStructureMember;
 	parseMethod(methodNode : JavaMethod) : TypescriptStructureMember;

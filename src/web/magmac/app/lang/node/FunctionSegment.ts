@@ -15,3 +15,8 @@ import { TypeRule } from "../../../../magmac/app/compile/rule/TypeRule";
 import { StatementFolder } from "../../../../magmac/app/compile/rule/fold/StatementFolder";
 import { Deserializers } from "../../../../magmac/app/lang/Deserializers";
 import { LazyRule } from "../../../../magmac/app/lang/LazyRule";
+export interface FunctionSegment {
+	deserialize(node : Node) : CompileResult<FunctionSegment>;
+	initFunctionSegmentRule(functionSegmentRule : LazyRule, value : Rule, definition : Rule) : Rule;
+	createCaseRule(value : Rule, segment : Rule) : Rule;
+}
