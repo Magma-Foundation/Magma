@@ -5,11 +5,11 @@ import magmac.app.compile.error.CompileResult;
 import magmac.app.compile.node.Node;
 import magmac.app.lang.Deserializers;
 
-public class LambdaHeaders {
-    public static CompileResult<LambdaHeader> deserialize(Node node) {
-        return Deserializers.orError("lambda-header", node, Lists.of(
+public class LambdaParameters {
+    public static CompileResult<LambdaParameter> deserialize(Node node) {
+        return Deserializers.orError("lambda-parameter", node, Lists.of(
                 Deserializers.wrap(Symbols::deserialize),
-                Deserializers.wrap(MultipleHeader::deserialize)
+                Deserializers.wrap(JavaDefinition::deserializeTyped)
         ));
     }
 }

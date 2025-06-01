@@ -35,7 +35,7 @@ record Lambda(LambdaHeader header, LambdaContent right) implements Value {
 
         Rule parameters = Lambda.createLambdaParameterRule(definition);
         Rule withParentheses = new TypeRule("multiple", new StripRule(new PrefixRule("(", new SuffixRule(parameters, ")"))));
-        Rule withoutParentheses = new TypeRule("single", new StripRule(Symbols.createSymbolRule("name")));
+        Rule withoutParentheses = Symbols.createSymbolRule();
 
         Rule header = new NodeRule("header", new OrRule(Lists.of(
                 withParentheses,
@@ -48,7 +48,7 @@ record Lambda(LambdaHeader header, LambdaContent right) implements Value {
     private static Rule createLambdaParameterRule(Rule definition) {
         return NodeListRule.createNodeListRule("parameters", new ValueFolder(), new OrRule(Lists.of(
                 definition,
-                Symbols.createSymbolRule("param")
+                Symbols.createSymbolRule()
         )));
     }
 
