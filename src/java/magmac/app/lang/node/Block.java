@@ -22,7 +22,7 @@ import magmac.app.lang.LazyRule;
 record Block(List<FunctionSegment> segments, BlockHeader header) implements FunctionSegment {
     public static Option<CompileResult<Block>> deserialize(Node node) {
         return Destructors.destructWithType("block", node).map(deserializer -> deserializer
-                .withNodeList("children", FunctionSegment::deserialize)
+                .withNodeList("children", FunctionSegments::deserialize)
                 .withNode("header", BlockHeader::deserialize)
                 .complete(tuple -> new Block(tuple.left(), tuple.right())));
     }

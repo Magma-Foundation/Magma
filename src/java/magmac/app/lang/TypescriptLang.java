@@ -10,7 +10,7 @@ import magmac.app.compile.rule.StringRule;
 import magmac.app.compile.rule.StripRule;
 import magmac.app.compile.rule.SuffixRule;
 import magmac.app.compile.rule.TypeRule;
-import magmac.app.lang.node.FunctionSegment;
+import magmac.app.lang.node.FunctionSegments;
 import magmac.app.lang.node.Modifier;
 import magmac.app.lang.node.Parameters;
 import magmac.app.lang.node.StructureStatement;
@@ -49,7 +49,7 @@ public final class TypescriptLang {
 
         LazyRule functionSegmentRule = new MutableLazyRule();
         LazyRule value = Values.initValueRule(functionSegmentRule, valueLazy, " => ", definition);
-        Rule children = CommonLang.Statements("children", FunctionSegment.initFunctionSegmentRule(functionSegmentRule, value, definition));
+        Rule children = CommonLang.Statements("children", FunctionSegments.initFunctionSegmentRule(functionSegmentRule, value, definition));
         Rule childRule = new SuffixRule(LocatingRule.First(header, " {", new StripRule("", children, "after-children")), "}");
         return new TypeRule("method", new OptionNodeListRule("children",
                 childRule,

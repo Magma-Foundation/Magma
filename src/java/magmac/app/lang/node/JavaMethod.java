@@ -29,7 +29,7 @@ public record JavaMethod(
     public static Option<CompileResult<JavaStructureMember>> deserialize(Node node) {
         return Destructors.destructWithType("method", node).map((InitialDestructor deserializer) -> deserializer
                 .withNode("header", JavaMethodHeader::deserializeError)
-                .withNodeListOptionally("children", FunctionSegment::deserialize)
+                .withNodeListOptionally("children", FunctionSegments::deserialize)
                 .withNodeList("parameters", Parameters::deserialize)
                 .complete((tuple) -> new JavaMethod(tuple.left().left(), tuple.right(), tuple.left().right()))
                 .mapValue((JavaMethod type) -> type));
