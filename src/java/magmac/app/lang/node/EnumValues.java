@@ -35,7 +35,8 @@ public record EnumValues(List<EnumValue> values) implements JavaStructureMember 
     }
 
     public static Option<CompileResult<JavaStructureMember>> deserialize(Node node) {
-        return Destructors.destructWithType("enum-values", node).map(deserializer -> deserializer.withNodeList("children", EnumValue::deserialize)
+        return Destructors.destructWithType("enum-values", node)
+                .map(deserializer -> deserializer.withNodeList("children", EnumValue::deserialize)
                 .complete(EnumValues::new));
     }
 }
