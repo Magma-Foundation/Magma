@@ -9,16 +9,17 @@ import magmac.app.compile.error.CompileResultCollector;
 import magmac.app.compile.error.CompileResults;
 import magmac.app.io.Location;
 import magmac.app.io.sources.UnitSetCollector;
-import magmac.app.lang.node.Constructor;
 import magmac.app.lang.node.Definition;
 import magmac.app.lang.node.EnumValues;
 import magmac.app.lang.node.JavaArrayType;
 import magmac.app.lang.node.JavaBase;
+import magmac.app.lang.node.JavaConstructor;
 import magmac.app.lang.node.JavaDefinition;
 import magmac.app.lang.node.JavaMethod;
 import magmac.app.lang.node.JavaMethodHeader;
 import magmac.app.lang.node.JavaNamespacedNode;
 import magmac.app.lang.node.JavaParameter;
+import magmac.app.lang.node.JavaRoot;
 import magmac.app.lang.node.JavaRootSegment;
 import magmac.app.lang.node.JavaStructureMember;
 import magmac.app.lang.node.JavaStructureNode;
@@ -26,7 +27,6 @@ import magmac.app.lang.node.JavaTemplateType;
 import magmac.app.lang.node.JavaType;
 import magmac.app.lang.node.ParameterizedMethodHeader;
 import magmac.app.lang.node.QualifiedType;
-import magmac.app.lang.node.JavaRoot;
 import magmac.app.lang.node.Segment;
 import magmac.app.lang.node.StructureStatement;
 import magmac.app.lang.node.StructureValue;
@@ -40,6 +40,7 @@ import magmac.app.lang.node.TypeScriptRootSegment;
 import magmac.app.lang.node.TypeScriptTemplateType;
 import magmac.app.lang.node.TypeScriptType;
 import magmac.app.lang.node.TypescriptArrayType;
+import magmac.app.lang.node.TypescriptConstructor;
 import magmac.app.lang.node.TypescriptMethod;
 import magmac.app.lang.node.TypescriptRoot;
 import magmac.app.lang.node.TypescriptStructureMember;
@@ -76,7 +77,8 @@ class JavaTypescriptParser implements Parser<JavaRoot, TypescriptRoot> {
 
     private static TypeScriptRootSegment parseStructure(JavaStructureNode structureNode) {
         return switch (structureNode.type()) {
-            case Class, Record -> JavaTypescriptParser.parseStructureWithType(TypescriptStructureType.Class, structureNode);
+            case Class, Record ->
+                    JavaTypescriptParser.parseStructureWithType(TypescriptStructureType.Class, structureNode);
             case Interface ->
                     JavaTypescriptParser.parseStructureWithType(TypescriptStructureType.Interface, structureNode);
             case Enum -> new Whitespace();
@@ -135,7 +137,7 @@ class JavaTypescriptParser implements Parser<JavaRoot, TypescriptRoot> {
 
     private static TypeScriptMethodHeader parseMethodHeader(JavaMethodHeader header) {
         return switch (header) {
-            case Constructor constructor -> constructor;
+            case JavaConstructor constructor -> new TypescriptConstructor();
             case JavaDefinition javaDefinition -> JavaTypescriptParser.parseDefinition(javaDefinition);
         };
     }
