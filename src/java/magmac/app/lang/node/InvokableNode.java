@@ -20,6 +20,7 @@ import magmac.app.lang.Destructors;
 import magmac.app.lang.InvocationFolder;
 import magmac.app.lang.JavaDeserializers;
 import magmac.app.lang.JavaLang;
+import magmac.app.lang.JavaRules;
 
 record InvokableNode(JavaLang.Caller caller, List<Argument> arguments) implements Value, FunctionSegmentValue {
     public static Option<CompileResult<InvokableNode>> deserialize(Node node) {
@@ -29,7 +30,7 @@ record InvokableNode(JavaLang.Caller caller, List<Argument> arguments) implement
     }
 
     public static Rule createInvokableRule(Rule value) {
-        Rule childRule = new OrRule(Lists.of(Construction.createConstructionRule(), value));
+        Rule childRule = new OrRule(Lists.of(JavaRules.createConstructionRule(), value));
         Rule caller = new NodeRule("caller", new SuffixRule(childRule, "("));
         Rule arguments = Arguments.createArgumentsRule(value);
         Splitter splitter = DividingSplitter.Last(new FoldingDivider(new InvocationFolder()), "");
