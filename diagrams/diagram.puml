@@ -166,6 +166,8 @@ Values --> StripRule
 Values --> SuffixRule
 Values --> TypeRule
 Values --> Deserializers
+Values --> JavaDeserializers
+Values --> JavaRules
 Values --> LazyRule
 class Values
 Folder --> DivideState
@@ -215,10 +217,10 @@ StructureMembers --> Node
 StructureMembers --> OrRule
 StructureMembers --> Rule
 StructureMembers --> TypeRule
-StructureMembers --> JavaLang
+StructureMembers --> Deserializers
+StructureMembers --> JavaRules
 StructureMembers --> LazyRule
 StructureMembers --> MutableLazyRule
-StructureMembers --> Deserializers
 class StructureMembers
 CompileApplication --> Option
 CompileApplication --> Some
@@ -309,6 +311,7 @@ Arguments --> NodeListRule
 Arguments --> OrRule
 Arguments --> Rule
 Arguments --> Deserializers
+Arguments --> JavaLang
 class Arguments
 ParseState --> Location
 interface ParseState
@@ -382,10 +385,6 @@ Parser --> UnitSet
 Parser --> Stage
 interface Parser
 Stage <|-- Parser
-Roots --> Rule
-Roots --> TypeRule
-Roots --> CommonLang
-class Roots
 Lexer --> Node
 Lexer --> UnitSet
 Lexer --> Stage
@@ -433,9 +432,9 @@ Main --> TypeScriptTargetPlatform
 Main --> ApplicationError
 Main --> PathSources
 Main --> Sources
+Main --> JavaDeserializers
+Main --> JavaRules
 Main --> JavaRoot
-Main --> JavaRootSegments
-Main --> Roots
 Main --> Lexer
 Main --> RuleLexer
 Main --> UnitSet
@@ -548,6 +547,20 @@ JVMList --> ArrayList
 JVMList --> BiFunction
 class JVMList
 List <|-- JVMList
+JavaDeserializers --> Option
+JavaDeserializers --> Lists
+JavaDeserializers --> CompileResult
+JavaDeserializers --> Node
+JavaDeserializers --> Arguments
+JavaDeserializers --> InvokableNode
+JavaDeserializers --> JavaNamespacedNode
+JavaDeserializers --> JavaRootSegment
+JavaDeserializers --> JavaStructureNodeDeserializer
+JavaDeserializers --> JavaStructureType
+JavaDeserializers --> JavaTypes
+JavaDeserializers --> Values
+JavaDeserializers --> Whitespace
+class JavaDeserializers
 EnumValues --> Option
 EnumValues --> List
 EnumValues --> Lists
@@ -717,7 +730,6 @@ JavaMethod --> SuffixRule
 JavaMethod --> TypeRule
 JavaMethod --> CommonLang
 JavaMethod --> Destructors
-JavaMethod --> JavaLang
 JavaMethod --> OptionNodeListRule
 class JavaMethod
 JavaStructureMember <|-- JavaMethod
@@ -773,6 +785,7 @@ JavaStructureNode --> MapNode
 JavaStructureNode --> Node
 class JavaStructureNode
 JavaRootSegment <|-- JavaStructureNode
+JavaStructureMember <|-- JavaStructureNode
 OrRule --> List
 OrRule --> Iter
 OrRule --> CompileResult
@@ -916,7 +929,7 @@ JavaPlantUMLParser --> PlantUMLRoot
 JavaPlantUMLParser --> PlantUMLRootSegment
 JavaPlantUMLParser --> PlantUMLStructure
 JavaPlantUMLParser --> PlantUMLStructureType
-JavaPlantUMLParser --> QualifiedType
+JavaPlantUMLParser --> Qualified
 JavaPlantUMLParser --> Segment
 JavaPlantUMLParser --> JavaStructureNode
 JavaPlantUMLParser --> JavaStructureType
@@ -937,24 +950,10 @@ ValueFolder --> DivideState
 ValueFolder --> Folder
 class ValueFolder
 Folder <|-- ValueFolder
-InvokableNode --> Option
 InvokableNode --> List
-InvokableNode --> Lists
-InvokableNode --> CompileResult
 InvokableNode --> MapNode
 InvokableNode --> Node
-InvokableNode --> LocatingRule
-InvokableNode --> NodeRule
-InvokableNode --> OrRule
-InvokableNode --> Rule
-InvokableNode --> Splitter
-InvokableNode --> StripRule
-InvokableNode --> SuffixRule
-InvokableNode --> TypeRule
-InvokableNode --> FoldingDivider
-InvokableNode --> DividingSplitter
-InvokableNode --> Destructors
-InvokableNode --> InvocationFolder
+InvokableNode --> JavaLang
 class InvokableNode
 Value <|-- InvokableNode
 FunctionSegmentValue <|-- InvokableNode
@@ -1049,13 +1048,6 @@ Targets --> IOException
 Targets --> Option
 Targets --> UnitSet
 interface Targets
-Caller --> Lists
-Caller --> CompileResult
-Caller --> Node
-Caller --> Deserializers
-Caller --> Serializable
-interface Caller
-Serializable <|-- Caller
 Unit --> CompileResult
 Unit --> Location
 Unit --> BiFunction
@@ -1075,9 +1067,6 @@ FlattenJava --> Passer
 FlattenJava --> ParseState
 class FlattenJava
 Passer <|-- FlattenJava
-Argument --> Serializable
-interface Argument
-Serializable <|-- Argument
 LambdaContents --> Lists
 LambdaContents --> CompileResult
 LambdaContents --> Node
@@ -1106,6 +1095,8 @@ Compiler <|-- StagedCompiler
 LazyRule --> Rule
 interface LazyRule
 Rule <|-- LazyRule
+JavaTypescriptParser --> Tuple2
+JavaTypescriptParser --> TupleCollector
 JavaTypescriptParser --> List
 JavaTypescriptParser --> Lists
 JavaTypescriptParser --> Joiner
@@ -1132,7 +1123,7 @@ JavaTypescriptParser --> JavaStructureNode
 JavaTypescriptParser --> JavaTemplateType
 JavaTypescriptParser --> JavaType
 JavaTypescriptParser --> ParameterizedMethodHeader
-JavaTypescriptParser --> QualifiedType
+JavaTypescriptParser --> Qualified
 JavaTypescriptParser --> Segment
 JavaTypescriptParser --> StructureStatement
 JavaTypescriptParser --> StructureValue
@@ -1258,6 +1249,10 @@ PlantUMLHeader --> TypeRule
 class PlantUMLHeader
 PlantUMLRootSegment <|-- PlantUMLHeader
 enum TypescriptStructureType
+TupleCollector --> Tuple2
+TupleCollector --> Collector
+class TupleCollector
+Collector <|-- TupleCollector
 Rule --> CompileResult
 Rule --> Node
 interface Rule
@@ -1365,21 +1360,6 @@ LambdaParameters --> CompileResult
 LambdaParameters --> Node
 LambdaParameters --> Deserializers
 class LambdaParameters
-Structures --> Lists
-Structures --> ContextRule
-Structures --> FilterRule
-Structures --> LocatingRule
-Structures --> NodeListRule
-Structures --> OrRule
-Structures --> Rule
-Structures --> StringRule
-Structures --> StripRule
-Structures --> SuffixRule
-Structures --> TypeRule
-Structures --> CommonLang
-Structures --> JavaLang
-Structures --> ValueFolder
-class Structures
 LastLocator --> None
 LastLocator --> Option
 LastLocator --> Some
@@ -1406,18 +1386,6 @@ interface Locator
 PlantUMLRootSegment --> Serializable
 interface PlantUMLRootSegment
 Serializable <|-- PlantUMLRootSegment
-QualifiedType --> Option
-QualifiedType --> List
-QualifiedType --> CompileResult
-QualifiedType --> MapNode
-QualifiedType --> Node
-QualifiedType --> NodeListRule
-QualifiedType --> Rule
-QualifiedType --> TypeRule
-QualifiedType --> DelimitedFolder
-QualifiedType --> Destructors
-class QualifiedType
-JavaBase <|-- QualifiedType
 TypeSeparatorFolder --> DivideState
 TypeSeparatorFolder --> Folder
 class TypeSeparatorFolder
@@ -1488,8 +1456,9 @@ Whitespace --> Rule
 Whitespace --> StripRule
 Whitespace --> TypeRule
 Whitespace --> Destructors
+Whitespace --> JavaLang
 class Whitespace
-Argument <|-- Whitespace
+? <|-- Whitespace
 FunctionSegment <|-- Whitespace
 JavaRootSegment <|-- Whitespace
 JavaParameter <|-- Whitespace
@@ -1503,9 +1472,10 @@ CommonLang --> StatementFolder
 class CommonLang
 Value --> MapNode
 Value --> Node
+Value --> JavaLang
 interface Value
-Caller <|-- Value
-Argument <|-- Value
+? <|-- Value
+? <|-- Value
 Assignable <|-- Value
 InvocationFolder --> DivideState
 InvocationFolder --> Folder
@@ -1527,26 +1497,8 @@ JavaTemplateType --> Deserializers
 JavaTemplateType --> Destructors
 class JavaTemplateType
 JavaType <|-- JavaTemplateType
-JavaLang --> Lists
-JavaLang --> FilterRule
-JavaLang --> LocatingRule
-JavaLang --> NodeListRule
-JavaLang --> NodeRule
-JavaLang --> OrRule
-JavaLang --> PrefixRule
-JavaLang --> Rule
-JavaLang --> Splitter
-JavaLang --> StringRule
-JavaLang --> StripRule
-JavaLang --> SuffixRule
-JavaLang --> TypeRule
-JavaLang --> Divider
-JavaLang --> FoldingDivider
-JavaLang --> DelimitedFolder
-JavaLang --> DividingSplitter
-JavaLang --> Modifier
-JavaLang --> JavaTypes
-class JavaLang
+JavaLang --> JavaType
+interface Caller
 StringRule --> Ok
 StringRule --> CompileResult
 StringRule --> CompileResults
@@ -1579,6 +1531,8 @@ FunctionSegmentValues --> OrRule
 FunctionSegmentValues --> Rule
 FunctionSegmentValues --> TypeRule
 FunctionSegmentValues --> Deserializers
+FunctionSegmentValues --> JavaDeserializers
+FunctionSegmentValues --> JavaRules
 class FunctionSegmentValues
 VariadicType --> Option
 VariadicType --> CompileResult
@@ -1606,6 +1560,31 @@ interface ParseResult
 StatementFolder --> DivideState
 class StatementFolder
 Folder <|-- StatementFolder
+JavaRules --> Lists
+JavaRules --> ContextRule
+JavaRules --> FilterRule
+JavaRules --> LocatingRule
+JavaRules --> NodeListRule
+JavaRules --> NodeRule
+JavaRules --> OrRule
+JavaRules --> PrefixRule
+JavaRules --> Rule
+JavaRules --> Splitter
+JavaRules --> StringRule
+JavaRules --> StripRule
+JavaRules --> SuffixRule
+JavaRules --> TypeRule
+JavaRules --> FoldingDivider
+JavaRules --> DividingSplitter
+JavaRules --> Arguments
+JavaRules --> JavaDefinition
+JavaRules --> JavaNamespacedNode
+JavaRules --> JavaTypes
+JavaRules --> Modifier
+JavaRules --> Parameters
+JavaRules --> StructureMembers
+JavaRules --> Whitespace
+class JavaRules
 EnumValue --> Option
 EnumValue --> List
 EnumValue --> Lists
@@ -1649,6 +1628,19 @@ CompileResult --> Supplier
 interface CompileResult
 class NumberFilter
 Filter <|-- NumberFilter
+Qualified --> Option
+Qualified --> List
+Qualified --> CompileResult
+Qualified --> MapNode
+Qualified --> Node
+Qualified --> NodeListRule
+Qualified --> Rule
+Qualified --> TypeRule
+Qualified --> DelimitedFolder
+Qualified --> Destructors
+class Qualified
+JavaBase <|-- Qualified
+JavaType <|-- Qualified
 DivideState --> Tuple2
 DivideState --> Option
 DivideState --> Iter
@@ -1715,18 +1707,6 @@ FirstLocator --> Option
 FirstLocator --> Some
 class FirstLocator
 Locator <|-- FirstLocator
-Construction --> Option
-Construction --> CompileResult
-Construction --> MapNode
-Construction --> Node
-Construction --> NodeRule
-Construction --> PrefixRule
-Construction --> Rule
-Construction --> StripRule
-Construction --> TypeRule
-Construction --> Destructors
-class Construction
-Caller <|-- Construction
 Node --> Option
 Node --> Tuple2
 Node --> List
@@ -1893,7 +1873,6 @@ TypescriptStructureNode --> StringRule
 TypescriptStructureNode --> SuffixRule
 TypescriptStructureNode --> TypeRule
 TypescriptStructureNode --> CommonLang
-TypescriptStructureNode --> JavaLang
 TypescriptStructureNode --> Serializable
 TypescriptStructureNode --> TypescriptLang
 class TypescriptStructureNode
@@ -1919,13 +1898,6 @@ PlantUMLAfterPasser --> Passer
 PlantUMLAfterPasser --> ParseState
 class PlantUMLAfterPasser
 Passer <|-- PlantUMLAfterPasser
-JavaRootSegments --> Lists
-JavaRootSegments --> CompileResult
-JavaRootSegments --> Node
-JavaRootSegments --> OrRule
-JavaRootSegments --> Rule
-JavaRootSegments --> Deserializers
-class JavaRootSegments
 HeadedIter --> Option
 HeadedIter --> Iter
 HeadedIter --> Collector
@@ -1940,9 +1912,29 @@ Splitter --> Option
 Splitter --> Tuple2
 interface Splitter
 JavaDefinition --> Option
+JavaDefinition --> Lists
 JavaDefinition --> CompileResult
 JavaDefinition --> MapNode
 JavaDefinition --> Node
+JavaDefinition --> FilterRule
+JavaDefinition --> LocatingRule
+JavaDefinition --> NodeListRule
+JavaDefinition --> NodeRule
+JavaDefinition --> OrRule
+JavaDefinition --> PrefixRule
+JavaDefinition --> Rule
+JavaDefinition --> Splitter
+JavaDefinition --> StringRule
+JavaDefinition --> StripRule
+JavaDefinition --> SuffixRule
+JavaDefinition --> TypeRule
+JavaDefinition --> Divider
+JavaDefinition --> FoldingDivider
+JavaDefinition --> DelimitedFolder
+JavaDefinition --> DividingSplitter
+JavaDefinition --> OptionNodeListRule
+JavaDefinition --> TypeSeparatorFolder
+JavaDefinition --> ValueFolder
 class JavaDefinition
 JavaParameter <|-- JavaDefinition
 Assignable <|-- JavaDefinition
