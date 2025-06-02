@@ -552,7 +552,6 @@ JavaDeserializers --> Lists
 JavaDeserializers --> CompileResult
 JavaDeserializers --> Node
 JavaDeserializers --> Arguments
-JavaDeserializers --> InvokableNode
 JavaDeserializers --> JavaNamespacedNode
 JavaDeserializers --> JavaRootSegment
 JavaDeserializers --> JavaStructureNodeDeserializer
@@ -950,13 +949,6 @@ ValueFolder --> DivideState
 ValueFolder --> Folder
 class ValueFolder
 Folder <|-- ValueFolder
-InvokableNode --> List
-InvokableNode --> MapNode
-InvokableNode --> Node
-InvokableNode --> JavaLang
-class InvokableNode
-Value <|-- InvokableNode
-FunctionSegmentValue <|-- InvokableNode
 StringNode --> Option
 StringNode --> CompileResult
 StringNode --> MapNode
@@ -1497,8 +1489,12 @@ JavaTemplateType --> Deserializers
 JavaTemplateType --> Destructors
 class JavaTemplateType
 JavaType <|-- JavaTemplateType
+JavaLang --> List
+JavaLang --> FunctionSegmentValue
 JavaLang --> JavaType
-interface Caller
+JavaLang --> Value
+class Construction
+Caller <|-- Construction
 StringRule --> Ok
 StringRule --> CompileResult
 StringRule --> CompileResults
