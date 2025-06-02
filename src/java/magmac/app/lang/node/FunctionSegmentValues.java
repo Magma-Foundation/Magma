@@ -8,13 +8,15 @@ import magmac.app.compile.rule.OrRule;
 import magmac.app.compile.rule.Rule;
 import magmac.app.compile.rule.TypeRule;
 import magmac.app.lang.Deserializers;
+import magmac.app.lang.JavaDeserializers;
+import magmac.app.lang.JavaRules;
 
 final class FunctionSegmentValues {
     public static CompileResult<FunctionSegmentValue> deserialize(Node node) {
         return Deserializers.orError("function-segment-value", node, Lists.of(
                 Deserializers.wrap(ReturnNode::deserialize),
                 Deserializers.wrap(AssignmentNode::deserialize),
-                Deserializers.wrap(InvokableNode::deserialize),
+                Deserializers.wrap(JavaDeserializers::deserializeInvocation),
                 Deserializers.wrap(node1 -> Post.deserialize(PostVariant.Increment, node1)),
                 Deserializers.wrap(node1 -> Post.deserialize(PostVariant.Decrement, node1)),
                 Deserializers.wrap(Break::deserialize),
@@ -25,7 +27,7 @@ final class FunctionSegmentValues {
 
     public static Rule createFunctionSegmentValueRule(Rule value, Rule definition) {
         return new OrRule(Lists.of(
-                InvokableNode.createInvokableRule(value),
+                JavaRules.createInvokableRule(value),
                 AssignmentNode.createAssignmentRule(definition, value),
                 ReturnNode.createReturnRule(value),
                 YieldNode.createYieldRule(value),

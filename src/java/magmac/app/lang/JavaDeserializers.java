@@ -4,6 +4,8 @@ import magmac.api.Option;
 import magmac.api.collect.list.Lists;
 import magmac.app.compile.error.CompileResult;
 import magmac.app.compile.node.Node;
+import magmac.app.lang.node.Arguments;
+import magmac.app.lang.node.InvokableNode;
 import magmac.app.lang.node.JavaTypes;
 import magmac.app.lang.node.Values;
 
@@ -19,5 +21,11 @@ public final class JavaDeserializers {
         return Destructors.destructWithType("construction", node)
                 .map(deserializer -> deserializer.withNode("type", JavaTypes::deserialize)
                         .complete(JavaLang.Construction::new));
+    }
+
+    public static Option<CompileResult<InvokableNode>> deserializeInvocation(Node node) {
+        return Destructors.destructWithType("invokable", node).map(deserializer -> deserializer.withNode("caller", JavaDeserializers::deserialize)
+                .withNodeList("arguments", Arguments::deserialize)
+                .complete(tuple -> new InvokableNode(tuple.left(), tuple.right())));
     }
 }

@@ -16,6 +16,8 @@ import magmac.app.compile.rule.StripRule;
 import magmac.app.compile.rule.SuffixRule;
 import magmac.app.compile.rule.TypeRule;
 import magmac.app.lang.Deserializers;
+import magmac.app.lang.JavaDeserializers;
+import magmac.app.lang.JavaRules;
 import magmac.app.lang.LazyRule;
 
 public final class Values {
@@ -26,7 +28,7 @@ public final class Values {
     public static Option<CompileResult<Value>> deserialize(Node node) {
         List<TypedDeserializer<Value>> deserializers = Lists.of(
                 Deserializers.wrap(SwitchNode::deserialize),
-                Deserializers.wrap(InvokableNode::deserialize),
+                Deserializers.wrap(JavaDeserializers::deserializeInvocation),
                 StringNode::deserialize,
                 node1 -> Access.deserialize(AccessType.Data, node1),
                 node1 -> Access.deserialize(AccessType.Method, node1),
@@ -60,7 +62,7 @@ public final class Values {
                 Not.createNotRule(value),
                 CharNode.createCharRule(),
                 StringNode.createStringRule(),
-                InvokableNode.createInvokableRule(value),
+                JavaRules.createInvokableRule(value),
                 IndexNode.createIndexRule(value),
                 NumberNode.createNumberRule(),
                 Symbols.createSymbolRule(),

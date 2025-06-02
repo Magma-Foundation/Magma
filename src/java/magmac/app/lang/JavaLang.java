@@ -8,4 +8,7 @@ public class JavaLang {
 
     public record Construction(JavaType type) implements Caller {
     }
+
+    public static interface Argument extends Serializable {
+    }
 }
