@@ -4,13 +4,12 @@ import magmac.api.collect.list.Lists;
 import magmac.app.compile.error.CompileResult;
 import magmac.app.compile.node.Node;
 import magmac.app.lang.Deserializers;
-import magmac.app.lang.Serializable;
 
-interface Caller extends Serializable {
-    static CompileResult<Caller> deserialize(Node node) {
+public class JavaCallers {
+    public static CompileResult<JavaCaller> deserialize(Node node) {
         return Deserializers.orError("caller", node, Lists.of(
-                Construction::deserialize,
-                node1 -> Values.deserialize(node1).map(result -> result.mapValue(type -> type))
+                Deserializers.wrap(Construction::deserialize),
+                Deserializers.wrap(Values::deserialize)
         ));
     }
 }

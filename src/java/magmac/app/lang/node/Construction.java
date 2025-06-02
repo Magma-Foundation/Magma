@@ -11,8 +11,8 @@ import magmac.app.compile.rule.StripRule;
 import magmac.app.compile.rule.TypeRule;
 import magmac.app.lang.Destructors;
 
-record Construction(JavaType type) implements Caller {
-    public static Option<CompileResult<Caller>> deserialize(Node node) {
+record Construction(JavaType type) implements JavaCaller {
+    public static Option<CompileResult<JavaCaller>> deserialize(Node node) {
         return Destructors.destructWithType("construction", node).map(deserializer -> deserializer.withNode("type", JavaTypes::deserialize).complete(Construction::new));
     }
 

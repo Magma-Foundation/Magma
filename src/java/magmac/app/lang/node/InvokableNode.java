@@ -19,9 +19,9 @@ import magmac.app.compile.rule.split.DividingSplitter;
 import magmac.app.lang.Destructors;
 import magmac.app.lang.InvocationFolder;
 
-record InvokableNode(Caller caller, List<Argument> arguments) implements Value, FunctionSegmentValue {
+record InvokableNode(JavaCaller caller, List<Argument> arguments) implements Value, FunctionSegmentValue {
     public static Option<CompileResult<InvokableNode>> deserialize(Node node) {
-        return Destructors.destructWithType("invokable", node).map(deserializer -> deserializer.withNode("caller", Caller::deserialize)
+        return Destructors.destructWithType("invokable", node).map(deserializer -> deserializer.withNode("caller", JavaCallers::deserialize)
                 .withNodeList("arguments", Arguments::deserialize)
                 .complete(tuple -> new InvokableNode(tuple.left(), tuple.right())));
     }
