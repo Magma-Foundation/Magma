@@ -10,8 +10,9 @@ import magmac.app.compile.rule.Rule;
 import magmac.app.compile.rule.StripRule;
 import magmac.app.compile.rule.TypeRule;
 import magmac.app.lang.Destructors;
+import magmac.app.lang.JavaNodes;
 
-record ReturnNode(Value child) implements FunctionSegmentValue, FunctionSegment {
+record ReturnNode(Value child) implements JavaNodes.FunctionSegmentValue, FunctionSegment {
     public static Option<CompileResult<ReturnNode>> deserialize(Node node) {
         return Destructors.destructWithType("return", node)
                 .map(deserializer -> deserializer.withNode("child", Values::deserializeOrError).complete(ReturnNode::new));

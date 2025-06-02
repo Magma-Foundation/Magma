@@ -10,9 +10,10 @@ import magmac.app.compile.rule.Rule;
 import magmac.app.compile.rule.StripRule;
 import magmac.app.compile.rule.TypeRule;
 import magmac.app.lang.Destructors;
+import magmac.app.lang.JavaNodes;
 
-record YieldNode(Value value) implements FunctionSegmentValue {
-    public static Option<CompileResult<FunctionSegmentValue>> deserialize(Node node) {
+record YieldNode(Value value) implements JavaNodes.FunctionSegmentValue {
+    public static Option<CompileResult<JavaNodes.FunctionSegmentValue>> deserialize(Node node) {
         return Destructors.destructWithType("yield", node)
                 .map(deserializer -> deserializer.withNode("value", Values::deserializeOrError)
                         .complete(YieldNode::new));

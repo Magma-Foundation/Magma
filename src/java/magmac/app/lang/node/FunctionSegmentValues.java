@@ -9,10 +9,11 @@ import magmac.app.compile.rule.Rule;
 import magmac.app.compile.rule.TypeRule;
 import magmac.app.lang.Deserializers;
 import magmac.app.lang.JavaDeserializers;
+import magmac.app.lang.JavaNodes;
 import magmac.app.lang.JavaRules;
 
 final class FunctionSegmentValues {
-    public static CompileResult<FunctionSegmentValue> deserialize(Node node) {
+    public static CompileResult<JavaNodes.FunctionSegmentValue> deserialize(Node node) {
         return Deserializers.orError("function-segment-value", node, Lists.of(
                 Deserializers.wrap(ReturnNode::deserialize),
                 Deserializers.wrap(AssignmentNode::deserialize),
