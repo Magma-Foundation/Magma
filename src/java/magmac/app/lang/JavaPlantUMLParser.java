@@ -23,7 +23,7 @@ import magmac.app.lang.node.PlantUMLRoot;
 import magmac.app.lang.node.PlantUMLRootSegment;
 import magmac.app.lang.node.PlantUMLStructure;
 import magmac.app.lang.node.PlantUMLStructureType;
-import magmac.app.lang.node.QualifiedType;
+import magmac.app.lang.node.Qualified;
 import magmac.app.lang.node.Segment;
 import magmac.app.lang.node.JavaStructureNode;
 import magmac.app.lang.node.JavaStructureType;
@@ -53,12 +53,12 @@ public class JavaPlantUMLParser implements Parser<JavaRoot, PlantUMLRoot> {
 
     private static String createSimpleName(JavaBase base) {
         return switch (base) {
-            case QualifiedType qualifiedType -> JavaPlantUMLParser.createSimpleNameFromQualifiedType(qualifiedType);
+            case Qualified qualifiedType -> JavaPlantUMLParser.createSimpleNameFromQualifiedType(qualifiedType);
             case Symbol symbol -> symbol.value();
         };
     }
 
-    private static String createSimpleNameFromQualifiedType(QualifiedType qualifiedType) {
+    private static String createSimpleNameFromQualifiedType(Qualified qualifiedType) {
         return qualifiedType.segments()
                 .iter()
                 .map(Segment::value)
@@ -82,6 +82,7 @@ public class JavaPlantUMLParser implements Parser<JavaRoot, PlantUMLRoot> {
             case JavaArrayType _, VariadicType _ -> "?";
             case Symbol symbol -> symbol.value();
             case JavaTemplateType templateType -> JavaPlantUMLParser.createSimpleName(templateType.base);
+            case Qualified qualified -> "?";
         };
     }
 

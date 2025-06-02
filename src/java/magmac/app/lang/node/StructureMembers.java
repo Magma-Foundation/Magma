@@ -7,6 +7,7 @@ import magmac.app.compile.rule.OrRule;
 import magmac.app.compile.rule.Rule;
 import magmac.app.compile.rule.TypeRule;
 import magmac.app.lang.Deserializers;
+import magmac.app.lang.JavaRules;
 import magmac.app.lang.LazyRule;
 import magmac.app.lang.MutableLazyRule;
 
@@ -16,7 +17,11 @@ public final class StructureMembers {
                 Deserializers.wrap(Whitespace::deserialize),
                 Deserializers.wrap(JavaMethod::deserialize),
                 Deserializers.wrap(StructureStatement::deserialize),
-                Deserializers.wrap(EnumValues::deserialize)
+                Deserializers.wrap(EnumValues::deserialize),
+                Deserializers.wrap(new JavaStructureNodeDeserializer(JavaStructureType.Class)),
+                Deserializers.wrap(new JavaStructureNodeDeserializer(JavaStructureType.Interface)),
+                Deserializers.wrap(new JavaStructureNodeDeserializer(JavaStructureType.Record)),
+                Deserializers.wrap(new JavaStructureNodeDeserializer(JavaStructureType.Enum))
         ));
     }
 
@@ -31,10 +36,10 @@ public final class StructureMembers {
                 StructureStatement.createStructureStatementRule(new TypeRule("definition", JavaDefinition.createRule()), value),
                 JavaMethod.createMethodRule(functionSegment),
                 EnumValues.createEnumValuesRule(value),
-                Structures.createStructureRule("record", classMemberRule),
-                Structures.createStructureRule("interface", classMemberRule),
-                Structures.createStructureRule("class", classMemberRule),
-                Structures.createStructureRule("enum", classMemberRule)
+                JavaRules.createStructureRule("record", classMemberRule),
+                JavaRules.createStructureRule("interface", classMemberRule),
+                JavaRules.createStructureRule("class", classMemberRule),
+                JavaRules.createStructureRule("enum", classMemberRule)
         )));
     }
 }

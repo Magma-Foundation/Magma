@@ -15,7 +15,8 @@ public final class JavaTypes {
                 Deserializers.wrap(Symbols::deserialize),
                 Deserializers.wrap(JavaTemplateType::deserialize),
                 Deserializers.wrap(VariadicType::deserialize),
-                Deserializers.wrap(JavaArrayType::deserialize)
+                Deserializers.wrap(JavaArrayType::deserialize),
+                Deserializers.wrap(Qualified::deserializeQualified)
         ));
     }
 
@@ -26,7 +27,7 @@ public final class JavaTypes {
                 JavaArrayType.createArrayRule(type),
                 JavaTemplateType.createTemplateRule(type),
                 Symbols.createSymbolRule(),
-                QualifiedType.createQualifiedRule()
+                Qualified.createQualifiedRule()
         )));
     }
 }

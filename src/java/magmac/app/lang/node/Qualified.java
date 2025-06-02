@@ -11,13 +11,15 @@ import magmac.app.compile.rule.TypeRule;
 import magmac.app.compile.rule.fold.DelimitedFolder;
 import magmac.app.lang.Destructors;
 
-public record QualifiedType(List<Segment> segments) implements JavaBase {
-    public static Option<CompileResult<JavaBase>> deserializeQualified(Node node) {
-        return Destructors.destructWithType("qualified", node).map(deserializer -> deserializer.withNodeList("segments", Segment::deserialize).complete(QualifiedType::new));
+public record Qualified(List<Segment> segments) implements JavaBase, JavaType {
+    public static Option<CompileResult<Qualified>> deserializeQualified(Node node) {
+        return Destructors.destructWithType("qualified", node)
+                .map(deserializer -> deserializer.withNodeList("segments", Segment::deserialize)
+                        .complete(Qualified::new));
     }
 
     public static TypeRule createQualifiedRule() {
-        return new TypeRule("qualified", QualifiedType.createSegmentsRule("segments"));
+        return new TypeRule("qualified", Qualified.createSegmentsRule("segments"));
     }
 
     private static Rule createSegmentsRule(String key) {

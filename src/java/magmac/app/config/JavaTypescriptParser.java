@@ -1,5 +1,7 @@
 package magmac.app.config;
 
+import magmac.api.Tuple2;
+import magmac.api.collect.TupleCollector;
 import magmac.api.collect.list.List;
 import magmac.api.collect.list.Lists;
 import magmac.api.iter.collect.Joiner;
@@ -26,7 +28,7 @@ import magmac.app.lang.node.JavaStructureNode;
 import magmac.app.lang.node.JavaTemplateType;
 import magmac.app.lang.node.JavaType;
 import magmac.app.lang.node.ParameterizedMethodHeader;
-import magmac.app.lang.node.QualifiedType;
+import magmac.app.lang.node.Qualified;
 import magmac.app.lang.node.Segment;
 import magmac.app.lang.node.StructureStatement;
 import magmac.app.lang.node.StructureValue;
@@ -62,59 +64,92 @@ class JavaTypescriptParser implements Parser<JavaRoot, TypescriptRoot> {
         List<TypeScriptRootSegment> rootSegments = root.children()
                 .iter()
                 .map(rootSegment -> JavaTypescriptParser.parseRootSegment(location, rootSegment))
+                .flatMap(List::iter)
                 .collect(new ListCollector<>());
 
         return CompileResults.Ok(new SimpleUnit<>(location, new TypescriptRoot(rootSegments)));
     }
 
-    private static TypeScriptRootSegment parseRootSegment(Location location, JavaRootSegment rootSegment) {
+    private static List<TypeScriptRootSegment> parseRootSegment(Location location, JavaRootSegment rootSegment) {
         return switch (rootSegment) {
-            case JavaNamespacedNode namespaced -> JavaTypescriptParser.parseNamespaced(location, namespaced);
-            case JavaStructureNode structureNode -> JavaTypescriptParser.parseStructure(structureNode);
-            case Whitespace whitespace -> whitespace;
+            case Whitespace whitespace -> Lists.of(whitespace);
+            case JavaNamespacedNode namespaced -> Lists.of(JavaTypescriptParser.parseNamespaced(location, namespaced));
+            case JavaStructureNode structureNode -> JavaTypescriptParser.getCollect(structureNode);
         };
     }
 
-    private static TypeScriptRootSegment parseStructure(JavaStructureNode structureNode) {
+    private static List<TypeScriptRootSegment> getCollect(JavaStructureNode structureNode) {
+        return JavaTypescriptParser.parseStructure(structureNode)
+                .iter()
+                .map(JavaTypescriptParser::wrap)
+                .collect(new ListCollector<>());
+    }
+
+    private static TypeScriptRootSegment wrap(TypescriptStructureNode value) {
+        return value;
+    }
+
+    private static List<TypescriptStructureNode> parseStructure(JavaStructureNode structureNode) {
         return switch (structureNode.type()) {
             case Class, Record ->
                     JavaTypescriptParser.parseStructureWithType(TypescriptStructureType.Class, structureNode);
             case Interface ->
                     JavaTypescriptParser.parseStructureWithType(TypescriptStructureType.Interface, structureNode);
-            case Enum -> new Whitespace();
+            case Enum -> Lists.empty();
         };
     }
 
-    private static TypescriptStructureNode parseStructureWithType(TypescriptStructureType type, JavaStructureNode structureNode) {
+    private static List<TypescriptStructureNode> parseStructureWithType(TypescriptStructureType type, JavaStructureNode structureNode) {
         StructureValue<JavaType, JavaStructureMember> value = structureNode.value;
-        List<TypescriptStructureMember> collect = value.members()
+        Tuple2<List<List<TypescriptStructureMember>>, List<List<TypescriptStructureNode>>> membersTuple = value.members()
                 .iter()
                 .map(JavaTypescriptParser::parseStructureMember)
+                .collect(new TupleCollector<>(new ListCollector<>(), new ListCollector<>()));
+
+        List<TypescriptStructureMember> members = membersTuple.left()
+                .iter()
+                .flatMap(List::iter)
+                .collect(new ListCollector<>());
+
+        List<TypescriptStructureNode> structures = membersTuple.right()
+                .iter()
+                .flatMap(List::iter)
                 .collect(new ListCollector<>());
 
         StructureValue<TypeScriptType, TypescriptStructureMember> structureNode1 = new StructureValue<>(
                 value.name(),
                 value.modifiers(),
-                collect,
+                members,
                 value.maybeTypeParams(),
                 value.maybeExtended().map(JavaTypescriptParser::parseTypeList),
                 value.maybeImplemented().map(JavaTypescriptParser::parseTypeList)
         );
 
-        return new TypescriptStructureNode(type, structureNode1);
+        return structures.addLast(new TypescriptStructureNode(type, structureNode1));
     }
 
     private static List<TypeScriptType> parseTypeList(List<JavaType> list) {
         return list.iter().map(JavaTypescriptParser::parseType).collect(new ListCollector<>());
     }
 
-    private static TypescriptStructureMember parseStructureMember(JavaStructureMember structureNode) {
+    private static Tuple2<List<TypescriptStructureMember>, List<TypescriptStructureNode>> parseStructureMember(JavaStructureMember structureNode) {
         return switch (structureNode) {
-            case Whitespace whitespace -> new Whitespace();
-            case EnumValues enumValues -> new Whitespace();
-            case StructureStatement structureStatement -> new Whitespace();
-            case JavaMethod methodNode -> JavaTypescriptParser.parseMethod(methodNode);
+            case Whitespace whitespace -> JavaTypescriptParser.getList();
+            case EnumValues enumValues -> JavaTypescriptParser.getList();
+            case StructureStatement structureStatement -> JavaTypescriptParser.getList();
+            case JavaMethod methodNode ->
+                    JavaTypescriptParser.getListListTuple2(JavaTypescriptParser.parseMethod(methodNode));
+            case JavaStructureNode javaStructureNode ->
+                    new Tuple2<>(Lists.empty(), JavaTypescriptParser.parseStructure(javaStructureNode));
         };
+    }
+
+    private static Tuple2<List<TypescriptStructureMember>, List<TypescriptStructureNode>> getListListTuple2(TypescriptStructureMember typescriptStructureMember) {
+        return new Tuple2<>(Lists.of(typescriptStructureMember), Lists.empty());
+    }
+
+    private static Tuple2<List<TypescriptStructureMember>, List<TypescriptStructureNode>> getList() {
+        return JavaTypescriptParser.getListListTuple2(new Whitespace());
     }
 
     private static TypescriptStructureMember parseMethod(JavaMethod methodNode) {
@@ -153,7 +188,19 @@ class JavaTypescriptParser implements Parser<JavaRoot, TypescriptRoot> {
             case VariadicType variadicType -> new TypeScriptDefinition(definition
                     .withName("..." + definition.name())
                     .withType(new TypescriptArrayType(JavaTypescriptParser.parseType(variadicType.child()))));
+            case Qualified qualified ->
+                    new TypeScriptDefinition(definition.withType(JavaTypescriptParser.parseQualifiedType(qualified)));
         };
+    }
+
+    private static Symbol parseQualifiedType(Qualified qualified) {
+        String joined = qualified.segments()
+                .iter()
+                .map(Segment::value)
+                .collect(new Joiner("."))
+                .orElse("");
+
+        return new Symbol(joined);
     }
 
     private static TypeScriptType parseArrayType(JavaArrayType type) {
@@ -166,6 +213,7 @@ class JavaTypescriptParser implements Parser<JavaRoot, TypescriptRoot> {
             case JavaArrayType type -> JavaTypescriptParser.parseArrayType(type);
             case JavaTemplateType templateType -> JavaTypescriptParser.parseTemplateType(templateType);
             case VariadicType type -> new Symbol("?");
+            case Qualified qualified -> JavaTypescriptParser.parseQualifiedType(qualified);
         };
     }
 
@@ -177,7 +225,7 @@ class JavaTypescriptParser implements Parser<JavaRoot, TypescriptRoot> {
 
     private static Symbol parseBaseType(JavaBase base) {
         return switch (base) {
-            case QualifiedType qualifiedType -> {
+            case Qualified qualifiedType -> {
                 String joined = qualifiedType.segments()
                         .iter()
                         .map(Segment::value)

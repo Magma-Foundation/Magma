@@ -14,8 +14,8 @@ import magmac.app.error.ApplicationError;
 import magmac.app.io.sources.PathSources;
 import magmac.app.io.sources.Sources;
 import magmac.app.lang.JavaDeserializers;
+import magmac.app.lang.JavaRules;
 import magmac.app.lang.node.JavaRoot;
-import magmac.app.lang.node.Roots;
 import magmac.app.stage.lexer.Lexer;
 import magmac.app.stage.lexer.RuleLexer;
 import magmac.app.stage.unit.UnitSet;
@@ -39,7 +39,7 @@ final class Main {
     }
 
     private static Result<UnitSet<JavaRoot>, ApplicationError> loadSources(Sources sources) {
-        Lexer lexer = new RuleLexer(Roots.createRule());
+        Lexer lexer = new RuleLexer(JavaRules.createRule());
         return new LexingStage<JavaRoot>(lexer, node -> JavaRoot.getChildren(node, JavaDeserializers::deserializeRootSegment))
                 .getUnitSetApplicationErrorResult(sources);
     }

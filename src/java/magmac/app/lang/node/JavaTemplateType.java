@@ -34,14 +34,14 @@ public final class JavaTemplateType implements JavaType {
     private static CompileResult<JavaBase> deserializeBase(Node node) {
         return Deserializers.orError("base", node, Lists.of(
                 Deserializers.wrap(Symbols::deserialize),
-                Deserializers.wrap(QualifiedType::deserializeQualified)
+                Deserializers.wrap(Qualified::deserializeQualified)
         ));
     }
 
     public static Rule createTemplateRule(Rule type) {
         Rule base = new NodeRule("base", new OrRule(Lists.of(
                 Symbols.createSymbolRule(),
-                QualifiedType.createQualifiedRule()
+                Qualified.createQualifiedRule()
         )));
 
         Rule arguments = NodeListRule.Values("arguments", type);
