@@ -40,4 +40,8 @@ public record Definition<T>(
     public Definition<T> withName(String name) {
         return new Definition<>(this.maybeAnnotations, this.modifiers, name, this.maybeTypeParams, this.type);
     }
+
+    public Node serialize() {
+        return null;
+    }
 }

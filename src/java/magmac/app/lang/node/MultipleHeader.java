@@ -3,6 +3,7 @@ package magmac.app.lang.node;
 import magmac.api.Option;
 import magmac.api.collect.list.List;
 import magmac.app.compile.error.CompileResult;
+import magmac.app.compile.node.MapNode;
 import magmac.app.compile.node.Node;
 import magmac.app.lang.Destructors;
 
@@ -11,5 +12,10 @@ public record MultipleHeader(List<LambdaParameter> parameters) implements Lambda
         return Destructors.destructWithType("multiple", node).map(destructor -> {
             return destructor.withNodeList("parameters", LambdaParameters::deserialize).complete(MultipleHeader::new);
         });
+    }
+
+    @Override
+    public Node serialize() {
+        return new MapNode("multiple").withNodeListSerialized("parameters", this.parameters);
     }
 }

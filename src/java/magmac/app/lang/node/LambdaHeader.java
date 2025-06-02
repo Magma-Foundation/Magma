@@ -1,4 +1,6 @@
 package magmac.app.lang.node;
 
-public interface LambdaHeader {
+import magmac.app.lang.Serializable;
+
+public interface LambdaHeader extends Serializable {
 }

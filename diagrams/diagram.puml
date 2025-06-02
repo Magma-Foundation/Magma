@@ -53,7 +53,9 @@ Collector <|-- ListCollector
 FunctionSegmentValue --> Serializable
 interface FunctionSegmentValue
 Serializable <|-- FunctionSegmentValue
+LambdaContent --> Serializable
 interface LambdaContent
+Serializable <|-- LambdaContent
 JavaStructureNodeDeserializer --> Option
 JavaStructureNodeDeserializer --> Tuple2
 JavaStructureNodeDeserializer --> List
@@ -571,7 +573,9 @@ Max --> Optional
 class Max
 Collector <|-- Max
 interface JavaRootSegment
+LambdaParameter --> Serializable
 interface LambdaParameter
+Serializable <|-- LambdaParameter
 DividingSplitter --> Option
 DividingSplitter --> Tuple2
 DividingSplitter --> List
@@ -810,6 +814,7 @@ class CaseValues
 BlockContent --> Option
 BlockContent --> List
 BlockContent --> CompileResult
+BlockContent --> MapNode
 BlockContent --> Node
 BlockContent --> Destructors
 class BlockContent
@@ -1294,6 +1299,7 @@ class PlantUMLFooter
 PlantUMLRootSegment <|-- PlantUMLFooter
 ValueContent --> Option
 ValueContent --> CompileResult
+ValueContent --> MapNode
 ValueContent --> Node
 ValueContent --> Destructors
 class ValueContent
@@ -1626,6 +1632,7 @@ LambdaHeader <|-- Symbol
 MultipleHeader --> Option
 MultipleHeader --> List
 MultipleHeader --> CompileResult
+MultipleHeader --> MapNode
 MultipleHeader --> Node
 MultipleHeader --> Destructors
 class MultipleHeader
@@ -1810,7 +1817,9 @@ MergeDiagram --> SimpleUnit
 MergeDiagram --> UnitSet
 class MergeDiagram
 AfterAll <|-- MergeDiagram
+LambdaHeader --> Serializable
 interface LambdaHeader
+Serializable <|-- LambdaHeader
 Segment --> CompileResult
 Segment --> MapNode
 Segment --> Node
@@ -1932,6 +1941,7 @@ Splitter --> Tuple2
 interface Splitter
 JavaDefinition --> Option
 JavaDefinition --> CompileResult
+JavaDefinition --> MapNode
 JavaDefinition --> Node
 class JavaDefinition
 JavaParameter <|-- JavaDefinition

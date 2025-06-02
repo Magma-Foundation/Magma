@@ -2,6 +2,7 @@ package magmac.app.lang.node;
 
 import magmac.api.Option;
 import magmac.app.compile.error.CompileResult;
+import magmac.app.compile.node.MapNode;
 import magmac.app.compile.node.Node;
 import magmac.app.lang.Destructors;
 
@@ -10,5 +11,10 @@ public record ValueContent(Value value) implements LambdaContent {
         return Destructors.destructWithType("value", node).map(destructor -> {
             return destructor.withNode("value", Values::deserializeOrError).complete(ValueContent::new);
         });
+    }
+
+    @Override
+    public Node serialize() {
+        return new MapNode("value").withNodeSerialized("value", this.value);
     }
 }
