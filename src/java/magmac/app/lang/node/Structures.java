@@ -15,7 +15,7 @@ import magmac.app.lang.CommonLang;
 import magmac.app.lang.ValueFolder;
 
 public final class Structures {
-    public static Rule createStructureRule(String keyword) {
+    public static Rule createStructureRule(String keyword, Rule structureMember) {
         Rule name = new StripRule(FilterRule.Symbol(new StringRule("name")));
         Rule beforeContent = JavaDefinition.attachTypeParams(name);
 
@@ -42,7 +42,7 @@ public final class Structures {
                 withImplements
         ));
 
-        Rule afterKeyword = LocatingRule.First(withPermits, "{", new StripRule(new SuffixRule(CommonLang.Statements("children", StructureMembers.createClassMemberRule()), "}")));
+        Rule afterKeyword = LocatingRule.First(withPermits, "{", new StripRule(new SuffixRule(CommonLang.Statements("children", structureMember), "}")));
         return new TypeRule(keyword, LocatingRule.First(Modifier.createModifiersRule(), keyword + " ", afterKeyword));
     }
 }

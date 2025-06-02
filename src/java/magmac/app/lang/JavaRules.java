@@ -15,6 +15,7 @@ import magmac.app.compile.rule.split.DividingSplitter;
 import magmac.app.lang.node.Arguments;
 import magmac.app.lang.node.JavaNamespacedNode;
 import magmac.app.lang.node.JavaTypes;
+import magmac.app.lang.node.StructureMembers;
 import magmac.app.lang.node.Structures;
 import magmac.app.lang.node.Whitespace;
 
@@ -32,14 +33,15 @@ public class JavaRules {
     }
 
     public static Rule createRootSegmentRule() {
+        Rule classMemberRule = StructureMembers.createClassMemberRule();
         return new OrRule(Lists.of(
                 Whitespace.createWhitespaceRule(),
                 JavaNamespacedNode.createNamespacedRule("package"),
                 JavaNamespacedNode.createNamespacedRule("import"),
-                Structures.createStructureRule("record"),
-                Structures.createStructureRule("interface"),
-                Structures.createStructureRule("class"),
-                Structures.createStructureRule("enum")
+                Structures.createStructureRule("record", classMemberRule),
+                Structures.createStructureRule("interface", classMemberRule),
+                Structures.createStructureRule("class", classMemberRule),
+                Structures.createStructureRule("enum", classMemberRule)
         ));
     }
 }
