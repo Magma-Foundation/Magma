@@ -15,7 +15,6 @@ import magmac.app.compile.rule.Rule;
 import magmac.app.compile.rule.StripRule;
 import magmac.app.compile.rule.SuffixRule;
 import magmac.app.compile.rule.TypeRule;
-import magmac.app.lang.CommonLang;
 import magmac.app.lang.Deserializers;
 import magmac.app.lang.LazyRule;
 
@@ -35,7 +34,8 @@ public final class Values {
                 Deserializers.wrap(CharNode::deserialize),
                 Deserializers.wrap(Lambda::deserialize),
                 Deserializers.wrap(NumberNode::deserialize),
-                Deserializers.wrap(Not::deserialize)
+                Deserializers.wrap(Not::deserialize),
+                Deserializers.wrap(value -> IndexNode.deserialize(value))
         );
 
         List<TypedDeserializer<Value>> operatorRules = Iters.fromValues(Operator.values())
@@ -61,7 +61,7 @@ public final class Values {
                 CharNode.createCharRule(),
                 StringNode.createStringRule(),
                 InvokableNode.createInvokableRule(value),
-                CommonLang.createIndexRule(value),
+                IndexNode.createIndexRule(value),
                 NumberNode.createNumberRule(),
                 Symbols.createSymbolRule(),
                 Access.createAccessRule("data-access", ".", value),
