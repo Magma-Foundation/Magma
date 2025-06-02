@@ -18,11 +18,12 @@ import magmac.app.compile.rule.divide.FoldingDivider;
 import magmac.app.compile.rule.split.DividingSplitter;
 import magmac.app.lang.Destructors;
 import magmac.app.lang.InvocationFolder;
+import magmac.app.lang.JavaDeserializers;
 import magmac.app.lang.JavaLang;
 
 record InvokableNode(JavaLang.Caller caller, List<Argument> arguments) implements Value, FunctionSegmentValue {
     public static Option<CompileResult<InvokableNode>> deserialize(Node node) {
-        return Destructors.destructWithType("invokable", node).map(deserializer -> deserializer.withNode("caller", JavaCallers::deserialize)
+        return Destructors.destructWithType("invokable", node).map(deserializer -> deserializer.withNode("caller", JavaDeserializers::deserialize)
                 .withNodeList("arguments", Arguments::deserialize)
                 .complete(tuple -> new InvokableNode(tuple.left(), tuple.right())));
     }
