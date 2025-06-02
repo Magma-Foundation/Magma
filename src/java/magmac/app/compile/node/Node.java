@@ -52,7 +52,7 @@ public interface Node {
 
     CompileResult<Tuple2<Node, String>> removeString(String key);
 
-    CompileResult<Tuple2<Node, Node>> removeNode(String key);
+    CompileResult<Tuple2<Node, Node>> removeNodeOrError(String key);
 
     <T> Node withNodeListAndSerializer(String key, List<T> list, Function<T, Node> serializer);
 
@@ -65,4 +65,6 @@ public interface Node {
     default <T extends Serializable> Node withNodeSerialized(String key, T element) {
         return this.withNodeAndSerializer(key, element, Serializable::serialize);
     }
+
+    Option<Tuple2<Node, Node>> removeNode(String key);
 }

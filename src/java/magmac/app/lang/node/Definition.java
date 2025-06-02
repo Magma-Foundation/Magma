@@ -17,7 +17,7 @@ public record Definition<T>(
 ) {
     static CompileResult<Definition<JavaType>> deserialize0(InitialDestructor deserialize) {
         return deserialize.withString("name")
-                .withNode("type", Types::deserialize)
+                .withNode("type", JavaTypes::deserialize)
                 .withNodeList("modifiers", Modifier::deserialize)
                 .withNodeListOptionally("annotations", Annotation::deserialize)
                 .withNodeListOptionally("type-parameters", TypeParam::deserialize)

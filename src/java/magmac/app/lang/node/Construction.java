@@ -13,11 +13,11 @@ import magmac.app.lang.Destructors;
 
 record Construction(JavaType type) implements Caller {
     public static Option<CompileResult<Caller>> deserialize(Node node) {
-        return Destructors.destructWithType("construction", node).map(deserializer -> deserializer.withNode("type", Types::deserialize).complete(Construction::new));
+        return Destructors.destructWithType("construction", node).map(deserializer -> deserializer.withNode("type", JavaTypes::deserialize).complete(Construction::new));
     }
 
     public static Rule createConstructionRule() {
-        return new TypeRule("construction", new StripRule(new PrefixRule("new ", new NodeRule("type", Types.createTypeRule()))));
+        return new TypeRule("construction", new StripRule(new PrefixRule("new ", new NodeRule("type", JavaTypes.createTypeRule()))));
     }
 
     @Override

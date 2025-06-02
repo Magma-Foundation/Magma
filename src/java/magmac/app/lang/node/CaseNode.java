@@ -28,7 +28,7 @@ public record CaseNode(List<CaseDefinition> definitions, CaseValue value) implem
     }
 
     static Rule createCaseRule(Rule value, Rule segment) {
-        Rule typeRule = Types.createTypeRule();
+        Rule typeRule = JavaTypes.createTypeRule();
         Rule name = new StripRule(new StringRule("name"));
         Rule last = LocatingRule.Last(new NodeRule("type", typeRule), " ", name);
         Rule definitions = new TypeRule("case-definition", new OrRule(Lists.of(

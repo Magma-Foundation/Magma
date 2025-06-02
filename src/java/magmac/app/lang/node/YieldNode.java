@@ -13,7 +13,9 @@ import magmac.app.lang.Destructors;
 
 record YieldNode(Value value) implements FunctionSegmentValue {
     public static Option<CompileResult<FunctionSegmentValue>> deserialize(Node node) {
-        return Destructors.destructWithType("yield", node).map(deserializer -> deserializer.withNode("yield", Values::deserializeOrError).complete(YieldNode::new));
+        return Destructors.destructWithType("yield", node)
+                .map(deserializer -> deserializer.withNode("value", Values::deserializeOrError)
+                        .complete(YieldNode::new));
     }
 
     public static Rule createYieldRule(Rule value) {

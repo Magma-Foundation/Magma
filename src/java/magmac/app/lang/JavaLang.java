@@ -18,7 +18,7 @@ import magmac.app.compile.rule.divide.FoldingDivider;
 import magmac.app.compile.rule.fold.DelimitedFolder;
 import magmac.app.compile.rule.split.DividingSplitter;
 import magmac.app.lang.node.Modifier;
-import magmac.app.lang.node.Types;
+import magmac.app.lang.node.JavaTypes;
 
 public class JavaLang {
     public static Rule createRule() {
@@ -31,7 +31,7 @@ public class JavaLang {
 
         Rule leftRule1 = JavaLang.attachTypeParams(beforeTypeParams);
 
-        Rule rightRule = new NodeRule("type", Types.createTypeRule());
+        Rule rightRule = new NodeRule("type", JavaTypes.createTypeRule());
         Divider divider = new FoldingDivider(new TypeSeparatorFolder());
         Splitter splitter = DividingSplitter.Last(divider, " ");
         Rule leftRule = new LocatingRule(leftRule1, splitter, rightRule);

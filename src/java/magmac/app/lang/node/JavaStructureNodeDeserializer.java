@@ -22,11 +22,11 @@ public record JavaStructureNodeDeserializer(JavaStructureType type) implements T
     }
 
     private static CompoundDestructor<Tuple2<Tuple2<Tuple2<Tuple2<Tuple2<Tuple2<Tuple2<String, List<Modifier>>, List<JavaStructureMember>>, Option<List<JavaType>>>, Option<List<TypeParam>>>, Option<List<JavaParameter>>>, Option<List<JavaType>>>, Option<List<JavaType>>>> attachOptionals(CompoundDestructor<Tuple2<Tuple2<String, List<Modifier>>, List<JavaStructureMember>>> attachRequired) {
-        return attachRequired.withNodeListOptionally("implemented", Types::deserialize)
+        return attachRequired.withNodeListOptionally("implemented", JavaTypes::deserialize)
                 .withNodeListOptionally("type-parameters", TypeParam::deserialize)
                 .withNodeListOptionally("parameters", Parameters::deserialize)
-                .withNodeListOptionally("extended", Types::deserialize)
-                .withNodeListOptionally("variants", Types::deserialize);
+                .withNodeListOptionally("extended", JavaTypes::deserialize)
+                .withNodeListOptionally("variants", JavaTypes::deserialize);
     }
 
     private static JavaStructureNode from(

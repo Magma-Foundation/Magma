@@ -14,5 +14,7 @@ public interface CompoundDestructor<T> {
 
     <R> CompoundDestructor<Tuple2<T, R>> withNode(String key, Function<Node, CompileResult<R>> deserializer);
 
+    <R> CompoundDestructor<Tuple2<T, Option<R>>> withNodeOptionally(String key, Function<Node, CompileResult<R>> deserializer);
+
     <R> CompoundDestructor<Tuple2<T, Option<List<R>>>> withNodeListOptionally(String key, Function<Node, CompileResult<R>> deserializer);
 }

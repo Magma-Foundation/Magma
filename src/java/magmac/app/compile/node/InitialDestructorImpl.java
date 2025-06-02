@@ -34,7 +34,7 @@ public class InitialDestructorImpl implements InitialDestructor {
 
     @Override
     public <T> CompoundDestructor<T> withNode(String key, Function<Node, CompileResult<T>> deserializer) {
-        return new CompoundDestructorImpl<>(this.node.removeNode(key).flatMapValue((Tuple2<Node, Node> tuple) -> deserializer.apply(tuple.right()).mapValue((T deserialized) -> new Tuple2<>(tuple.left(), deserialized))));
+        return new CompoundDestructorImpl<>(this.node.removeNodeOrError(key).flatMapValue((Tuple2<Node, Node> tuple) -> deserializer.apply(tuple.right()).mapValue((T deserialized) -> new Tuple2<>(tuple.left(), deserialized))));
     }
 
     @Override

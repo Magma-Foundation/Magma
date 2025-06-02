@@ -25,7 +25,7 @@ final class Structures {
                 beforeContent
         ));
 
-        Rule type = Types.createTypeRule();
+        Rule type = JavaTypes.createTypeRule();
         Rule extended = NodeListRule.createNodeListRule("extended", new ValueFolder(), type);
         Rule withEnds = new OrRule(Lists.of(
                 LocatingRule.First(withParameters, " extends ", extended),

@@ -87,6 +87,14 @@ public final class MapNode implements Node {
     }
 
     @Override
+    public Option<Tuple2<Node, Node>> removeNode(String key) {
+        return this.nodes.removeByKey(key).map(tuple -> {
+            MapNode copy = new MapNode(this.maybeType, this.strings, tuple.left(), this.nodeLists);
+            return new Tuple2<>(copy, tuple.right());
+        });
+    }
+
+    @Override
     public Iter<Tuple2<String, Node>> iterNodes() {
         return this.nodes.iter();
     }
@@ -214,7 +222,7 @@ public final class MapNode implements Node {
     }
 
     @Override
-    public CompileResult<Tuple2<Node, Node>> removeNode(String key) {
+    public CompileResult<Tuple2<Node, Node>> removeNodeOrError(String key) {
         return this.nodes.removeByKey(key)
                 .map((Tuple2<Map<String, Node>, Node> tuple) -> CompileResults.Ok(new Tuple2<>(this.withNodes(tuple.left()), tuple.right())))
                 .orElseGet(() -> this.createNotPresent(key));

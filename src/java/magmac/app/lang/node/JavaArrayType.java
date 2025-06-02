@@ -24,7 +24,7 @@ public final class JavaArrayType implements JavaType {
 
     public static Option<CompileResult<JavaType>> deserialize(Node node) {
         return Destructors.destructWithType("array", node)
-                .map(deserializer -> deserializer.withNode("child", Types::deserialize)
+                .map(deserializer -> deserializer.withNode("child", JavaTypes::deserialize)
                         .complete(JavaArrayType::new));
     }
 }

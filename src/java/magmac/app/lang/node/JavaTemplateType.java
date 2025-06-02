@@ -27,7 +27,7 @@ public final class JavaTemplateType implements JavaType {
     public static Option<CompileResult<JavaTemplateType>> deserialize(Node node) {
         return Destructors.destructWithType("template", node).map(deserializer -> deserializer
                 .withNode("base", JavaTemplateType::deserializeBase)
-                .withNodeList("arguments", Types::deserialize)
+                .withNodeList("arguments", JavaTypes::deserialize)
                 .complete(tuple -> new JavaTemplateType(tuple.left(), new TypeArguments<JavaType>(tuple.right()))));
     }
 

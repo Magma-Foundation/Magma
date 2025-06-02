@@ -12,7 +12,7 @@ import magmac.app.lang.Destructors;
 
 public record VariadicType(JavaType child) implements JavaType {
     public static Option<CompileResult<JavaType>> deserialize(Node node) {
-        return Destructors.destructWithType("variadic", node).map(deserializer -> deserializer.withNode("child", Types::deserialize)
+        return Destructors.destructWithType("variadic", node).map(deserializer -> deserializer.withNode("child", JavaTypes::deserialize)
                 .complete(VariadicType::new));
     }
 
