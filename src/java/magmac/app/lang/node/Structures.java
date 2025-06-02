@@ -14,7 +14,7 @@ import magmac.app.compile.rule.TypeRule;
 import magmac.app.lang.CommonLang;
 import magmac.app.lang.ValueFolder;
 
-final class Structures {
+public final class Structures {
     public static Rule createStructureRule(String keyword) {
         Rule name = new StripRule(FilterRule.Symbol(new StringRule("name")));
         Rule beforeContent = JavaDefinition.attachTypeParams(name);

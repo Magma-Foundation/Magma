@@ -29,7 +29,11 @@ final class StructureMembers {
                 Whitespace.createWhitespaceRule(),
                 StructureStatement.createStructureStatementRule(new TypeRule("definition", JavaDefinition.createRule()), value),
                 JavaMethod.createMethodRule(functionSegment),
-                EnumValues.createEnumValuesRule(value)
+                EnumValues.createEnumValuesRule(value),
+                Structures.createStructureRule("record"),
+                Structures.createStructureRule("interface"),
+                Structures.createStructureRule("class"),
+                Structures.createStructureRule("enum")
         ));
     }
 }

@@ -6,9 +6,9 @@ public class JavaLang {
     public interface Caller {
     }
 
-    public record Construction(JavaType type) implements Caller {
+    public interface Argument extends Serializable {
     }
 
-    public static interface Argument extends Serializable {
+    public record Construction(JavaType type) implements Caller {
     }
 }

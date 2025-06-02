@@ -13,8 +13,8 @@ import magmac.app.config.TypeScriptTargetPlatform;
 import magmac.app.error.ApplicationError;
 import magmac.app.io.sources.PathSources;
 import magmac.app.io.sources.Sources;
+import magmac.app.lang.JavaDeserializers;
 import magmac.app.lang.node.JavaRoot;
-import magmac.app.lang.node.JavaRootSegments;
 import magmac.app.lang.node.Roots;
 import magmac.app.stage.lexer.Lexer;
 import magmac.app.stage.lexer.RuleLexer;
@@ -40,7 +40,7 @@ final class Main {
 
     private static Result<UnitSet<JavaRoot>, ApplicationError> loadSources(Sources sources) {
         Lexer lexer = new RuleLexer(Roots.createRule());
-        return new LexingStage<JavaRoot>(lexer, node -> JavaRoot.getChildren(node, JavaRootSegments::deserialize))
+        return new LexingStage<JavaRoot>(lexer, node -> JavaRoot.getChildren(node, JavaDeserializers::deserializeRootSegment))
                 .getUnitSetApplicationErrorResult(sources);
     }
 

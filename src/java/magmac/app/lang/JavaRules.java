@@ -13,7 +13,10 @@ import magmac.app.compile.rule.TypeRule;
 import magmac.app.compile.rule.divide.FoldingDivider;
 import magmac.app.compile.rule.split.DividingSplitter;
 import magmac.app.lang.node.Arguments;
+import magmac.app.lang.node.JavaNamespacedNode;
 import magmac.app.lang.node.JavaTypes;
+import magmac.app.lang.node.Structures;
+import magmac.app.lang.node.Whitespace;
 
 public class JavaRules {
     public static Rule createConstructionRule() {
@@ -26,5 +29,17 @@ public class JavaRules {
         Rule arguments = Arguments.createArgumentsRule(value);
         Splitter splitter = DividingSplitter.Last(new FoldingDivider(new InvocationFolder()), "");
         return new TypeRule("invokable", new StripRule(new SuffixRule(new LocatingRule(caller, splitter, arguments), ")")));
+    }
+
+    public static Rule createRootSegmentRule() {
+        return new OrRule(Lists.of(
+                Whitespace.createWhitespaceRule(),
+                JavaNamespacedNode.createNamespacedRule("package"),
+                JavaNamespacedNode.createNamespacedRule("import"),
+                Structures.createStructureRule("record"),
+                Structures.createStructureRule("interface"),
+                Structures.createStructureRule("class"),
+                Structures.createStructureRule("enum")
+        ));
     }
 }
