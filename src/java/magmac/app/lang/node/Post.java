@@ -10,14 +10,14 @@ import magmac.app.compile.rule.StripRule;
 import magmac.app.compile.rule.SuffixRule;
 import magmac.app.compile.rule.TypeRule;
 import magmac.app.lang.Destructors;
-import magmac.app.lang.JavaNodes;
+import magmac.app.lang.java.JavaFunctionSegmentValue;
 
-record Post(PostVariant variant, Value value) implements JavaNodes.FunctionSegmentValue {
+record Post(PostVariant variant, JavaValue value) implements JavaFunctionSegmentValue {
     public static Rule createPostRule(String type, String suffix, Rule value) {
         return new TypeRule(type, new StripRule(new SuffixRule(new NodeRule("child", value), suffix)));
     }
 
-    public static Option<CompileResult<JavaNodes.FunctionSegmentValue>> deserialize(PostVariant variant, Node node) {
+    public static Option<CompileResult<JavaFunctionSegmentValue>> deserialize(PostVariant variant, Node node) {
         return Destructors.destructWithType(variant.type(), node).map(deserializer -> deserializer
                 .withNode("child", Values::deserializeOrError)
                 .complete(child -> new Post(variant, child)));

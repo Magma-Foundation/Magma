@@ -11,9 +11,9 @@ import magmac.app.compile.rule.OrRule;
 import magmac.app.compile.rule.Rule;
 import magmac.app.compile.rule.TypeRule;
 import magmac.app.lang.Destructors;
-import magmac.app.lang.JavaNodes;
+import magmac.app.lang.java.JavaFunctionSegmentValue;
 
-record AssignmentNode(Assignable assignable, Value value) implements JavaNodes.FunctionSegmentValue, StructureStatementValue {
+record AssignmentNode(Assignable assignable, JavaValue value) implements JavaFunctionSegmentValue, StructureStatementValue {
     public static Option<CompileResult<AssignmentNode>> deserialize(Node node) {
         return Destructors.destructWithType("assignment", node).map(deserializer -> deserializer
                 .withNode("destination", Assignables::deserializeError)

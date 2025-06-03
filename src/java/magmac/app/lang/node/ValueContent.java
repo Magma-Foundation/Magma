@@ -6,7 +6,7 @@ import magmac.app.compile.node.MapNode;
 import magmac.app.compile.node.Node;
 import magmac.app.lang.Destructors;
 
-public record ValueContent(Value value) implements LambdaContent {
+public record ValueContent(JavaValue value) implements LambdaContent {
     public static Option<CompileResult<LambdaContent>> deserialize(Node node) {
         return Destructors.destructWithType("value", node).map(destructor -> {
             return destructor.withNode("value", Values::deserializeOrError).complete(ValueContent::new);

@@ -1,12 +1,12 @@
 package magmac.app.lang.node;
 
-public enum AccessType {
+public enum JavaAccessType {
     Data("data-access"),
     Method("method-access");
 
     private final String value;
 
-    AccessType(String value) {
+    JavaAccessType(String value) {
         this.value = value;
     }
 

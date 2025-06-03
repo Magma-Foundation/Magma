@@ -9,10 +9,10 @@ import magmac.app.compile.rule.Rule;
 import magmac.app.compile.rule.StripRule;
 import magmac.app.compile.rule.TypeRule;
 import magmac.app.lang.Destructors;
-import magmac.app.lang.JavaNodes;
+import magmac.app.lang.java.JavaArgument;
 
 public final class Whitespace implements
-        JavaNodes.Argument,
+        JavaArgument,
         FunctionSegment,
         JavaRootSegment,
         JavaParameter,

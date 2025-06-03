@@ -10,7 +10,7 @@ import magmac.app.compile.rule.SuffixRule;
 import magmac.app.compile.rule.TypeRule;
 import magmac.app.lang.Destructors;
 
-public record SingleCaseValue(Value value) implements CaseValue {
+public record SingleCaseValue(JavaValue value) implements CaseValue {
     public static Option<CompileResult<SingleCaseValue>> deserialize(Node node) {
         return Destructors.destructWithType("case-single", node).map(destructor -> {
             return destructor.withNode("value", Values::deserializeOrError)

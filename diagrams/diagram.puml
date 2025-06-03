@@ -80,9 +80,9 @@ AssignmentNode --> OrRule
 AssignmentNode --> Rule
 AssignmentNode --> TypeRule
 AssignmentNode --> Destructors
-AssignmentNode --> JavaNodes
+AssignmentNode --> FunctionSegmentValue
 class AssignmentNode
-? <|-- AssignmentNode
+FunctionSegmentValue <|-- AssignmentNode
 StructureStatementValue <|-- AssignmentNode
 ApplicationError --> Error
 class ApplicationError
@@ -309,7 +309,7 @@ Arguments --> NodeListRule
 Arguments --> OrRule
 Arguments --> Rule
 Arguments --> Deserializers
-Arguments --> JavaNodes
+Arguments --> JavaArgument
 class Arguments
 ParseState --> Location
 interface ParseState
@@ -501,6 +501,9 @@ CaseNode --> TypeRule
 CaseNode --> Destructors
 class CaseNode
 FunctionSegment <|-- CaseNode
+JavaConstruction --> JavaType
+class JavaConstruction
+JavaCaller <|-- JavaConstruction
 SimpleUnit --> CompileResult
 SimpleUnit --> Location
 SimpleUnit --> BiFunction
@@ -549,6 +552,9 @@ JavaDeserializers --> Option
 JavaDeserializers --> Lists
 JavaDeserializers --> CompileResult
 JavaDeserializers --> Node
+JavaDeserializers --> Invokable
+JavaDeserializers --> JavaCaller
+JavaDeserializers --> JavaConstruction
 JavaDeserializers --> Arguments
 JavaDeserializers --> JavaNamespacedNode
 JavaDeserializers --> JavaRootSegment
@@ -626,6 +632,7 @@ Stage --> CompileResult
 interface Stage
 IndexNode --> Option
 IndexNode --> CompileResult
+IndexNode --> MapNode
 IndexNode --> Node
 IndexNode --> LocatingRule
 IndexNode --> NodeRule
@@ -774,9 +781,9 @@ Post --> StripRule
 Post --> SuffixRule
 Post --> TypeRule
 Post --> Destructors
-Post --> JavaNodes
+Post --> FunctionSegmentValue
 class Post
-? <|-- Post
+FunctionSegmentValue <|-- Post
 JavaStructureNode --> Option
 JavaStructureNode --> List
 JavaStructureNode --> MapNode
@@ -815,9 +822,9 @@ Break --> CompileResult
 Break --> MapNode
 Break --> Node
 Break --> Destructors
-Break --> JavaNodes
+Break --> FunctionSegmentValue
 class Break
-? <|-- Break
+FunctionSegmentValue <|-- Break
 CaseValues --> Lists
 CaseValues --> CompileResult
 CaseValues --> Node
@@ -865,9 +872,9 @@ YieldNode --> Rule
 YieldNode --> StripRule
 YieldNode --> TypeRule
 YieldNode --> Destructors
-YieldNode --> JavaNodes
+YieldNode --> FunctionSegmentValue
 class YieldNode
-? <|-- YieldNode
+FunctionSegmentValue <|-- YieldNode
 ParameterizedMethodHeader --> List
 ParameterizedMethodHeader --> Node
 ParameterizedMethodHeader --> Serializable
@@ -881,9 +888,9 @@ Continue --> CompileResult
 Continue --> MapNode
 Continue --> Node
 Continue --> Destructors
-Continue --> JavaNodes
+Continue --> FunctionSegmentValue
 class Continue
-? <|-- Continue
+FunctionSegmentValue <|-- Continue
 TreeParser --> Tuple2
 TreeParser --> CompileResult
 TreeParser --> CompileResultCollector
@@ -964,6 +971,9 @@ StringNode --> TypeRule
 StringNode --> Destructors
 class StringNode
 Value <|-- StringNode
+FunctionSegmentValue --> Serializable
+interface FunctionSegmentValue
+Serializable <|-- FunctionSegmentValue
 interface JavaStructureMember
 SafeFiles --> None
 SafeFiles --> Option
@@ -1214,7 +1224,7 @@ FunctionStatement --> StripRule
 FunctionStatement --> SuffixRule
 FunctionStatement --> TypeRule
 FunctionStatement --> Destructors
-FunctionStatement --> JavaNodes
+FunctionStatement --> FunctionSegmentValue
 class FunctionStatement
 FunctionSegment <|-- FunctionStatement
 OperationDeserializer --> Option
@@ -1406,6 +1416,9 @@ ParseUnitImpl --> ParseState
 ParseUnitImpl --> BiFunction
 class ParseUnitImpl
 ParseUnit <|-- ParseUnitImpl
+JavaArgument --> Serializable
+interface JavaArgument
+Serializable <|-- JavaArgument
 PlantUMLDependency --> MapNode
 PlantUMLDependency --> Node
 PlantUMLDependency --> LocatingRule
@@ -1451,9 +1464,9 @@ Whitespace --> Rule
 Whitespace --> StripRule
 Whitespace --> TypeRule
 Whitespace --> Destructors
-Whitespace --> JavaNodes
+Whitespace --> JavaArgument
 class Whitespace
-? <|-- Whitespace
+JavaArgument <|-- Whitespace
 FunctionSegment <|-- Whitespace
 JavaRootSegment <|-- Whitespace
 JavaParameter <|-- Whitespace
@@ -1465,12 +1478,11 @@ CommonLang --> NodeListRule
 CommonLang --> Rule
 CommonLang --> StatementFolder
 class CommonLang
-Value --> MapNode
-Value --> Node
-Value --> JavaNodes
+Value --> JavaArgument
+Value --> JavaCaller
 interface Value
-? <|-- Value
-? <|-- Value
+JavaCaller <|-- Value
+JavaArgument <|-- Value
 Assignable <|-- Value
 InvocationFolder --> DivideState
 InvocationFolder --> Folder
@@ -1525,8 +1537,8 @@ FunctionSegmentValues --> Rule
 FunctionSegmentValues --> TypeRule
 FunctionSegmentValues --> Deserializers
 FunctionSegmentValues --> JavaDeserializers
-FunctionSegmentValues --> JavaNodes
 FunctionSegmentValues --> JavaRules
+FunctionSegmentValues --> FunctionSegmentValue
 class FunctionSegmentValues
 VariadicType --> Option
 VariadicType --> CompileResult
@@ -1640,11 +1652,6 @@ DivideState --> Option
 DivideState --> Iter
 interface DivideState
 enum JavaStructureType
-JavaNodes --> List
-JavaNodes --> JavaType
-JavaNodes --> Value
-class Construction
-Caller <|-- Construction
 JVMMap --> None
 JVMMap --> Option
 JVMMap --> Some
@@ -1688,6 +1695,7 @@ PathSource --> SafeFiles
 PathSource --> Path
 class PathSource
 Source <|-- PathSource
+interface JavaCaller
 InlineNodeList --> Option
 InlineNodeList --> Some
 InlineNodeList --> List
@@ -1752,6 +1760,13 @@ class TypeScriptDefinition
 TypeScriptParameter <|-- TypeScriptDefinition
 Assignable <|-- TypeScriptDefinition
 TypeScriptMethodHeader <|-- TypeScriptDefinition
+Invokable --> List
+Invokable --> MapNode
+Invokable --> Node
+Invokable --> Value
+class Invokable
+Value <|-- Invokable
+FunctionSegmentValue <|-- Invokable
 Assignables --> Lists
 Assignables --> CompileResult
 Assignables --> Node
@@ -1850,9 +1865,9 @@ ReturnNode --> Rule
 ReturnNode --> StripRule
 ReturnNode --> TypeRule
 ReturnNode --> Destructors
-ReturnNode --> JavaNodes
+ReturnNode --> FunctionSegmentValue
 class ReturnNode
-? <|-- ReturnNode
+FunctionSegmentValue <|-- ReturnNode
 FunctionSegment <|-- ReturnNode
 interface JavaType
 JavaTypes --> Lists

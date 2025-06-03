@@ -21,17 +21,17 @@ import magmac.app.lang.JavaRules;
 import magmac.app.lang.LazyRule;
 
 public final class Values {
-    public static CompileResult<Value> deserializeOrError(Node node) {
+    public static CompileResult<JavaValue> deserializeOrError(Node node) {
         return Values.deserialize(node).orElseGet(() -> CompileResults.NodeErr("Cannot deserialize value", node));
     }
 
-    public static Option<CompileResult<Value>> deserialize(Node node) {
-        List<TypedDeserializer<Value>> deserializers = Lists.of(
+    public static Option<CompileResult<JavaValue>> deserialize(Node node) {
+        List<TypedDeserializer<JavaValue>> deserializers = Lists.of(
                 Deserializers.wrap(SwitchNode::deserialize),
                 Deserializers.wrap(JavaDeserializers::deserializeInvocation),
                 StringNode::deserialize,
-                node1 -> Access.deserialize(AccessType.Data, node1),
-                node1 -> Access.deserialize(AccessType.Method, node1),
+                node1 -> JavaDeserializers.deserialize(JavaAccessType.Data, node1),
+                node1 -> JavaDeserializers.deserialize(JavaAccessType.Method, node1),
                 Deserializers.wrap(Symbols::deserialize),
                 Deserializers.wrap(CharNode::deserialize),
                 Deserializers.wrap(Lambda::deserialize),
@@ -40,14 +40,14 @@ public final class Values {
                 Deserializers.wrap(value -> IndexNode.deserialize(value))
         );
 
-        List<TypedDeserializer<Value>> operatorRules = Iters.fromValues(Operator.values())
+        List<TypedDeserializer<JavaValue>> operatorRules = Iters.fromValues(Operator.values())
                 .map(Values::getWrap)
                 .collect(new ListCollector<>());
 
         return Deserializers.or(node, deserializers.addAllLast(operatorRules));
     }
 
-    private static TypedDeserializer<Value> getWrap(Operator operator) {
+    private static TypedDeserializer<JavaValue> getWrap(Operator operator) {
         return Deserializers.wrap(Deserializers.wrap(new OperationDeserializer(operator)));
     }
 
@@ -66,8 +66,8 @@ public final class Values {
                 IndexNode.createIndexRule(value),
                 NumberNode.createNumberRule(),
                 Symbols.createSymbolRule(),
-                Access.createAccessRule("data-access", ".", value),
-                Access.createAccessRule("method-access", "::", value)
+                JavaRules.createAccessRule("data-access", ".", value),
+                JavaRules.createAccessRule("method-access", "::", value)
         );
 
         List<Rule> operatorLists = Iters.fromValues(Operator.values())

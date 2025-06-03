@@ -19,7 +19,7 @@ import magmac.app.lang.Destructors;
 import magmac.app.lang.LazyRule;
 import magmac.app.lang.ValueFolder;
 
-record Lambda(LambdaHeader header, LambdaContent content) implements Value {
+record Lambda(LambdaHeader header, LambdaContent content) implements JavaValue, TypeScriptValue {
     public static Option<CompileResult<Lambda>> deserialize(Node node) {
         return Destructors.destructWithType("lambda", node).map(deserializer -> deserializer
                 .withNode("header", LambdaHeaders::deserialize)

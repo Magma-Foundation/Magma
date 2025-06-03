@@ -23,6 +23,7 @@ import magmac.app.lang.node.JavaTypes;
 import magmac.app.lang.node.Modifier;
 import magmac.app.lang.node.Parameters;
 import magmac.app.lang.node.StructureMembers;
+import magmac.app.lang.node.Symbols;
 import magmac.app.lang.node.Whitespace;
 
 public final class JavaRules {
@@ -84,5 +85,10 @@ public final class JavaRules {
 
         Rule afterKeyword = LocatingRule.First(withPermits, "{", new StripRule(new SuffixRule(CommonLang.Statements("children", structureMember), "}")));
         return new TypeRule(keyword, LocatingRule.First(Modifier.createModifiersRule(), keyword + " ", afterKeyword));
+    }
+
+    public static Rule createAccessRule(String type, String infix, LazyRule value) {
+        Rule property = Symbols.createSymbolRule("property");
+        return new TypeRule(type, LocatingRule.Last(new NodeRule("receiver", value), infix, property));
     }
 }

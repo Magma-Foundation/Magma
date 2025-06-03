@@ -13,14 +13,14 @@ import magmac.app.compile.rule.TypeRule;
 import magmac.app.lang.Destructors;
 import magmac.app.lang.LazyRule;
 
-public record IndexNode(Value parent, Value argument) implements Value {
+public record IndexNode(JavaValue parent, JavaValue argument) implements JavaValue, TypeScriptValue {
     public static Rule createIndexRule(LazyRule value) {
         NodeRule parent = new NodeRule("parent", value);
         NodeRule argument = new NodeRule("argument", value);
         return new TypeRule("index", new StripRule(new SuffixRule(LocatingRule.First(parent, "[", argument), "]")));
     }
 
-    public static Option<CompileResult<Value>> deserialize(Node value) {
+    public static Option<CompileResult<JavaValue>> deserialize(Node value) {
         return Destructors.destructWithType("index", value).map(destructor -> {
             return destructor.withNode("parent", Values::deserializeOrError)
                     .withNode("argument", Values::deserializeOrError)

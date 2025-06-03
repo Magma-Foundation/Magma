@@ -12,8 +12,8 @@ import magmac.app.compile.rule.SuffixRule;
 import magmac.app.compile.rule.TypeRule;
 import magmac.app.lang.Destructors;
 
-record StringNode(String value) implements Value {
-    public static Option<CompileResult<Value>> deserialize(Node node) {
+record StringNode(String value) implements JavaValue, TypeScriptValue {
+    public static Option<CompileResult<JavaValue>> deserialize(Node node) {
         return Destructors.destructWithType("string", node).map(deserializer -> deserializer.withString("value").complete(StringNode::new));
     }
 

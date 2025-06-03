@@ -11,12 +11,12 @@ import magmac.app.compile.rule.TypeRule;
 import magmac.app.lang.Destructors;
 import magmac.app.lang.LazyRule;
 
-record Not(Value value) implements Value {
+record Not(JavaValue value) implements JavaValue, TypeScriptValue {
     public static TypeRule createNotRule(LazyRule value) {
         return new TypeRule("not", new StripRule(new PrefixRule("!", new NodeRule("child", value))));
     }
 
-    public static Option<CompileResult<Value>> deserialize(Node node) {
+    public static Option<CompileResult<JavaValue>> deserialize(Node node) {
         return Destructors.destructWithType("not", node).map(deserializer -> deserializer.withNode("child", Values::deserializeOrError)
                 .complete(Not::new));
     }

@@ -7,10 +7,10 @@ import magmac.app.compile.rule.NodeListRule;
 import magmac.app.compile.rule.OrRule;
 import magmac.app.compile.rule.Rule;
 import magmac.app.lang.Deserializers;
-import magmac.app.lang.JavaNodes;
+import magmac.app.lang.java.JavaArgument;
 
 public final class Arguments {
-    public static CompileResult<JavaNodes.Argument> deserialize(Node node) {
+    public static CompileResult<JavaArgument> deserialize(Node node) {
         return Deserializers.orError("argument", node, Lists.of(
                 Deserializers.wrap(Whitespace::deserialize),
                 Deserializers.wrap(Values::deserialize)

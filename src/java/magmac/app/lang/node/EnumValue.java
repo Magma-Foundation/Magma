@@ -14,7 +14,7 @@ import magmac.app.compile.rule.StripRule;
 import magmac.app.compile.rule.SuffixRule;
 import magmac.app.lang.Destructors;
 
-record EnumValue(String name, Option<List<Value>> argumentsList) {
+record EnumValue(String name, Option<List<JavaValue>> argumentsList) {
     public static CompileResult<EnumValue> deserialize(Node node) {
         return Destructors.destruct(node)
                 .withString("name")
