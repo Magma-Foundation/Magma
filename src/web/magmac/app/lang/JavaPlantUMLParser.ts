@@ -27,14 +27,14 @@ import { SimpleUnit } from "../../../magmac/app/stage/unit/SimpleUnit";
 import { Unit } from "../../../magmac/app/stage/unit/Unit";
 import { UnitSet } from "../../../magmac/app/stage/unit/UnitSet";
 export class JavaPlantUMLParser {
-	parseNamespaced(child : String, namespaced : JavaNamespacedNode) : Iter<PlantUMLRootSegment> {;;;}
-	createSimpleName(base : JavaLang.JavaBase) : String {;;;}
+	parseNamespaced(child : String, namespaced : JavaNamespacedNode) : Iter<PlantUMLRootSegment> {return 0;;}
+	createSimpleName(base : JavaLang.JavaBase) : String {return 0;;}
 	createSimpleNameFromQualifiedType(qualifiedType : JavaLang.JavaQualified) : String {return qualifiedType.segments( ).iter( ).map( Segment.value).collect( new Joiner( ".")).orElse( "");;}
-	createStructureSegment(structureNode : JavaStructureNode) : PlantUMLRootSegment {break;break;;;;}
-	createSimpleNameFromType(type : JavaLang.JavaType) : String {;;;}
+	createStructureSegment(structureNode : JavaStructureNode) : PlantUMLRootSegment {break;break;return 0;;}
+	createSimpleNameFromType(type : JavaLang.JavaType) : String {return 0;;}
 	apply(initial : UnitSet<JavaLang.JavaRoot>) : CompileResult<UnitSet<PlantUMLRoot>> {break;break;break;return CompileResults.Ok( new MapUnitSet<PlantUMLRoot>( ).add( new SimpleUnit<>( defaultLocation, mergedRoot)));;}
 	parseRoot(unit : Unit<JavaLang.JavaRoot>) : Iter<PlantUMLRootSegment> {return unit.destruct( 0);;}
-	parseRootSegment(fileName : String, rootSegment : JavaRootSegment) : Iter<PlantUMLRootSegment> {;;;}
+	parseRootSegment(fileName : String, rootSegment : JavaRootSegment) : Iter<PlantUMLRootSegment> {return 0;;}
 	parseStructure(structureNode : JavaStructureNode) : Iter<PlantUMLRootSegment> {break;break;return Lists.of( segment).addAllLast( JavaPlantUMLParser.toInherits( child, structureNode.extended( ))).addAllLast( JavaPlantUMLParser.toInherits( child, structureNode.implemented( ))).iter( );;}
 	toInherits(child : String, maybeOption : Option<List<JavaLang.JavaType>>) : List<PlantUMLRootSegment> {return maybeOption.orElse( Lists.empty( )).iter( ).map( JavaPlantUMLParser.createSimpleNameFromType).<PlantUMLRootSegment>map( 0).collect( new ListCollector<>( ));;}
 }

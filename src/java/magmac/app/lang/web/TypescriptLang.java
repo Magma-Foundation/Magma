@@ -9,30 +9,18 @@ import magmac.app.lang.CommonLang;
 import magmac.app.lang.Destructors;
 import magmac.app.lang.Serializable;
 import magmac.app.lang.java.JavaLang;
-import magmac.app.lang.node.Block;
+import magmac.app.lang.node.AbstractReturnNode;
 import magmac.app.lang.node.Conditional;
 import magmac.app.lang.node.ConditionalType;
 import magmac.app.lang.node.Operator;
 import magmac.app.lang.node.ParameterizedMethodHeader;
 import magmac.app.lang.node.PostVariant;
-import magmac.app.lang.node.ReturnNode;
 import magmac.app.lang.node.Segment;
 import magmac.app.lang.node.StructureValue;
 import magmac.app.lang.node.TypeArguments;
 
 public final class TypescriptLang {
-    public interface TypescriptArgument extends Serializable {
-        class TypescriptWhitespace implements
-                TypeScriptRootSegment,
-                TypescriptStructureMember,
-                TypeScriptParameter,
-                TypescriptFunctionSegment,
-                TypescriptArgument {
-            @Override
-            public Node serialize() {
-                return new MapNode("whitespace");
-            }
-        }
+    public interface Argument extends Serializable {
     }
 
     public interface TypeScriptParameter extends Serializable {
@@ -44,9 +32,6 @@ public final class TypescriptLang {
     public interface TypescriptStructureMember extends Serializable {
     }
 
-    public interface TypescriptLambdaContent extends Serializable {
-    }
-
     public interface TypeScriptMethodHeader extends Serializable {
     }
 
@@ -56,10 +41,12 @@ public final class TypescriptLang {
     public interface TypeScriptRootSegment extends Serializable {
     }
 
-    public interface TypescriptFunctionSegment extends Serializable {
+    public interface FunctionSegment extends Serializable {
+        interface Value extends Serializable {
+        }
     }
 
-    public interface Value extends TypescriptCaller, TypescriptArgument {
+    public interface Value extends TypescriptCaller, Argument {
     }
 
     public record Number(String value) implements Value {
@@ -127,7 +114,7 @@ public final class TypescriptLang {
 
     public record TypescriptMethod(
             ParameterizedMethodHeader<TypeScriptParameter> header,
-            Option<List<TypescriptFunctionSegment>> maybeChildren
+            Option<List<FunctionSegment>> maybeChildren
     ) implements TypescriptStructureMember {
         @Override
         public Node serialize() {
@@ -167,8 +154,8 @@ public final class TypescriptLang {
         }
     }
 
-    public static final class TypescriptBlock extends Block<TypescriptBlockHeader, TypescriptFunctionSegment> implements TypescriptFunctionSegment {
-        public TypescriptBlock(TypescriptBlockHeader header, List<TypescriptFunctionSegment> segments) {
+    public static final class Block extends magmac.app.lang.node.Block<TypescriptBlockHeader, FunctionSegment> implements FunctionSegment {
+        public Block(TypescriptBlockHeader header, List<FunctionSegment> segments) {
             super(header, segments);
         }
 
@@ -235,7 +222,7 @@ public final class TypescriptLang {
         }
     }
 
-    public record Post(PostVariant variant, Value value) implements TypescriptFunctionSegmentValue {
+    public record Post(PostVariant variant, Value value) implements FunctionSegment.Value {
         @Override
         public Node serialize() {
             return new MapNode(this.variant.type()).withNodeSerialized("child", this.value);
@@ -251,22 +238,22 @@ public final class TypescriptLang {
         }
     }
 
-    public static final class TypescriptBreak implements TypescriptFunctionSegmentValue {
+    public static final class Break implements FunctionSegment.Value {
         @Override
         public Node serialize() {
             return new MapNode("break");
         }
     }
 
-    public static final class TypescriptContinue implements TypescriptFunctionSegmentValue {
+    public static final class Continue implements FunctionSegment.Value {
         @Override
         public Node serialize() {
             return new MapNode("continue");
         }
     }
 
-    public static final class TypescriptReturnNode extends ReturnNode<Value> implements TypescriptFunctionSegmentValue, TypescriptFunctionSegment {
-        public TypescriptReturnNode(Value child) {
+    public static final class Return extends AbstractReturnNode<Value> implements FunctionSegment.Value, FunctionSegment {
+        public Return(TypescriptLang.Value child) {
             super(child);
         }
 
@@ -276,8 +263,8 @@ public final class TypescriptLang {
         }
     }
 
-    public static class Invokable extends magmac.app.lang.java.Invokable<TypescriptCaller, TypescriptArgument> implements Value, TypescriptFunctionSegmentValue {
-        public Invokable(TypescriptCaller caller, List<TypescriptArgument> arguments) {
+    public static class Invokable extends magmac.app.lang.java.Invokable<TypescriptCaller, Argument> implements Value, FunctionSegment.Value {
+        public Invokable(TypescriptCaller caller, List<Argument> arguments) {
             super(caller, arguments);
         }
 
@@ -334,6 +321,18 @@ public final class TypescriptLang {
             return new MapNode(this.operator.type())
                     .withNodeSerialized("left", this.left)
                     .withNodeSerialized("right", this.right);
+        }
+    }
+
+    public static class Whitespace implements
+            TypeScriptRootSegment,
+            TypescriptStructureMember,
+            TypeScriptParameter,
+            FunctionSegment,
+            Argument {
+        @Override
+        public Node serialize() {
+            return new MapNode("whitespace");
         }
     }
 

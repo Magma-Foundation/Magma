@@ -1,9 +1,9 @@
 package magmac.app.lang.common;
 
-public class FunctionStatement<V> {
+public class AbstractFunctionStatement<V> {
     protected final V child;
 
-    public FunctionStatement(V child) {
+    public AbstractFunctionStatement(V child) {
         this.child = child;
     }
 

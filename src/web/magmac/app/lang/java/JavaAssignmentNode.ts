@@ -11,7 +11,7 @@ import { TypeRule } from "../../../../magmac/app/compile/rule/TypeRule";
 import { Destructors } from "../../../../magmac/app/lang/Destructors";
 import { Assignables } from "../../../../magmac/app/lang/node/Assignables";
 import { StructureStatementValue } from "../../../../magmac/app/lang/node/StructureStatementValue";
-import { TypescriptFunctionSegmentValue } from "../../../../magmac/app/lang/web/TypescriptFunctionSegmentValue";
+import { TypescriptLang } from "../../../../magmac/app/lang/web/TypescriptLang";
 export class JavaAssignmentNode {
 	deserialize(node : Node) : Option<CompileResult<JavaAssignmentNode>> {return Destructors.destructWithType( "assignment", node).map( 0);;}
 	createAssignmentRule(definition : Rule, value : Rule) : Rule {break;break;return new TypeRule( "assignment", LocatingRule.First( before, "=", source));;}

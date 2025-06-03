@@ -14,6 +14,8 @@ import magmac.app.lang.Deserializers;
 import magmac.app.lang.Destructors;
 import magmac.app.lang.common.Annotation;
 import magmac.app.lang.node.Arguments;
+import magmac.app.lang.node.CaseDefinition;
+import magmac.app.lang.node.CaseValues;
 import magmac.app.lang.node.ConditionalType;
 import magmac.app.lang.node.FunctionSegmentValues;
 import magmac.app.lang.node.FunctionSegments;
@@ -89,38 +91,38 @@ public final class JavaDeserializers {
         return node1 -> JavaDeserializers.deserializeAccess(type, node1);
     }
 
-    public static Option<CompileResult<JavaFunctionStatement>> deserializeFunctionStatement(Node node) {
+    public static Option<CompileResult<JavaLang.FunctionStatement>> deserializeFunctionStatement(Node node) {
         return Destructors.destructWithType("statement", node)
                 .map(deserializer -> deserializer.withNode("child", FunctionSegmentValues::deserialize)
-                        .complete(JavaFunctionStatement::new)
+                        .complete(JavaLang.FunctionStatement::new)
                         .mapValue(value -> value));
     }
 
-    public static Option<CompileResult<JavaReturnNode>> deserializeReturn(Node node) {
+    public static Option<CompileResult<JavaLang.Return>> deserializeReturn(Node node) {
         return Destructors.destructWithType("return", node)
-                .map(deserializer -> deserializer.withNode("child", JavaDeserializers::deserializeJavaOrError).complete(JavaReturnNode::new));
+                .map(deserializer -> deserializer.withNode("child", JavaDeserializers::deserializeJavaOrError).complete(JavaLang.Return::new));
     }
 
-    public static CompileResult<JavaBlockHeader> deserializeBlockHeader(Node node) {
+    public static CompileResult<BlockHeader> deserializeBlockHeader(Node node) {
         return Deserializers.orError("header", node, Lists.of(
                 Deserializers.wrap(node1 -> JavaDeserializers.deserializeConditional(ConditionalType.If, node1)),
                 Deserializers.wrap(node1 -> JavaDeserializers.deserializeConditional(ConditionalType.While, node1)),
                 Deserializers.wrap(JavaDeserializers::deserializeElse),
                 Deserializers.wrap(JavaDeserializers::deserializeTry),
-                Deserializers.wrap(JavaCatch::deserialize)
+                Deserializers.wrap(Catch::deserialize)
         ));
     }
 
-    public static Option<CompileResult<JavaBlock>> deserializeBlock(Node node) {
+    public static Option<CompileResult<Block>> deserializeBlock(Node node) {
         return Destructors.destructWithType("block", node).map(deserializer -> deserializer
                 .withNodeList("children", FunctionSegments::deserialize)
                 .withNode("header", JavaDeserializers::deserializeBlockHeader)
-                .complete(tuple -> new JavaBlock(tuple.right(), tuple.left())));
+                .complete(tuple -> new Block(tuple.right(), tuple.left())));
     }
 
-    public static Option<CompileResult<JavaConditional>> deserializeConditional(ConditionalType type, Node node) {
+    public static Option<CompileResult<Conditional>> deserializeConditional(ConditionalType type, Node node) {
         return Destructors.destructWithType(type.name().toLowerCase(), node).map(deserializer -> deserializer.withNode("condition", JavaDeserializers::deserializeJavaOrError)
-                .complete(value -> new JavaConditional(type, value)));
+                .complete(value -> new Conditional(type, value)));
     }
 
     public static CompileResult<StructureStatementValue> deserializeStructureStatement(Node node) {
@@ -138,17 +140,17 @@ public final class JavaDeserializers {
         return Destructors.destructWithType("continue", node).map(deserializer -> deserializer.complete(JavaContinue::new));
     }
 
-    public static Option<CompileResult<JavaLang.JavaWhitespace>> deserializeWhitespace(Node node) {
-        return Destructors.destructWithType("whitespace", node).map(deserializer -> deserializer.complete(JavaLang.JavaWhitespace::new));
+    public static Option<CompileResult<Whitespace>> deserializeWhitespace(Node node) {
+        return Destructors.destructWithType("whitespace", node).map(deserializer -> deserializer.complete(Whitespace::new));
     }
 
-    public static Option<CompileResult<JavaTry>> deserializeTry(Node node) {
+    public static Option<CompileResult<Try>> deserializeTry(Node node) {
         return Destructors.destructWithType("try", node)
-                .map(deserializer -> deserializer.complete(JavaTry::new));
+                .map(deserializer -> deserializer.complete(Try::new));
     }
 
-    public static Option<CompileResult<JavaElse>> deserializeElse(Node node) {
-        return Destructors.destructWithType("else", node).map(deserializer -> deserializer.complete(JavaElse::new));
+    public static Option<CompileResult<Else>> deserializeElse(Node node) {
+        return Destructors.destructWithType("else", node).map(deserializer -> deserializer.complete(Else::new));
     }
 
     public static Option<CompileResult<StringValue>> deserializeString(Node node) {
@@ -257,5 +259,14 @@ public final class JavaDeserializers {
                 .withNodeListOptionally("annotations", Annotation::deserialize)
                 .withNodeListOptionally("type-parameters", TypescriptLang.TypeParam::deserialize)
                 .complete((result) -> new CommonLang.Definition<JavaType>(result.left().right(), result.left().left().right(), result.left().left().left().left(), result.right(), result.left().left().left().right()));
+    }
+
+    public static Option<CompileResult<Case>> deserializeCase(Node node) {
+        return Destructors.destructWithType("case", node).map(destructor -> {
+            return destructor
+                    .withNodeList("definitions", CaseDefinition::deserialize)
+                    .withNode("value", CaseValues::deserializeOrError)
+                    .complete(tuple -> new Case(tuple.left(), tuple.right()));
+        });
     }
 }

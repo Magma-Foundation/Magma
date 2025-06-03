@@ -13,9 +13,9 @@ import magmac.app.compile.rule.TypeRule;
 import magmac.app.lang.Destructors;
 import magmac.app.lang.node.Assignables;
 import magmac.app.lang.node.StructureStatementValue;
-import magmac.app.lang.web.TypescriptFunctionSegmentValue;
+import magmac.app.lang.web.TypescriptLang;
 
-public record JavaAssignmentNode(JavaLang.JavaAssignable assignable, JavaLang.JavaValue value) implements JavaFunctionSegmentValue, StructureStatementValue, TypescriptFunctionSegmentValue {
+public record JavaAssignmentNode(JavaLang.JavaAssignable assignable, JavaLang.JavaValue value) implements JavaFunctionSegmentValue, StructureStatementValue, TypescriptLang.FunctionSegment.Value {
     public static Option<CompileResult<JavaAssignmentNode>> deserialize(Node node) {
         return Destructors.destructWithType("assignment", node).map(deserializer -> deserializer
                 .withNode("destination", Assignables::deserializeError)

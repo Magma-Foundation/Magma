@@ -28,8 +28,10 @@ import { JavaLang } from "../../../magmac/app/lang/java/JavaLang";
 import { Arguments } from "../../../magmac/app/lang/node/Arguments";
 import { JavaNamespacedNode } from "../../../magmac/app/lang/java/JavaNamespacedNode";
 import { Modifier } from "../../../magmac/app/lang/node/Modifier";
+import { MultipleCaseValue } from "../../../magmac/app/lang/node/MultipleCaseValue";
 import { Operator } from "../../../magmac/app/lang/node/Operator";
 import { Parameters } from "../../../magmac/app/lang/node/Parameters";
+import { SingleCaseValue } from "../../../magmac/app/lang/node/SingleCaseValue";
 import { StructureMembers } from "../../../magmac/app/lang/node/StructureMembers";
 export class JavaRules {
 	createConstructionRule() : Rule {return new TypeRule( "construction", new StripRule( new PrefixRule( "new ", new NodeRule( "type", JavaLang.JavaTypes.createTypeRule( )))));;}
@@ -60,4 +62,5 @@ export class JavaRules {
 	createSwitchRule(functionSegmentRule : Rule, value : Rule) : TypeRule {break;break;return new TypeRule( "switch", createBlockRule0( new StripRule( header), functionSegmentRule));;}
 	createDefinitionRule() : Rule {break;break;break;break;break;break;break;break;break;return new TypeRule( "definition", stripRule);;}
 	attachTypeParams(beforeTypeParams : Rule) : Rule {break;return new OptionNodeListRule( "type-parameters", new StripRule( new SuffixRule( LocatingRule.First( beforeTypeParams, "<", typeParams), ">")), beforeTypeParams);;}
+	createCaseRule(value : Rule, segment : Rule) : Rule {break;break;break;break;break;break;break;return new TypeRule( "case", new StripRule( new PrefixRule( "case", childRule)));;}
 }

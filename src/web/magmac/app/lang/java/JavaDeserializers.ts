@@ -12,6 +12,8 @@ import { Deserializers } from "../../../../magmac/app/lang/Deserializers";
 import { Destructors } from "../../../../magmac/app/lang/Destructors";
 import { Annotation } from "../../../../magmac/app/lang/common/Annotation";
 import { Arguments } from "../../../../magmac/app/lang/node/Arguments";
+import { CaseDefinition } from "../../../../magmac/app/lang/node/CaseDefinition";
+import { CaseValues } from "../../../../magmac/app/lang/node/CaseValues";
 import { ConditionalType } from "../../../../magmac/app/lang/node/ConditionalType";
 import { FunctionSegmentValues } from "../../../../magmac/app/lang/node/FunctionSegmentValues";
 import { FunctionSegments } from "../../../../magmac/app/lang/node/FunctionSegments";
@@ -34,17 +36,17 @@ export class JavaDeserializers {
 	deserializePost(variant : PostVariant, node : Node) : Option<CompileResult<JavaPost>> {return Destructors.destructWithType( variant.type( ), node).map( 0);;}
 	deserializeLambda(node : Node) : Option<CompileResult<JavaLambda>> {return Destructors.destructWithType( "lambda", node).map( 0);;}
 	deserializeAccessWithType(type : JavaAccessType) : TypedDeserializer<Access> {return 0;;}
-	deserializeFunctionStatement(node : Node) : Option<CompileResult<JavaFunctionStatement>> {return Destructors.destructWithType( "statement", node).map( 0);;}
-	deserializeReturn(node : Node) : Option<CompileResult<JavaReturnNode>> {return Destructors.destructWithType( "return", node).map( 0);;}
-	deserializeBlockHeader(node : Node) : CompileResult<JavaBlockHeader> {return Deserializers.orError( "header", node, Lists.of( Deserializers.wrap( 0), Deserializers.wrap( 0), Deserializers.wrap( JavaDeserializers.deserializeElse), Deserializers.wrap( JavaDeserializers.deserializeTry), Deserializers.wrap( JavaCatch.deserialize)));;}
-	deserializeBlock(node : Node) : Option<CompileResult<JavaBlock>> {return Destructors.destructWithType( "block", node).map( 0);;}
-	deserializeConditional(type : ConditionalType, node : Node) : Option<CompileResult<JavaConditional>> {return Destructors.destructWithType( type.name( ).toLowerCase( ), node).map( 0);;}
+	deserializeFunctionStatement(node : Node) : Option<CompileResult<JavaLang.FunctionStatement>> {return Destructors.destructWithType( "statement", node).map( 0);;}
+	deserializeReturn(node : Node) : Option<CompileResult<JavaLang.Return>> {return Destructors.destructWithType( "return", node).map( 0);;}
+	deserializeBlockHeader(node : Node) : CompileResult<BlockHeader> {return Deserializers.orError( "header", node, Lists.of( Deserializers.wrap( 0), Deserializers.wrap( 0), Deserializers.wrap( JavaDeserializers.deserializeElse), Deserializers.wrap( JavaDeserializers.deserializeTry), Deserializers.wrap( Catch.deserialize)));;}
+	deserializeBlock(node : Node) : Option<CompileResult<Block>> {return Destructors.destructWithType( "block", node).map( 0);;}
+	deserializeConditional(type : ConditionalType, node : Node) : Option<CompileResult<Conditional>> {return Destructors.destructWithType( type.name( ).toLowerCase( ), node).map( 0);;}
 	deserializeStructureStatement(node : Node) : CompileResult<StructureStatementValue> {return Deserializers.orError( "structure-statement-value", node, Lists.of( Deserializers.wrap( JavaDeserializers.deserializeTypedDefinition), Deserializers.wrap( JavaAssignmentNode.deserialize)));;}
 	deserializeBreak(node : Node) : Option<CompileResult<JavaBreak>> {return Destructors.destructWithType( "break", node).map( 0);;}
 	deserializeContinue(node : Node) : Option<CompileResult<JavaContinue>> {return Destructors.destructWithType( "continue", node).map( 0);;}
-	deserializeWhitespace(node : Node) : Option<CompileResult<JavaLang.JavaWhitespace>> {return Destructors.destructWithType( "whitespace", node).map( 0);;}
-	deserializeTry(node : Node) : Option<CompileResult<JavaTry>> {return Destructors.destructWithType( "try", node).map( 0);;}
-	deserializeElse(node : Node) : Option<CompileResult<JavaElse>> {return Destructors.destructWithType( "else", node).map( 0);;}
+	deserializeWhitespace(node : Node) : Option<CompileResult<Whitespace>> {return Destructors.destructWithType( "whitespace", node).map( 0);;}
+	deserializeTry(node : Node) : Option<CompileResult<Try>> {return Destructors.destructWithType( "try", node).map( 0);;}
+	deserializeElse(node : Node) : Option<CompileResult<Else>> {return Destructors.destructWithType( "else", node).map( 0);;}
 	deserializeString(node : Node) : Option<CompileResult<StringValue>> {return Destructors.destructWithType( "string", node).map( 0);;}
 	deserializeChar(node : Node) : Option<CompileResult<Char>> {return Destructors.destructWithType( "char", node).map( 0);;}
 	deserializeLambdaHeader(node : Node) : CompileResult<JavaLambdaHeader> {return Deserializers.orError( "lambda-header", node, Lists.of( Deserializers.wrap( JavaDeserializers.deserializeSymbol), Deserializers.wrap( JavaDeserializers.deserializeMultipleHeader)));;}
@@ -61,4 +63,5 @@ export class JavaDeserializers {
 	deserializeTypedDefinition(node : Node) : Option<CompileResult<JavaDefinition>> {return Destructors.destructWithType( "definition", node).map( JavaDeserializers.deserialize0).map( 0);;}
 	deserializeMultipleHeader(node : Node) : Option<CompileResult<JavaLambdaHeader>> {return Destructors.destructWithType( "multiple", node).map( 0);;}
 	deserialize0(deserialize : InitialDestructor) : CompileResult<CommonLang.Definition<JavaType>> {return deserialize.withString( "name").withNode( "type", JavaTypes.deserialize).withNodeList( "modifiers", Modifier.deserialize).withNodeListOptionally( "annotations", Annotation.deserialize).withNodeListOptionally( "type-parameters", TypescriptLang.TypeParam.deserialize).complete( 0);;}
+	deserializeCase(node : Node) : Option<CompileResult<Case>> {return Destructors.destructWithType( "case", node).map( 0);;}
 }

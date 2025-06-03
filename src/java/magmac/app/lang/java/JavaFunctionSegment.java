@@ -1,4 +1,4 @@
 package magmac.app.lang.java;
 
-public sealed interface JavaFunctionSegment permits JavaCaseNode, JavaFunctionStatement, JavaBlock, JavaReturnNode, JavaLang.JavaWhitespace {
+public sealed interface JavaFunctionSegment permits JavaLang.Case, JavaLang.FunctionStatement, JavaLang.Block, JavaLang.Return, JavaLang.Whitespace {
 }

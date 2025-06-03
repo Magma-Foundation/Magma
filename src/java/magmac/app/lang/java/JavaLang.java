@@ -25,7 +25,10 @@ import magmac.app.lang.Destructors;
 import magmac.app.lang.LazyRule;
 import magmac.app.lang.MutableLazyRule;
 import magmac.app.lang.Serializable;
-import magmac.app.lang.node.Conditional;
+import magmac.app.lang.common.AbstractFunctionStatement;
+import magmac.app.lang.node.AbstractReturnNode;
+import magmac.app.lang.node.CaseDefinition;
+import magmac.app.lang.node.CaseValue;
 import magmac.app.lang.node.ConditionalType;
 import magmac.app.lang.node.Deserializer;
 import magmac.app.lang.node.FunctionSegments;
@@ -44,7 +47,7 @@ import magmac.app.lang.node.TypedDeserializer;
 import magmac.app.lang.web.TypescriptLang;
 
 public class JavaLang {
-    public sealed interface JavaArgument permits JavaValue, JavaWhitespace {
+    public sealed interface JavaArgument permits JavaValue, Whitespace {
     }
 
     public sealed interface JavaCaller permits JavaConstruction, JavaValue {
@@ -56,7 +59,7 @@ public class JavaLang {
     public interface JavaAssignable {
     }
 
-    public sealed interface JavaBlockHeader permits JavaCatch, JavaConditional, JavaElse, JavaTry {
+    public sealed interface BlockHeader permits Catch, Conditional, Else, Try {
     }
 
     public sealed interface JavaBase extends Serializable permits JavaQualified, Symbol {
@@ -140,8 +143,8 @@ public class JavaLang {
         }
     }
 
-    public static final class JavaConditional extends Conditional<JavaValue> implements JavaBlockHeader {
-        public JavaConditional(ConditionalType type, JavaValue condition) {
+    public static final class Conditional extends magmac.app.lang.node.Conditional<JavaValue> implements BlockHeader {
+        public Conditional(ConditionalType type, JavaValue condition) {
             super(type, condition);
         }
     }
@@ -239,16 +242,16 @@ public class JavaLang {
         }
     }
 
-    public static final class JavaTry implements JavaBlockHeader {
+    public static final class Try implements BlockHeader {
     }
 
-    public static final class JavaElse implements JavaBlockHeader {
+    public static final class Else implements BlockHeader {
     }
 
-    public record JavaCatch(JavaDefinition definition) implements JavaBlockHeader {
-        public static Option<CompileResult<JavaBlockHeader>> deserialize(Node node) {
+    public record Catch(JavaDefinition definition) implements BlockHeader {
+        public static Option<CompileResult<BlockHeader>> deserialize(Node node) {
             return Destructors.destructWithType("catch", node).map(deserializer -> deserializer.withNode("definition", JavaDeserializers::deserializeDefinition)
-                    .complete(JavaCatch::new));
+                    .complete(Catch::new));
         }
     }
 
@@ -349,11 +352,32 @@ public class JavaLang {
         Interface
     }
 
-    public static final class JavaWhitespace implements
+    public static final class Whitespace implements
             JavaArgument,
             JavaFunctionSegment,
             JavaRootSegment,
             JavaParameter,
             JavaStructureMember {
+    }
+
+    public static final class FunctionStatement extends AbstractFunctionStatement<JavaFunctionSegmentValue> implements JavaFunctionSegment {
+        public FunctionStatement(JavaFunctionSegmentValue child) {
+            super(child);
+        }
+    }
+
+    public static final class Return extends AbstractReturnNode<JavaValue> implements JavaFunctionSegmentValue, JavaFunctionSegment {
+        public Return(JavaValue child) {
+            super(child);
+        }
+    }
+
+    public static record Case(List<CaseDefinition> definitions, CaseValue value) implements JavaFunctionSegment {
+    }
+
+    public static final class Block extends magmac.app.lang.node.Block<BlockHeader, JavaFunctionSegment> implements JavaFunctionSegment {
+        public Block(BlockHeader header, List<JavaFunctionSegment> segments) {
+            super(header, segments);
+        }
     }
 }

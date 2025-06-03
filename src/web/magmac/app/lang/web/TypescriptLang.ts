@@ -7,20 +7,16 @@ import { CommonLang } from "../../../../magmac/app/lang/CommonLang";
 import { Destructors } from "../../../../magmac/app/lang/Destructors";
 import { Serializable } from "../../../../magmac/app/lang/Serializable";
 import { JavaLang } from "../../../../magmac/app/lang/java/JavaLang";
-import { Block } from "../../../../magmac/app/lang/node/Block";
+import { AbstractReturnNode } from "../../../../magmac/app/lang/node/AbstractReturnNode";
 import { Conditional } from "../../../../magmac/app/lang/node/Conditional";
 import { ConditionalType } from "../../../../magmac/app/lang/node/ConditionalType";
 import { Operator } from "../../../../magmac/app/lang/node/Operator";
 import { ParameterizedMethodHeader } from "../../../../magmac/app/lang/node/ParameterizedMethodHeader";
 import { PostVariant } from "../../../../magmac/app/lang/node/PostVariant";
-import { ReturnNode } from "../../../../magmac/app/lang/node/ReturnNode";
 import { Segment } from "../../../../magmac/app/lang/node/Segment";
 import { StructureValue } from "../../../../magmac/app/lang/node/StructureValue";
 import { TypeArguments } from "../../../../magmac/app/lang/node/TypeArguments";
-export class TypescriptWhitespace {
-	serialize() : Node {return new MapNode( "whitespace");;}
-}
-export interface TypescriptArgument {
+export interface Argument {
 }
 export interface TypeScriptParameter {
 }
@@ -28,15 +24,15 @@ export interface TypescriptBlockHeader {
 }
 export interface TypescriptStructureMember {
 }
-export interface TypescriptLambdaContent {
-}
 export interface TypeScriptMethodHeader {
 }
 export interface TypeScriptType {
 }
 export interface TypeScriptRootSegment {
 }
-export interface TypescriptFunctionSegment {
+export interface Value {
+}
+export interface FunctionSegment {
 }
 export interface Value {
 }
@@ -67,8 +63,8 @@ export class TypescriptConditional {
 	TypescriptConditional(type : ConditionalType, condition : Value) : public {super( type, condition);;}
 	serialize() : Node {return new MapNode( this.type.name( ).toLowerCase( )).withNodeSerialized( "condition", this.condition);;}
 }
-export class TypescriptBlock {
-	TypescriptBlock(header : TypescriptBlockHeader, segments : List<TypescriptFunctionSegment>) : public {super( header, segments);;}
+export class Block {
+	Block(header : TypescriptBlockHeader, segments : List<FunctionSegment>) : public {super( header, segments);;}
 	serialize() : Node {return new MapNode( "block").withNodeSerialized( "header", this.header).withNodeListSerialized( "children", this.children);;}
 }
 export class TypescriptConstructor {
@@ -95,18 +91,18 @@ export class Post {
 export class Access {
 	serialize() : Node {return new MapNode( "data-access").withNodeSerialized( "receiver", this.receiver).withString( "property", this.property);;}
 }
-export class TypescriptBreak {
+export class Break {
 	serialize() : Node {return new MapNode( "break");;}
 }
-export class TypescriptContinue {
+export class Continue {
 	serialize() : Node {return new MapNode( "continue");;}
 }
-export class TypescriptReturnNode {
-	TypescriptReturnNode(child : Value) : public {super( child);;}
+export class Return {
+	Return(child : TypescriptLang.Value) : public {super( child);;}
 	serialize() : Node {return new MapNode( "return").withNodeSerialized( "child", this.child);;}
 }
 export class Invokable {
-	Invokable(caller : TypescriptCaller, arguments : List<TypescriptArgument>) : public {super( caller, arguments);;}
+	Invokable(caller : TypescriptCaller, arguments : List<Argument>) : public {super( caller, arguments);;}
 	serialize() : Node {return new MapNode( "invokable").withNodeSerialized( "caller", this.caller).withNodeListSerialized( "arguments", this.arguments);;}
 }
 export class Char {
@@ -126,6 +122,9 @@ export class Symbol {
 }
 export class Operation {
 	serialize() : Node {return new MapNode( this.operator.type( )).withNodeSerialized( "left", this.left).withNodeSerialized( "right", this.right);;}
+}
+export class Whitespace {
+	serialize() : Node {return new MapNode( "whitespace");;}
 }
 export class TypescriptLang {
 }

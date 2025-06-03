@@ -30,8 +30,10 @@ import magmac.app.lang.java.JavaLang;
 import magmac.app.lang.node.Arguments;
 import magmac.app.lang.java.JavaNamespacedNode;
 import magmac.app.lang.node.Modifier;
+import magmac.app.lang.node.MultipleCaseValue;
 import magmac.app.lang.node.Operator;
 import magmac.app.lang.node.Parameters;
+import magmac.app.lang.node.SingleCaseValue;
 import magmac.app.lang.node.StructureMembers;
 
 public final class JavaRules {
@@ -258,5 +260,24 @@ public final class JavaRules {
                 new StripRule(new SuffixRule(LocatingRule.First(beforeTypeParams, "<", typeParams), ">")),
                 beforeTypeParams
         );
+    }
+
+    public static Rule createCaseRule(Rule value, Rule segment) {
+        Rule typeRule = JavaLang.JavaTypes.createTypeRule();
+        Rule name = new StripRule(new StringRule("name"));
+        Rule last = LocatingRule.Last(new NodeRule("type", typeRule), " ", name);
+        Rule definitions = new TypeRule("case-definition", new OrRule(Lists.of(
+                new StripRule(last),
+                name
+        )));
+
+        Rule beforeArrow = NodeListRule.Values("definitions", definitions);
+        OrRule children = new OrRule(Lists.of(
+                SingleCaseValue.createRule(value),
+                MultipleCaseValue.createRule(segment)
+        ));
+
+        Rule childRule = LocatingRule.First(beforeArrow, "->", new NodeRule("value", children));
+        return new TypeRule("case", new StripRule(new PrefixRule("case", childRule)));
     }
 }

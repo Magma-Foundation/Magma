@@ -1,9 +1,9 @@
 package magmac.app.lang.node;
 
-public class ReturnNode<V> {
+public class AbstractReturnNode<V> {
     protected final V child;
 
-    public ReturnNode(V child) {
+    public AbstractReturnNode(V child) {
         this.child = child;
     }
 

@@ -21,12 +21,6 @@ PlantUMLInherits --> StringRule
 PlantUMLInherits --> TypeRule
 class PlantUMLInherits
 PlantUMLRootSegment <|-- PlantUMLInherits
-TypescriptFunctionStatement --> MapNode
-TypescriptFunctionStatement --> Node
-TypescriptFunctionStatement --> FunctionStatement
-class TypescriptFunctionStatement
-FunctionStatement <|-- TypescriptFunctionStatement
-? <|-- TypescriptFunctionStatement
 TargetPlatform --> Application
 TargetPlatform --> Compiler
 TargetPlatform --> Rule
@@ -41,7 +35,7 @@ ListCollector --> List
 ListCollector --> Lists
 class ListCollector
 Collector <|-- ListCollector
-class FunctionStatement
+class AbstractReturnNode
 ApplicationError --> Error
 class ApplicationError
 Error <|-- ApplicationError
@@ -53,31 +47,6 @@ PlantUMLStructure --> StringRule
 PlantUMLStructure --> TypeRule
 class PlantUMLStructure
 PlantUMLRootSegment <|-- PlantUMLStructure
-JavaCaseNode --> Option
-JavaCaseNode --> List
-JavaCaseNode --> Lists
-JavaCaseNode --> CompileResult
-JavaCaseNode --> MapNode
-JavaCaseNode --> Node
-JavaCaseNode --> LocatingRule
-JavaCaseNode --> NodeListRule
-JavaCaseNode --> NodeRule
-JavaCaseNode --> OrRule
-JavaCaseNode --> PrefixRule
-JavaCaseNode --> Rule
-JavaCaseNode --> StringRule
-JavaCaseNode --> StripRule
-JavaCaseNode --> TypeRule
-JavaCaseNode --> Destructors
-JavaCaseNode --> TypescriptLang
-JavaCaseNode --> CaseDefinition
-JavaCaseNode --> CaseValue
-JavaCaseNode --> CaseValues
-JavaCaseNode --> MultipleCaseValue
-JavaCaseNode --> SingleCaseValue
-class JavaCaseNode
-JavaFunctionSegment <|-- JavaCaseNode
-? <|-- JavaCaseNode
 TypescriptLang --> Option
 TypescriptLang --> List
 TypescriptLang --> CompileResult
@@ -87,13 +56,12 @@ TypescriptLang --> CommonLang
 TypescriptLang --> Destructors
 TypescriptLang --> Serializable
 TypescriptLang --> JavaLang
-TypescriptLang --> Block
+TypescriptLang --> AbstractReturnNode
 TypescriptLang --> Conditional
 TypescriptLang --> ConditionalType
 TypescriptLang --> Operator
 TypescriptLang --> ParameterizedMethodHeader
 TypescriptLang --> PostVariant
-TypescriptLang --> ReturnNode
 TypescriptLang --> Segment
 TypescriptLang --> StructureValue
 TypescriptLang --> TypeArguments
@@ -227,6 +195,12 @@ MapUnitSet --> Location
 MapUnitSet --> Function
 class MapUnitSet
 UnitSet <|-- MapUnitSet
+FunctionStatement --> MapNode
+FunctionStatement --> Node
+FunctionStatement --> AbstractFunctionStatement
+class FunctionStatement
+AbstractFunctionStatement <|-- FunctionStatement
+? <|-- FunctionStatement
 Location --> List
 Location --> Joiner
 class Location
@@ -403,6 +377,8 @@ JavaDeserializers --> Deserializers
 JavaDeserializers --> Destructors
 JavaDeserializers --> Annotation
 JavaDeserializers --> Arguments
+JavaDeserializers --> CaseDefinition
+JavaDeserializers --> CaseValues
 JavaDeserializers --> ConditionalType
 JavaDeserializers --> FunctionSegmentValues
 JavaDeserializers --> FunctionSegments
@@ -436,7 +412,6 @@ FunctionSegments --> Deserializers
 FunctionSegments --> JavaDeserializers
 FunctionSegments --> JavaRules
 FunctionSegments --> LazyRule
-FunctionSegments --> JavaCaseNode
 FunctionSegments --> JavaFunctionSegment
 class FunctionSegments
 EmptyHead --> None
@@ -817,15 +792,11 @@ JavaAssignmentNode --> TypeRule
 JavaAssignmentNode --> Destructors
 JavaAssignmentNode --> Assignables
 JavaAssignmentNode --> StructureStatementValue
-JavaAssignmentNode --> TypescriptFunctionSegmentValue
+JavaAssignmentNode --> TypescriptLang
 class JavaAssignmentNode
 JavaFunctionSegmentValue <|-- JavaAssignmentNode
 StructureStatementValue <|-- JavaAssignmentNode
-TypescriptFunctionSegmentValue <|-- JavaAssignmentNode
-JavaFunctionStatement --> FunctionStatement
-class JavaFunctionStatement
-FunctionStatement <|-- JavaFunctionStatement
-JavaFunctionSegment <|-- JavaFunctionStatement
+? <|-- JavaAssignmentNode
 Targets --> IOException
 Targets --> Option
 Targets --> UnitSet
@@ -909,11 +880,6 @@ Compiler <|-- StagedCompiler
 LazyRule --> Rule
 interface LazyRule
 Rule <|-- LazyRule
-JavaBlock --> List
-JavaBlock --> Block
-class JavaBlock
-Block <|-- JavaBlock
-JavaFunctionSegment <|-- JavaBlock
 JavaTypescriptParser --> Tuple2
 JavaTypescriptParser --> TupleCollector
 JavaTypescriptParser --> List
@@ -927,23 +893,19 @@ JavaTypescriptParser --> Location
 JavaTypescriptParser --> UnitSetCollector
 JavaTypescriptParser --> CommonLang
 JavaTypescriptParser --> JavaAssignmentNode
-JavaTypescriptParser --> JavaBlock
 JavaTypescriptParser --> JavaBreak
-JavaTypescriptParser --> JavaCaseNode
 JavaTypescriptParser --> JavaConstruction
 JavaTypescriptParser --> JavaConstructor
 JavaTypescriptParser --> JavaContinue
 JavaTypescriptParser --> JavaEnumValues
 JavaTypescriptParser --> JavaFunctionSegment
 JavaTypescriptParser --> JavaFunctionSegmentValue
-JavaTypescriptParser --> JavaFunctionStatement
 JavaTypescriptParser --> JavaLang
 JavaTypescriptParser --> JavaMethod
 JavaTypescriptParser --> JavaMethodHeader
 JavaTypescriptParser --> JavaNamespacedNode
 JavaTypescriptParser --> JavaParameter
 JavaTypescriptParser --> JavaPost
-JavaTypescriptParser --> JavaReturnNode
 JavaTypescriptParser --> JavaRootSegment
 JavaTypescriptParser --> JavaStructureMember
 JavaTypescriptParser --> JavaStructureNode
@@ -956,8 +918,6 @@ JavaTypescriptParser --> StructureValue
 JavaTypescriptParser --> TypeArguments
 JavaTypescriptParser --> Symbol
 JavaTypescriptParser --> TypescriptCaller
-JavaTypescriptParser --> TypescriptFunctionSegmentValue
-JavaTypescriptParser --> TypescriptFunctionStatement
 JavaTypescriptParser --> TypescriptLang
 JavaTypescriptParser --> Parser
 JavaTypescriptParser --> SimpleUnit
@@ -1118,6 +1078,7 @@ PlantUMLRoot --> StatementFolder
 PlantUMLRoot --> Serializable
 class PlantUMLRoot
 Serializable <|-- PlantUMLRoot
+class AbstractFunctionStatement
 Ok --> Tuple2
 Ok --> Function
 Ok --> Supplier
@@ -1137,9 +1098,6 @@ SuffixRule --> CompileErrors
 SuffixRule --> Node
 class SuffixRule
 Rule <|-- SuffixRule
-TypescriptFunctionSegmentValue --> Serializable
-interface TypescriptFunctionSegmentValue
-Serializable <|-- TypescriptFunctionSegmentValue
 EmptyAfterAll --> Node
 EmptyAfterAll --> UnitSet
 class EmptyAfterAll
@@ -1315,8 +1273,10 @@ JavaRules --> JavaLang
 JavaRules --> Arguments
 JavaRules --> JavaNamespacedNode
 JavaRules --> Modifier
+JavaRules --> MultipleCaseValue
 JavaRules --> Operator
 JavaRules --> Parameters
+JavaRules --> SingleCaseValue
 JavaRules --> StructureMembers
 class JavaRules
 NodeContext --> Node
@@ -1352,11 +1312,6 @@ PrefixRule --> CompileErrors
 PrefixRule --> Node
 class PrefixRule
 Rule <|-- PrefixRule
-JavaReturnNode --> ReturnNode
-class JavaReturnNode
-ReturnNode <|-- JavaReturnNode
-JavaFunctionSegmentValue <|-- JavaReturnNode
-JavaFunctionSegment <|-- JavaReturnNode
 LexingStage --> Result
 LexingStage --> CompileResult
 LexingStage --> Node
@@ -1407,7 +1362,10 @@ JavaLang --> Destructors
 JavaLang --> LazyRule
 JavaLang --> MutableLazyRule
 JavaLang --> Serializable
-JavaLang --> Conditional
+JavaLang --> AbstractFunctionStatement
+JavaLang --> AbstractReturnNode
+JavaLang --> CaseDefinition
+JavaLang --> CaseValue
 JavaLang --> ConditionalType
 JavaLang --> Deserializer
 JavaLang --> FunctionSegments
@@ -1530,7 +1488,6 @@ Err --> Function
 Err --> Supplier
 class Err
 Result <|-- Err
-class ReturnNode
 PlantUMLAfterPasser --> Some
 PlantUMLAfterPasser --> List
 PlantUMLAfterPasser --> ListCollector

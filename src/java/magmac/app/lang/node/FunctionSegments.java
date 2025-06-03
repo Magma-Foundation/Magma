@@ -12,7 +12,6 @@ import magmac.app.lang.Deserializers;
 import magmac.app.lang.java.JavaDeserializers;
 import magmac.app.lang.JavaRules;
 import magmac.app.lang.LazyRule;
-import magmac.app.lang.java.JavaCaseNode;
 import magmac.app.lang.java.JavaFunctionSegment;
 
 public class FunctionSegments {
@@ -22,7 +21,7 @@ public class FunctionSegments {
                 Deserializers.wrap(JavaDeserializers::deserializeFunctionStatement),
                 Deserializers.wrap(JavaDeserializers::deserializeBlock),
                 Deserializers.wrap(JavaDeserializers::deserializeReturn),
-                Deserializers.wrap(JavaCaseNode::deserialize)
+                Deserializers.wrap(JavaDeserializers::deserializeCase)
         ));
     }
 
@@ -35,7 +34,7 @@ public class FunctionSegments {
                 JavaRules.createStatementRule(functionSegmentValueRule),
                 JavaRules.createBlockRule(functionSegmentRule, value, definition),
                 JavaRules.createReturnRule(value),
-                JavaCaseNode.createCaseRule(value, functionSegmentRule)
+                JavaRules.createCaseRule(value, functionSegmentRule)
         ));
 
         return functionSegmentRule.set(new StripRule("before", rule, ""));

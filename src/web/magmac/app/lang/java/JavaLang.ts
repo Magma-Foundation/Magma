@@ -23,7 +23,10 @@ import { Destructors } from "../../../../magmac/app/lang/Destructors";
 import { LazyRule } from "../../../../magmac/app/lang/LazyRule";
 import { MutableLazyRule } from "../../../../magmac/app/lang/MutableLazyRule";
 import { Serializable } from "../../../../magmac/app/lang/Serializable";
-import { Conditional } from "../../../../magmac/app/lang/node/Conditional";
+import { AbstractFunctionStatement } from "../../../../magmac/app/lang/common/AbstractFunctionStatement";
+import { AbstractReturnNode } from "../../../../magmac/app/lang/node/AbstractReturnNode";
+import { CaseDefinition } from "../../../../magmac/app/lang/node/CaseDefinition";
+import { CaseValue } from "../../../../magmac/app/lang/node/CaseValue";
 import { ConditionalType } from "../../../../magmac/app/lang/node/ConditionalType";
 import { Deserializer } from "../../../../magmac/app/lang/node/Deserializer";
 import { FunctionSegments } from "../../../../magmac/app/lang/node/FunctionSegments";
@@ -48,7 +51,7 @@ export interface JavaValue {
 }
 export interface JavaAssignable {
 }
-export interface JavaBlockHeader {
+export interface BlockHeader {
 }
 export interface JavaBase {
 }
@@ -86,8 +89,8 @@ export class JavaLambdaValueContent {
 export class JavaLambdaBlockContent {
 	deserialize(node : Node) : Option<CompileResult<JavaLambdaBlockContent>> {return Destructors.destructWithType( "block", node).map( 0);;}
 }
-export class JavaConditional {
-	JavaConditional(type : ConditionalType, condition : JavaValue) : public {super( type, condition);;}
+export class Conditional {
+	Conditional(type : ConditionalType, condition : JavaValue) : public {super( type, condition);;}
 }
 export class JavaTemplateType {
 	JavaTemplateType(base : JavaBase, typeArguments : TypeArguments<JavaType>) : public {break;break;;}
@@ -106,12 +109,12 @@ export class JavaTypes {
 	deserialize(node : Node) : CompileResult<JavaType> {return Deserializers.orError( "type", node, Lists.of( Deserializers.wrap( JavaDeserializers.deserializeSymbol), Deserializers.wrap( JavaTemplateType.deserialize), Deserializers.wrap( JavaVariadicType.deserialize), Deserializers.wrap( JavaArrayType.deserialize), Deserializers.wrap( JavaQualified.deserializeQualified)));;}
 	createTypeRule() : Rule {break;return type.set( new OrRule( Lists.of( JavaVariadicType.createVariadicRule( type), JavaArrayType.createArrayRule( type), JavaTemplateType.createTemplateRule( type), CommonRules.createSymbolRule( ), JavaQualified.createQualifiedRule( ))));;}
 }
-export class JavaTry {
+export class Try {
 }
-export class JavaElse {
+export class Else {
 }
-export class JavaCatch {
-	deserialize(node : Node) : Option<CompileResult<JavaBlockHeader>> {return Destructors.destructWithType( "catch", node).map( 0);;}
+export class Catch {
+	deserialize(node : Node) : Option<CompileResult<BlockHeader>> {return Destructors.destructWithType( "catch", node).map( 0);;}
 }
 export class JavaQualified {
 	deserializeQualified(node : Node) : Option<CompileResult<JavaQualified>> {return Destructors.destructWithType( "qualified", node).map( 0);;}
@@ -144,7 +147,18 @@ export class JavaDefinition {
 }
 export class JavaMultipleHeader {
 }
-export class JavaWhitespace {
+export class Whitespace {
+}
+export class FunctionStatement {
+	FunctionStatement(child : JavaFunctionSegmentValue) : public {super( child);;}
+}
+export class Return {
+	Return(child : JavaValue) : public {super( child);;}
+}
+export class Case {
+}
+export class Block {
+	Block(header : BlockHeader, segments : List<JavaFunctionSegment>) : public {super( header, segments);;}
 }
 export class JavaLang {
 }
