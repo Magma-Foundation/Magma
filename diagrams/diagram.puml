@@ -1,0 +1,1473 @@
+@startuml
+skinparam linetype ortho
+StructureValue --> Option
+StructureValue --> List
+StructureValue --> TypescriptLang
+class StructureValue
+PlantUMLRootSegments --> Lists
+PlantUMLRootSegments --> OrRule
+PlantUMLRootSegments --> Rule
+PlantUMLRootSegments --> SuffixRule
+class PlantUMLRootSegments
+List --> Option
+List --> Tuple2
+List --> Iter
+List --> BiFunction
+interface List
+PlantUMLInherits --> MapNode
+PlantUMLInherits --> Node
+PlantUMLInherits --> LocatingRule
+PlantUMLInherits --> StringRule
+PlantUMLInherits --> TypeRule
+class PlantUMLInherits
+PlantUMLRootSegment <|-- PlantUMLInherits
+TargetPlatform --> Application
+TargetPlatform --> Compiler
+TargetPlatform --> Rule
+TargetPlatform --> Path
+interface TargetPlatform
+Joiner --> None
+Joiner --> Option
+Joiner --> Some
+class Joiner
+Collector <|-- Joiner
+ListCollector --> List
+ListCollector --> Lists
+class ListCollector
+Collector <|-- ListCollector
+class AbstractReturnNode
+ApplicationError --> Error
+class ApplicationError
+Error <|-- ApplicationError
+PlantUMLStructure --> MapNode
+PlantUMLStructure --> Node
+PlantUMLStructure --> PrefixRule
+PlantUMLStructure --> Rule
+PlantUMLStructure --> StringRule
+PlantUMLStructure --> TypeRule
+class PlantUMLStructure
+PlantUMLRootSegment <|-- PlantUMLStructure
+TypescriptLang --> Option
+TypescriptLang --> List
+TypescriptLang --> CompileResult
+TypescriptLang --> MapNode
+TypescriptLang --> Node
+TypescriptLang --> CommonLang
+TypescriptLang --> Destructors
+TypescriptLang --> Serializable
+TypescriptLang --> Annotation
+TypescriptLang --> JavaLang
+TypescriptLang --> AbstractReturnNode
+TypescriptLang --> Conditional
+TypescriptLang --> ConditionalType
+TypescriptLang --> Modifier
+TypescriptLang --> Operator
+TypescriptLang --> ParameterizedMethodHeader
+TypescriptLang --> PostVariant
+TypescriptLang --> Segment
+TypescriptLang --> StructureValue
+TypescriptLang --> TypeArguments
+class TypescriptLang
+AfterAll --> Node
+AfterAll --> UnitSet
+interface AfterAll
+CompoundDestructorImpl --> None
+CompoundDestructorImpl --> Option
+CompoundDestructorImpl --> Some
+CompoundDestructorImpl --> Tuple2
+CompoundDestructorImpl --> List
+CompoundDestructorImpl --> ListCollector
+CompoundDestructorImpl --> CompileResult
+CompoundDestructorImpl --> CompileResultCollector
+CompoundDestructorImpl --> CompileResults
+CompoundDestructorImpl --> Function
+class CompoundDestructorImpl
+CompoundDestructor <|-- CompoundDestructorImpl
+Compiler --> CompileResult
+Compiler --> JavaLang
+Compiler --> UnitSet
+interface Compiler
+MapCollector --> Tuple2
+MapCollector --> Collector
+class MapCollector
+Collector <|-- MapCollector
+Folder --> DivideState
+interface Folder
+Deserializers --> Option
+Deserializers --> List
+Deserializers --> Lists
+Deserializers --> Iters
+Deserializers --> CompileResult
+Deserializers --> CompileResults
+Deserializers --> NodeContext
+Deserializers --> CompileError
+Deserializers --> Node
+Deserializers --> ImmutableCompileError
+Deserializers --> TypedDeserializer
+class Deserializers
+ParseUnit --> NodeList
+ParseUnit --> ParseState
+ParseUnit --> BiFunction
+interface ParseUnit
+RuleGenerator --> Lists
+RuleGenerator --> CompileResult
+RuleGenerator --> CompileResultCollector
+RuleGenerator --> NodeContext
+RuleGenerator --> CompileError
+RuleGenerator --> Node
+RuleGenerator --> Rule
+RuleGenerator --> ImmutableCompileError
+RuleGenerator --> UnitSetCollector
+RuleGenerator --> Unit
+RuleGenerator --> UnitSet
+class RuleGenerator
+Generator <|-- RuleGenerator
+Passer --> Node
+Passer --> ParseState
+Passer --> ParseResult
+interface Passer
+StructureMembers --> Lists
+StructureMembers --> CompileResult
+StructureMembers --> Node
+StructureMembers --> OrRule
+StructureMembers --> Rule
+StructureMembers --> TypeRule
+StructureMembers --> Deserializers
+StructureMembers --> JavaDeserializers
+StructureMembers --> JavaRules
+StructureMembers --> LazyRule
+StructureMembers --> MutableLazyRule
+StructureMembers --> JavaEnumValues
+StructureMembers --> JavaLang
+StructureMembers --> JavaMethod
+StructureMembers --> JavaStructureMember
+StructureMembers --> JavaStructureStatement
+class StructureMembers
+CompileApplication --> Option
+CompileApplication --> Some
+CompileApplication --> Error
+CompileApplication --> Compiler
+CompileApplication --> ApplicationError
+CompileApplication --> ThrowableError
+CompileApplication --> Targets
+CompileApplication --> Serializable
+CompileApplication --> JavaLang
+CompileApplication --> UnitSet
+class CompileApplication
+Application <|-- CompileApplication
+Lambda --> JavaLang
+class Lambda
+Block --> List
+class Block
+interface StructureStatementValue
+OrState --> None
+OrState --> Option
+OrState --> Some
+OrState --> List
+OrState --> Lists
+OrState --> Err
+OrState --> Ok
+OrState --> CompileResult
+OrState --> CompileResults
+OrState --> Context
+OrState --> CompileError
+OrState --> ImmutableCompileError
+class OrState
+ParseState --> Location
+interface ParseState
+MapUnitSet --> Tuple2
+MapUnitSet --> Map
+MapUnitSet --> MapCollector
+MapUnitSet --> Maps
+MapUnitSet --> Iter
+MapUnitSet --> CompileResult
+MapUnitSet --> CompileResultCollector
+MapUnitSet --> Location
+MapUnitSet --> Function
+class MapUnitSet
+UnitSet <|-- MapUnitSet
+FunctionStatement --> MapNode
+FunctionStatement --> Node
+FunctionStatement --> AbstractFunctionStatement
+class FunctionStatement
+AbstractFunctionStatement <|-- FunctionStatement
+TypescriptLang.FunctionSegment <|-- FunctionStatement
+Location --> List
+Location --> Joiner
+class Location
+StripRule --> CompileResult
+StripRule --> Node
+class StripRule
+Rule <|-- StripRule
+CompileErrors --> Err
+CompileErrors --> CompileResult
+CompileErrors --> CompileResults
+CompileErrors --> NodeContext
+CompileErrors --> StringContext
+CompileErrors --> Node
+CompileErrors --> ImmutableCompileError
+class CompileErrors
+Parser --> UnitSet
+Parser --> Stage
+interface Parser
+Stage <|-- Parser
+Lexer --> Node
+Lexer --> UnitSet
+Lexer --> Stage
+interface Lexer
+Stage <|-- Lexer
+CompoundDestructor --> Option
+CompoundDestructor --> Tuple2
+CompoundDestructor --> List
+CompoundDestructor --> CompileResult
+CompoundDestructor --> Function
+interface CompoundDestructor
+IOResult --> Result
+IOResult --> IOException
+IOResult --> Function
+interface IOResult
+Result --> Tuple2
+Result --> Function
+Result --> Supplier
+interface Result
+InitialDestructorImpl --> Tuple2
+InitialDestructorImpl --> List
+InitialDestructorImpl --> ListCollector
+InitialDestructorImpl --> CompileResult
+InitialDestructorImpl --> CompileResultCollector
+InitialDestructorImpl --> CompileResults
+InitialDestructorImpl --> Deserializer
+InitialDestructorImpl --> Function
+InitialDestructorImpl --> Supplier
+class InitialDestructorImpl
+InitialDestructor <|-- InitialDestructorImpl
+Main --> Console
+Main --> Option
+Main --> Some
+Main --> Error
+Main --> Iters
+Main --> Result
+Main --> LexingStage
+Main --> PlantUMLTargetPlatform
+Main --> TargetPlatform
+Main --> TypeScriptTargetPlatform
+Main --> ApplicationError
+Main --> PathSources
+Main --> Sources
+Main --> JavaDeserializers
+Main --> JavaRules
+Main --> JavaLang
+Main --> Lexer
+Main --> RuleLexer
+Main --> UnitSet
+Main --> Paths
+class Main
+class Console
+Caller --> Serializable
+interface Caller
+Serializable <|-- Caller
+UnitSetCollector --> Collector
+UnitSetCollector --> MapUnitSet
+UnitSetCollector --> Unit
+UnitSetCollector --> UnitSet
+class UnitSetCollector
+Collector <|-- UnitSetCollector
+enum ConditionalType
+TypedDeserializer --> Option
+TypedDeserializer --> CompileResult
+TypedDeserializer --> Node
+interface TypedDeserializer
+ContextRule --> Lists
+ContextRule --> CompileResult
+ContextRule --> NodeContext
+ContextRule --> CompileError
+ContextRule --> Node
+ContextRule --> StringContext
+ContextRule --> ImmutableCompileError
+class ContextRule
+Rule <|-- ContextRule
+Selector --> Option
+Selector --> Tuple2
+Selector --> List
+interface Selector
+RangeHead --> None
+RangeHead --> Option
+RangeHead --> Some
+class RangeHead
+Head <|-- RangeHead
+Source --> IOResult
+Source --> Location
+interface Source
+class JavaConstruction
+JavaLang.JavaCaller <|-- JavaConstruction
+SimpleUnit --> CompileResult
+SimpleUnit --> Location
+SimpleUnit --> BiFunction
+SimpleUnit --> Function
+class SimpleUnit
+Unit <|-- SimpleUnit
+Lists --> ArrayList
+Lists --> Arrays
+class Lists
+enum PlantUMLStructureType
+Deserializer --> Option
+Deserializer --> CompileResult
+Deserializer --> Node
+interface Deserializer
+interface JavaParameter
+interface Filter
+ThrowableError --> Error
+ThrowableError --> PrintWriter
+ThrowableError --> StringWriter
+class ThrowableError
+Error <|-- ThrowableError
+interface JavaFunctionSegmentValue
+None --> Consumer
+None --> Function
+None --> Predicate
+None --> Supplier
+class None
+Option <|-- None
+JVMList --> None
+JVMList --> Option
+JVMList --> Some
+JVMList --> Tuple2
+JVMList --> HeadedIter
+JVMList --> RangeHead
+JVMList --> Iter
+JVMList --> ListCollector
+JVMList --> ArrayList
+JVMList --> BiFunction
+class JVMList
+List <|-- JVMList
+class JavaContinue
+JavaFunctionSegmentValue <|-- JavaContinue
+enum PostVariant
+Generator --> Node
+Generator --> UnitSet
+Generator --> Stage
+interface Generator
+Stage <|-- Generator
+Max --> Optional
+class Max
+Collector <|-- Max
+JavaDeserializers --> Option
+JavaDeserializers --> List
+JavaDeserializers --> Lists
+JavaDeserializers --> Iters
+JavaDeserializers --> ListCollector
+JavaDeserializers --> CompileResult
+JavaDeserializers --> CompileResults
+JavaDeserializers --> InitialDestructor
+JavaDeserializers --> Node
+JavaDeserializers --> Deserializers
+JavaDeserializers --> Destructors
+JavaDeserializers --> Annotation
+JavaDeserializers --> Assignables
+JavaDeserializers --> CaseDefinition
+JavaDeserializers --> CaseValues
+JavaDeserializers --> ConditionalType
+JavaDeserializers --> FunctionSegmentValues
+JavaDeserializers --> FunctionSegments
+JavaDeserializers --> LambdaContents
+JavaDeserializers --> Modifier
+JavaDeserializers --> OperationDeserializer
+JavaDeserializers --> Operator
+JavaDeserializers --> PostVariant
+JavaDeserializers --> StructureStatementValue
+JavaDeserializers --> TypeArguments
+JavaDeserializers --> TypedDeserializer
+JavaDeserializers --> TypescriptLang
+class JavaDeserializers
+DividingSplitter --> Option
+DividingSplitter --> Tuple2
+DividingSplitter --> List
+DividingSplitter --> ListCollector
+DividingSplitter --> Splitter
+DividingSplitter --> Divider
+class DividingSplitter
+Splitter <|-- DividingSplitter
+FunctionSegments --> Lists
+FunctionSegments --> CompileResult
+FunctionSegments --> Node
+FunctionSegments --> ExactRule
+FunctionSegments --> OrRule
+FunctionSegments --> Rule
+FunctionSegments --> StripRule
+FunctionSegments --> TypeRule
+FunctionSegments --> Deserializers
+FunctionSegments --> JavaDeserializers
+FunctionSegments --> JavaRules
+FunctionSegments --> LazyRule
+FunctionSegments --> JavaFunctionSegment
+class FunctionSegments
+EmptyHead --> None
+EmptyHead --> Option
+class EmptyHead
+Head <|-- EmptyHead
+NodeListCollector --> Collector
+class NodeListCollector
+Collector <|-- NodeListCollector
+Stage --> CompileResult
+interface Stage
+CompileResults --> Err
+CompileResults --> Ok
+CompileResults --> Result
+CompileResults --> Context
+CompileResults --> NodeContext
+CompileResults --> StringContext
+CompileResults --> CompileError
+CompileResults --> Node
+CompileResults --> ImmutableCompileError
+class CompileResults
+PathSources --> List
+PathSources --> Iter
+PathSources --> ListCollector
+PathSources --> ResultCollector
+PathSources --> Result
+PathSources --> IOResult
+PathSources --> InlineIOResult
+PathSources --> SafeFiles
+PathSources --> SimpleUnit
+PathSources --> Unit
+PathSources --> UnitSet
+PathSources --> IOException
+PathSources --> Files
+PathSources --> Path
+class PathSources
+Sources <|-- PathSources
+Map --> Option
+Map --> Tuple2
+Map --> Iter
+Map --> Function
+Map --> Supplier
+interface Map
+PlantUMLTargetPlatform --> Application
+PlantUMLTargetPlatform --> CompileApplication
+PlantUMLTargetPlatform --> Compiler
+PlantUMLTargetPlatform --> StagedCompiler
+PlantUMLTargetPlatform --> Rule
+PlantUMLTargetPlatform --> PathTargets
+PlantUMLTargetPlatform --> Targets
+PlantUMLTargetPlatform --> JavaPlantUMLParser
+PlantUMLTargetPlatform --> PlantUMLRoot
+PlantUMLTargetPlatform --> Generator
+PlantUMLTargetPlatform --> RuleGenerator
+PlantUMLTargetPlatform --> Path
+PlantUMLTargetPlatform --> Paths
+class PlantUMLTargetPlatform
+TargetPlatform <|-- PlantUMLTargetPlatform
+MutableLazyRule --> None
+MutableLazyRule --> Option
+MutableLazyRule --> Some
+MutableLazyRule --> CompileResult
+MutableLazyRule --> CompileErrors
+MutableLazyRule --> Node
+MutableLazyRule --> Rule
+class MutableLazyRule
+LazyRule <|-- MutableLazyRule
+class JavaBreak
+JavaFunctionSegmentValue <|-- JavaBreak
+FirstSelector --> Option
+FirstSelector --> Tuple2
+FirstSelector --> List
+FirstSelector --> Joiner
+class FirstSelector
+Selector <|-- FirstSelector
+ExactRule --> Ok
+ExactRule --> CompileResult
+ExactRule --> CompileResults
+ExactRule --> CompileErrors
+ExactRule --> MapNode
+ExactRule --> Node
+class ExactRule
+Rule <|-- ExactRule
+Symbol --> JavaLang
+class Symbol
+magmac.app.lang.common.Symbol <|-- Symbol
+TypescriptLang.Type <|-- Symbol
+JavaLang.JavaLambdaParameter <|-- Symbol
+JavaLang.JavaLambdaHeader <|-- Symbol
+TypescriptLang.Value <|-- Symbol
+class StringContext
+Context <|-- StringContext
+InlinePassResult --> None
+InlinePassResult --> Option
+InlinePassResult --> Some
+InlinePassResult --> Ok
+InlinePassResult --> CompileResult
+InlinePassResult --> CompileResults
+InlinePassResult --> Node
+InlinePassResult --> ParseState
+InlinePassResult --> ParseUnit
+InlinePassResult --> ParseUnitImpl
+InlinePassResult --> Supplier
+class InlinePassResult
+ParseResult <|-- InlinePassResult
+InitialDestructor --> List
+InitialDestructor --> CompileResult
+InitialDestructor --> Deserializer
+InitialDestructor --> Function
+InitialDestructor --> Supplier
+interface InitialDestructor
+interface CaseValue
+TypeRule --> Lists
+TypeRule --> CompileResult
+TypeRule --> CompileResults
+TypeRule --> Context
+TypeRule --> NodeContext
+TypeRule --> StringContext
+TypeRule --> CompileError
+TypeRule --> CompileErrors
+TypeRule --> Node
+TypeRule --> ImmutableCompileError
+class TypeRule
+Rule <|-- TypeRule
+class SymbolFilter
+Filter <|-- SymbolFilter
+Post --> JavaLang
+class Post
+interface JavaRootSegment
+OrRule --> List
+OrRule --> Iter
+OrRule --> CompileResult
+OrRule --> Context
+OrRule --> NodeContext
+OrRule --> StringContext
+OrRule --> Node
+OrRule --> Function
+class OrRule
+Rule <|-- OrRule
+Iter --> Option
+Iter --> Collector
+Iter --> Result
+Iter --> BiFunction
+Iter --> Function
+Iter --> Predicate
+interface Iter
+NodeRule --> CompileResult
+NodeRule --> MapNode
+NodeRule --> Node
+class NodeRule
+Rule <|-- NodeRule
+BlockFolder --> DivideState
+BlockFolder --> Folder
+class BlockFolder
+Folder <|-- BlockFolder
+JavaMethod --> Option
+JavaMethod --> List
+JavaMethod --> Lists
+JavaMethod --> CompileResult
+JavaMethod --> InitialDestructor
+JavaMethod --> Node
+JavaMethod --> FilterRule
+JavaMethod --> LocatingRule
+JavaMethod --> NodeRule
+JavaMethod --> OrRule
+JavaMethod --> PrefixRule
+JavaMethod --> Rule
+JavaMethod --> StringRule
+JavaMethod --> StripRule
+JavaMethod --> SuffixRule
+JavaMethod --> TypeRule
+JavaMethod --> CommonLang
+JavaMethod --> Destructors
+JavaMethod --> JavaRules
+JavaMethod --> OptionNodeListRule
+JavaMethod --> FunctionSegments
+class JavaMethod
+JavaStructureMember <|-- JavaMethod
+CaseValues --> Lists
+CaseValues --> CompileResult
+CaseValues --> Node
+CaseValues --> Deserializers
+class CaseValues
+DelimitedFolder --> DivideState
+class DelimitedFolder
+Folder <|-- DelimitedFolder
+Some --> Consumer
+Some --> Function
+Some --> Predicate
+Some --> Supplier
+class Some
+Option <|-- Some
+Deserializer --> CompileResult
+Deserializer --> Node
+Deserializer --> Serializable
+interface Deserializer
+ParameterizedMethodHeader --> List
+ParameterizedMethodHeader --> Node
+ParameterizedMethodHeader --> Serializable
+ParameterizedMethodHeader --> TypescriptLang
+class ParameterizedMethodHeader
+Serializable <|-- ParameterizedMethodHeader
+Sources --> IOResult
+Sources --> UnitSet
+interface Sources
+JavaPost --> NodeRule
+JavaPost --> Rule
+JavaPost --> StripRule
+JavaPost --> SuffixRule
+JavaPost --> TypeRule
+JavaPost --> Post
+JavaPost --> PostVariant
+class JavaPost
+Post <|-- JavaPost
+JavaFunctionSegmentValue <|-- JavaPost
+JavaMethodHeader --> Lists
+JavaMethodHeader --> CompileResult
+JavaMethodHeader --> Node
+JavaMethodHeader --> Deserializers
+interface JavaMethodHeader
+TreeParser --> Tuple2
+TreeParser --> CompileResult
+TreeParser --> CompileResultCollector
+TreeParser --> CompileResults
+TreeParser --> Node
+TreeParser --> NodeList
+TreeParser --> Location
+TreeParser --> UnitSetCollector
+TreeParser --> AfterAll
+TreeParser --> ParseUnit
+TreeParser --> ParseUnitImpl
+TreeParser --> Passer
+TreeParser --> Unit
+TreeParser --> UnitSet
+class TreeParser
+Parser <|-- TreeParser
+OptionNodeListRule --> Lists
+OptionNodeListRule --> CompileResult
+OptionNodeListRule --> Node
+OptionNodeListRule --> OrRule
+OptionNodeListRule --> Rule
+class OptionNodeListRule
+Rule <|-- OptionNodeListRule
+JavaPlantUMLParser --> Option
+JavaPlantUMLParser --> List
+JavaPlantUMLParser --> Lists
+JavaPlantUMLParser --> Iter
+JavaPlantUMLParser --> Iters
+JavaPlantUMLParser --> Joiner
+JavaPlantUMLParser --> ListCollector
+JavaPlantUMLParser --> CompileResult
+JavaPlantUMLParser --> CompileResults
+JavaPlantUMLParser --> Location
+JavaPlantUMLParser --> JavaLang
+JavaPlantUMLParser --> JavaNamespacedNode
+JavaPlantUMLParser --> JavaRootSegment
+JavaPlantUMLParser --> PlantUMLDependency
+JavaPlantUMLParser --> PlantUMLFooter
+JavaPlantUMLParser --> PlantUMLHeader
+JavaPlantUMLParser --> PlantUMLInherits
+JavaPlantUMLParser --> PlantUMLRoot
+JavaPlantUMLParser --> PlantUMLRootSegment
+JavaPlantUMLParser --> PlantUMLStructure
+JavaPlantUMLParser --> PlantUMLStructureType
+JavaPlantUMLParser --> Segment
+JavaPlantUMLParser --> Parser
+JavaPlantUMLParser --> MapUnitSet
+JavaPlantUMLParser --> SimpleUnit
+JavaPlantUMLParser --> Unit
+JavaPlantUMLParser --> UnitSet
+class JavaPlantUMLParser
+Parser <|-- JavaPlantUMLParser
+TypescriptRules --> Lists
+TypescriptRules --> LocatingRule
+TypescriptRules --> NodeListRule
+TypescriptRules --> NodeRule
+TypescriptRules --> OrRule
+TypescriptRules --> PrefixRule
+TypescriptRules --> Rule
+TypescriptRules --> StringRule
+TypescriptRules --> StripRule
+TypescriptRules --> SuffixRule
+TypescriptRules --> TypeRule
+TypescriptRules --> DelimitedDivider
+TypescriptRules --> DelimitedFolder
+TypescriptRules --> CommonLang
+TypescriptRules --> CommonRules
+TypescriptRules --> JavaRules
+TypescriptRules --> LazyRule
+TypescriptRules --> MutableLazyRule
+TypescriptRules --> OptionNodeListRule
+TypescriptRules --> JavaStructureStatement
+TypescriptRules --> FunctionSegments
+TypescriptRules --> Modifier
+class TypescriptRules
+enum Operator
+ValueFolder --> DivideState
+ValueFolder --> Folder
+class ValueFolder
+Folder <|-- ValueFolder
+SafeFiles --> None
+SafeFiles --> Option
+SafeFiles --> Some
+SafeFiles --> JVMList
+SafeFiles --> Iter
+SafeFiles --> Err
+SafeFiles --> Ok
+SafeFiles --> IOException
+SafeFiles --> Files
+SafeFiles --> Path
+SafeFiles --> Collectors
+SafeFiles --> Stream
+class SafeFiles
+JavaNamespacedNode --> Option
+JavaNamespacedNode --> List
+JavaNamespacedNode --> Iters
+JavaNamespacedNode --> CompileResult
+JavaNamespacedNode --> InitialDestructor
+JavaNamespacedNode --> Node
+JavaNamespacedNode --> NodeListRule
+JavaNamespacedNode --> PrefixRule
+JavaNamespacedNode --> Rule
+JavaNamespacedNode --> StringRule
+JavaNamespacedNode --> StripRule
+JavaNamespacedNode --> SuffixRule
+JavaNamespacedNode --> TypeRule
+JavaNamespacedNode --> DelimitedFolder
+JavaNamespacedNode --> Destructors
+JavaNamespacedNode --> NamespacedType
+JavaNamespacedNode --> Segment
+class JavaNamespacedNode
+JavaRootSegment <|-- JavaNamespacedNode
+CaseDefinition --> Option
+CaseDefinition --> CompileResult
+CaseDefinition --> Node
+CaseDefinition --> Destructors
+CaseDefinition --> JavaDeserializers
+CaseDefinition --> JavaLang
+class CaseDefinition
+FilterRule --> CompileResult
+FilterRule --> CompileErrors
+FilterRule --> Node
+FilterRule --> Filter
+FilterRule --> NumberFilter
+FilterRule --> SymbolFilter
+class FilterRule
+Rule <|-- FilterRule
+TypeScriptTargetPlatform --> Application
+TypeScriptTargetPlatform --> CompileApplication
+TypeScriptTargetPlatform --> Compiler
+TypeScriptTargetPlatform --> StagedCompiler
+TypeScriptTargetPlatform --> Rule
+TypeScriptTargetPlatform --> PathTargets
+TypeScriptTargetPlatform --> Targets
+TypeScriptTargetPlatform --> TypescriptLang
+TypeScriptTargetPlatform --> JavaLang
+TypeScriptTargetPlatform --> TypescriptRules
+TypeScriptTargetPlatform --> Generator
+TypeScriptTargetPlatform --> RuleGenerator
+TypeScriptTargetPlatform --> Parser
+TypeScriptTargetPlatform --> Path
+TypeScriptTargetPlatform --> Paths
+class TypeScriptTargetPlatform
+TargetPlatform <|-- TypeScriptTargetPlatform
+Targets --> IOException
+Targets --> Option
+Targets --> UnitSet
+interface Targets
+CommonRules --> FilterRule
+CommonRules --> Rule
+CommonRules --> StringRule
+CommonRules --> StripRule
+CommonRules --> TypeRule
+class CommonRules
+class JavaYieldNode
+JavaFunctionSegmentValue <|-- JavaYieldNode
+class Access
+Unit --> CompileResult
+Unit --> Location
+Unit --> BiFunction
+Unit --> Function
+interface Unit
+FlattenJava --> Some
+FlattenJava --> ListCollector
+FlattenJava --> CompileResults
+FlattenJava --> InlineNodeList
+FlattenJava --> Node
+FlattenJava --> NodeList
+FlattenJava --> InlinePassResult
+FlattenJava --> ParseResult
+FlattenJava --> ParseUnit
+FlattenJava --> ParseUnitImpl
+FlattenJava --> Passer
+FlattenJava --> ParseState
+class FlattenJava
+Passer <|-- FlattenJava
+JavaEnumValues --> Option
+JavaEnumValues --> List
+JavaEnumValues --> Lists
+JavaEnumValues --> CompileResult
+JavaEnumValues --> Node
+JavaEnumValues --> NodeListRule
+JavaEnumValues --> OrRule
+JavaEnumValues --> Rule
+JavaEnumValues --> StripRule
+JavaEnumValues --> SuffixRule
+JavaEnumValues --> TypeRule
+JavaEnumValues --> Destructors
+JavaEnumValues --> ValueFolder
+class JavaEnumValues
+JavaStructureMember <|-- JavaEnumValues
+interface JavaStructureMember
+LambdaContents --> Lists
+LambdaContents --> CompileResult
+LambdaContents --> Node
+LambdaContents --> Deserializers
+LambdaContents --> JavaRules
+LambdaContents --> JavaLang
+class LambdaContents
+Maps --> HashMap
+class Maps
+class Tuple2
+LambdaValueContent --> JavaLang
+class LambdaValueContent
+StagedCompiler --> CompileResult
+StagedCompiler --> Serializable
+StagedCompiler --> JavaLang
+StagedCompiler --> Generator
+StagedCompiler --> Parser
+StagedCompiler --> UnitSet
+class StagedCompiler
+Compiler <|-- StagedCompiler
+LazyRule --> Rule
+interface LazyRule
+Rule <|-- LazyRule
+JavaTypescriptParser --> Tuple2
+JavaTypescriptParser --> TupleCollector
+JavaTypescriptParser --> List
+JavaTypescriptParser --> Lists
+JavaTypescriptParser --> Joiner
+JavaTypescriptParser --> ListCollector
+JavaTypescriptParser --> CompileResult
+JavaTypescriptParser --> CompileResultCollector
+JavaTypescriptParser --> CompileResults
+JavaTypescriptParser --> Location
+JavaTypescriptParser --> UnitSetCollector
+JavaTypescriptParser --> JavaBreak
+JavaTypescriptParser --> JavaConstruction
+JavaTypescriptParser --> JavaConstructor
+JavaTypescriptParser --> JavaContinue
+JavaTypescriptParser --> JavaEnumValues
+JavaTypescriptParser --> JavaFunctionSegment
+JavaTypescriptParser --> JavaFunctionSegmentValue
+JavaTypescriptParser --> JavaLang
+JavaTypescriptParser --> JavaMethod
+JavaTypescriptParser --> JavaMethodHeader
+JavaTypescriptParser --> JavaNamespacedNode
+JavaTypescriptParser --> JavaParameter
+JavaTypescriptParser --> JavaPost
+JavaTypescriptParser --> JavaRootSegment
+JavaTypescriptParser --> JavaStructureMember
+JavaTypescriptParser --> JavaStructureStatement
+JavaTypescriptParser --> JavaYieldNode
+JavaTypescriptParser --> ConditionalType
+JavaTypescriptParser --> Modifier
+JavaTypescriptParser --> ParameterizedMethodHeader
+JavaTypescriptParser --> Segment
+JavaTypescriptParser --> StructureValue
+JavaTypescriptParser --> TypeArguments
+JavaTypescriptParser --> Caller
+JavaTypescriptParser --> FunctionStatement
+JavaTypescriptParser --> Symbol
+JavaTypescriptParser --> TypescriptLang
+JavaTypescriptParser --> Parser
+JavaTypescriptParser --> SimpleUnit
+JavaTypescriptParser --> Unit
+JavaTypescriptParser --> UnitSet
+class JavaTypescriptParser
+Parser <|-- JavaTypescriptParser
+ImmutableCompileError --> List
+ImmutableCompileError --> Lists
+ImmutableCompileError --> Iter
+ImmutableCompileError --> Joiner
+ImmutableCompileError --> Max
+ImmutableCompileError --> Context
+ImmutableCompileError --> CompileError
+class ImmutableCompileError
+CompileError <|-- ImmutableCompileError
+NodeList --> Option
+NodeList --> Iter
+NodeList --> CompileResult
+NodeList --> Function
+interface NodeList
+Annotation --> CompileResult
+Annotation --> Node
+Annotation --> Destructors
+class Annotation
+LastSelector --> Option
+LastSelector --> Tuple2
+LastSelector --> List
+LastSelector --> Joiner
+class LastSelector
+Selector <|-- LastSelector
+InlineCompileResult --> Tuple2
+InlineCompileResult --> Result
+InlineCompileResult --> CompileError
+InlineCompileResult --> BiFunction
+InlineCompileResult --> Function
+InlineCompileResult --> Supplier
+class InlineCompileResult
+CompileResult <|-- InlineCompileResult
+RuleLexer --> CompileResult
+RuleLexer --> CompileResultCollector
+RuleLexer --> Node
+RuleLexer --> Rule
+RuleLexer --> UnitSetCollector
+RuleLexer --> Unit
+RuleLexer --> UnitSet
+class RuleLexer
+Lexer <|-- RuleLexer
+Modifier --> CompileResult
+Modifier --> MapNode
+Modifier --> Node
+Modifier --> NodeListRule
+Modifier --> Rule
+Modifier --> StringRule
+Modifier --> StripRule
+Modifier --> DelimitedFolder
+Modifier --> Destructors
+Modifier --> Serializable
+class Modifier
+Serializable <|-- Modifier
+OperationDeserializer --> Option
+OperationDeserializer --> CompileResult
+OperationDeserializer --> Node
+OperationDeserializer --> Destructors
+OperationDeserializer --> JavaDeserializers
+OperationDeserializer --> operation
+class OperationDeserializer
+TypedDeserializer <|-- OperationDeserializer
+PlantUMLHeader --> MapNode
+PlantUMLHeader --> Node
+PlantUMLHeader --> ExactRule
+PlantUMLHeader --> TypeRule
+class PlantUMLHeader
+PlantUMLRootSegment <|-- PlantUMLHeader
+TupleCollector --> Tuple2
+TupleCollector --> Collector
+class TupleCollector
+Collector <|-- TupleCollector
+Rule --> CompileResult
+Rule --> Node
+interface Rule
+CompileResultCollector --> Collector
+CompileResultCollector --> Ok
+class CompileResultCollector
+Collector <|-- CompileResultCollector
+interface Error
+MultipleCaseValue --> Option
+MultipleCaseValue --> List
+MultipleCaseValue --> CompileResult
+MultipleCaseValue --> Node
+MultipleCaseValue --> NodeListRule
+MultipleCaseValue --> PrefixRule
+MultipleCaseValue --> Rule
+MultipleCaseValue --> StripRule
+MultipleCaseValue --> SuffixRule
+MultipleCaseValue --> TypeRule
+MultipleCaseValue --> StatementFolder
+MultipleCaseValue --> Destructors
+MultipleCaseValue --> JavaFunctionSegment
+class MultipleCaseValue
+CaseValue <|-- MultipleCaseValue
+PathTargets --> Option
+PathTargets --> Iters
+PathTargets --> Location
+PathTargets --> SafeFiles
+PathTargets --> Unit
+PathTargets --> UnitSet
+PathTargets --> IOException
+PathTargets --> Files
+PathTargets --> Path
+class PathTargets
+Targets <|-- PathTargets
+PlantUMLFooter --> MapNode
+PlantUMLFooter --> Node
+PlantUMLFooter --> ExactRule
+PlantUMLFooter --> TypeRule
+class PlantUMLFooter
+PlantUMLRootSegment <|-- PlantUMLFooter
+JavaEnumValue --> Option
+JavaEnumValue --> List
+JavaEnumValue --> Lists
+JavaEnumValue --> CompileResult
+JavaEnumValue --> Node
+JavaEnumValue --> FilterRule
+JavaEnumValue --> LocatingRule
+JavaEnumValue --> OrRule
+JavaEnumValue --> Rule
+JavaEnumValue --> StringRule
+JavaEnumValue --> StripRule
+JavaEnumValue --> SuffixRule
+JavaEnumValue --> CommonRules
+JavaEnumValue --> Destructors
+JavaEnumValue --> JavaRules
+class JavaEnumValue
+SingleHead --> None
+SingleHead --> Option
+SingleHead --> Some
+class SingleHead
+Head <|-- SingleHead
+class NumberNode
+TypeArguments --> List
+class TypeArguments
+Option --> Consumer
+Option --> Function
+Option --> Predicate
+Option --> Supplier
+interface Option
+class StringNode
+PlantUMLRoot --> List
+PlantUMLRoot --> MapNode
+PlantUMLRoot --> Node
+PlantUMLRoot --> NodeListRule
+PlantUMLRoot --> Rule
+PlantUMLRoot --> StatementFolder
+PlantUMLRoot --> Serializable
+class PlantUMLRoot
+Serializable <|-- PlantUMLRoot
+class AbstractFunctionStatement
+Ok --> Tuple2
+Ok --> Function
+Ok --> Supplier
+class Ok
+Result <|-- Ok
+LocatingRule --> Tuple2
+LocatingRule --> CompileResult
+LocatingRule --> CompileErrors
+LocatingRule --> Node
+LocatingRule --> FirstLocator
+LocatingRule --> LastLocator
+LocatingRule --> Locator
+class LocatingRule
+Rule <|-- LocatingRule
+SuffixRule --> CompileResult
+SuffixRule --> CompileErrors
+SuffixRule --> Node
+class SuffixRule
+Rule <|-- SuffixRule
+EmptyAfterAll --> Node
+EmptyAfterAll --> UnitSet
+class EmptyAfterAll
+AfterAll <|-- EmptyAfterAll
+LastLocator --> None
+LastLocator --> Option
+LastLocator --> Some
+class LastLocator
+Locator <|-- LastLocator
+MutableDivideState --> None
+MutableDivideState --> Option
+MutableDivideState --> Some
+MutableDivideState --> Tuple2
+MutableDivideState --> List
+MutableDivideState --> Lists
+MutableDivideState --> Iter
+class MutableDivideState
+DivideState <|-- MutableDivideState
+JavaStructureStatement --> Option
+JavaStructureStatement --> Lists
+JavaStructureStatement --> CompileResult
+JavaStructureStatement --> Node
+JavaStructureStatement --> NodeRule
+JavaStructureStatement --> OrRule
+JavaStructureStatement --> Rule
+JavaStructureStatement --> StripRule
+JavaStructureStatement --> SuffixRule
+JavaStructureStatement --> TypeRule
+JavaStructureStatement --> Destructors
+JavaStructureStatement --> JavaRules
+JavaStructureStatement --> LazyRule
+JavaStructureStatement --> StructureStatementValue
+class JavaStructureStatement
+JavaStructureMember <|-- JavaStructureStatement
+CompileError --> Error
+interface CompileError
+Error <|-- CompileError
+Locator --> Option
+interface Locator
+PlantUMLRootSegment --> Serializable
+interface PlantUMLRootSegment
+Serializable <|-- PlantUMLRootSegment
+TypeSeparatorFolder --> DivideState
+TypeSeparatorFolder --> Folder
+class TypeSeparatorFolder
+Folder <|-- TypeSeparatorFolder
+UnitSet --> Iter
+UnitSet --> CompileResult
+UnitSet --> Function
+interface UnitSet
+SingleCaseValue --> Option
+SingleCaseValue --> CompileResult
+SingleCaseValue --> Node
+SingleCaseValue --> NodeRule
+SingleCaseValue --> Rule
+SingleCaseValue --> StripRule
+SingleCaseValue --> SuffixRule
+SingleCaseValue --> TypeRule
+SingleCaseValue --> Destructors
+SingleCaseValue --> JavaDeserializers
+SingleCaseValue --> JavaLang
+class SingleCaseValue
+CaseValue <|-- SingleCaseValue
+ParseUnitImpl --> InlineNodeList
+ParseUnitImpl --> NodeList
+ParseUnitImpl --> ParseState
+ParseUnitImpl --> BiFunction
+class ParseUnitImpl
+ParseUnit <|-- ParseUnitImpl
+PlantUMLDependency --> MapNode
+PlantUMLDependency --> Node
+PlantUMLDependency --> LocatingRule
+PlantUMLDependency --> StringRule
+PlantUMLDependency --> TypeRule
+class PlantUMLDependency
+PlantUMLRootSegment <|-- PlantUMLDependency
+FlatMapHead --> None
+FlatMapHead --> Iter
+FlatMapHead --> Option
+FlatMapHead --> Function
+class FlatMapHead
+Head <|-- FlatMapHead
+FoldingDivider --> None
+FoldingDivider --> Option
+FoldingDivider --> Some
+FoldingDivider --> Tuple2
+FoldingDivider --> Iter
+FoldingDivider --> Folder
+class FoldingDivider
+Divider <|-- FoldingDivider
+CommonLang --> Option
+CommonLang --> List
+CommonLang --> NodeListRule
+CommonLang --> Rule
+CommonLang --> StatementFolder
+CommonLang --> Annotation
+CommonLang --> Modifier
+CommonLang --> TypescriptLang
+class CommonLang
+InvocationFolder --> DivideState
+InvocationFolder --> Folder
+class InvocationFolder
+Folder <|-- InvocationFolder
+StringRule --> Ok
+StringRule --> CompileResult
+StringRule --> CompileResults
+StringRule --> CompileErrors
+StringRule --> MapNode
+StringRule --> Node
+class StringRule
+Rule <|-- StringRule
+ResultCollector --> Tuple2
+ResultCollector --> Ok
+ResultCollector --> Result
+class ResultCollector
+Collector <|-- ResultCollector
+FunctionSegmentValues --> Lists
+FunctionSegmentValues --> CompileResult
+FunctionSegmentValues --> Node
+FunctionSegmentValues --> ExactRule
+FunctionSegmentValues --> OrRule
+FunctionSegmentValues --> Rule
+FunctionSegmentValues --> TypeRule
+FunctionSegmentValues --> Deserializers
+FunctionSegmentValues --> JavaDeserializers
+FunctionSegmentValues --> JavaRules
+FunctionSegmentValues --> JavaFunctionSegmentValue
+FunctionSegmentValues --> JavaPost
+class FunctionSegmentValues
+Head --> Option
+interface Head
+DelimitedDivider --> Iter
+DelimitedDivider --> Iters
+DelimitedDivider --> Pattern
+class DelimitedDivider
+Divider <|-- DelimitedDivider
+ParseResult --> CompileResult
+ParseResult --> Node
+ParseResult --> ParseUnit
+ParseResult --> Supplier
+interface ParseResult
+interface JavaFunctionSegment
+StatementFolder --> DivideState
+class StatementFolder
+Folder <|-- StatementFolder
+JavaRules --> Option
+JavaRules --> List
+JavaRules --> Lists
+JavaRules --> Iters
+JavaRules --> ListCollector
+JavaRules --> CompileResult
+JavaRules --> Node
+JavaRules --> ContextRule
+JavaRules --> ExactRule
+JavaRules --> FilterRule
+JavaRules --> LocatingRule
+JavaRules --> NodeListRule
+JavaRules --> NodeRule
+JavaRules --> OrRule
+JavaRules --> PrefixRule
+JavaRules --> Rule
+JavaRules --> StringRule
+JavaRules --> StripRule
+JavaRules --> SuffixRule
+JavaRules --> TypeRule
+JavaRules --> Divider
+JavaRules --> FoldingDivider
+JavaRules --> DelimitedFolder
+JavaRules --> DividingSplitter
+JavaRules --> JavaDeserializers
+JavaRules --> JavaLang
+JavaRules --> JavaNamespacedNode
+JavaRules --> Modifier
+JavaRules --> MultipleCaseValue
+JavaRules --> Operator
+JavaRules --> SingleCaseValue
+JavaRules --> StructureMembers
+class JavaRules
+NodeContext --> Node
+class NodeContext
+Context <|-- NodeContext
+CompileResult --> Tuple2
+CompileResult --> Result
+CompileResult --> CompileError
+CompileResult --> BiFunction
+CompileResult --> Function
+CompileResult --> Supplier
+interface CompileResult
+class NumberFilter
+Filter <|-- NumberFilter
+DivideState --> Tuple2
+DivideState --> Option
+DivideState --> Iter
+interface DivideState
+JVMMap --> None
+JVMMap --> Option
+JVMMap --> Some
+JVMMap --> Tuple2
+JVMMap --> JVMList
+JVMMap --> Iter
+JVMMap --> ArrayList
+JVMMap --> HashMap
+JVMMap --> Function
+JVMMap --> Supplier
+class JVMMap
+Map <|-- JVMMap
+PrefixRule --> CompileResult
+PrefixRule --> CompileErrors
+PrefixRule --> Node
+class PrefixRule
+Rule <|-- PrefixRule
+LexingStage --> Result
+LexingStage --> CompileResult
+LexingStage --> Node
+LexingStage --> ApplicationError
+LexingStage --> ThrowableError
+LexingStage --> Sources
+LexingStage --> Lexer
+LexingStage --> UnitSet
+LexingStage --> Function
+class LexingStage
+Destructors --> None
+Destructors --> Option
+Destructors --> Some
+Destructors --> InitialDestructor
+Destructors --> InitialDestructorImpl
+Destructors --> Node
+class Destructors
+PathSource --> List
+PathSource --> Lists
+PathSource --> IOResult
+PathSource --> Location
+PathSource --> SafeFiles
+PathSource --> Path
+class PathSource
+Source <|-- PathSource
+JavaLang --> Option
+JavaLang --> Tuple2
+JavaLang --> List
+JavaLang --> CompileResult
+JavaLang --> CompoundDestructor
+JavaLang --> InitialDestructor
+JavaLang --> MapNode
+JavaLang --> Node
+JavaLang --> NodeListRule
+JavaLang --> NodeRule
+JavaLang --> Rule
+JavaLang --> StripRule
+JavaLang --> SuffixRule
+JavaLang --> TypeRule
+JavaLang --> DelimitedFolder
+JavaLang --> AbstractDefinition
+JavaLang --> CommonRules
+JavaLang --> Destructors
+JavaLang --> Serializable
+JavaLang --> AbstractFunctionStatement
+JavaLang --> Annotation
+JavaLang --> AbstractReturnNode
+JavaLang --> CaseDefinition
+JavaLang --> CaseValue
+JavaLang --> ConditionalType
+JavaLang --> Deserializer
+JavaLang --> FunctionSegments
+JavaLang --> LambdaValueContent
+JavaLang --> Modifier
+JavaLang --> NumberNode
+JavaLang --> Operator
+JavaLang --> Segment
+JavaLang --> StructureMembers
+JavaLang --> StructureStatementValue
+JavaLang --> StructureValue
+JavaLang --> TypeArguments
+JavaLang --> TypedDeserializer
+JavaLang --> TypescriptLang
+class JavaLang
+InlineNodeList --> Option
+InlineNodeList --> Some
+InlineNodeList --> List
+InlineNodeList --> Lists
+InlineNodeList --> Iter
+InlineNodeList --> Joiner
+InlineNodeList --> CompileResult
+InlineNodeList --> CompileResultCollector
+InlineNodeList --> Function
+class InlineNodeList
+NodeList <|-- InlineNodeList
+Serializable --> Node
+interface Serializable
+FirstLocator --> None
+FirstLocator --> Option
+FirstLocator --> Some
+class FirstLocator
+Locator <|-- FirstLocator
+Node --> Option
+Node --> Tuple2
+Node --> List
+Node --> Iter
+Node --> CompileResult
+Node --> Serializable
+Node --> Function
+interface Node
+NodeListRule --> CompileResult
+NodeListRule --> CompileResultCollector
+NodeListRule --> MapNode
+NodeListRule --> Node
+NodeListRule --> NodeList
+NodeListRule --> NodeListCollector
+NodeListRule --> Divider
+NodeListRule --> FoldingDivider
+NodeListRule --> Folder
+NodeListRule --> ValueFolder
+class NodeListRule
+Rule <|-- NodeListRule
+Symbol --> MapNode
+Symbol --> Node
+Symbol --> Serializable
+class Symbol
+Serializable <|-- Symbol
+Iters --> Option
+Iters --> EmptyHead
+Iters --> HeadedIter
+Iters --> RangeHead
+Iters --> SingleHead
+class Iters
+Invokable --> List
+class Invokable
+Assignables --> Lists
+Assignables --> CompileResult
+Assignables --> Node
+Assignables --> Deserializers
+Assignables --> JavaDeserializers
+Assignables --> JavaLang
+class Assignables
+enum NamespacedType
+interface Collector
+LocatingSplitter --> Option
+LocatingSplitter --> Tuple2
+LocatingSplitter --> Locator
+class LocatingSplitter
+Splitter <|-- LocatingSplitter
+interface Context
+MergeDiagram --> Tuple2
+MergeDiagram --> List
+MergeDiagram --> Lists
+MergeDiagram --> Map
+MergeDiagram --> Maps
+MergeDiagram --> Iters
+MergeDiagram --> ListCollector
+MergeDiagram --> InlineNodeList
+MergeDiagram --> MapNode
+MergeDiagram --> Node
+MergeDiagram --> NodeList
+MergeDiagram --> Location
+MergeDiagram --> AfterAll
+MergeDiagram --> MapUnitSet
+MergeDiagram --> SimpleUnit
+MergeDiagram --> UnitSet
+class MergeDiagram
+AfterAll <|-- MergeDiagram
+Segment --> CompileResult
+Segment --> MapNode
+Segment --> Node
+Segment --> Destructors
+class Segment
+Application --> Option
+Application --> Error
+Application --> JavaLang
+Application --> UnitSet
+interface Application
+ImmutableParseState --> Location
+class ImmutableParseState
+ParseState <|-- ImmutableParseState
+class Conditional
+Divider --> Iter
+interface Divider
+Err --> Tuple2
+Err --> Function
+Err --> Supplier
+class Err
+Result <|-- Err
+HeadedIter --> Option
+HeadedIter --> Iter
+HeadedIter --> Collector
+HeadedIter --> Ok
+HeadedIter --> Result
+HeadedIter --> BiFunction
+HeadedIter --> Function
+HeadedIter --> Predicate
+class HeadedIter
+Iter <|-- HeadedIter
+Splitter --> Option
+Splitter --> Tuple2
+interface Splitter
+JavaConstructor --> Option
+JavaConstructor --> CompileResult
+JavaConstructor --> Node
+JavaConstructor --> Destructors
+class JavaConstructor
+JavaMethodHeader <|-- JavaConstructor
+MapNode --> None
+MapNode --> Option
+MapNode --> Some
+MapNode --> Tuple2
+MapNode --> List
+MapNode --> Map
+MapNode --> Maps
+MapNode --> Iter
+MapNode --> Iters
+MapNode --> Joiner
+MapNode --> Ok
+MapNode --> CompileResult
+MapNode --> CompileResults
+MapNode --> CompileErrors
+MapNode --> BiFunction
+MapNode --> Function
+class MapNode
+Node <|-- MapNode
+InlineIOResult --> Result
+InlineIOResult --> IOException
+InlineIOResult --> Function
+class InlineIOResult
+IOResult <|-- InlineIOResult
+@enduml
