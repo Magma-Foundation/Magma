@@ -11,6 +11,10 @@ import magmac.app.compile.error.CompileResultCollector;
 import magmac.app.compile.error.CompileResults;
 import magmac.app.io.Location;
 import magmac.app.io.sources.UnitSetCollector;
+import magmac.app.lang.node.Block;
+import magmac.app.lang.node.CaseNode;
+import magmac.app.lang.node.FunctionStatement;
+import magmac.app.lang.node.JavaFunctionSegment;
 import magmac.app.lang.node.Definition;
 import magmac.app.lang.node.EnumValues;
 import magmac.app.lang.node.JavaArrayType;
@@ -21,6 +25,7 @@ import magmac.app.lang.node.JavaMethod;
 import magmac.app.lang.node.JavaMethodHeader;
 import magmac.app.lang.node.JavaNamespacedNode;
 import magmac.app.lang.node.JavaParameter;
+import magmac.app.lang.node.JavaReturnNode;
 import magmac.app.lang.node.JavaRoot;
 import magmac.app.lang.node.JavaRootSegment;
 import magmac.app.lang.node.JavaStructureMember;
@@ -43,6 +48,7 @@ import magmac.app.lang.node.TypeScriptTemplateType;
 import magmac.app.lang.node.TypeScriptType;
 import magmac.app.lang.node.TypescriptArrayType;
 import magmac.app.lang.node.TypescriptConstructor;
+import magmac.app.lang.node.TypescriptFunctionSegment;
 import magmac.app.lang.node.TypescriptMethod;
 import magmac.app.lang.node.TypescriptRoot;
 import magmac.app.lang.node.TypescriptStructureMember;
@@ -160,7 +166,23 @@ class JavaTypescriptParser implements Parser<JavaRoot, TypescriptRoot> {
 
         TypeScriptMethodHeader header = JavaTypescriptParser.parseMethodHeader(methodNode.header());
         ParameterizedMethodHeader<TypeScriptParameter> parameterizedHeader = new ParameterizedMethodHeader<>(header, parameters);
-        return new TypescriptMethod(parameterizedHeader, methodNode.maybeChildren());
+        return new TypescriptMethod(parameterizedHeader, methodNode.maybeChildren().map(JavaTypescriptParser::parseFunctionSegments));
+    }
+
+    private static List<TypescriptFunctionSegment> parseFunctionSegments(List<JavaFunctionSegment> segments) {
+        return segments.iter()
+                .map(JavaTypescriptParser::parseFunctionSegment)
+                .collect(new ListCollector<>());
+    }
+
+    private static TypescriptFunctionSegment parseFunctionSegment(JavaFunctionSegment segment) {
+        return switch (segment) {
+            case Block block -> new Whitespace();
+            case CaseNode caseNode -> new Whitespace();
+            case FunctionStatement functionStatement -> new Whitespace();
+            case JavaReturnNode javaReturnNode -> new Whitespace();
+            case Whitespace whitespace -> new Whitespace();
+        };
     }
 
     private static TypeScriptParameter parseParameter(JavaParameter parameter) {

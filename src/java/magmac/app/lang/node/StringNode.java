@@ -13,7 +13,7 @@ import magmac.app.compile.rule.TypeRule;
 import magmac.app.lang.Destructors;
 
 record StringNode(String value) implements JavaValue, TypeScriptValue {
-    public static Option<CompileResult<JavaValue>> deserialize(Node node) {
+    public static Option<CompileResult<StringNode>> deserialize(Node node) {
         return Destructors.destructWithType("string", node).map(deserializer -> deserializer.withString("value").complete(StringNode::new));
     }
 

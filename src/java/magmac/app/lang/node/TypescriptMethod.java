@@ -7,7 +7,7 @@ import magmac.app.compile.node.Node;
 
 public record TypescriptMethod(
         ParameterizedMethodHeader<TypeScriptParameter> header,
-        Option<List<FunctionSegment>> maybeChildren
+        Option<List<TypescriptFunctionSegment>> maybeChildren
 ) implements TypescriptStructureMember {
     @Override
     public Node serialize() {

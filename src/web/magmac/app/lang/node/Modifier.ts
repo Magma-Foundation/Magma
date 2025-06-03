@@ -6,10 +6,10 @@ import { Rule } from "../../../../magmac/app/compile/rule/Rule";
 import { StringRule } from "../../../../magmac/app/compile/rule/StringRule";
 import { StripRule } from "../../../../magmac/app/compile/rule/StripRule";
 import { DelimitedFolder } from "../../../../magmac/app/compile/rule/fold/DelimitedFolder";
-import { Deserializers } from "../../../../magmac/app/lang/Deserializers";
+import { Destructors } from "../../../../magmac/app/lang/Destructors";
 import { Serializable } from "../../../../magmac/app/lang/Serializable";
 export class Modifier {
-	deserialize(node : Node) : CompileResult<Modifier>;
-	createModifiersRule() : Rule;
-	serialize() : Node;
+	deserialize(node : Node) : CompileResult<Modifier> {;;}
+	createModifiersRule() : Rule {;;}
+	serialize() : Node {;;}
 }

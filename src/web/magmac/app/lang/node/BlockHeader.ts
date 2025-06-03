@@ -11,6 +11,6 @@ import { SuffixRule } from "../../../../magmac/app/compile/rule/SuffixRule";
 import { TypeRule } from "../../../../magmac/app/compile/rule/TypeRule";
 import { Deserializers } from "../../../../magmac/app/lang/Deserializers";
 export interface BlockHeader {
-	deserialize(node : Node) : CompileResult<BlockHeader>;
-	createBlockHeaderRule(value : Rule, definition : Rule) : Rule;
+	deserialize(node : Node) : CompileResult<BlockHeader> {;;}
+	createBlockHeaderRule(value : Rule, definition : Rule) : Rule {;;}
 }

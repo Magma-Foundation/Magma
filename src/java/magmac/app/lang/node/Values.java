@@ -19,6 +19,7 @@ import magmac.app.lang.Deserializers;
 import magmac.app.lang.JavaDeserializers;
 import magmac.app.lang.JavaRules;
 import magmac.app.lang.LazyRule;
+import magmac.app.lang.java.JavaInvokable;
 
 public final class Values {
     public static CompileResult<JavaValue> deserializeOrError(Node node) {
@@ -29,15 +30,15 @@ public final class Values {
         List<TypedDeserializer<JavaValue>> deserializers = Lists.of(
                 Deserializers.wrap(SwitchNode::deserialize),
                 Deserializers.wrap(JavaDeserializers::deserializeInvocation),
-                StringNode::deserialize,
-                node1 -> JavaDeserializers.deserialize(JavaAccessType.Data, node1),
-                node1 -> JavaDeserializers.deserialize(JavaAccessType.Method, node1),
+                Deserializers.wrap(StringNode::deserialize),
+                Deserializers.wrap(JavaDeserializers.deserializeAccessWithType(JavaAccessType.Data)),
+                Deserializers.wrap(JavaDeserializers.deserializeAccessWithType(JavaAccessType.Method)),
                 Deserializers.wrap(Symbols::deserialize),
                 Deserializers.wrap(CharNode::deserialize),
-                Deserializers.wrap(Lambda::deserialize),
+                Deserializers.wrap(JavaDeserializers::deserializeLambda),
                 Deserializers.wrap(NumberNode::deserialize),
                 Deserializers.wrap(Not::deserialize),
-                Deserializers.wrap(value -> IndexNode.deserialize(value))
+                Deserializers.wrap(IndexNode::deserialize)
         );
 
         List<TypedDeserializer<JavaValue>> operatorRules = Iters.fromValues(Operator.values())
@@ -58,7 +59,7 @@ public final class Values {
     private static List<Rule> getValueRules(Rule functionSegment, LazyRule value, String lambdaInfix, Rule definition) {
         List<Rule> ruleList = Lists.of(
                 Values.createSwitchRule(functionSegment, value),
-                Lambda.createLambdaRule(value, functionSegment, lambdaInfix, definition),
+                JavaRules.createLambdaRule(value, functionSegment, lambdaInfix, definition),
                 Not.createNotRule(value),
                 CharNode.createCharRule(),
                 StringNode.createStringRule(),

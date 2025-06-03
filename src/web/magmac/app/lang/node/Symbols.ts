@@ -6,9 +6,9 @@ import { Rule } from "../../../../magmac/app/compile/rule/Rule";
 import { StringRule } from "../../../../magmac/app/compile/rule/StringRule";
 import { StripRule } from "../../../../magmac/app/compile/rule/StripRule";
 import { TypeRule } from "../../../../magmac/app/compile/rule/TypeRule";
-import { Deserializers } from "../../../../magmac/app/lang/Deserializers";
+import { Destructors } from "../../../../magmac/app/lang/Destructors";
 export class Symbols {
-	deserialize(node : Node) : Option<CompileResult<Symbol>>;
-	createSymbolRule(key : String) : Rule;
-	createSymbolRule() : Rule;
+	deserialize(node : Node) : Option<CompileResult<Symbol>> {;;}
+	createSymbolRule(key : String) : Rule {;;}
+	createSymbolRule() : Rule {;;}
 }

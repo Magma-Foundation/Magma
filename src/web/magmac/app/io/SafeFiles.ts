@@ -11,8 +11,8 @@ import { Path } from "../../../java/nio/file/Path";
 import { Collectors } from "../../../java/util/stream/Collectors";
 import { Stream } from "../../../java/util/stream/Stream";
 export class SafeFiles {
-	writeString(target : Path, output : String) : Option<IOException>;
-	walk(sourceDirectory : Path) : IOResult<Iter<Path>>;
-	readString(source : Path) : IOResult<String>;
-	createDirectories(targetParent : Path) : Option<IOException>;
+	writeString(target : Path, output : String) : Option<IOException> {;;;}
+	walk(sourceDirectory : Path) : IOResult<Iter<Path>> {;;;}
+	readString(source : Path) : IOResult<String> {;;;}
+	createDirectories(targetParent : Path) : Option<IOException> {;;;}
 }

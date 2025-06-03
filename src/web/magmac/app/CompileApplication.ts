@@ -6,10 +6,9 @@ import { ApplicationError } from "../../magmac/app/error/ApplicationError";
 import { ThrowableError } from "../../magmac/app/error/ThrowableError";
 import { Targets } from "../../magmac/app/io/targets/Targets";
 import { Serializable } from "../../magmac/app/lang/Serializable";
-import { JavaRootSegment } from "../../magmac/app/lang/node/JavaRootSegment";
-import { Root } from "../../magmac/app/lang/node/Root";
+import { JavaRoot } from "../../magmac/app/lang/node/JavaRoot";
 import { UnitSet } from "../../magmac/app/stage/unit/UnitSet";
 export class CompileApplication<R extends Serializable> {
-	CompileApplication(compiler : Compiler, targets : Targets) : public;
-	parseAndStore(units : UnitSet<Root<JavaRootSegment>>) : Option<Error>;
+	CompileApplication(compiler : Compiler, targets : Targets) : public {;;;}
+	parseAndStore(units : UnitSet<JavaRoot>) : Option<Error> {;;}
 }

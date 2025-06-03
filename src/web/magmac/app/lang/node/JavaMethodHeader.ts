@@ -3,5 +3,5 @@ import { CompileResult } from "../../../../magmac/app/compile/error/CompileResul
 import { Node } from "../../../../magmac/app/compile/node/Node";
 import { Deserializers } from "../../../../magmac/app/lang/Deserializers";
 export interface JavaMethodHeader {
-	deserializeError(node : Node) : CompileResult<JavaMethodHeader>;
+	deserializeError(node : Node) : CompileResult<JavaMethodHeader> {;;}
 }

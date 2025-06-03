@@ -9,15 +9,17 @@ import magmac.app.compile.rule.Rule;
 import magmac.app.compile.rule.StripRule;
 import magmac.app.compile.rule.TypeRule;
 import magmac.app.lang.Deserializers;
+import magmac.app.lang.JavaDeserializers;
+import magmac.app.lang.JavaRules;
 import magmac.app.lang.LazyRule;
 
 public class FunctionSegments {
-    public static CompileResult<FunctionSegment> deserialize(Node node) {
+    public static CompileResult<JavaFunctionSegment> deserialize(Node node) {
         return Deserializers.orError("function-segment", node, Lists.of(
                 Deserializers.wrap(Whitespace::deserialize),
-                Deserializers.wrap(FunctionStatement::deserialize),
+                Deserializers.wrap(JavaDeserializers::deserializeFunctionStatement),
                 Deserializers.wrap(Block::deserialize),
-                Deserializers.wrap(ReturnNode::deserialize),
+                Deserializers.wrap(JavaDeserializers::deserializeReturn),
                 Deserializers.wrap(CaseNode::deserialize)
         ));
     }
@@ -28,9 +30,9 @@ public class FunctionSegments {
         Rule rule = new OrRule(Lists.of(
                 new TypeRule("whitespace", new StripRule(new ExactRule(";"))),
                 Whitespace.createWhitespaceRule(),
-                FunctionStatement.createStatementRule(functionSegmentValueRule),
+                JavaRules.createStatementRule(functionSegmentValueRule),
                 Block.createBlockRule(functionSegmentRule, value, definition),
-                ReturnNode.createReturnRule(value),
+                JavaReturnNode.createReturnRule(value),
                 CaseNode.createCaseRule(value, functionSegmentRule)
         ));
 

@@ -1,6 +1,9 @@
 package magmac.app.lang;
 
+import magmac.api.Option;
 import magmac.api.collect.list.Lists;
+import magmac.app.compile.error.CompileResult;
+import magmac.app.compile.node.Node;
 import magmac.app.compile.rule.ContextRule;
 import magmac.app.compile.rule.FilterRule;
 import magmac.app.compile.rule.LocatingRule;
@@ -18,12 +21,14 @@ import magmac.app.compile.rule.divide.FoldingDivider;
 import magmac.app.compile.rule.split.DividingSplitter;
 import magmac.app.lang.node.Arguments;
 import magmac.app.lang.node.JavaDefinition;
+import magmac.app.lang.node.JavaLambdaValueContent;
 import magmac.app.lang.node.JavaNamespacedNode;
 import magmac.app.lang.node.JavaTypes;
 import magmac.app.lang.node.Modifier;
 import magmac.app.lang.node.Parameters;
 import magmac.app.lang.node.StructureMembers;
 import magmac.app.lang.node.Symbols;
+import magmac.app.lang.node.Values;
 import magmac.app.lang.node.Whitespace;
 
 public final class JavaRules {
@@ -90,5 +95,45 @@ public final class JavaRules {
     public static Rule createAccessRule(String type, String infix, LazyRule value) {
         Rule property = Symbols.createSymbolRule("property");
         return new TypeRule(type, LocatingRule.Last(new NodeRule("receiver", value), infix, property));
+    }
+
+    public static Option<CompileResult<JavaLambdaValueContent>> deserializeLambdaValueContent(Node node) {
+        return Destructors.destructWithType("value", node).map(destructor -> {
+            return destructor.withNode("value", Values::deserializeOrError).complete(JavaLambdaValueContent::new);
+        });
+    }
+
+    public static Rule createYieldRule(Rule value) {
+        return new TypeRule("yield", new StripRule(new PrefixRule("yield ", new NodeRule("value", value))));
+    }
+
+    public static Rule createLambdaRule(LazyRule value, Rule functionSegment, String infix, Rule definition) {
+        Rule afterInfix = new OrRule(Lists.of(
+                new TypeRule("block", new StripRule(new PrefixRule("{", new SuffixRule(CommonLang.Statements("children", functionSegment), "}")))),
+                new TypeRule("value", new NodeRule("value", value))
+        ));
+
+        Rule parameters = JavaRules.createLambdaParameterRule(definition);
+        Rule withParentheses = new TypeRule("multiple", new StripRule(new PrefixRule("(", new SuffixRule(parameters, ")"))));
+        Rule withoutParentheses = Symbols.createSymbolRule();
+
+        Rule header = new NodeRule("header", new OrRule(Lists.of(
+                withParentheses,
+                withoutParentheses
+        )));
+
+        return new TypeRule("lambda", LocatingRule.First(header, infix, new NodeRule("content", afterInfix)));
+    }
+
+    public static Rule createStatementRule(Rule rule) {
+        NodeRule child = new NodeRule("child", rule);
+        return new TypeRule("statement", new StripRule(new SuffixRule(child, ";")));
+    }
+
+    public static Rule createLambdaParameterRule(Rule definition) {
+        return NodeListRule.createNodeListRule("parameters", new ValueFolder(), new OrRule(Lists.of(
+                definition,
+                Symbols.createSymbolRule()
+        )));
     }
 }

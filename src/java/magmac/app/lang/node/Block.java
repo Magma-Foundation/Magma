@@ -19,7 +19,7 @@ import magmac.app.lang.CommonLang;
 import magmac.app.lang.Destructors;
 import magmac.app.lang.LazyRule;
 
-record Block(List<FunctionSegment> segments, BlockHeader header) implements FunctionSegment {
+public record Block(List<JavaFunctionSegment> segments, BlockHeader header) implements JavaFunctionSegment, TypescriptFunctionSegment {
     public static Option<CompileResult<Block>> deserialize(Node node) {
         return Destructors.destructWithType("block", node).map(deserializer -> deserializer
                 .withNodeList("children", FunctionSegments::deserialize)

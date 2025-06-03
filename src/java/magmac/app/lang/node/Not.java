@@ -16,7 +16,7 @@ record Not(JavaValue value) implements JavaValue, TypeScriptValue {
         return new TypeRule("not", new StripRule(new PrefixRule("!", new NodeRule("child", value))));
     }
 
-    public static Option<CompileResult<JavaValue>> deserialize(Node node) {
+    public static Option<CompileResult<Not>> deserialize(Node node) {
         return Destructors.destructWithType("not", node).map(deserializer -> deserializer.withNode("child", Values::deserializeOrError)
                 .complete(Not::new));
     }

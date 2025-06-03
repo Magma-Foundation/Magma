@@ -23,7 +23,7 @@ import magmac.app.lang.OptionNodeListRule;
 public record JavaMethod(
         JavaMethodHeader header,
         List<JavaParameter> parameters,
-        Option<List<FunctionSegment>> maybeChildren
+        Option<List<JavaFunctionSegment>> maybeChildren
 ) implements JavaStructureMember {
     public static Option<CompileResult<JavaStructureMember>> deserialize(Node node) {
         return Destructors.destructWithType("method", node).map((InitialDestructor deserializer) -> deserializer

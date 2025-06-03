@@ -17,7 +17,7 @@ import magmac.app.compile.rule.StripRule;
 import magmac.app.compile.rule.TypeRule;
 import magmac.app.lang.Destructors;
 
-public record CaseNode(List<CaseDefinition> definitions, CaseValue value) implements FunctionSegment {
+public record CaseNode(List<CaseDefinition> definitions, CaseValue value) implements JavaFunctionSegment, TypescriptFunctionSegment {
     public static Option<CompileResult<CaseNode>> deserialize(Node node) {
         return Destructors.destructWithType("case", node).map(destructor -> {
             return destructor

@@ -6,10 +6,10 @@ import { FirstLocator } from "../../../../magmac/app/compile/rule/locate/FirstLo
 import { LastLocator } from "../../../../magmac/app/compile/rule/locate/LastLocator";
 import { Locator } from "../../../../magmac/app/compile/rule/locate/Locator";
 export class LocatingRule {
-	LocatingRule(leftRule : Rule, splitter : Splitter, rightRule : Rule) : public;
-	First(leftRule : Rule, infix : String, rightRule : Rule) : Rule;
-	Last(leftRule : Rule, infix : String, rightRule : Rule) : Rule;
-	createLocatingRule(leftRule : Rule, infix : String, rightRule : Rule, locator : Locator) : Rule;
-	lex(input : String) : CompileResult<Node>;
-	generate(node : Node) : CompileResult<String>;
+	LocatingRule(leftRule : Rule, splitter : Splitter, rightRule : Rule) : public {;;;;}
+	First(leftRule : Rule, infix : String, rightRule : Rule) : Rule {;;}
+	Last(leftRule : Rule, infix : String, rightRule : Rule) : Rule {;;}
+	createLocatingRule(leftRule : Rule, infix : String, rightRule : Rule, locator : Locator) : Rule {;;}
+	lex(input : String) : CompileResult<Node> {;;}
+	generate(node : Node) : CompileResult<String> {;;}
 }

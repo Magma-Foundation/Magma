@@ -12,17 +12,17 @@ import magmac.app.lang.JavaDeserializers;
 import magmac.app.lang.JavaRules;
 import magmac.app.lang.java.JavaFunctionSegmentValue;
 
-final class FunctionSegmentValues {
+public final class FunctionSegmentValues {
     public static CompileResult<JavaFunctionSegmentValue> deserialize(Node node) {
         return Deserializers.orError("function-segment-value", node, Lists.of(
-                Deserializers.wrap(ReturnNode::deserialize),
+                Deserializers.wrap(JavaDeserializers::deserializeReturn),
                 Deserializers.wrap(AssignmentNode::deserialize),
                 Deserializers.wrap(JavaDeserializers::deserializeInvocation),
-                Deserializers.wrap(node1 -> Post.deserialize(PostVariant.Increment, node1)),
-                Deserializers.wrap(node1 -> Post.deserialize(PostVariant.Decrement, node1)),
+                Deserializers.wrap(node1 -> JavaDeserializers.deserializePost(PostVariant.Increment, node1)),
+                Deserializers.wrap(node1 -> JavaDeserializers.deserializePost(PostVariant.Decrement, node1)),
                 Deserializers.wrap(Break::deserialize),
-                Deserializers.wrap(JavaContinue::deserialize),
-                Deserializers.wrap(YieldNode::deserialize)
+                Deserializers.wrap(Continue::deserialize),
+                Deserializers.wrap(JavaDeserializers::deserializeYield)
         ));
     }
 
@@ -30,10 +30,10 @@ final class FunctionSegmentValues {
         return new OrRule(Lists.of(
                 JavaRules.createInvokableRule(value),
                 AssignmentNode.createAssignmentRule(definition, value),
-                ReturnNode.createReturnRule(value),
-                YieldNode.createYieldRule(value),
-                Post.createPostRule("post-increment", "++", value),
-                Post.createPostRule("post-decrement", "--", value),
+                JavaReturnNode.createReturnRule(value),
+                JavaRules.createYieldRule(value),
+                JavaPost.createPostRule("post-increment", "++", value),
+                JavaPost.createPostRule("post-decrement", "--", value),
                 new TypeRule("break", new ExactRule("break")),
                 new TypeRule("continue", new ExactRule("continue"))
         ));

@@ -6,8 +6,7 @@ import { Rule } from "../../../magmac/app/compile/rule/Rule";
 import { PathTargets } from "../../../magmac/app/io/targets/PathTargets";
 import { Targets } from "../../../magmac/app/io/targets/Targets";
 import { TypescriptLang } from "../../../magmac/app/lang/TypescriptLang";
-import { JavaRootSegment } from "../../../magmac/app/lang/node/JavaRootSegment";
-import { Root } from "../../../magmac/app/lang/node/Root";
+import { JavaRoot } from "../../../magmac/app/lang/node/JavaRoot";
 import { TypescriptRoot } from "../../../magmac/app/lang/node/TypescriptRoot";
 import { Generator } from "../../../magmac/app/stage/generate/Generator";
 import { RuleGenerator } from "../../../magmac/app/stage/generate/RuleGenerator";
@@ -15,9 +14,9 @@ import { Parser } from "../../../magmac/app/stage/parse/Parser";
 import { Path } from "../../../java/nio/file/Path";
 import { Paths } from "../../../java/nio/file/Paths";
 export class TypeScriptTargetPlatform {
-	createTargetPath() : Path;
-	createExtension() : String;
-	createRule() : Rule;
-	createCompiler() : Compiler;
-	createApplication() : Application;
+	createTargetPath() : Path {;;}
+	createExtension() : String {;;}
+	createRule() : Rule {;;}
+	createCompiler() : Compiler {;;;;}
+	createApplication() : Application {;;;;;}
 }

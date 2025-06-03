@@ -11,16 +11,16 @@ import { TypeScriptTargetPlatform } from "../magmac/app/config/TypeScriptTargetP
 import { ApplicationError } from "../magmac/app/error/ApplicationError";
 import { PathSources } from "../magmac/app/io/sources/PathSources";
 import { Sources } from "../magmac/app/io/sources/Sources";
-import { JavaLang } from "../magmac/app/lang/JavaLang";
-import { JavaRootSegment } from "../magmac/app/lang/node/JavaRootSegment";
-import { Root } from "../magmac/app/lang/node/Root";
+import { JavaDeserializers } from "../magmac/app/lang/JavaDeserializers";
+import { JavaRules } from "../magmac/app/lang/JavaRules";
+import { JavaRoot } from "../magmac/app/lang/node/JavaRoot";
 import { Lexer } from "../magmac/app/stage/lexer/Lexer";
 import { RuleLexer } from "../magmac/app/stage/lexer/RuleLexer";
 import { UnitSet } from "../magmac/app/stage/unit/UnitSet";
 import { Paths } from "../java/nio/file/Paths";
 export class Main {
-	main() : void;
-	getNext(result : UnitSet<Root<JavaRootSegment>>) : Option<Error>;
-	loadSources(sources : Sources) : Result<UnitSet<Root<JavaRootSegment>>, ApplicationError>;
-	run(roots : UnitSet<Root<JavaRootSegment>>, platform : TargetPlatform) : Option<Error>;
+	main() : void {;;;}
+	getNext(result : UnitSet<JavaRoot>) : Option<Error> {;;}
+	loadSources(sources : Sources) : Result<UnitSet<JavaRoot>, ApplicationError> {;;;}
+	run(roots : UnitSet<JavaRoot>, platform : TargetPlatform) : Option<Error> {;;}
 }

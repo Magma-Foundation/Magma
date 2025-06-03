@@ -10,7 +10,7 @@ import { CompileResults } from "../../../magmac/app/compile/error/CompileResults
 import { Location } from "../../../magmac/app/io/Location";
 import { JavaArrayType } from "../../../magmac/app/lang/node/JavaArrayType";
 import { JavaBase } from "../../../magmac/app/lang/node/JavaBase";
-import { Root } from "../../../magmac/app/lang/node/Root";
+import { JavaRoot } from "../../../magmac/app/lang/node/JavaRoot";
 import { JavaRootSegment } from "../../../magmac/app/lang/node/JavaRootSegment";
 import { JavaNamespacedNode } from "../../../magmac/app/lang/node/JavaNamespacedNode";
 import { PlantUMLDependency } from "../../../magmac/app/lang/node/PlantUMLDependency";
@@ -21,7 +21,7 @@ import { PlantUMLRoot } from "../../../magmac/app/lang/node/PlantUMLRoot";
 import { PlantUMLRootSegment } from "../../../magmac/app/lang/node/PlantUMLRootSegment";
 import { PlantUMLStructure } from "../../../magmac/app/lang/node/PlantUMLStructure";
 import { PlantUMLStructureType } from "../../../magmac/app/lang/node/PlantUMLStructureType";
-import { QualifiedType } from "../../../magmac/app/lang/node/QualifiedType";
+import { Qualified } from "../../../magmac/app/lang/node/Qualified";
 import { Segment } from "../../../magmac/app/lang/node/Segment";
 import { JavaStructureNode } from "../../../magmac/app/lang/node/JavaStructureNode";
 import { JavaStructureType } from "../../../magmac/app/lang/node/JavaStructureType";
@@ -36,14 +36,14 @@ import { SimpleUnit } from "../../../magmac/app/stage/unit/SimpleUnit";
 import { Unit } from "../../../magmac/app/stage/unit/Unit";
 import { UnitSet } from "../../../magmac/app/stage/unit/UnitSet";
 export class JavaPlantUMLParser {
-	parseNamespaced(child : String, namespaced : JavaNamespacedNode) : Iter<PlantUMLRootSegment>;
-	createSimpleName(base : JavaBase) : String;
-	createSimpleNameFromQualifiedType(qualifiedType : QualifiedType) : String;
-	createStructureSegment(structureNode : JavaStructureNode) : PlantUMLRootSegment;
-	createSimpleNameFromType(type : JavaType) : String;
-	apply(initial : UnitSet<Root<JavaRootSegment>>) : CompileResult<UnitSet<PlantUMLRoot>>;
-	parseRoot(unit : Unit<Root<JavaRootSegment>>) : Iter<PlantUMLRootSegment>;
-	parseRootSegment(fileName : String, rootSegment : JavaRootSegment) : Iter<PlantUMLRootSegment>;
-	parseStructure(structureNode : JavaStructureNode) : Iter<PlantUMLRootSegment>;
-	toInherits(child : String, maybeOption : Option<List<JavaType>>) : List<PlantUMLRootSegment>;
+	parseNamespaced(child : String, namespaced : JavaNamespacedNode) : Iter<PlantUMLRootSegment> {;;;}
+	createSimpleName(base : JavaBase) : String {;;;}
+	createSimpleNameFromQualifiedType(qualifiedType : Qualified) : String {;;}
+	createStructureSegment(structureNode : JavaStructureNode) : PlantUMLRootSegment {;;;;;}
+	createSimpleNameFromType(type : JavaType) : String {;;;}
+	apply(initial : UnitSet<JavaRoot>) : CompileResult<UnitSet<PlantUMLRoot>> {;;;;;}
+	parseRoot(unit : Unit<JavaRoot>) : Iter<PlantUMLRootSegment> {;;}
+	parseRootSegment(fileName : String, rootSegment : JavaRootSegment) : Iter<PlantUMLRootSegment> {;;;}
+	parseStructure(structureNode : JavaStructureNode) : Iter<PlantUMLRootSegment> {;;;;}
+	toInherits(child : String, maybeOption : Option<List<JavaType>>) : List<PlantUMLRootSegment> {;;}
 }

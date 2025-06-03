@@ -6,9 +6,10 @@ import { ExactRule } from "../../../../magmac/app/compile/rule/ExactRule";
 import { Rule } from "../../../../magmac/app/compile/rule/Rule";
 import { StripRule } from "../../../../magmac/app/compile/rule/StripRule";
 import { TypeRule } from "../../../../magmac/app/compile/rule/TypeRule";
-import { Deserializers } from "../../../../magmac/app/lang/Deserializers";
+import { Destructors } from "../../../../magmac/app/lang/Destructors";
+import { Lang } from "../../../../magmac/app/lang/java/Lang";
 export class Whitespace {
-	deserialize(node : Node) : Option<CompileResult<Whitespace>>;
-	createWhitespaceRule() : Rule;
-	serialize() : Node;
+	deserialize(node : Node) : Option<CompileResult<Whitespace>> {;;}
+	createWhitespaceRule() : Rule {;;}
+	serialize() : Node {;;}
 }

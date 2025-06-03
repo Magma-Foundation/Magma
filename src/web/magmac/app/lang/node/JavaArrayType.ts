@@ -6,9 +6,9 @@ import { Rule } from "../../../../magmac/app/compile/rule/Rule";
 import { StripRule } from "../../../../magmac/app/compile/rule/StripRule";
 import { SuffixRule } from "../../../../magmac/app/compile/rule/SuffixRule";
 import { TypeRule } from "../../../../magmac/app/compile/rule/TypeRule";
-import { Deserializers } from "../../../../magmac/app/lang/Deserializers";
+import { Destructors } from "../../../../magmac/app/lang/Destructors";
 export class JavaArrayType {
-	JavaArrayType(arrayType : JavaType) : public;
-	createArrayRule(rule : Rule) : Rule;
-	deserialize(node : Node) : Option<CompileResult<JavaType>>;
+	JavaArrayType(arrayType : JavaType) : public {;;}
+	createArrayRule(rule : Rule) : Rule {;;;}
+	deserialize(node : Node) : Option<CompileResult<JavaType>> {;;}
 }

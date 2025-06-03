@@ -3,7 +3,6 @@ import { List } from "../../../../magmac/api/collect/list/List";
 import { Iters } from "../../../../magmac/api/iter/Iters";
 import { CompileResult } from "../../../../magmac/app/compile/error/CompileResult";
 import { InitialDestructor } from "../../../../magmac/app/compile/node/InitialDestructor";
-import { MapNode } from "../../../../magmac/app/compile/node/MapNode";
 import { Node } from "../../../../magmac/app/compile/node/Node";
 import { NodeListRule } from "../../../../magmac/app/compile/rule/NodeListRule";
 import { PrefixRule } from "../../../../magmac/app/compile/rule/PrefixRule";
@@ -13,10 +12,9 @@ import { StripRule } from "../../../../magmac/app/compile/rule/StripRule";
 import { SuffixRule } from "../../../../magmac/app/compile/rule/SuffixRule";
 import { TypeRule } from "../../../../magmac/app/compile/rule/TypeRule";
 import { DelimitedFolder } from "../../../../magmac/app/compile/rule/fold/DelimitedFolder";
-import { Deserializers } from "../../../../magmac/app/lang/Deserializers";
+import { Destructors } from "../../../../magmac/app/lang/Destructors";
 export class JavaNamespacedNode {
-	deserialize(type : NamespacedType, node : Node) : Option<CompileResult<JavaRootSegment>>;
-	deserialize(node : Node) : Option<CompileResult<JavaRootSegment>>;
-	createNamespacedRule(type : String) : Rule;
-	serialize() : Node;
+	deserialize(type : NamespacedType, node : Node) : Option<CompileResult<JavaRootSegment>> {;;}
+	deserialize(node : Node) : Option<CompileResult<JavaRootSegment>> {;;}
+	createNamespacedRule(type : String) : Rule {;;;}
 }

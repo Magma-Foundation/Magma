@@ -20,7 +20,7 @@ public record IndexNode(JavaValue parent, JavaValue argument) implements JavaVal
         return new TypeRule("index", new StripRule(new SuffixRule(LocatingRule.First(parent, "[", argument), "]")));
     }
 
-    public static Option<CompileResult<JavaValue>> deserialize(Node value) {
+    public static Option<CompileResult<IndexNode>> deserialize(Node value) {
         return Destructors.destructWithType("index", value).map(destructor -> {
             return destructor.withNode("parent", Values::deserializeOrError)
                     .withNode("argument", Values::deserializeOrError)

@@ -13,14 +13,16 @@ import { Rule } from "../../../../magmac/app/compile/rule/Rule";
 import { StripRule } from "../../../../magmac/app/compile/rule/StripRule";
 import { SuffixRule } from "../../../../magmac/app/compile/rule/SuffixRule";
 import { TypeRule } from "../../../../magmac/app/compile/rule/TypeRule";
-import { CommonLang } from "../../../../magmac/app/lang/CommonLang";
 import { Deserializers } from "../../../../magmac/app/lang/Deserializers";
+import { JavaDeserializers } from "../../../../magmac/app/lang/JavaDeserializers";
+import { JavaRules } from "../../../../magmac/app/lang/JavaRules";
 import { LazyRule } from "../../../../magmac/app/lang/LazyRule";
+import { JavaInvokable } from "../../../../magmac/app/lang/java/JavaInvokable";
 export class Values {
-	deserializeOrError(node : Node) : CompileResult<Value>;
-	deserialize(node : Node) : Option<CompileResult<Value>>;
-	getWrap(operator : Operator) : TypedDeserializer<Value>;
-	initValueRule(segment : Rule, value : LazyRule, lambdaInfix : String, definition : Rule) : LazyRule;
-	getValueRules(functionSegment : Rule, value : LazyRule, lambdaInfix : String, definition : Rule) : List<Rule>;
-	createSwitchRule(functionSegmentRule : Rule, value : Rule) : TypeRule;
+	deserializeOrError(node : Node) : CompileResult<JavaValue> {;;}
+	deserialize(node : Node) : Option<CompileResult<JavaValue>> {;;;;}
+	getWrap(operator : Operator) : TypedDeserializer<JavaValue> {;;}
+	initValueRule(segment : Rule, value : LazyRule, lambdaInfix : String, definition : Rule) : LazyRule {;;}
+	getValueRules(functionSegment : Rule, value : LazyRule, lambdaInfix : String, definition : Rule) : List<Rule> {;;;;}
+	createSwitchRule(functionSegmentRule : Rule, value : Rule) : TypeRule {;;;;}
 }

@@ -1,22 +1,5 @@
-import { Option } from "../../../../magmac/api/Option";
-import { Lists } from "../../../../magmac/api/collect/list/Lists";
-import { CompileResult } from "../../../../magmac/app/compile/error/CompileResult";
-import { Node } from "../../../../magmac/app/compile/node/Node";
-import { LocatingRule } from "../../../../magmac/app/compile/rule/LocatingRule";
-import { NodeListRule } from "../../../../magmac/app/compile/rule/NodeListRule";
-import { NodeRule } from "../../../../magmac/app/compile/rule/NodeRule";
-import { OrRule } from "../../../../magmac/app/compile/rule/OrRule";
-import { PrefixRule } from "../../../../magmac/app/compile/rule/PrefixRule";
-import { Rule } from "../../../../magmac/app/compile/rule/Rule";
-import { StripRule } from "../../../../magmac/app/compile/rule/StripRule";
-import { SuffixRule } from "../../../../magmac/app/compile/rule/SuffixRule";
-import { TypeRule } from "../../../../magmac/app/compile/rule/TypeRule";
-import { CommonLang } from "../../../../magmac/app/lang/CommonLang";
-import { LazyRule } from "../../../../magmac/app/lang/LazyRule";
-import { ValueFolder } from "../../../../magmac/app/lang/ValueFolder";
-import { Deserializers } from "../../../../magmac/app/lang/Deserializers";
 export class Lambda {
-	deserialize(node : Node) : Option<CompileResult<Lambda>>;
-	createLambdaRule(value : LazyRule, functionSegment : Rule, infix : String, definition : Rule) : Rule;
-	createLambdaParameterRule(definition : Rule) : Rule;
+	Lambda(header : LambdaHeader, content : JavaLambdaContent) : public {;;;}
+	header() : LambdaHeader {;;}
+	content() : JavaLambdaContent {;;}
 }

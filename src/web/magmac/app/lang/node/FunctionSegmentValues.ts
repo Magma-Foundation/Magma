@@ -6,7 +6,10 @@ import { OrRule } from "../../../../magmac/app/compile/rule/OrRule";
 import { Rule } from "../../../../magmac/app/compile/rule/Rule";
 import { TypeRule } from "../../../../magmac/app/compile/rule/TypeRule";
 import { Deserializers } from "../../../../magmac/app/lang/Deserializers";
+import { JavaDeserializers } from "../../../../magmac/app/lang/JavaDeserializers";
+import { JavaRules } from "../../../../magmac/app/lang/JavaRules";
+import { JavaFunctionSegmentValue } from "../../../../magmac/app/lang/java/JavaFunctionSegmentValue";
 export class FunctionSegmentValues {
-	deserialize(node : Node) : CompileResult<FunctionSegmentValue>;
-	createFunctionSegmentValueRule(value : Rule, definition : Rule) : Rule;
+	deserialize(node : Node) : CompileResult<JavaFunctionSegmentValue> {;;}
+	createFunctionSegmentValueRule(value : Rule, definition : Rule) : Rule {;;}
 }

@@ -1,3 +1,3 @@
 export class Console {
-	handleError(value : String) : void;
+	handleError(value : String) : void {;;}
 }

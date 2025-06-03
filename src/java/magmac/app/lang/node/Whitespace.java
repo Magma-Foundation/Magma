@@ -9,17 +9,17 @@ import magmac.app.compile.rule.Rule;
 import magmac.app.compile.rule.StripRule;
 import magmac.app.compile.rule.TypeRule;
 import magmac.app.lang.Destructors;
-import magmac.app.lang.java.JavaArgument;
+import magmac.app.lang.java.Lang;
 
 public final class Whitespace implements
-        JavaArgument,
-        FunctionSegment,
+        Lang.JavaArgument,
+        JavaFunctionSegment,
         JavaRootSegment,
         JavaParameter,
         JavaStructureMember,
         TypeScriptRootSegment,
         TypescriptStructureMember,
-        TypeScriptParameter {
+        TypeScriptParameter, TypescriptFunctionSegment {
     public static Option<CompileResult<Whitespace>> deserialize(Node node) {
         return Destructors.destructWithType("whitespace", node).map(deserializer -> deserializer.complete(Whitespace::new));
     }

@@ -3,6 +3,6 @@ import { Tuple2 } from "../../../../../magmac/api/Tuple2";
 import { List } from "../../../../../magmac/api/collect/list/List";
 import { Joiner } from "../../../../../magmac/api/iter/collect/Joiner";
 export class FirstSelector {
-	FirstSelector(delimiter : String) : public;
-	select(list : List<String>) : Option<Tuple2<String, String>>;
+	FirstSelector(delimiter : String) : public {;;}
+	select(list : List<String>) : Option<Tuple2<String, String>> {;;}
 }

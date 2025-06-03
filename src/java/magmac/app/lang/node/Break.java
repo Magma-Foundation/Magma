@@ -6,9 +6,10 @@ import magmac.app.compile.node.MapNode;
 import magmac.app.compile.node.Node;
 import magmac.app.lang.Destructors;
 import magmac.app.lang.java.JavaFunctionSegmentValue;
+import magmac.app.lang.java.Lang;
 
-class Break implements JavaFunctionSegmentValue {
-    public static Option<CompileResult<JavaFunctionSegmentValue>> deserialize(Node node) {
+class Break implements JavaFunctionSegmentValue, Lang.TypescriptFunctionSegmentValue {
+    public static Option<CompileResult<Break>> deserialize(Node node) {
         return Destructors.destructWithType("break", node).map(deserializer -> deserializer.complete(Break::new));
     }
 

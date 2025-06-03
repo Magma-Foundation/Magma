@@ -13,7 +13,7 @@ import magmac.app.compile.rule.TypeRule;
 import magmac.app.compile.rule.fold.StatementFolder;
 import magmac.app.lang.Destructors;
 
-public record MultipleCaseValue(List<FunctionSegment> children) implements CaseValue {
+public record MultipleCaseValue(List<JavaFunctionSegment> children) implements CaseValue {
     public static Option<CompileResult<CaseValue>> deserialize(Node node) {
         return Destructors.destructWithType("case-multiple", node).map(destructor -> {
             return destructor.withNodeList("children", FunctionSegments::deserialize)

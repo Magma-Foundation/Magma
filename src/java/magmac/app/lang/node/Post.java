@@ -1,30 +1,11 @@
 package magmac.app.lang.node;
 
-import magmac.api.Option;
-import magmac.app.compile.error.CompileResult;
-import magmac.app.compile.node.MapNode;
-import magmac.app.compile.node.Node;
-import magmac.app.compile.rule.NodeRule;
-import magmac.app.compile.rule.Rule;
-import magmac.app.compile.rule.StripRule;
-import magmac.app.compile.rule.SuffixRule;
-import magmac.app.compile.rule.TypeRule;
-import magmac.app.lang.Destructors;
-import magmac.app.lang.java.JavaFunctionSegmentValue;
+public class Post {
+    protected final PostVariant variant;
+    protected final JavaValue value;
 
-record Post(PostVariant variant, JavaValue value) implements JavaFunctionSegmentValue {
-    public static Rule createPostRule(String type, String suffix, Rule value) {
-        return new TypeRule(type, new StripRule(new SuffixRule(new NodeRule("child", value), suffix)));
-    }
-
-    public static Option<CompileResult<JavaFunctionSegmentValue>> deserialize(PostVariant variant, Node node) {
-        return Destructors.destructWithType(variant.type(), node).map(deserializer -> deserializer
-                .withNode("child", Values::deserializeOrError)
-                .complete(child -> new Post(variant, child)));
-    }
-
-    @Override
-    public Node serialize() {
-        return new MapNode(this.variant.type());
+    public Post(PostVariant variant, JavaValue value) {
+        this.variant = variant;
+        this.value = value;
     }
 }

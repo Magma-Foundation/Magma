@@ -5,10 +5,10 @@ import { ListCollector } from "../../../../../magmac/api/iter/collect/ListCollec
 import { Splitter } from "../../../../../magmac/app/compile/rule/Splitter";
 import { Divider } from "../../../../../magmac/app/compile/rule/divide/Divider";
 export class DividingSplitter {
-	DividingSplitter(divider : Divider, selector : Selector) : private;
-	Last(divider : Divider, delimiter : String) : Splitter;
-	First(divider : Divider, delimiter : String) : Splitter;
-	split(input : String) : Option<Tuple2<String, String>>;
-	createMessage() : String;
-	merge(leftString : String, rightString : String) : String;
+	DividingSplitter(divider : Divider, selector : Selector) : private {;;;}
+	Last(divider : Divider, delimiter : String) : Splitter {;;}
+	First(divider : Divider, delimiter : String) : Splitter {;;}
+	split(input : String) : Option<Tuple2<String, String>> {;;;}
+	createMessage() : String {;;}
+	merge(leftString : String, rightString : String) : String {;;}
 }
