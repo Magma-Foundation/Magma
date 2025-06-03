@@ -10,6 +10,10 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
+/**
+ * Iterator implementation backed by a {@link Head}.
+ */
+
 public record HeadedIter<T>(Head<T> head) implements Iter<T> {
     @Override
     public <R, X> Result<R, X> foldToResult(R initial, BiFunction<R, T, Result<R, X>> folder) {

@@ -2,6 +2,10 @@ package magmac.api.iter.collect;
 
 import java.util.Optional;
 
+/**
+ * Collector that determines the maximum integer.
+ */
+
 public record Max() implements Collector<Integer, Optional<Integer>> {
     @Override
     public Optional<Integer> createInitial() {

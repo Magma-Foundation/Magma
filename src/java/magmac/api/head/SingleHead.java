@@ -4,6 +4,10 @@ import magmac.api.None;
 import magmac.api.Option;
 import magmac.api.Some;
 
+/**
+ * {@link Head} yielding a single element.
+ */
+
 public class SingleHead<T> implements Head<T> {
     private final T element;
     private boolean retrieved;

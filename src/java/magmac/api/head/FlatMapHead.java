@@ -4,6 +4,10 @@ import magmac.api.None;
 import magmac.api.iter.Iter;
 
 import magmac.api.Option;
+
+/**
+ * {@link Head} that applies a mapping function producing nested iterables.
+ */
 import java.util.function.Function;
 
 public class FlatMapHead<T, R> implements Head<R> {

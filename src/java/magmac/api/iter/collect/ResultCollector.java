@@ -4,6 +4,10 @@ import magmac.api.Tuple2;
 import magmac.api.result.Ok;
 import magmac.api.result.Result;
 
+/**
+ * Collector that transforms {@link magmac.api.result.Result} values while accumulating.
+ */
+
 public record ResultCollector<T, C, X>(
         Collector<T, C> collector
 ) implements Collector<Result<T, X>, Result<C, X>> {

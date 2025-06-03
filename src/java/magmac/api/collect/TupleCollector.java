@@ -3,6 +3,10 @@ package magmac.api.collect;
 import magmac.api.Tuple2;
 import magmac.api.iter.collect.Collector;
 
+/**
+ * Collects a pair of iterables using individual collectors for each side.
+ */
+
 public record TupleCollector<A, AC, B, BC>(
         Collector<A, AC> leftCollector,
         Collector<B, BC> rightCollector
