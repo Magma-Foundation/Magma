@@ -12,7 +12,6 @@ import magmac.app.compile.node.Node;
 import magmac.app.lang.Deserializers;
 import magmac.app.lang.Destructors;
 import magmac.app.lang.common.Annotation;
-import magmac.app.lang.node.Arguments;
 import magmac.app.lang.node.Assignables;
 import magmac.app.lang.node.CaseDefinition;
 import magmac.app.lang.node.CaseValues;
@@ -25,6 +24,7 @@ import magmac.app.lang.node.OperationDeserializer;
 import magmac.app.lang.node.Operator;
 import magmac.app.lang.node.PostVariant;
 import magmac.app.lang.node.StructureStatementValue;
+import magmac.app.lang.node.TypeArguments;
 import magmac.app.lang.node.TypedDeserializer;
 import magmac.app.lang.web.TypescriptLang;
 
@@ -46,7 +46,7 @@ public final class JavaDeserializers {
 
     public static Option<CompileResult<JavaLang.Invokable>> deserializeInvocation(Node node) {
         return Destructors.destructWithType("invokable", node).map(deserializer -> deserializer.withNode("caller", JavaDeserializers::deserialize)
-                .withNodeList("arguments", Arguments::deserialize)
+                .withNodeList("arguments", JavaDeserializers::deserializeArguments)
                 .complete(tuple -> new JavaLang.Invokable(tuple.left(), tuple.right())));
     }
 
@@ -279,10 +279,38 @@ public final class JavaDeserializers {
     public static CompileResult<JavaType> deserializeType(Node node) {
         return Deserializers.orError("type", node, Lists.of(
                 Deserializers.wrap(JavaDeserializers::deserializeSymbol),
-                Deserializers.wrap(JavaTemplateType::deserialize),
+                Deserializers.wrap(JavaDeserializers::deserializeTemplate),
                 Deserializers.wrap(JavaVariadicType::deserialize),
                 Deserializers.wrap(JavaArrayType::deserialize),
                 Deserializers.wrap(JavaQualified::deserializeQualified)
+        ));
+    }
+
+    static CompileResult<JavaBase> deserializeBase(Node node) {
+        return Deserializers.orError("base", node, Lists.of(
+                Deserializers.wrap(JavaDeserializers::deserializeSymbol),
+                Deserializers.wrap(JavaQualified::deserializeQualified)
+        ));
+    }
+
+    public static Option<CompileResult<JavaTemplateType>> deserializeTemplate(Node node) {
+        return Destructors.destructWithType("template", node).map(deserializer -> deserializer
+                .withNode("base", JavaDeserializers::deserializeBase)
+                .withNodeList("arguments", JavaDeserializers::deserializeType)
+                .complete(tuple -> new JavaTemplateType(tuple.left(), new TypeArguments<JavaType>(tuple.right()))));
+    }
+
+    public static CompileResult<JavaArgument> deserializeArguments(Node node) {
+        return Deserializers.orError("argument", node, Lists.of(
+                Deserializers.wrap(JavaDeserializers::deserializeWhitespace),
+                Deserializers.wrap(JavaDeserializers::deserializeValue)
+        ));
+    }
+
+    public static CompileResult<JavaParameter> deserializeParameter(Node node) {
+        return Deserializers.orError("parameter", node, Lists.of(
+                Deserializers.wrap(JavaDeserializers::deserializeWhitespace),
+                Deserializers.wrap(JavaDeserializers::deserializeTypedDefinition)
         ));
     }
 }

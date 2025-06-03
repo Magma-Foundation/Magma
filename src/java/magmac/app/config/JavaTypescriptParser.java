@@ -317,8 +317,8 @@ class JavaTypescriptParser implements Parser<JavaLang.JavaRoot, TypescriptLang.T
     }
 
     private static TypescriptLang.TemplateType parseTemplateType(JavaLang.JavaTemplateType type) {
-        JavaLang.Symbol base = JavaTypescriptParser.parseBaseType(type.base);
-        List<TypescriptLang.Type> collect = JavaTypescriptParser.parseTypeList(type.typeArguments.arguments());
+        JavaLang.Symbol base = JavaTypescriptParser.parseBaseType(type.base());
+        List<TypescriptLang.Type> collect = JavaTypescriptParser.parseTypeList(type.typeArguments().arguments());
         return new TypescriptLang.TemplateType(base, new TypeArguments<>(collect));
     }
 

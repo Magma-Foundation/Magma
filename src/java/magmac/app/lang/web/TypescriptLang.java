@@ -179,7 +179,7 @@ public final class TypescriptLang {
         }
     }
 
-    public static final class Definition extends CommonLang.Definition<Type> implements TypeScriptParameter, Assignable, TypeScriptMethodHeader {
+    public static final class Definition extends CommonLang.AbstractDefinition<Type> implements TypeScriptParameter, Assignable, TypeScriptMethodHeader {
         public Definition(Option<List<Annotation>> maybeAnnotations, List<Modifier> modifiers, String name, Option<List<TypeParam>> maybeTypeParams, Type type) {
             super(maybeAnnotations, modifiers, name, maybeTypeParams, type);
         }

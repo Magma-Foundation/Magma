@@ -14,7 +14,7 @@ import magmac.app.compile.rule.StripRule;
 import magmac.app.compile.rule.SuffixRule;
 import magmac.app.lang.CommonRules;
 import magmac.app.lang.Destructors;
-import magmac.app.lang.node.Arguments;
+import magmac.app.lang.JavaRules;
 
 public record JavaEnumValue(String name, Option<List<JavaLang.Value>> argumentsList) {
     public static CompileResult<JavaEnumValue> deserialize(Node node) {
@@ -26,7 +26,7 @@ public record JavaEnumValue(String name, Option<List<JavaLang.Value>> argumentsL
 
     static Rule createEnumValueRule(Rule value) {
         Rule name = new StripRule(FilterRule.Symbol(new StringRule("name")));
-        Rule rule = new SuffixRule(LocatingRule.First(name, "(", Arguments.createArgumentsRule(value)), ")");
+        Rule rule = new SuffixRule(LocatingRule.First(name, "(", JavaRules.createArgumentsRule(value)), ")");
         return new StripRule(new OrRule(Lists.of(
                 CommonRules.createSymbolRule("name"),
                 rule

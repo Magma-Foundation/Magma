@@ -72,7 +72,7 @@ public class JavaPlantUMLParser implements Parser<JavaLang.JavaRoot, PlantUMLRoo
         return switch (type) {
             case JavaLang.JavaArrayType _, JavaLang.JavaVariadicType _ -> "?";
             case JavaLang.Symbol symbol -> symbol.value();
-            case JavaLang.JavaTemplateType templateType -> JavaPlantUMLParser.createSimpleName(templateType.base);
+            case JavaLang.JavaTemplateType templateType -> JavaPlantUMLParser.createSimpleName(templateType.base());
             case JavaLang.JavaQualified qualified -> "?";
         };
     }

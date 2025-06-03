@@ -28,11 +28,9 @@ import magmac.app.compile.rule.split.DividingSplitter;
 import magmac.app.lang.java.JavaDeserializers;
 import magmac.app.lang.java.JavaLang;
 import magmac.app.lang.java.JavaNamespacedNode;
-import magmac.app.lang.node.Arguments;
 import magmac.app.lang.node.Modifier;
 import magmac.app.lang.node.MultipleCaseValue;
 import magmac.app.lang.node.Operator;
-import magmac.app.lang.node.Parameters;
 import magmac.app.lang.node.SingleCaseValue;
 import magmac.app.lang.node.StructureMembers;
 
@@ -44,7 +42,7 @@ public final class JavaRules {
     public static Rule createInvokableRule(Rule value) {
         Rule childRule = new OrRule(Lists.of(JavaRules.createConstructionRule(), value));
         Rule caller = new NodeRule("caller", new SuffixRule(childRule, "("));
-        Rule arguments = Arguments.createArgumentsRule(value);
+        Rule arguments = JavaRules.createArgumentsRule(value);
         Splitter splitter = DividingSplitter.Last(new FoldingDivider(new InvocationFolder()), "");
         return new TypeRule("invokable", new StripRule(new SuffixRule(new LocatingRule(caller, splitter, arguments), ")")));
     }
@@ -71,7 +69,7 @@ public final class JavaRules {
         Rule beforeContent = JavaRules.attachTypeParams(name);
 
         Rule withParameters = new OrRule(Lists.of(
-                new StripRule(new SuffixRule(LocatingRule.First(beforeContent, "(", Parameters.createParametersRule(JavaRules.createDefinitionRule())), ")")),
+                new StripRule(new SuffixRule(LocatingRule.First(beforeContent, "(", JavaRules.createParametersRule(JavaRules.createDefinitionRule())), ")")),
                 beforeContent
         ));
 
@@ -232,7 +230,9 @@ public final class JavaRules {
     }
 
     private static Rule createInstanceOfRule(LazyRule value) {
-        return new TypeRule("instanceof", LocatingRule.Last(new NodeRule("child", value), " instanceof ", new NodeRule("type", JavaRules.createTypeRule())));
+        Rule base = new NodeRule("base", JavaRules.createBaseRule());
+        Rule right = new StripRule(new SuffixRule(LocatingRule.First(base, "(", JavaRules.createParametersRule(JavaRules.createDefinitionRule())), ")"));
+        return new TypeRule("instanceof", LocatingRule.Last(new NodeRule("child", value), " instanceof ", right));
     }
 
     private static TypeRule createSwitchRule(Rule functionSegmentRule, Rule value) {
@@ -301,9 +301,37 @@ public final class JavaRules {
         return type.set(new OrRule(Lists.of(
                 JavaLang.JavaVariadicType.createVariadicRule(type),
                 JavaLang.JavaArrayType.createArrayRule(type),
-                JavaLang.JavaTemplateType.createTemplateRule(type),
+                JavaRules.createTemplateRule(type),
                 CommonRules.createSymbolRule(),
                 JavaLang.JavaQualified.createQualifiedRule()
+        )));
+    }
+
+    public static OrRule createBaseRule() {
+        return new OrRule(Lists.of(
+                CommonRules.createSymbolRule(),
+                JavaLang.JavaQualified.createQualifiedRule()
+        ));
+    }
+
+    public static Rule createTemplateRule(Rule type) {
+        Rule base = new NodeRule("base", JavaRules.createBaseRule());
+
+        Rule arguments = NodeListRule.Values("arguments", type);
+        return new TypeRule("template", new StripRule(new SuffixRule(LocatingRule.First(base, "<", arguments), ">")));
+    }
+
+    public static Rule createArgumentsRule(Rule value) {
+        return NodeListRule.Values("arguments", new OrRule(Lists.of(
+                JavaRules.createWhitespaceRule(),
+                value
+        )));
+    }
+
+    public static Rule createParametersRule(Rule definition) {
+        return NodeListRule.createNodeListRule("parameters", new ValueFolder(), new OrRule(Lists.of(
+                JavaRules.createWhitespaceRule(),
+                definition
         )));
     }
 }

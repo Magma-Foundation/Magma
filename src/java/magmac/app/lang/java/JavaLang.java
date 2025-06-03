@@ -3,24 +3,20 @@ package magmac.app.lang.java;
 import magmac.api.Option;
 import magmac.api.Tuple2;
 import magmac.api.collect.list.List;
-import magmac.api.collect.list.Lists;
 import magmac.app.compile.error.CompileResult;
 import magmac.app.compile.node.CompoundDestructor;
 import magmac.app.compile.node.InitialDestructor;
 import magmac.app.compile.node.MapNode;
 import magmac.app.compile.node.Node;
-import magmac.app.compile.rule.LocatingRule;
 import magmac.app.compile.rule.NodeListRule;
 import magmac.app.compile.rule.NodeRule;
-import magmac.app.compile.rule.OrRule;
 import magmac.app.compile.rule.Rule;
 import magmac.app.compile.rule.StripRule;
 import magmac.app.compile.rule.SuffixRule;
 import magmac.app.compile.rule.TypeRule;
 import magmac.app.compile.rule.fold.DelimitedFolder;
-import magmac.app.lang.CommonLang;
+import magmac.app.lang.CommonLang.AbstractDefinition;
 import magmac.app.lang.CommonRules;
-import magmac.app.lang.Deserializers;
 import magmac.app.lang.Destructors;
 import magmac.app.lang.Serializable;
 import magmac.app.lang.common.AbstractFunctionStatement;
@@ -35,7 +31,6 @@ import magmac.app.lang.node.LambdaValueContent;
 import magmac.app.lang.node.Modifier;
 import magmac.app.lang.node.NumberNode;
 import magmac.app.lang.node.Operator;
-import magmac.app.lang.node.Parameters;
 import magmac.app.lang.node.Segment;
 import magmac.app.lang.node.StructureMembers;
 import magmac.app.lang.node.StructureStatementValue;
@@ -147,38 +142,7 @@ public class JavaLang {
         }
     }
 
-    public static final class JavaTemplateType implements JavaType {
-        public final JavaBase base;
-        public final TypeArguments<JavaType> typeArguments;
-
-        public JavaTemplateType(JavaBase base, TypeArguments<JavaType> typeArguments) {
-            this.base = base;
-            this.typeArguments = typeArguments;
-        }
-
-        public static Option<CompileResult<JavaTemplateType>> deserialize(Node node) {
-            return Destructors.destructWithType("template", node).map(deserializer -> deserializer
-                    .withNode("base", JavaTemplateType::deserializeBase)
-                    .withNodeList("arguments", JavaDeserializers::deserializeType)
-                    .complete(tuple -> new JavaTemplateType(tuple.left(), new TypeArguments<JavaType>(tuple.right()))));
-        }
-
-        private static CompileResult<JavaBase> deserializeBase(Node node) {
-            return Deserializers.orError("base", node, Lists.of(
-                    Deserializers.wrap(JavaDeserializers::deserializeSymbol),
-                    Deserializers.wrap(JavaQualified::deserializeQualified)
-            ));
-        }
-
-        public static Rule createTemplateRule(Rule type) {
-            Rule base = new NodeRule("base", new OrRule(Lists.of(
-                    CommonRules.createSymbolRule(),
-                    JavaQualified.createQualifiedRule()
-            )));
-
-            Rule arguments = NodeListRule.Values("arguments", type);
-            return new TypeRule("template", new StripRule(new SuffixRule(LocatingRule.First(base, "<", arguments), ">")));
-        }
+    public record JavaTemplateType(JavaBase base, TypeArguments<JavaType> typeArguments) implements JavaType {
     }
 
     public record JavaStructureNodeDeserializer(
@@ -197,7 +161,7 @@ public class JavaLang {
         private static CompoundDestructor<Tuple2<Tuple2<Tuple2<Tuple2<Tuple2<Tuple2<Tuple2<String, List<Modifier>>, List<JavaStructureMember>>, Option<List<JavaType>>>, Option<List<TypescriptLang.TypeParam>>>, Option<List<JavaParameter>>>, Option<List<JavaType>>>, Option<List<JavaType>>>> attachOptionals(CompoundDestructor<Tuple2<Tuple2<String, List<Modifier>>, List<JavaStructureMember>>> attachRequired) {
             return attachRequired.withNodeListOptionally("implemented", JavaDeserializers::deserializeType)
                     .withNodeListOptionally("type-parameters", TypescriptLang.TypeParam::deserialize)
-                    .withNodeListOptionally("parameters", Parameters::deserialize)
+                    .withNodeListOptionally("parameters", JavaDeserializers::deserializeParameter)
                     .withNodeListOptionally("extended", JavaDeserializers::deserializeType)
                     .withNodeListOptionally("variants", JavaDeserializers::deserializeType);
         }
@@ -298,7 +262,7 @@ public class JavaLang {
     public record SwitchNode(Value value, List<JavaFunctionSegment> children) implements Value {
     }
 
-    public static final class Definition extends CommonLang.Definition<JavaType>
+    public static final class Definition extends AbstractDefinition<JavaType>
             implements JavaParameter, Assignable, JavaMethodHeader, StructureStatementValue, JavaLambdaParameter {
         public Definition(Option<List<Annotation>> maybeAnnotations, List<Modifier> modifiers, String name, Option<List<TypescriptLang.TypeParam>> maybeTypeParams, JavaType type) {
             super(maybeAnnotations, modifiers, name, maybeTypeParams, type);

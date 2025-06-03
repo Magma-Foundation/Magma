@@ -21,7 +21,6 @@ import magmac.app.lang.Destructors;
 import magmac.app.lang.JavaRules;
 import magmac.app.lang.OptionNodeListRule;
 import magmac.app.lang.node.FunctionSegments;
-import magmac.app.lang.node.Parameters;
 
 public record JavaMethod(
         JavaMethodHeader header,
@@ -32,7 +31,7 @@ public record JavaMethod(
         return Destructors.destructWithType("method", node).map((InitialDestructor deserializer) -> deserializer
                 .withNode("header", JavaMethodHeader::deserializeError)
                 .withNodeListOptionally("children", FunctionSegments::deserialize)
-                .withNodeList("parameters", Parameters::deserialize)
+                .withNodeList("parameters", JavaDeserializers::deserializeParameter)
                 .complete((tuple) -> new JavaMethod(tuple.left().left(), tuple.right(), tuple.left().right()))
                 .mapValue((JavaMethod type) -> type));
     }
@@ -43,7 +42,7 @@ public record JavaMethod(
                 new TypeRule("constructor", new StripRule(FilterRule.Symbol(new StringRule("name"))))
         )));
 
-        Rule parameters = Parameters.createParametersRule(JavaRules.createDefinitionRule());
+        Rule parameters = JavaRules.createParametersRule(JavaRules.createDefinitionRule());
         Rule content = CommonLang.Statements("children", childRule);
         Rule rightRule = new StripRule(new PrefixRule("{", new SuffixRule(new StripRule("", content, "after-children"), "}")));
         Rule withParams = new OptionNodeListRule("parameters",

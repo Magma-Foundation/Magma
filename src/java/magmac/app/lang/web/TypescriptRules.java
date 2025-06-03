@@ -19,11 +19,9 @@ import magmac.app.lang.JavaRules;
 import magmac.app.lang.LazyRule;
 import magmac.app.lang.MutableLazyRule;
 import magmac.app.lang.OptionNodeListRule;
-import magmac.app.lang.java.JavaLang;
 import magmac.app.lang.java.JavaStructureStatement;
 import magmac.app.lang.node.FunctionSegments;
 import magmac.app.lang.node.Modifier;
-import magmac.app.lang.node.Parameters;
 
 public class TypescriptRules {
     public static Rule createRule() {
@@ -62,7 +60,7 @@ public class TypescriptRules {
     }
 
     private static Rule createConstructorRule(Rule definition) {
-        Rule parametersRule = Parameters.createParametersRule(definition);
+        Rule parametersRule = JavaRules.createParametersRule(definition);
         return new TypeRule("constructor", new PrefixRule("constructor(", new SuffixRule(parametersRule, ")")));
     }
 
@@ -70,7 +68,7 @@ public class TypescriptRules {
         LazyRule definition = new MutableLazyRule();
         Rule modifiers = Modifier.createModifiersRule();
 
-        Rule parameters = Parameters.createParametersRule(definition);
+        Rule parameters = JavaRules.createParametersRule(definition);
         Rule name = new StringRule("name");
         Rule leftRule = new OptionNodeListRule("parameters",
                 new SuffixRule(LocatingRule.First(name, "(", parameters), ")"),
@@ -84,7 +82,7 @@ public class TypescriptRules {
     private static Rule createTypeRule() {
         LazyRule type = new MutableLazyRule();
         return type.set(new OrRule(Lists.of(
-                JavaLang.JavaTemplateType.createTemplateRule(type),
+                JavaRules.createTemplateRule(type),
                 createArrayRule(type),
                 CommonRules.createSymbolRule()
         )));
