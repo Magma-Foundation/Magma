@@ -16,7 +16,6 @@ import magmac.app.compile.rule.NodeRule;
 import magmac.app.compile.rule.OrRule;
 import magmac.app.compile.rule.PrefixRule;
 import magmac.app.compile.rule.Rule;
-import magmac.app.compile.rule.Splitter;
 import magmac.app.compile.rule.StringRule;
 import magmac.app.compile.rule.StripRule;
 import magmac.app.compile.rule.SuffixRule;
@@ -228,9 +227,17 @@ public final class JavaRules {
     }
 
     private static Rule createInstanceOfRule(LazyRule value) {
-        Rule base = new NodeRule("base", JavaRules.createBaseRule());
-        Rule right = new StripRule(new SuffixRule(LocatingRule.First(base, "(", JavaRules.createParametersRule(JavaRules.createDefinitionRule())), ")"));
-        return new TypeRule("instance-of", LocatingRule.Last(new NodeRule("child", value), " instanceof ", right));
+        var base = new NodeRule("base", JavaRules.createBaseRule());
+        var parameters = JavaRules.createParametersRule(JavaRules.createDefinitionRule());
+        var withParameters = new TypeRule("with-parameters", new StripRule(new SuffixRule(LocatingRule.First(base, "(", parameters), ")")));
+        var withoutParameters = new TypeRule("with-name", new StripRule(LocatingRule.Last(base, " ", new StringRule("name"))));
+
+        var rightRule = new OrRule(Lists.of(
+                withParameters,
+                withoutParameters
+        ));
+
+        return new TypeRule("instance-of", LocatingRule.Last(new NodeRule("child", value), " instanceof ", new NodeRule("definition", rightRule)));
     }
 
     private static TypeRule createSwitchRule(Rule functionSegmentRule, Rule value) {

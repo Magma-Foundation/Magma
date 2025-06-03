@@ -70,6 +70,15 @@ public class JavaLang {
     public interface JavaLambdaParameter {
     }
 
+    public interface InstanceOfDefinition {
+    }
+
+    public record InstanceOfDefinitionWithParameters(Base base, List<Definition> parameters) implements InstanceOfDefinition {
+    }
+
+    public record InstanceOfDefinitionWithName(Base base, String name) implements InstanceOfDefinition {
+    }
+
     public static final class Invokable extends magmac.app.lang.java.Invokable<JavaCaller, JavaArgument> implements Value, JavaFunctionSegmentValue {
         public Invokable(JavaCaller caller, List<JavaArgument> arguments) {
             super(caller, arguments);
@@ -203,7 +212,9 @@ public class JavaLang {
             return new TypeRule("qualified", Qualified.createSegmentsRule());
         }
 
-        private static Rule createSegmentsRule() {
+        private static Rule createSegmentsRule(
+
+        ) {
             return NodeListRule.createNodeListRule("segments", new DelimitedFolder('.'), CommonRules.createSymbolRule("value"));
         }
 
@@ -304,34 +315,12 @@ public class JavaLang {
             Value value) implements JavaFunctionSegmentValue, StructureStatementValue {
     }
 
-    public record InstanceOf(Base base, Value value, List<JavaParameter> parameters) implements Value {
-    }
-
-    public enum JavaAccessType {
-        Data("data-access"),
-        Method("method-access");
-
-        private final String value;
-
-        JavaAccessType(String value) {
-            this.value = value;
-        }
-
-        public String type() {
-            return this.value;
-        }
-    }
-
-    public enum JavaStructureType {
-        Class,
-        Record,
-        Enum,
-        Interface
+    public record InstanceOf(Value value, InstanceOfDefinition definition) implements Value {
     }
 
     public static final class StructureNode implements JavaRootSegment, JavaStructureMember {
-        private final JavaStructureType type;
         public final StructureValue<JavaType, JavaStructureMember> value;
+        private final JavaStructureType type;
 
         StructureNode(
                 JavaStructureType type,
@@ -358,5 +347,27 @@ public class JavaLang {
         public Option<List<JavaType>> extended() {
             return this.value.maybeExtended();
         }
+    }
+
+    public enum JavaAccessType {
+        Data("data-access"),
+        Method("method-access");
+
+        private final String value;
+
+        JavaAccessType(String value) {
+            this.value = value;
+        }
+
+        public String type() {
+            return this.value;
+        }
+    }
+
+    public enum JavaStructureType {
+        Class,
+        Record,
+        Enum,
+        Interface
     }
 }

@@ -1,6 +1,5 @@
 package magmac.app.config;
 
-import magmac.api.Option;
 import magmac.api.Tuple2;
 import magmac.api.collect.TupleCollector;
 import magmac.api.collect.list.List;
@@ -12,7 +11,6 @@ import magmac.app.compile.error.CompileResultCollector;
 import magmac.app.compile.error.CompileResults;
 import magmac.app.io.Location;
 import magmac.app.io.sources.UnitSetCollector;
-import magmac.app.lang.common.Annotation;
 import magmac.app.lang.java.JavaBreak;
 import magmac.app.lang.java.JavaConstruction;
 import magmac.app.lang.java.JavaConstructor;
@@ -174,7 +172,22 @@ class JavaTypescriptParser implements Parser<JavaLang.JavaRoot, TypescriptLang.T
     }
 
     private static TypescriptLang.FunctionSegment parseFunctionStatement(JavaLang.FunctionStatement functionStatement) {
-        return new FunctionStatement(JavaTypescriptParser.parseFunctionStatementValue(functionStatement.child()));
+        var oldValue = JavaTypescriptParser.parseFunctionStatementValue(functionStatement.child());
+        var newValue = JavaTypescriptParser.getOldValue(oldValue);
+        return new FunctionStatement(newValue);
+    }
+
+    private static TypescriptLang.FunctionSegment.Value getOldValue(TypescriptLang.FunctionSegment.Value oldValue) {
+        if (oldValue instanceof TypescriptLang.Assignment(
+                var assignable, var value
+        )) {
+            if (assignable instanceof TypescriptLang.Definition oldDefinition) {
+                var newDefinition = oldDefinition.withModifier(new Modifier("let"));
+                return new TypescriptLang.Assignment(newDefinition, value);
+            }
+        }
+
+        return oldValue;
     }
 
     private static TypescriptLang.FunctionSegment.Value parseFunctionStatementValue(JavaFunctionSegmentValue child) {

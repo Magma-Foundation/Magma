@@ -215,10 +215,34 @@ public final class JavaDeserializers {
 
     private static Option<CompileResult<InstanceOf>> deserializeInstanceOf(Node node) {
         return Destructors.destructWithType("instance-of", node).map(destructor -> destructor
-                .withNode("base", JavaDeserializers::deserializeBase)
                 .withNode("child", JavaDeserializers::deserializeValueOrError)
-                .withNodeList("parameters", JavaDeserializers::deserializeParameter)
-                .complete(tuple -> new InstanceOf(tuple.left().left(), tuple.left().right(), tuple.right())));
+                .withNode("definition", JavaDeserializers::deserializeInstanceOfDefinition)
+                .complete(tuple -> new InstanceOf(tuple.left(), tuple.right())));
+    }
+
+    private static CompileResult<InstanceOfDefinition> deserializeInstanceOfDefinition(Node node) {
+        return Deserializers.orError("instance-of-definition", node, Lists.of(
+                Deserializers.wrap(JavaDeserializers::deserializeInstanceOfWithParameters),
+                Deserializers.wrap(JavaDeserializers::deserializeInstanceOfWithName)
+        ));
+    }
+
+    private static Option<CompileResult<InstanceOfDefinitionWithName>> deserializeInstanceOfWithName(Node node) {
+        return Destructors.destructWithType("with-name", node).map(destructor -> {
+            return destructor
+                    .withString("name")
+                    .withNode("base", JavaDeserializers::deserializeBase)
+                    .complete(tuple -> new InstanceOfDefinitionWithName(tuple.right(), tuple.left()));
+        });
+    }
+
+    private static Option<CompileResult<InstanceOfDefinitionWithParameters>> deserializeInstanceOfWithParameters(Node node) {
+        return Destructors.destructWithType("with-parameters", node).map(destructor -> {
+            return destructor
+                    .withNode("base", JavaDeserializers::deserializeBase)
+                    .withNodeList("parameters", JavaDeserializers::deserializeDefinition)
+                    .complete(tuple -> new InstanceOfDefinitionWithParameters(tuple.left(), tuple.right()));
+        });
     }
 
     private static TypedDeserializer<Value> wrapAsDeserializer(Operator operator) {

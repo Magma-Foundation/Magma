@@ -77,6 +77,7 @@ export class TypescriptConstructor {
 export class Definition {
 	Definition(maybeAnnotations : Option<List<Annotation>>, modifiers : List<Modifier>, name : String, maybeTypeParams : Option<List<TypeParam>>, type : Type) : public {super( maybeAnnotations, modifiers, name, maybeTypeParams, type);;}
 	serialize() : Node {return new MapNode( "definition").withString( "name", this.name).withNodeSerialized( "type", this.type);;}
+	withModifier(modifier : Modifier) : Definition {return new Definition( this.maybeAnnotations, this.modifiers.addLast( modifier), this.name, this.maybeTypeParams, this.type);;}
 }
 export class ArrayType {
 	ArrayType(arrayType : Type) : public {this.childType=arrayType;;}

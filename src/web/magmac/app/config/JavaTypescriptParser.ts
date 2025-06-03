@@ -1,4 +1,3 @@
-import { Option } from "../../../magmac/api/Option";
 import { Tuple2 } from "../../../magmac/api/Tuple2";
 import { TupleCollector } from "../../../magmac/api/collect/TupleCollector";
 import { List } from "../../../magmac/api/collect/list/List";
@@ -10,7 +9,6 @@ import { CompileResultCollector } from "../../../magmac/app/compile/error/Compil
 import { CompileResults } from "../../../magmac/app/compile/error/CompileResults";
 import { Location } from "../../../magmac/app/io/Location";
 import { UnitSetCollector } from "../../../magmac/app/io/sources/UnitSetCollector";
-import { Annotation } from "../../../magmac/app/lang/common/Annotation";
 import { JavaBreak } from "../../../magmac/app/lang/java/JavaBreak";
 import { JavaConstruction } from "../../../magmac/app/lang/java/JavaConstruction";
 import { JavaConstructor } from "../../../magmac/app/lang/java/JavaConstructor";
@@ -57,7 +55,8 @@ export class JavaTypescriptParser {
 	parseMethod(methodNode : JavaMethod) : TypescriptLang.TypescriptStructureMember {parameters : var=methodNode.parameters( ).iter( ).map( JavaTypescriptParser.parseParameter).collect( new ListCollector<>( ));header : var=JavaTypescriptParser.parseMethodHeader( methodNode.header( ));parameterizedHeader : var=new ParameterizedMethodHeader<TypescriptLang.TypeScriptParameter>( header, parameters);return new TypescriptLang.TypescriptMethod( parameterizedHeader, methodNode.maybeChildren( ).map( JavaTypescriptParser.parseFunctionSegments));;}
 	parseFunctionSegments(segments : List<JavaFunctionSegment>) : List<TypescriptLang.FunctionSegment> {return segments.iter( ).map( JavaTypescriptParser.parseFunctionSegment).collect( new ListCollector<>( ));;}
 	parseFunctionSegment(segment : JavaFunctionSegment) : TypescriptLang.FunctionSegment {return 0;;}
-	parseFunctionStatement(functionStatement : JavaLang.FunctionStatement) : TypescriptLang.FunctionSegment {return new FunctionStatement( JavaTypescriptParser.parseFunctionStatementValue( functionStatement.child( )));;}
+	parseFunctionStatement(functionStatement : JavaLang.FunctionStatement) : TypescriptLang.FunctionSegment {oldValue : var=JavaTypescriptParser.parseFunctionStatementValue( functionStatement.child( ));newValue : var=JavaTypescriptParser.getOldValue( oldValue);return new FunctionStatement( newValue);;}
+	getOldValue(oldValue : TypescriptLang.FunctionSegment.Value) : TypescriptLang.FunctionSegment.Value {if(true){ if(true){ newDefinition : var=oldDefinition.withModifier( new Modifier( "let"));return new TypescriptLang.Assignment( newDefinition, value);;};}return oldValue;;}
 	parseFunctionStatementValue(child : JavaFunctionSegmentValue) : TypescriptLang.FunctionSegment.Value {return 0;;}
 	parseAssignable(assignable : JavaLang.Assignable) : TypescriptLang.Assignable {return 0;;}
 	parseInvokable(invokable : JavaLang.Invokable) : TypescriptLang.Invokable {return new TypescriptLang.Invokable( JavaTypescriptParser.parseCaller( invokable.caller( )), JavaTypescriptParser.parseArguments( invokable.arguments( )));;}

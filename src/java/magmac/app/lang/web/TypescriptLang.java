@@ -190,6 +190,10 @@ public final class TypescriptLang {
                     .withString("name", this.name)
                     .withNodeSerialized("type", this.type);
         }
+
+        public Definition withModifier(Modifier modifier) {
+            return new Definition(this.maybeAnnotations, this.modifiers.addLast(modifier), this.name, this.maybeTypeParams, this.type);
+        }
     }
 
     public static final class ArrayType implements Type {

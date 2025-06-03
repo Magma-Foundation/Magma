@@ -834,7 +834,6 @@ Compiler <|-- StagedCompiler
 LazyRule --> Rule
 interface LazyRule
 Rule <|-- LazyRule
-JavaTypescriptParser --> Option
 JavaTypescriptParser --> Tuple2
 JavaTypescriptParser --> TupleCollector
 JavaTypescriptParser --> List
@@ -846,7 +845,6 @@ JavaTypescriptParser --> CompileResultCollector
 JavaTypescriptParser --> CompileResults
 JavaTypescriptParser --> Location
 JavaTypescriptParser --> UnitSetCollector
-JavaTypescriptParser --> Annotation
 JavaTypescriptParser --> JavaBreak
 JavaTypescriptParser --> JavaConstruction
 JavaTypescriptParser --> JavaConstructor
@@ -1211,7 +1209,6 @@ JavaRules --> NodeRule
 JavaRules --> OrRule
 JavaRules --> PrefixRule
 JavaRules --> Rule
-JavaRules --> Splitter
 JavaRules --> StringRule
 JavaRules --> StripRule
 JavaRules --> SuffixRule

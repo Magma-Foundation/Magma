@@ -56,6 +56,12 @@ export interface JavaLambdaHeader {
 }
 export interface JavaLambdaParameter {
 }
+export interface InstanceOfDefinition {
+}
+export class InstanceOfDefinitionWithParameters {
+}
+export class InstanceOfDefinitionWithName {
+}
 export class Invokable {
 	Invokable(caller : JavaCaller, arguments : List<JavaArgument>) : public {super( caller, arguments);;}
 }

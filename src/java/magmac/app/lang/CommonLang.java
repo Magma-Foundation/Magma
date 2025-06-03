@@ -13,9 +13,9 @@ public final class CommonLang {
     public static class AbstractDefinition<T> {
         protected final String name;
         protected final T type;
-        private final Option<List<Annotation>> maybeAnnotations;
-        private final List<Modifier> modifiers;
-        private final Option<List<TypescriptLang.TypeParam>> maybeTypeParams;
+        protected final Option<List<Annotation>> maybeAnnotations;
+        protected final List<Modifier> modifiers;
+        protected final Option<List<TypescriptLang.TypeParam>> maybeTypeParams;
 
         public AbstractDefinition(
                 Option<List<Annotation>> maybeAnnotations,
