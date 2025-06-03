@@ -1,4 +1,0 @@
-export class JavaMethod {
-	public static deserialize( node : Node) : Option<CompileResult<JavaStructureMember>> {return Destructors.destructWithType( "method", node).map( 0);;}
-	public static createMethodRule( childRule : Rule) : Rule { let header : var=new NodeRule( "header", new OrRule( Lists.of( JavaRules.createDefinitionRule( ), new TypeRule( "constructor", new StripRule( FilterRule.Symbol( new StringRule( "name"))))))); let parameters : var=JavaRules.createParametersRule( JavaRules.createDefinitionRule( )); let content : var=CommonLang.Statements( "children", childRule); let rightRule : Rule=new StripRule( new PrefixRule( "{", new SuffixRule( new StripRule( "", content, "after-children"), "}"))); let withParams : Rule=new OptionNodeListRule( "parameters", new SuffixRule( parameters, ");"), LocatingRule.First( parameters, ")", rightRule));return new TypeRule( "method", LocatingRule.First( header, "(", withParams));;}
-}
