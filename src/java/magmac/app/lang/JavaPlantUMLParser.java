@@ -36,14 +36,20 @@ public class JavaPlantUMLParser implements Parser<JavaLang.JavaRoot, PlantUMLRoo
                 var parent = namespaced.segments().findLast().orElse(null)
                         .value();
 
-                yield Iters.fromValues(new PlantUMLDependency(child, parent));
+                if ("*".equals(parent)) {
+                    yield Iters.empty();
+                }
+                else {
+                    yield Iters.fromValues(new PlantUMLDependency(child, parent));
+                }
             }
         };
     }
 
     private static String createSimpleName(JavaLang.Base base) {
         return switch (base) {
-            case JavaLang.Qualified qualifiedType -> JavaPlantUMLParser.createSimpleNameFromQualifiedType(qualifiedType);
+            case JavaLang.Qualified qualifiedType ->
+                    JavaPlantUMLParser.createSimpleNameFromQualifiedType(qualifiedType);
             case JavaLang.Symbol symbol -> symbol.value();
         };
     }

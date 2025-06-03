@@ -378,7 +378,6 @@ JavaDeserializers --> StructureStatementValue
 JavaDeserializers --> TypeArguments
 JavaDeserializers --> TypedDeserializer
 JavaDeserializers --> TypescriptLang
-JavaDeserializers --> *
 class JavaDeserializers
 DividingSplitter --> Option
 DividingSplitter --> Tuple2
