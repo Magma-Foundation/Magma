@@ -5,20 +5,8 @@ import magmac.api.collect.list.List;
 import magmac.app.compile.error.CompileResult;
 import magmac.app.compile.node.MapNode;
 import magmac.app.compile.node.Node;
-import magmac.app.compile.rule.LocatingRule;
-import magmac.app.compile.rule.NodeListRule;
-import magmac.app.compile.rule.NodeRule;
-import magmac.app.compile.rule.PrefixRule;
-import magmac.app.compile.rule.Rule;
-import magmac.app.compile.rule.StringRule;
-import magmac.app.compile.rule.SuffixRule;
-import magmac.app.compile.rule.TypeRule;
-import magmac.app.compile.rule.divide.DelimitedDivider;
-import magmac.app.compile.rule.fold.DelimitedFolder;
 import magmac.app.lang.CommonLang;
 import magmac.app.lang.Destructors;
-import magmac.app.lang.JavaRules;
-import magmac.app.lang.LazyRule;
 import magmac.app.lang.Serializable;
 import magmac.app.lang.java.Invokable;
 import magmac.app.lang.java.JavaLang;
@@ -90,13 +78,6 @@ public final class TypescriptLang {
             this.value = structureNode;
         }
 
-        public static Rule createStructureRule(String type) {
-            Rule children = CommonLang.Statements("members", TypescriptRules.createStructureMemberRule());
-            Rule name = new StringRule("name");
-            Rule afterKeyword = LocatingRule.First(JavaRules.attachTypeParams(name), " {", new SuffixRule(children, "\n}\n"));
-            return new TypeRule(type, new PrefixRule("export " + type + " ", afterKeyword));
-        }
-
         private Node serializeImplementsParams() {
             return this.value.maybeImplemented()
                     .map(implemented -> new MapNode().withNodeListSerialized("implemented", implemented))
@@ -127,22 +108,7 @@ public final class TypescriptLang {
         }
     }
 
-    public record TypeScriptRoots(List<TypeScriptRootSegment> children) implements Serializable {
-        @Override
-        public Node serialize() {
-            return new MapNode().withNodeListAndSerializer("children", this.children, Serializable::serialize);
-        }
-    }
-
-    public record TypeScriptImport(List<Segment> values,
-                                   List<Segment> segments) implements TypeScriptRootSegment {
-        public static Rule createImportRule() {
-            Rule segments = new SuffixRule(NodeListRule.createNodeListRule("segments", new DelimitedFolder('/'), new StringRule("value")), "\";\n");
-            Rule leftRule = new NodeListRule("values", new StringRule("value"), new DelimitedDivider(", "));
-            Rule first = LocatingRule.First(leftRule, " } from \"", segments);
-            return new TypeRule("import", new PrefixRule("import { ", first));
-        }
-
+    public record TypeScriptImport(List<Segment> values, List<Segment> segments) implements TypeScriptRootSegment {
         @Override
         public Node serialize() {
             return new MapNode("import")
@@ -323,8 +289,11 @@ public final class TypescriptLang {
         }
     }
 
-    public static TypeRule createArrayRule(LazyRule orRule) {
-        return new TypeRule("array", new SuffixRule(new NodeRule("child", orRule), "[]"));
+    public record Char(String value) implements TypescriptValue {
+        @Override
+        public Node serialize() {
+            return new MapNode("char").withString("value", this.value);
+        }
     }
 
     public enum TypescriptStructureType {

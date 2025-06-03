@@ -1,5 +1,6 @@
 import { Lists } from "../../../../magmac/api/collect/list/Lists";
 import { LocatingRule } from "../../../../magmac/app/compile/rule/LocatingRule";
+import { NodeListRule } from "../../../../magmac/app/compile/rule/NodeListRule";
 import { NodeRule } from "../../../../magmac/app/compile/rule/NodeRule";
 import { OrRule } from "../../../../magmac/app/compile/rule/OrRule";
 import { PrefixRule } from "../../../../magmac/app/compile/rule/PrefixRule";
@@ -8,6 +9,8 @@ import { StringRule } from "../../../../magmac/app/compile/rule/StringRule";
 import { StripRule } from "../../../../magmac/app/compile/rule/StripRule";
 import { SuffixRule } from "../../../../magmac/app/compile/rule/SuffixRule";
 import { TypeRule } from "../../../../magmac/app/compile/rule/TypeRule";
+import { DelimitedDivider } from "../../../../magmac/app/compile/rule/divide/DelimitedDivider";
+import { DelimitedFolder } from "../../../../magmac/app/compile/rule/fold/DelimitedFolder";
 import { CommonLang } from "../../../../magmac/app/lang/CommonLang";
 import { CommonRules } from "../../../../magmac/app/lang/CommonRules";
 import { JavaRules } from "../../../../magmac/app/lang/JavaRules";
@@ -26,4 +29,7 @@ export class TypescriptRules {
 	createConstructorRule(definition : Rule) : Rule {break;return 0;;}
 	createDefinitionRule() : Rule {break;break;break;break;break;break;return 0;;}
 	createTypeRule() : Rule {break;return 0;;}
+	createStructureRule(type : String) : Rule {break;break;break;return 0;;}
+	createImportRule() : Rule {break;break;break;return 0;;}
+	createArrayRule(orRule : LazyRule) : TypeRule {return 0;;}
 }

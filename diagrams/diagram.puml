@@ -83,20 +83,8 @@ TypescriptLang --> List
 TypescriptLang --> CompileResult
 TypescriptLang --> MapNode
 TypescriptLang --> Node
-TypescriptLang --> LocatingRule
-TypescriptLang --> NodeListRule
-TypescriptLang --> NodeRule
-TypescriptLang --> PrefixRule
-TypescriptLang --> Rule
-TypescriptLang --> StringRule
-TypescriptLang --> SuffixRule
-TypescriptLang --> TypeRule
-TypescriptLang --> DelimitedDivider
-TypescriptLang --> DelimitedFolder
 TypescriptLang --> CommonLang
 TypescriptLang --> Destructors
-TypescriptLang --> JavaRules
-TypescriptLang --> LazyRule
 TypescriptLang --> Serializable
 TypescriptLang --> Invokable
 TypescriptLang --> JavaLang
@@ -726,6 +714,7 @@ class JavaPlantUMLParser
 Parser <|-- JavaPlantUMLParser
 TypescriptRules --> Lists
 TypescriptRules --> LocatingRule
+TypescriptRules --> NodeListRule
 TypescriptRules --> NodeRule
 TypescriptRules --> OrRule
 TypescriptRules --> PrefixRule
@@ -734,6 +723,8 @@ TypescriptRules --> StringRule
 TypescriptRules --> StripRule
 TypescriptRules --> SuffixRule
 TypescriptRules --> TypeRule
+TypescriptRules --> DelimitedDivider
+TypescriptRules --> DelimitedFolder
 TypescriptRules --> CommonLang
 TypescriptRules --> CommonRules
 TypescriptRules --> JavaRules

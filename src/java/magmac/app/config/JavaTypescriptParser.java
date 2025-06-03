@@ -220,7 +220,7 @@ class JavaTypescriptParser implements Parser<JavaLang.JavaRoot, TypescriptLang.T
         return switch (child) {
             case JavaLang.JavaAccess javaAccess ->
                     new TypescriptLang.Access(JavaTypescriptParser.parseValue(javaAccess.receiver()), javaAccess.property());
-            case JavaLang.JavaCharNode javaCharNode -> new TypescriptLang.NumberNode("0");
+            case JavaLang.JavaCharNode javaCharNode -> new TypescriptLang.Char(javaCharNode.value());
             case JavaLang.JavaIndexNode javaIndexNode -> new TypescriptLang.NumberNode("0");
             case JavaLang.JavaInvokable javaInvokable -> new TypescriptLang.NumberNode("0");
             case JavaLang.JavaLambda javaLambda -> new TypescriptLang.NumberNode("0");
