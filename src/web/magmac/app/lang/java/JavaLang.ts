@@ -72,8 +72,8 @@ export class JavaArrayType {
 	public static createArrayRule( rule : Rule) : Rule { let child : var=new NodeRule( "child", rule);return new TypeRule( "array", new StripRule( new SuffixRule( child, "[]")));;}
 	public static deserialize( node : Node) : Option<CompileResult<JavaType>> {return Destructors.destructWithType( "array", node).map( 0);;}
 }
-export class JavaRoot {
-	public static getChildren( node : Node,  deserializer : Deserializer<JavaRootSegment>) : CompileResult<JavaRoot> {return Destructors.destruct( node).withNodeList( "children", deserializer).complete( JavaRoot.new);;}
+export class Root {
+	public static getChildren( node : Node,  deserializer : Deserializer<JavaRootSegment>) : CompileResult<Root> {return Destructors.destruct( node).withNodeList( "children", deserializer).complete( Root.new);;}
 }
 export class Lambda {
 	 Lambda( header : JavaLambdaHeader,  content : JavaLambdaContent) : public {super( header, content);;}
@@ -93,11 +93,11 @@ export class Conditional {
 export class JavaTemplateType {
 }
 export class JavaStructureNodeDeserializer {
-	private static deserializeHelper( type : JavaStructureType,  deserializer : InitialDestructor) : CompileResult<StructureNode> {return JavaStructureNodeDeserializer.attachOptionals( JavaStructureNodeDeserializer.attachRequired( deserializer)).complete( 0);;}
+	private static deserializeHelper( type : JavaStructureType,  deserializer : InitialDestructor) : CompileResult<Structure> {return JavaStructureNodeDeserializer.attachOptionals( JavaStructureNodeDeserializer.attachRequired( deserializer)).complete( 0);;}
 	private static attachRequired( deserializer : InitialDestructor) : CompoundDestructor<Tuple2<Tuple2<String, List<Modifier>>, List<JavaStructureMember>>> {return deserializer.withString( "name").withNodeList( "modifiers", Modifier.deserialize).withNodeList( "children", StructureMembers.deserialize);;}
 	private static attachOptionals( attachRequired : CompoundDestructor<Tuple2<Tuple2<String, List<Modifier>>, List<JavaStructureMember>>>) : CompoundDestructor<Tuple2<Tuple2<Tuple2<Tuple2<Tuple2<Tuple2<Tuple2<String, List<Modifier>>, List<JavaStructureMember>>, Option<List<JavaType>>>, Option<List<TypescriptLang.TypeParam>>>, Option<List<JavaParameter>>>, Option<List<JavaType>>>, Option<List<JavaType>>>> {return attachRequired.withNodeListOptionally( "implemented", JavaDeserializers.deserializeType).withNodeListOptionally( "type-parameters", TypescriptLang.TypeParam.deserialize).withNodeListOptionally( "parameters", JavaDeserializers.deserializeParameter).withNodeListOptionally( "extended", JavaDeserializers.deserializeType).withNodeListOptionally( "variants", JavaDeserializers.deserializeType);;}
-	private static from( type : JavaStructureType,  tuple : Tuple2<Tuple2<Tuple2<Tuple2<Tuple2<Tuple2<Tuple2<String, List<Modifier>>, List<JavaStructureMember>>, Option<List<JavaType>>>, Option<List<TypescriptLang.TypeParam>>>, Option<List<JavaParameter>>>, Option<List<JavaType>>>, Option<List<JavaType>>>) : StructureNode {return new StructureNode( type, new StructureValue<JavaType, JavaStructureMember>( tuple.left( ).left( ).left( ).left( ).left( ).left( ).left( ), tuple.left( ).left( ).left( ).left( ).left( ).left( ).right( ), tuple.left( ).left( ).left( ).left( ).left( ).right( ), tuple.left( ).left( ).left( ).right( ), tuple.left( ).right( ), tuple.left( ).left( ).left( ).left( ).right( )), tuple.left( ).left( ).right( ), tuple.right( ));;}
-	public deserialize( node : Node) : Option<CompileResult<StructureNode>> {return Destructors.destructWithType( this.type( ).name( ).toLowerCase( ), node).map( 0);;}
+	private static from( type : JavaStructureType,  tuple : Tuple2<Tuple2<Tuple2<Tuple2<Tuple2<Tuple2<Tuple2<String, List<Modifier>>, List<JavaStructureMember>>, Option<List<JavaType>>>, Option<List<TypescriptLang.TypeParam>>>, Option<List<JavaParameter>>>, Option<List<JavaType>>>, Option<List<JavaType>>>) : Structure {return new Structure( type, new StructureValue<JavaType, JavaStructureMember>( tuple.left( ).left( ).left( ).left( ).left( ).left( ).left( ), tuple.left( ).left( ).left( ).left( ).left( ).left( ).right( ), tuple.left( ).left( ).left( ).left( ).left( ).right( ), tuple.left( ).left( ).left( ).right( ), tuple.left( ).right( ), tuple.left( ).left( ).left( ).left( ).right( )), tuple.left( ).left( ).right( ), tuple.right( ));;}
+	public deserialize( node : Node) : Option<CompileResult<Structure>> {return Destructors.destructWithType( this.type( ).name( ).toLowerCase( ), node).map( 0);;}
 }
 export class Try {
 }
@@ -155,7 +155,7 @@ export class Assignment {
 }
 export class InstanceOf {
 }
-export class StructureNode {
+export class Structure {
 	constructor( type : JavaStructureType,  structureNode : StructureValue<JavaType, JavaStructureMember>,  parameters : Option<List<JavaParameter>>,  variants : Option<List<JavaType>>) {this.type=type;this.value=structureNode;;}
 	public type() : JavaStructureType {return this.type;;}
 	public name() : String {return this.value.name( );;}
