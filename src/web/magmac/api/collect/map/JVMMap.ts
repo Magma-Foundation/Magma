@@ -9,12 +9,12 @@ import { HashMap } from "../../../../java/util/HashMap";
 import { Function } from "../../../../java/util/function/Function";
 import { Supplier } from "../../../../java/util/function/Supplier";
 export class JVMMap<K,  V> {
-	getOrDefault(key : K, other : V) : V {;;}
-	iter() : Iter<Tuple2<K, V>> {;;}
-	put(key : K, value : V) : Map<K, V> {;;;}
-	containsKey(key : K) : boolean {;;}
-	get(key : K) : V {;;}
-	isEmpty() : boolean {;;}
-	mapOrPut(key : K, mapper : Function<V, V>, supplier : Supplier<V>) : Map<K, V> {if(true){ ;;}if(true){ ;;};;}
-	removeByKey(key : K) : Option<Tuple2<Map<K, V>, V>> {if(true){ ;;};;;;}
+	getOrDefault(key : K, other : V) : V {break;;}
+	iter() : Iter<Tuple2<K, V>> {break;;}
+	put(key : K, value : V) : Map<K, V> {break;break;;}
+	containsKey(key : K) : boolean {break;;}
+	get(key : K) : V {break;;}
+	isEmpty() : boolean {break;;}
+	mapOrPut(key : K, mapper : Function<V, V>, supplier : Supplier<V>) : Map<K, V> {if(true){ break;;}if(true){ break;;}break;;}
+	removeByKey(key : K) : Option<Tuple2<Map<K, V>, V>> {if(true){ break;;}break;break;break;;}
 }

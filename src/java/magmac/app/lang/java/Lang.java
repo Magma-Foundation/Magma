@@ -8,8 +8,4 @@ public class Lang {
 
     public interface JavaCaller {
     }
-
-    public interface TypescriptFunctionSegmentValue extends Serializable {
-    }
-
 }

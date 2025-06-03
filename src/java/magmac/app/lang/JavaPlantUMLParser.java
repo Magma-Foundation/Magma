@@ -13,8 +13,8 @@ import magmac.app.io.Location;
 import magmac.app.lang.node.JavaArrayType;
 import magmac.app.lang.node.JavaBase;
 import magmac.app.lang.node.JavaRoot;
-import magmac.app.lang.node.JavaRootSegment;
-import magmac.app.lang.node.JavaNamespacedNode;
+import magmac.app.lang.java.JavaRootSegment;
+import magmac.app.lang.java.JavaNamespacedNode;
 import magmac.app.lang.node.PlantUMLDependency;
 import magmac.app.lang.node.PlantUMLFooter;
 import magmac.app.lang.node.PlantUMLHeader;
@@ -25,13 +25,13 @@ import magmac.app.lang.node.PlantUMLStructure;
 import magmac.app.lang.node.PlantUMLStructureType;
 import magmac.app.lang.node.Qualified;
 import magmac.app.lang.node.Segment;
-import magmac.app.lang.node.JavaStructureNode;
+import magmac.app.lang.java.JavaStructureNode;
 import magmac.app.lang.node.JavaStructureType;
 import magmac.app.lang.node.Symbol;
 import magmac.app.lang.node.JavaTemplateType;
 import magmac.app.lang.node.JavaType;
 import magmac.app.lang.node.VariadicType;
-import magmac.app.lang.node.Whitespace;
+import magmac.app.lang.java.JavaWhitespace;
 import magmac.app.stage.parse.Parser;
 import magmac.app.stage.unit.MapUnitSet;
 import magmac.app.stage.unit.SimpleUnit;
@@ -109,7 +109,7 @@ public class JavaPlantUMLParser implements Parser<JavaRoot, PlantUMLRoot> {
 
     private static Iter<PlantUMLRootSegment> parseRootSegment(String fileName, JavaRootSegment rootSegment) {
         return switch (rootSegment) {
-            case Whitespace _ -> Iters.empty();
+            case JavaWhitespace _ -> Iters.empty();
             case JavaNamespacedNode namespaced -> JavaPlantUMLParser.parseNamespaced(fileName, namespaced);
             case JavaStructureNode structureNode -> JavaPlantUMLParser.parseStructure(structureNode);
         };

@@ -1,4 +1,4 @@
 package magmac.app.lang.java;
 
-public interface JavaFunctionSegmentValue {
+public sealed interface JavaFunctionSegmentValue permits JavaAssignmentNode, JavaBreak, JavaContinue, JavaInvokable, JavaPost, JavaReturnNode, JavaYieldNode {
 }

@@ -9,7 +9,7 @@ import { TypeRule } from "../../../../magmac/app/compile/rule/TypeRule";
 import { Destructors } from "../../../../magmac/app/lang/Destructors";
 import { LazyRule } from "../../../../magmac/app/lang/LazyRule";
 export class Not {
-	createNotRule(value : LazyRule) : TypeRule {;;}
-	deserialize(node : Node) : Option<CompileResult<Not>> {;;}
-	serialize() : Node {;;}
+	createNotRule(value : LazyRule) : TypeRule {break;;}
+	deserialize(node : Node) : Option<CompileResult<Not>> {break;;}
+	serialize() : Node {break;;}
 }

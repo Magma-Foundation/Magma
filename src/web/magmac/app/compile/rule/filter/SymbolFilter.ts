@@ -1,5 +1,5 @@
 export class SymbolFilter {
-	isValidSymbolChar(c : char, index : int) : boolean {;;}
-	test(input : String) : boolean {;;if(true){ ;if(true){ ;;;};;};;}
-	createMessage() : String {;;}
+	isValidSymbolChar(c : char, index : int) : boolean {break;;}
+	test(input : String) : boolean {break;break;if(true){ break;if(true){ break;break;;}break;;}break;;}
+	createMessage() : String {break;;}
 }

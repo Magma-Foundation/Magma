@@ -8,8 +8,10 @@ import { TypeRule } from "../../../../magmac/app/compile/rule/TypeRule";
 import { Deserializers } from "../../../../magmac/app/lang/Deserializers";
 import { JavaDeserializers } from "../../../../magmac/app/lang/JavaDeserializers";
 import { JavaRules } from "../../../../magmac/app/lang/JavaRules";
+import { JavaAssignmentNode } from "../../../../magmac/app/lang/java/JavaAssignmentNode";
 import { JavaFunctionSegmentValue } from "../../../../magmac/app/lang/java/JavaFunctionSegmentValue";
+import { JavaPost } from "../../../../magmac/app/lang/java/JavaPost";
 export class FunctionSegmentValues {
-	deserialize(node : Node) : CompileResult<JavaFunctionSegmentValue> {;;}
-	createFunctionSegmentValueRule(value : Rule, definition : Rule) : Rule {;;}
+	deserialize(node : Node) : CompileResult<JavaFunctionSegmentValue> {break;;}
+	createFunctionSegmentValueRule(value : Rule, definition : Rule) : Rule {break;;}
 }

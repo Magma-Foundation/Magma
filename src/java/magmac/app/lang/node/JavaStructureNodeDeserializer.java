@@ -8,6 +8,9 @@ import magmac.app.compile.node.CompoundDestructor;
 import magmac.app.compile.node.InitialDestructor;
 import magmac.app.compile.node.Node;
 import magmac.app.lang.Destructors;
+import magmac.app.lang.java.JavaParameter;
+import magmac.app.lang.java.JavaStructureMember;
+import magmac.app.lang.java.JavaStructureNode;
 
 public record JavaStructureNodeDeserializer(JavaStructureType type) implements TypedDeserializer<JavaStructureNode> {
     private static CompileResult<JavaStructureNode> deserializeHelper(JavaStructureType type, InitialDestructor deserializer) {

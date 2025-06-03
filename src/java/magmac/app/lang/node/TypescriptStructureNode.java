@@ -11,6 +11,7 @@ import magmac.app.compile.rule.TypeRule;
 import magmac.app.lang.CommonLang;
 import magmac.app.lang.Serializable;
 import magmac.app.lang.TypescriptLang;
+import magmac.app.lang.java.JavaDefinition;
 
 public final class TypescriptStructureNode implements TypeScriptRootSegment {
     private final TypescriptStructureType type;

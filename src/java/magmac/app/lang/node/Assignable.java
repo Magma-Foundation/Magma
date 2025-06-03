@@ -1,4 +1,4 @@
 package magmac.app.lang.node;
 
-interface Assignable {
+public interface Assignable {
 }

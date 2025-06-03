@@ -21,16 +21,15 @@ import magmac.app.compile.rule.TypeRule;
 import magmac.app.compile.rule.divide.FoldingDivider;
 import magmac.app.compile.rule.split.DividingSplitter;
 import magmac.app.lang.node.Arguments;
-import magmac.app.lang.node.JavaDefinition;
+import magmac.app.lang.java.JavaDefinition;
 import magmac.app.lang.node.JavaLambdaValueContent;
-import magmac.app.lang.node.JavaNamespacedNode;
+import magmac.app.lang.java.JavaNamespacedNode;
 import magmac.app.lang.node.JavaTypes;
 import magmac.app.lang.node.Modifier;
 import magmac.app.lang.node.Parameters;
 import magmac.app.lang.node.StructureMembers;
 import magmac.app.lang.node.Symbols;
 import magmac.app.lang.node.Values;
-import magmac.app.lang.node.Whitespace;
 
 public final class JavaRules {
     public static Rule createConstructionRule() {
@@ -48,7 +47,7 @@ public final class JavaRules {
     public static Rule createRootSegmentRule() {
         Rule classMemberRule = StructureMembers.createClassMemberRule();
         return new OrRule(Lists.of(
-                Whitespace.createWhitespaceRule(),
+                createWhitespaceRule(),
                 JavaNamespacedNode.createNamespacedRule("package"),
                 JavaNamespacedNode.createNamespacedRule("import"),
                 JavaRules.createStructureRule("record", classMemberRule),
@@ -168,5 +167,9 @@ public final class JavaRules {
 
     public static Rule createReturnRule(Rule value) {
         return new TypeRule("return", new StripRule(new PrefixRule("return ", new NodeRule("child", value))));
+    }
+
+    public static Rule createWhitespaceRule() {
+        return new TypeRule("whitespace", new StripRule(new ExactRule("")));
     }
 }

@@ -6,6 +6,6 @@ import { Rule } from "../../../../magmac/app/compile/rule/Rule";
 import { TypeRule } from "../../../../magmac/app/compile/rule/TypeRule";
 import { LazyRule } from "../../../../magmac/app/lang/LazyRule";
 export class Operation {
-	createOperationRule(operator : Operator, value : LazyRule) : Rule {;;}
-	serialize() : Node {;;}
+	createOperationRule(operator : Operator, value : LazyRule) : Rule {break;;}
+	serialize() : Node {break;;}
 }

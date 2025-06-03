@@ -1,4 +1,4 @@
-package magmac.app.lang.node;
+package magmac.app.lang.java;
 
 import magmac.api.Option;
 import magmac.api.collect.list.Lists;
@@ -11,15 +11,19 @@ import magmac.app.compile.rule.OrRule;
 import magmac.app.compile.rule.Rule;
 import magmac.app.compile.rule.TypeRule;
 import magmac.app.lang.Destructors;
-import magmac.app.lang.java.JavaFunctionSegmentValue;
-import magmac.app.lang.java.Lang;
+import magmac.app.lang.node.Assignable;
+import magmac.app.lang.node.Assignables;
+import magmac.app.lang.node.JavaValue;
+import magmac.app.lang.node.StructureStatementValue;
+import magmac.app.lang.node.Values;
+import magmac.app.lang.web.TypescriptFunctionSegmentValue;
 
-record AssignmentNode(Assignable assignable, JavaValue value) implements JavaFunctionSegmentValue, StructureStatementValue, Lang.TypescriptFunctionSegmentValue {
-    public static Option<CompileResult<AssignmentNode>> deserialize(Node node) {
+public record JavaAssignmentNode(Assignable assignable, JavaValue value) implements JavaFunctionSegmentValue, StructureStatementValue, TypescriptFunctionSegmentValue {
+    public static Option<CompileResult<JavaAssignmentNode>> deserialize(Node node) {
         return Destructors.destructWithType("assignment", node).map(deserializer -> deserializer
                 .withNode("destination", Assignables::deserializeError)
                 .withNode("source", Values::deserializeOrError)
-                .complete(tuple -> new AssignmentNode(tuple.left(), tuple.right())));
+                .complete(tuple -> new JavaAssignmentNode(tuple.left(), tuple.right())));
     }
 
     public static Rule createAssignmentRule(Rule definition, Rule value) {

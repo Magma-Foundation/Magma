@@ -1,9 +1,10 @@
-package magmac.app.lang.node;
+package magmac.app.lang.java;
 
 import magmac.api.Option;
 import magmac.api.collect.list.List;
-import magmac.app.compile.node.MapNode;
-import magmac.app.compile.node.Node;
+import magmac.app.lang.node.JavaStructureType;
+import magmac.app.lang.node.JavaType;
+import magmac.app.lang.node.StructureValue;
 
 public final class JavaStructureNode implements JavaRootSegment, JavaStructureMember {
     private final JavaStructureType type;

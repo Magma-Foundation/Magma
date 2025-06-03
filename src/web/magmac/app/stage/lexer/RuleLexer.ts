@@ -6,7 +6,7 @@ import { UnitSetCollector } from "../../../../magmac/app/io/sources/UnitSetColle
 import { Unit } from "../../../../magmac/app/stage/unit/Unit";
 import { UnitSet } from "../../../../magmac/app/stage/unit/UnitSet";
 export class RuleLexer {
-	RuleLexer(rootRule : Rule) : public {;;}
-	foldEntry(unit : Unit<String>) : CompileResult<Unit<Node>> {;;;}
-	apply(initial : UnitSet<String>) : CompileResult<UnitSet<Node>> {;;}
+	RuleLexer(rootRule : Rule) : public {break;;}
+	foldEntry(unit : Unit<String>) : CompileResult<Unit<Node>> {break;break;;}
+	apply(initial : UnitSet<String>) : CompileResult<UnitSet<Node>> {break;;}
 }

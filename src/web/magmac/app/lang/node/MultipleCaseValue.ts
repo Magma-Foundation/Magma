@@ -10,7 +10,8 @@ import { SuffixRule } from "../../../../magmac/app/compile/rule/SuffixRule";
 import { TypeRule } from "../../../../magmac/app/compile/rule/TypeRule";
 import { StatementFolder } from "../../../../magmac/app/compile/rule/fold/StatementFolder";
 import { Destructors } from "../../../../magmac/app/lang/Destructors";
+import { JavaFunctionSegment } from "../../../../magmac/app/lang/java/JavaFunctionSegment";
 export class MultipleCaseValue {
-	deserialize(node : Node) : Option<CompileResult<CaseValue>> {;;}
-	createRule(segment : Rule) : TypeRule {;;}
+	deserialize(node : Node) : Option<CompileResult<CaseValue>> {break;;}
+	createRule(segment : Rule) : TypeRule {break;;}
 }

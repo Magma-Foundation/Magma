@@ -13,8 +13,8 @@ import { TypeRule } from "../../../../magmac/app/compile/rule/TypeRule";
 import { Deserializers } from "../../../../magmac/app/lang/Deserializers";
 import { Destructors } from "../../../../magmac/app/lang/Destructors";
 export class JavaTemplateType {
-	JavaTemplateType(base : JavaBase, typeArguments : TypeArguments<JavaType>) : public {;;;}
-	deserialize(node : Node) : Option<CompileResult<JavaTemplateType>> {;;}
-	deserializeBase(node : Node) : CompileResult<JavaBase> {;;}
-	createTemplateRule(type : Rule) : Rule {;;;;}
+	JavaTemplateType(base : JavaBase, typeArguments : TypeArguments<JavaType>) : public {break;break;;}
+	deserialize(node : Node) : Option<CompileResult<JavaTemplateType>> {break;;}
+	deserializeBase(node : Node) : CompileResult<JavaBase> {break;;}
+	createTemplateRule(type : Rule) : Rule {break;break;break;;}
 }

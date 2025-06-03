@@ -7,6 +7,7 @@ import magmac.app.compile.node.InitialDestructor;
 import magmac.app.compile.node.Node;
 import magmac.app.lang.Destructors;
 import magmac.app.lang.Serializable;
+import magmac.app.lang.common.Annotation;
 
 public record Definition<T>(
         Option<List<Annotation>> maybeAnnotations,
@@ -24,11 +25,11 @@ public record Definition<T>(
                 .complete((result) -> new Definition<JavaType>(result.left().right(), result.left().left().right(), result.left().left().left().left(), result.right(), result.left().left().left().right()));
     }
 
-    static CompileResult<Definition<JavaType>> deserialize(Node node) {
+    public static CompileResult<Definition<JavaType>> deserialize(Node node) {
         return Definition.deserialize0(Destructors.destruct(node));
     }
 
-    static Option<CompileResult<Definition<JavaType>>> deserializeWithType(Node node) {
+    public static Option<CompileResult<Definition<JavaType>>> deserializeWithType(Node node) {
         return Destructors.destructWithType("definition", node)
                 .map(Definition::deserialize0);
     }

@@ -5,10 +5,16 @@ import { OrRule } from "../../../../magmac/app/compile/rule/OrRule";
 import { Rule } from "../../../../magmac/app/compile/rule/Rule";
 import { TypeRule } from "../../../../magmac/app/compile/rule/TypeRule";
 import { Deserializers } from "../../../../magmac/app/lang/Deserializers";
+import { JavaDeserializers } from "../../../../magmac/app/lang/JavaDeserializers";
 import { JavaRules } from "../../../../magmac/app/lang/JavaRules";
 import { LazyRule } from "../../../../magmac/app/lang/LazyRule";
 import { MutableLazyRule } from "../../../../magmac/app/lang/MutableLazyRule";
+import { JavaDefinition } from "../../../../magmac/app/lang/java/JavaDefinition";
+import { JavaEnumValues } from "../../../../magmac/app/lang/java/JavaEnumValues";
+import { JavaMethod } from "../../../../magmac/app/lang/java/JavaMethod";
+import { JavaStructureMember } from "../../../../magmac/app/lang/java/JavaStructureMember";
+import { JavaStructureStatement } from "../../../../magmac/app/lang/java/JavaStructureStatement";
 export class StructureMembers {
-	deserialize(node : Node) : CompileResult<JavaStructureMember> {;;}
-	createClassMemberRule() : Rule {;;;;;;;}
+	deserialize(node : Node) : CompileResult<JavaStructureMember> {break;;}
+	createClassMemberRule() : Rule {break;break;break;break;break;break;;}
 }

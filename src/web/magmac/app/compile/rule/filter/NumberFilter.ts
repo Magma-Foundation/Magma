@@ -1,4 +1,4 @@
 export class NumberFilter {
-	test(input : String) : boolean {;;if(true){ ;if(true){ ;;;};;};;}
-	createMessage() : String {;;}
+	test(input : String) : boolean {break;break;if(true){ break;if(true){ break;break;;}break;;}break;;}
+	createMessage() : String {break;;}
 }

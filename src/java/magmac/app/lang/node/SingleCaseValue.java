@@ -18,7 +18,7 @@ public record SingleCaseValue(JavaValue value) implements CaseValue {
         });
     }
 
-    static TypeRule createRule(Rule value) {
+    public static TypeRule createRule(Rule value) {
         return new TypeRule("case-single", new NodeRule("value", new StripRule(new SuffixRule(value, ";"))));
     }
 }

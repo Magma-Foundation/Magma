@@ -6,17 +6,17 @@ import { List } from "../../../../../magmac/api/collect/list/List";
 import { Lists } from "../../../../../magmac/api/collect/list/Lists";
 import { Iter } from "../../../../../magmac/api/iter/Iter";
 export class MutableDivideState {
-	MutableDivideState(segments : List<String>, buffer : StringBuilder, input : String) : private {;;;;;}
-	MutableDivideState(input : String) : public {;;}
-	append(c : char) : DivideState {;;;}
-	advance() : DivideState {;;;;}
-	iter() : Iter<String> {;;}
-	isLevel() : boolean {;;}
-	enter() : DivideState {;;;}
-	exit() : DivideState {;;;}
-	isShallow() : boolean {;;}
-	pop() : Option<Tuple2<DivideState, Character>> {if(true){ ;;;;}if(true){ ;;};}
-	popAndAppendToTuple() : Option<Tuple2<DivideState, Character>> {;;}
-	popAndAppendToOption() : Option<DivideState> {;;}
-	peek() : char {;;}
+	MutableDivideState(segments : List<String>, buffer : StringBuilder, input : String) : private {break;break;break;break;;}
+	MutableDivideState(input : String) : public {break;;}
+	append(c : char) : DivideState {break;break;;}
+	advance() : DivideState {break;break;break;;}
+	iter() : Iter<String> {break;;}
+	isLevel() : boolean {break;;}
+	enter() : DivideState {break;break;;}
+	exit() : DivideState {break;break;;}
+	isShallow() : boolean {break;;}
+	pop() : Option<Tuple2<DivideState, Character>> {if(true){ break;break;break;;}if(true){ break;;};}
+	popAndAppendToTuple() : Option<Tuple2<DivideState, Character>> {break;;}
+	popAndAppendToOption() : Option<DivideState> {break;;}
+	peek() : char {break;;}
 }

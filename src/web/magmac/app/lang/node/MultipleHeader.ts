@@ -5,6 +5,6 @@ import { MapNode } from "../../../../magmac/app/compile/node/MapNode";
 import { Node } from "../../../../magmac/app/compile/node/Node";
 import { Destructors } from "../../../../magmac/app/lang/Destructors";
 export class MultipleHeader {
-	deserialize(node : Node) : Option<CompileResult<LambdaHeader>> {;;}
-	serialize() : Node {;;}
+	deserialize(node : Node) : Option<CompileResult<LambdaHeader>> {break;;}
+	serialize() : Node {break;;}
 }

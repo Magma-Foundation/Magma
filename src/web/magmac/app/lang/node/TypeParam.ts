@@ -4,6 +4,6 @@ import { Node } from "../../../../magmac/app/compile/node/Node";
 import { Destructors } from "../../../../magmac/app/lang/Destructors";
 import { Serializable } from "../../../../magmac/app/lang/Serializable";
 export class TypeParam {
-	deserialize(node : Node) : CompileResult<TypeParam> {;;}
-	serialize() : Node {;;}
+	deserialize(node : Node) : CompileResult<TypeParam> {break;;}
+	serialize() : Node {break;;}
 }

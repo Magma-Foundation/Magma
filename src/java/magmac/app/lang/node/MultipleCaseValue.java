@@ -12,6 +12,7 @@ import magmac.app.compile.rule.SuffixRule;
 import magmac.app.compile.rule.TypeRule;
 import magmac.app.compile.rule.fold.StatementFolder;
 import magmac.app.lang.Destructors;
+import magmac.app.lang.java.JavaFunctionSegment;
 
 public record MultipleCaseValue(List<JavaFunctionSegment> children) implements CaseValue {
     public static Option<CompileResult<CaseValue>> deserialize(Node node) {
@@ -21,7 +22,7 @@ public record MultipleCaseValue(List<JavaFunctionSegment> children) implements C
         });
     }
 
-    static TypeRule createRule(Rule segment) {
+    public static TypeRule createRule(Rule segment) {
         return new TypeRule("case-multiple", new StripRule(new PrefixRule("{", new SuffixRule(NodeListRule.createNodeListRule("children", new StatementFolder(), segment), "}"))));
     }
 }

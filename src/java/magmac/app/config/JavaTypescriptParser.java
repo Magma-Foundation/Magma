@@ -11,33 +11,41 @@ import magmac.app.compile.error.CompileResultCollector;
 import magmac.app.compile.error.CompileResults;
 import magmac.app.io.Location;
 import magmac.app.io.sources.UnitSetCollector;
-import magmac.app.lang.node.CaseNode;
+import magmac.app.lang.java.JavaAssignmentNode;
+import magmac.app.lang.java.JavaBlock;
+import magmac.app.lang.java.JavaBreak;
+import magmac.app.lang.java.JavaCaseNode;
+import magmac.app.lang.java.JavaConstructor;
+import magmac.app.lang.java.JavaContinue;
+import magmac.app.lang.java.JavaDefinition;
+import magmac.app.lang.java.JavaEnumValues;
+import magmac.app.lang.java.JavaFunctionSegment;
+import magmac.app.lang.java.JavaFunctionSegmentValue;
+import magmac.app.lang.java.JavaFunctionStatement;
+import magmac.app.lang.java.JavaInvokable;
+import magmac.app.lang.java.JavaMethod;
+import magmac.app.lang.java.JavaMethodHeader;
+import magmac.app.lang.java.JavaNamespacedNode;
+import magmac.app.lang.java.JavaParameter;
+import magmac.app.lang.java.JavaPost;
+import magmac.app.lang.java.JavaReturnNode;
+import magmac.app.lang.java.JavaRootSegment;
+import magmac.app.lang.java.JavaStructureMember;
+import magmac.app.lang.java.JavaStructureNode;
+import magmac.app.lang.java.JavaStructureStatement;
+import magmac.app.lang.java.JavaWhitespace;
+import magmac.app.lang.java.JavaYieldNode;
 import magmac.app.lang.node.ConditionalType;
 import magmac.app.lang.node.Definition;
-import magmac.app.lang.node.EnumValues;
-import magmac.app.lang.node.FunctionStatement;
 import magmac.app.lang.node.JavaArrayType;
 import magmac.app.lang.node.JavaBase;
-import magmac.app.lang.node.JavaBlock;
 import magmac.app.lang.node.JavaBlockHeader;
-import magmac.app.lang.node.JavaConstructor;
-import magmac.app.lang.node.JavaDefinition;
-import magmac.app.lang.node.JavaFunctionSegment;
-import magmac.app.lang.node.JavaMethod;
-import magmac.app.lang.node.JavaMethodHeader;
-import magmac.app.lang.node.JavaNamespacedNode;
-import magmac.app.lang.node.JavaParameter;
-import magmac.app.lang.node.JavaReturnNode;
 import magmac.app.lang.node.JavaRoot;
-import magmac.app.lang.node.JavaRootSegment;
-import magmac.app.lang.node.JavaStructureMember;
-import magmac.app.lang.node.JavaStructureNode;
 import magmac.app.lang.node.JavaTemplateType;
 import magmac.app.lang.node.JavaType;
 import magmac.app.lang.node.ParameterizedMethodHeader;
 import magmac.app.lang.node.Qualified;
 import magmac.app.lang.node.Segment;
-import magmac.app.lang.node.StructureStatement;
 import magmac.app.lang.node.StructureValue;
 import magmac.app.lang.node.Symbol;
 import magmac.app.lang.node.TypeArguments;
@@ -60,7 +68,10 @@ import magmac.app.lang.node.TypescriptStructureMember;
 import magmac.app.lang.node.TypescriptStructureNode;
 import magmac.app.lang.node.TypescriptStructureType;
 import magmac.app.lang.node.VariadicType;
-import magmac.app.lang.node.Whitespace;
+import magmac.app.lang.web.TypescriptBreak;
+import magmac.app.lang.web.TypescriptFunctionSegmentValue;
+import magmac.app.lang.web.TypescriptFunctionStatement;
+import magmac.app.lang.web.TypescriptWhitespace;
 import magmac.app.stage.parse.Parser;
 import magmac.app.stage.unit.SimpleUnit;
 import magmac.app.stage.unit.Unit;
@@ -83,7 +94,7 @@ class JavaTypescriptParser implements Parser<JavaRoot, TypescriptRoot> {
 
     private static List<TypeScriptRootSegment> parseRootSegment(Location location, JavaRootSegment rootSegment) {
         return switch (rootSegment) {
-            case Whitespace whitespace -> Lists.of(whitespace);
+            case JavaWhitespace whitespace -> Lists.of(new TypescriptWhitespace());
             case JavaNamespacedNode namespaced -> Lists.of(JavaTypescriptParser.parseNamespaced(location, namespaced));
             case JavaStructureNode structureNode -> JavaTypescriptParser.getCollect(structureNode);
         };
@@ -145,9 +156,9 @@ class JavaTypescriptParser implements Parser<JavaRoot, TypescriptRoot> {
 
     private static Tuple2<List<TypescriptStructureMember>, List<TypescriptStructureNode>> parseStructureMember(JavaStructureMember structureNode) {
         return switch (structureNode) {
-            case Whitespace whitespace -> JavaTypescriptParser.getList();
-            case EnumValues enumValues -> JavaTypescriptParser.getList();
-            case StructureStatement structureStatement -> JavaTypescriptParser.getList();
+            case JavaWhitespace whitespace -> JavaTypescriptParser.getList();
+            case JavaEnumValues enumValues -> JavaTypescriptParser.getList();
+            case JavaStructureStatement structureStatement -> JavaTypescriptParser.getList();
             case JavaMethod methodNode ->
                     JavaTypescriptParser.getListListTuple2(JavaTypescriptParser.parseMethod(methodNode));
             case JavaStructureNode javaStructureNode ->
@@ -160,7 +171,7 @@ class JavaTypescriptParser implements Parser<JavaRoot, TypescriptRoot> {
     }
 
     private static Tuple2<List<TypescriptStructureMember>, List<TypescriptStructureNode>> getList() {
-        return JavaTypescriptParser.getListListTuple2(new Whitespace());
+        return JavaTypescriptParser.getListListTuple2(new TypescriptWhitespace());
     }
 
     private static TypescriptStructureMember parseMethod(JavaMethod methodNode) {
@@ -183,10 +194,27 @@ class JavaTypescriptParser implements Parser<JavaRoot, TypescriptRoot> {
     private static TypescriptFunctionSegment parseFunctionSegment(JavaFunctionSegment segment) {
         return switch (segment) {
             case JavaBlock block -> JavaTypescriptParser.parseBlock(block);
-            case CaseNode caseNode -> new Whitespace();
-            case JavaReturnNode javaReturnNode -> new Whitespace();
-            case FunctionStatement functionStatement -> new Whitespace();
-            case Whitespace whitespace -> new Whitespace();
+            case JavaCaseNode caseNode -> new TypescriptWhitespace();
+            case JavaReturnNode javaReturnNode -> new TypescriptWhitespace();
+            case JavaFunctionStatement functionStatement ->
+                    JavaTypescriptParser.parseFunctionStatement(functionStatement);
+            case JavaWhitespace whitespace -> new TypescriptWhitespace();
+        };
+    }
+
+    private static TypescriptFunctionSegment parseFunctionStatement(JavaFunctionStatement functionStatement) {
+        return new TypescriptFunctionStatement(JavaTypescriptParser.parseFunctionStatementValue(functionStatement.child()));
+    }
+
+    private static TypescriptFunctionSegmentValue parseFunctionStatementValue(JavaFunctionSegmentValue child) {
+        return switch (child) {
+            case JavaBreak javaBreak -> new TypescriptBreak();
+            case JavaContinue javaContinue -> new TypescriptBreak();
+            case JavaReturnNode javaReturnNode -> new TypescriptBreak();
+            case JavaYieldNode javaYieldNode -> new TypescriptBreak();
+            case JavaInvokable javaInvokable -> new TypescriptBreak();
+            case JavaPost javaPost -> new TypescriptBreak();
+            case JavaAssignmentNode javaAssignmentNode -> new TypescriptBreak();
         };
     }
 
@@ -200,7 +228,7 @@ class JavaTypescriptParser implements Parser<JavaRoot, TypescriptRoot> {
 
     private static TypeScriptParameter parseParameter(JavaParameter parameter) {
         return switch (parameter) {
-            case Whitespace whitespace -> whitespace;
+            case JavaWhitespace whitespace -> new TypescriptWhitespace();
             case JavaDefinition javaDefinition -> JavaTypescriptParser.parseDefinition(javaDefinition);
         };
     }
@@ -275,7 +303,7 @@ class JavaTypescriptParser implements Parser<JavaRoot, TypescriptRoot> {
 
     private static TypeScriptRootSegment parseNamespaced(Location location, JavaNamespacedNode namespaced) {
         return switch (namespaced.type()) {
-            case Package -> new Whitespace();
+            case Package -> new TypescriptWhitespace();
             case Import -> JavaTypescriptParser.parseImport(location, namespaced.segments());
         };
     }

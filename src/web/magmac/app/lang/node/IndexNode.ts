@@ -11,7 +11,7 @@ import { TypeRule } from "../../../../magmac/app/compile/rule/TypeRule";
 import { Destructors } from "../../../../magmac/app/lang/Destructors";
 import { LazyRule } from "../../../../magmac/app/lang/LazyRule";
 export class IndexNode {
-	createIndexRule(value : LazyRule) : Rule {;;;;}
-	deserialize(value : Node) : Option<CompileResult<IndexNode>> {;;}
-	serialize() : Node {;;}
+	createIndexRule(value : LazyRule) : Rule {break;break;break;;}
+	deserialize(value : Node) : Option<CompileResult<IndexNode>> {break;;}
+	serialize() : Node {break;;}
 }

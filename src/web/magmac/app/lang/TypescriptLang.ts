@@ -11,19 +11,18 @@ import { TypeRule } from "../../../magmac/app/compile/rule/TypeRule";
 import { FunctionSegments } from "../../../magmac/app/lang/node/FunctionSegments";
 import { Modifier } from "../../../magmac/app/lang/node/Modifier";
 import { Parameters } from "../../../magmac/app/lang/node/Parameters";
-import { StructureStatement } from "../../../magmac/app/lang/node/StructureStatement";
+import { JavaStructureStatement } from "../../../magmac/app/lang/java/JavaStructureStatement";
 import { Symbols } from "../../../magmac/app/lang/node/Symbols";
 import { JavaTemplateType } from "../../../magmac/app/lang/node/JavaTemplateType";
 import { TypeScriptImport } from "../../../magmac/app/lang/node/TypeScriptImport";
 import { TypescriptStructureNode } from "../../../magmac/app/lang/node/TypescriptStructureNode";
 import { Values } from "../../../magmac/app/lang/node/Values";
-import { Whitespace } from "../../../magmac/app/lang/node/Whitespace";
 export class TypescriptLang {
-	createRule() : Rule {;;}
-	createStructureMemberRule() : Rule {;;;;}
-	createMethodRule(definition : Rule, valueLazy : LazyRule) : Rule {;;;;;;;}
-	createConstructorRule(definition : Rule) : Rule {;;;}
-	createDefinitionRule() : Rule {;;;;;;;;}
-	createTypeRule() : Rule {;;;}
-	createArrayRule(orRule : LazyRule) : TypeRule {;;}
+	createRule() : Rule {break;;}
+	createStructureMemberRule() : Rule {break;break;break;;}
+	createMethodRule(definition : Rule, valueLazy : LazyRule) : Rule {break;break;break;break;break;break;;}
+	createConstructorRule(definition : Rule) : Rule {break;break;;}
+	createDefinitionRule() : Rule {break;break;break;break;break;break;break;;}
+	createTypeRule() : Rule {break;break;;}
+	createArrayRule(orRule : LazyRule) : TypeRule {break;;}
 }

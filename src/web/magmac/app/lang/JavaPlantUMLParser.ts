@@ -11,8 +11,8 @@ import { Location } from "../../../magmac/app/io/Location";
 import { JavaArrayType } from "../../../magmac/app/lang/node/JavaArrayType";
 import { JavaBase } from "../../../magmac/app/lang/node/JavaBase";
 import { JavaRoot } from "../../../magmac/app/lang/node/JavaRoot";
-import { JavaRootSegment } from "../../../magmac/app/lang/node/JavaRootSegment";
-import { JavaNamespacedNode } from "../../../magmac/app/lang/node/JavaNamespacedNode";
+import { JavaRootSegment } from "../../../magmac/app/lang/java/JavaRootSegment";
+import { JavaNamespacedNode } from "../../../magmac/app/lang/java/JavaNamespacedNode";
 import { PlantUMLDependency } from "../../../magmac/app/lang/node/PlantUMLDependency";
 import { PlantUMLFooter } from "../../../magmac/app/lang/node/PlantUMLFooter";
 import { PlantUMLHeader } from "../../../magmac/app/lang/node/PlantUMLHeader";
@@ -23,13 +23,13 @@ import { PlantUMLStructure } from "../../../magmac/app/lang/node/PlantUMLStructu
 import { PlantUMLStructureType } from "../../../magmac/app/lang/node/PlantUMLStructureType";
 import { Qualified } from "../../../magmac/app/lang/node/Qualified";
 import { Segment } from "../../../magmac/app/lang/node/Segment";
-import { JavaStructureNode } from "../../../magmac/app/lang/node/JavaStructureNode";
+import { JavaStructureNode } from "../../../magmac/app/lang/java/JavaStructureNode";
 import { JavaStructureType } from "../../../magmac/app/lang/node/JavaStructureType";
 import { Symbol } from "../../../magmac/app/lang/node/Symbol";
 import { JavaTemplateType } from "../../../magmac/app/lang/node/JavaTemplateType";
 import { JavaType } from "../../../magmac/app/lang/node/JavaType";
 import { VariadicType } from "../../../magmac/app/lang/node/VariadicType";
-import { Whitespace } from "../../../magmac/app/lang/node/Whitespace";
+import { JavaWhitespace } from "../../../magmac/app/lang/java/JavaWhitespace";
 import { Parser } from "../../../magmac/app/stage/parse/Parser";
 import { MapUnitSet } from "../../../magmac/app/stage/unit/MapUnitSet";
 import { SimpleUnit } from "../../../magmac/app/stage/unit/SimpleUnit";
@@ -38,12 +38,12 @@ import { UnitSet } from "../../../magmac/app/stage/unit/UnitSet";
 export class JavaPlantUMLParser {
 	parseNamespaced(child : String, namespaced : JavaNamespacedNode) : Iter<PlantUMLRootSegment> {;;;}
 	createSimpleName(base : JavaBase) : String {;;;}
-	createSimpleNameFromQualifiedType(qualifiedType : Qualified) : String {;;}
-	createStructureSegment(structureNode : JavaStructureNode) : PlantUMLRootSegment {;;;;;}
+	createSimpleNameFromQualifiedType(qualifiedType : Qualified) : String {break;;}
+	createStructureSegment(structureNode : JavaStructureNode) : PlantUMLRootSegment {break;break;;;;}
 	createSimpleNameFromType(type : JavaType) : String {;;;}
-	apply(initial : UnitSet<JavaRoot>) : CompileResult<UnitSet<PlantUMLRoot>> {;;;;;}
-	parseRoot(unit : Unit<JavaRoot>) : Iter<PlantUMLRootSegment> {;;}
+	apply(initial : UnitSet<JavaRoot>) : CompileResult<UnitSet<PlantUMLRoot>> {break;break;break;break;;}
+	parseRoot(unit : Unit<JavaRoot>) : Iter<PlantUMLRootSegment> {break;;}
 	parseRootSegment(fileName : String, rootSegment : JavaRootSegment) : Iter<PlantUMLRootSegment> {;;;}
-	parseStructure(structureNode : JavaStructureNode) : Iter<PlantUMLRootSegment> {;;;;}
-	toInherits(child : String, maybeOption : Option<List<JavaType>>) : List<PlantUMLRootSegment> {;;}
+	parseStructure(structureNode : JavaStructureNode) : Iter<PlantUMLRootSegment> {break;break;break;;}
+	toInherits(child : String, maybeOption : Option<List<JavaType>>) : List<PlantUMLRootSegment> {break;;}
 }

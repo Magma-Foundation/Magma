@@ -1,3 +1,3 @@
 export class JavaConditional {
-	JavaConditional(type : ConditionalType, condition : JavaValue) : public {;;}
+	JavaConditional(type : ConditionalType, condition : JavaValue) : public {break;;}
 }

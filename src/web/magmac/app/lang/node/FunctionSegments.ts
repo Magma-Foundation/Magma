@@ -10,7 +10,9 @@ import { Deserializers } from "../../../../magmac/app/lang/Deserializers";
 import { JavaDeserializers } from "../../../../magmac/app/lang/JavaDeserializers";
 import { JavaRules } from "../../../../magmac/app/lang/JavaRules";
 import { LazyRule } from "../../../../magmac/app/lang/LazyRule";
+import { JavaCaseNode } from "../../../../magmac/app/lang/java/JavaCaseNode";
+import { JavaFunctionSegment } from "../../../../magmac/app/lang/java/JavaFunctionSegment";
 export class FunctionSegments {
-	deserialize(node : Node) : CompileResult<JavaFunctionSegment> {;;}
-	initFunctionSegmentRule(functionSegmentRule : LazyRule, value : Rule, definition : Rule) : Rule {;;;;}
+	deserialize(node : Node) : CompileResult<JavaFunctionSegment> {break;;}
+	initFunctionSegmentRule(functionSegmentRule : LazyRule, value : Rule, definition : Rule) : Rule {break;break;break;;}
 }

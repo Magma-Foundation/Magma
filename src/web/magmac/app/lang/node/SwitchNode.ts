@@ -4,7 +4,8 @@ import { CompileResult } from "../../../../magmac/app/compile/error/CompileResul
 import { MapNode } from "../../../../magmac/app/compile/node/MapNode";
 import { Node } from "../../../../magmac/app/compile/node/Node";
 import { Destructors } from "../../../../magmac/app/lang/Destructors";
+import { JavaFunctionSegment } from "../../../../magmac/app/lang/java/JavaFunctionSegment";
 export class SwitchNode {
-	deserialize(node : Node) : Option<CompileResult<SwitchNode>> {;;}
-	serialize() : Node {;;}
+	deserialize(node : Node) : Option<CompileResult<SwitchNode>> {break;;}
+	serialize() : Node {break;;}
 }

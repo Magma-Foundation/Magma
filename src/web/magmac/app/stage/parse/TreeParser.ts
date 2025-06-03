@@ -13,13 +13,13 @@ import { Passer } from "../../../../magmac/app/stage/Passer";
 import { Unit } from "../../../../magmac/app/stage/unit/Unit";
 import { UnitSet } from "../../../../magmac/app/stage/unit/UnitSet";
 export class TreeParser {
-	TreeParser(beforeChild : Passer, afterChild : Passer, afterAllChildren : AfterAll) : public {;;;;}
-	parseNodeListEntry(current : ParseUnit<Node>, entry : Tuple2<String, NodeList>) : CompileResult<ParseUnit<Node>> {;;;;;}
-	getParseUnitCompileResult(node : Node, currentState1 : ParseState, currentElements : NodeList) : CompileResult<ParseUnit<NodeList>> {;;}
-	parseTree(state : ParseState, root : Node) : CompileResult<ParseUnit<Node>> {;;}
-	parseNodes(withNodeLists : ParseUnit<Node>) : CompileResult<ParseUnit<Node>> {;;}
-	parseNodeEntry(current : ParseUnit<Node>, entry : Tuple2<String, Node>) : CompileResult<ParseUnit<Node>> {;;;;;}
-	parseNodeLists(beforeTuple : ParseUnit<Node>) : CompileResult<ParseUnit<Node>> {;;}
-	apply(initial : UnitSet<Node>) : CompileResult<UnitSet<Node>> {;;}
-	parseUnit(unit : Unit<Node>) : CompileResult<Unit<Node>> {;;}
+	TreeParser(beforeChild : Passer, afterChild : Passer, afterAllChildren : AfterAll) : public {break;break;break;;}
+	parseNodeListEntry(current : ParseUnit<Node>, entry : Tuple2<String, NodeList>) : CompileResult<ParseUnit<Node>> {break;break;break;break;;}
+	getParseUnitCompileResult(node : Node, currentState1 : ParseState, currentElements : NodeList) : CompileResult<ParseUnit<NodeList>> {break;;}
+	parseTree(state : ParseState, root : Node) : CompileResult<ParseUnit<Node>> {break;;}
+	parseNodes(withNodeLists : ParseUnit<Node>) : CompileResult<ParseUnit<Node>> {break;;}
+	parseNodeEntry(current : ParseUnit<Node>, entry : Tuple2<String, Node>) : CompileResult<ParseUnit<Node>> {break;break;break;break;;}
+	parseNodeLists(beforeTuple : ParseUnit<Node>) : CompileResult<ParseUnit<Node>> {break;;}
+	apply(initial : UnitSet<Node>) : CompileResult<UnitSet<Node>> {break;;}
+	parseUnit(unit : Unit<Node>) : CompileResult<Unit<Node>> {break;;}
 }

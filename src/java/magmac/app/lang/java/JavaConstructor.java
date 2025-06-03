@@ -1,4 +1,4 @@
-package magmac.app.lang.node;
+package magmac.app.lang.java;
 
 import magmac.api.Option;
 import magmac.app.compile.error.CompileResult;

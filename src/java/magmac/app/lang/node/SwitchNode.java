@@ -6,6 +6,7 @@ import magmac.app.compile.error.CompileResult;
 import magmac.app.compile.node.MapNode;
 import magmac.app.compile.node.Node;
 import magmac.app.lang.Destructors;
+import magmac.app.lang.java.JavaFunctionSegment;
 
 public record SwitchNode(JavaValue value, List<JavaFunctionSegment> children) implements JavaValue, TypeScriptValue {
     public static Option<CompileResult<SwitchNode>> deserialize(Node node) {

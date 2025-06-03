@@ -4,39 +4,44 @@ import magmac.api.Option;
 import magmac.api.collect.list.Lists;
 import magmac.app.compile.error.CompileResult;
 import magmac.app.compile.node.Node;
+import magmac.app.lang.common.FunctionStatement;
+import magmac.app.lang.java.JavaAssignmentNode;
+import magmac.app.lang.java.JavaBreak;
 import magmac.app.lang.java.JavaConstruction;
+import magmac.app.lang.java.JavaContinue;
+import magmac.app.lang.java.JavaFunctionSegmentValue;
+import magmac.app.lang.java.JavaFunctionStatement;
 import magmac.app.lang.java.JavaInvokable;
 import magmac.app.lang.java.Lang;
 import magmac.app.lang.node.Arguments;
-import magmac.app.lang.node.Conditional;
-import magmac.app.lang.node.FunctionSegments;
-import magmac.app.lang.node.JavaBlock;
-import magmac.app.lang.node.JavaBlockHeader;
 import magmac.app.lang.node.Catch;
 import magmac.app.lang.node.ConditionalType;
 import magmac.app.lang.node.Else;
 import magmac.app.lang.node.FunctionSegmentValues;
-import magmac.app.lang.node.FunctionStatement;
+import magmac.app.lang.node.FunctionSegments;
 import magmac.app.lang.node.JavaAccess;
 import magmac.app.lang.node.JavaAccessType;
+import magmac.app.lang.java.JavaBlock;
+import magmac.app.lang.node.JavaBlockHeader;
 import magmac.app.lang.node.JavaConditional;
+import magmac.app.lang.java.JavaDefinition;
 import magmac.app.lang.node.JavaLambda;
-import magmac.app.lang.node.JavaNamespacedNode;
-import magmac.app.lang.node.JavaPost;
-import magmac.app.lang.node.JavaReturnNode;
-import magmac.app.lang.node.JavaRootSegment;
+import magmac.app.lang.java.JavaNamespacedNode;
+import magmac.app.lang.java.JavaPost;
+import magmac.app.lang.java.JavaReturnNode;
+import magmac.app.lang.java.JavaRootSegment;
 import magmac.app.lang.node.JavaStructureNodeDeserializer;
 import magmac.app.lang.node.JavaStructureType;
 import magmac.app.lang.node.JavaTypes;
-import magmac.app.lang.node.JavaValue;
-import magmac.app.lang.node.JavaYieldNode;
+import magmac.app.lang.java.JavaYieldNode;
 import magmac.app.lang.node.LambdaContents;
 import magmac.app.lang.node.LambdaHeaders;
 import magmac.app.lang.node.PostVariant;
+import magmac.app.lang.node.StructureStatementValue;
 import magmac.app.lang.node.Try;
 import magmac.app.lang.node.TypedDeserializer;
 import magmac.app.lang.node.Values;
-import magmac.app.lang.node.Whitespace;
+import magmac.app.lang.java.JavaWhitespace;
 
 public final class JavaDeserializers {
     public static CompileResult<Lang.JavaCaller> deserialize(Node node) {
@@ -60,7 +65,7 @@ public final class JavaDeserializers {
 
     public static CompileResult<JavaRootSegment> deserializeRootSegment(Node node) {
         return Deserializers.orError("root-segment", node, Lists.of(
-                Deserializers.wrap(Whitespace::deserialize),
+                Deserializers.wrap(JavaDeserializers::deserializeWhitespace),
                 JavaNamespacedNode::deserialize,
                 Deserializers.wrap(new JavaStructureNodeDeserializer(JavaStructureType.Class)),
                 Deserializers.wrap(new JavaStructureNodeDeserializer(JavaStructureType.Interface)),
@@ -99,10 +104,10 @@ public final class JavaDeserializers {
         return node1 -> JavaDeserializers.deserializeAccess(type, node1);
     }
 
-    public static Option<CompileResult<FunctionStatement>> deserializeFunctionStatement(Node node) {
+    public static Option<CompileResult<JavaFunctionStatement>> deserializeFunctionStatement(Node node) {
         return Destructors.destructWithType("statement", node)
                 .map(deserializer -> deserializer.withNode("child", FunctionSegmentValues::deserialize)
-                        .complete(FunctionStatement::new)
+                        .complete(JavaFunctionStatement::new)
                         .mapValue(value -> value));
     }
 
@@ -113,8 +118,8 @@ public final class JavaDeserializers {
 
     public static CompileResult<JavaBlockHeader> deserializeBlockHeader(Node node) {
         return Deserializers.orError("header", node, Lists.of(
-                Deserializers.wrap(node1 -> deserializeConditional(ConditionalType.If, node1)),
-                Deserializers.wrap(node1 -> deserializeConditional(ConditionalType.While, node1)),
+                Deserializers.wrap(node1 -> JavaDeserializers.deserializeConditional(ConditionalType.If, node1)),
+                Deserializers.wrap(node1 -> JavaDeserializers.deserializeConditional(ConditionalType.While, node1)),
                 Deserializers.wrap(Else::deserialize),
                 Deserializers.wrap(Try::deserialize),
                 Deserializers.wrap(Catch::deserialize)
@@ -131,5 +136,24 @@ public final class JavaDeserializers {
     public static Option<CompileResult<JavaConditional>> deserializeConditional(ConditionalType type, Node node) {
         return Destructors.destructWithType(type.name().toLowerCase(), node).map(deserializer -> deserializer.withNode("condition", Values::deserializeOrError)
                 .complete(value -> new JavaConditional(type, value)));
+    }
+
+    public static CompileResult<StructureStatementValue> deserializeStructureStatement(Node node) {
+        return Deserializers.orError("structure-statement-value", node, Lists.of(
+                Deserializers.wrap(JavaDefinition::deserializeTyped),
+                Deserializers.wrap(JavaAssignmentNode::deserialize)
+        ));
+    }
+
+    public static Option<CompileResult<JavaBreak>> deserializeBreak(Node node) {
+        return Destructors.destructWithType("break", node).map(deserializer -> deserializer.complete(JavaBreak::new));
+    }
+
+    public static Option<CompileResult<JavaContinue>> deserializeContinue(Node node) {
+        return Destructors.destructWithType("continue", node).map(deserializer -> deserializer.complete(JavaContinue::new));
+    }
+
+    public static Option<CompileResult<JavaWhitespace>> deserializeWhitespace(Node node) {
+        return Destructors.destructWithType("whitespace", node).map(deserializer -> deserializer.complete(JavaWhitespace::new));
     }
 }

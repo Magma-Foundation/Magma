@@ -4,6 +4,6 @@ import { Node } from "../../../magmac/app/compile/node/Node";
 import { OrRule } from "../../../magmac/app/compile/rule/OrRule";
 import { Rule } from "../../../magmac/app/compile/rule/Rule";
 export class OptionNodeListRule {
-	lex(input : String) : CompileResult<Node> {;;}
-	generate(node : Node) : CompileResult<String> {if(true){ ;;}if(true){ ;;};}
+	lex(input : String) : CompileResult<Node> {break;;}
+	generate(node : Node) : CompileResult<String> {if(true){ break;;}if(true){ break;;};}
 }

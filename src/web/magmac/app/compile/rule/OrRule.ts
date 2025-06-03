@@ -7,8 +7,8 @@ import { StringContext } from "../../../../magmac/app/compile/error/context/Stri
 import { Node } from "../../../../magmac/app/compile/node/Node";
 import { Function } from "../../../../java/util/function/Function";
 export class OrRule {
-	foldElement(state : OrState<T>, rule : Rule, mapper : Function<Rule, CompileResult<T>>) : OrState<T> {;;}
-	foldAll(mapper : Function<Rule, CompileResult<T>>, context : Context) : CompileResult<T> {;;;;}
-	lex(input : String) : CompileResult<Node> {;;}
-	generate(node : Node) : CompileResult<String> {;;}
+	foldElement(state : OrState<T>, rule : Rule, mapper : Function<Rule, CompileResult<T>>) : OrState<T> {break;;}
+	foldAll(mapper : Function<Rule, CompileResult<T>>, context : Context) : CompileResult<T> {break;break;break;;}
+	lex(input : String) : CompileResult<Node> {break;;}
+	generate(node : Node) : CompileResult<String> {break;;}
 }

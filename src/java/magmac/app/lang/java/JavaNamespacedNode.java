@@ -1,4 +1,4 @@
-package magmac.app.lang.node;
+package magmac.app.lang.java;
 
 import magmac.api.Option;
 import magmac.api.collect.list.List;
@@ -15,6 +15,8 @@ import magmac.app.compile.rule.SuffixRule;
 import magmac.app.compile.rule.TypeRule;
 import magmac.app.compile.rule.fold.DelimitedFolder;
 import magmac.app.lang.Destructors;
+import magmac.app.lang.node.NamespacedType;
+import magmac.app.lang.node.Segment;
 
 public record JavaNamespacedNode(NamespacedType type, List<Segment> segments) implements JavaRootSegment {
     private static Option<CompileResult<JavaRootSegment>> deserialize(NamespacedType type, Node node) {

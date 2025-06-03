@@ -9,18 +9,18 @@ import { ListCollector } from "../../../../magmac/api/iter/collect/ListCollector
 import { ArrayList } from "../../../../java/util/ArrayList";
 import { BiFunction } from "../../../../java/util/function/BiFunction";
 export class JVMList<T> {
-	JVMList() : public {;;}
-	addLast(element : T) : List<T> {;;;;}
-	iter() : Iter<T> {;;}
-	addAllLast(others : List<T>) : List<T> {;;}
-	createInitial() : List<T> {;;}
-	removeAll(others : List<T>) : List<T> {;;}
-	get(index : int) : T {;;}
-	sort(sorter : BiFunction<T, T, Integer>) : List<T> {;;;;}
-	contains(element : T) : boolean {;;}
-	size() : int {;;}
-	popLast() : Option<Tuple2<List<T>, T>> {if(true){ ;;};;;}
-	popFirst() : Option<Tuple2<T, List<T>>> {if(true){ ;;};;;}
-	addFirst(element : T) : List<T> {;;;;;}
-	findLast() : Option<T> {if(true){ ;;};;}
+	JVMList() : public {break;;}
+	addLast(element : T) : List<T> {break;break;break;;}
+	iter() : Iter<T> {break;;}
+	addAllLast(others : List<T>) : List<T> {break;;}
+	createInitial() : List<T> {break;;}
+	removeAll(others : List<T>) : List<T> {break;;}
+	get(index : int) : T {break;;}
+	sort(sorter : BiFunction<T, T, Integer>) : List<T> {break;break;break;;}
+	contains(element : T) : boolean {break;;}
+	size() : int {break;;}
+	popLast() : Option<Tuple2<List<T>, T>> {if(true){ break;;}break;break;;}
+	popFirst() : Option<Tuple2<T, List<T>>> {if(true){ break;;}break;break;;}
+	addFirst(element : T) : List<T> {break;break;break;break;;}
+	findLast() : Option<T> {if(true){ break;;}break;;}
 }

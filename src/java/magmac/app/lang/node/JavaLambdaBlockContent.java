@@ -5,6 +5,7 @@ import magmac.api.collect.list.List;
 import magmac.app.compile.error.CompileResult;
 import magmac.app.compile.node.Node;
 import magmac.app.lang.Destructors;
+import magmac.app.lang.java.JavaFunctionSegment;
 
 public record JavaLambdaBlockContent(List<JavaFunctionSegment> children) implements JavaLambdaContent {
     public static Option<CompileResult<JavaLambdaBlockContent>> deserialize(Node node) {

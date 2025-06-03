@@ -13,18 +13,17 @@ import magmac.app.compile.rule.TypeRule;
 import magmac.app.lang.node.FunctionSegments;
 import magmac.app.lang.node.Modifier;
 import magmac.app.lang.node.Parameters;
-import magmac.app.lang.node.StructureStatement;
+import magmac.app.lang.java.JavaStructureStatement;
 import magmac.app.lang.node.Symbols;
 import magmac.app.lang.node.JavaTemplateType;
 import magmac.app.lang.node.TypeScriptImport;
 import magmac.app.lang.node.TypescriptStructureNode;
 import magmac.app.lang.node.Values;
-import magmac.app.lang.node.Whitespace;
 
 public final class TypescriptLang {
     public static Rule createRule() {
         return new TypeRule("root", CommonLang.Statements("children", new OrRule(Lists.of(
-                Whitespace.createWhitespaceRule(),
+                JavaRules.createWhitespaceRule(),
                 TypeScriptImport.createImportRule(),
                 TypescriptStructureNode.createStructureRule("class"),
                 TypescriptStructureNode.createStructureRule("interface")
@@ -35,9 +34,9 @@ public final class TypescriptLang {
         Rule definitionRule = TypescriptLang.createDefinitionRule();
         LazyRule valueLazy = new MutableLazyRule();
         return new OrRule(Lists.of(
-                Whitespace.createWhitespaceRule(),
+                JavaRules.createWhitespaceRule(),
                 TypescriptLang.createMethodRule(definitionRule, valueLazy),
-                StructureStatement.createStructureStatementRule(definitionRule, valueLazy)
+                JavaStructureStatement.createStructureStatementRule(definitionRule, valueLazy)
         ));
     }
 

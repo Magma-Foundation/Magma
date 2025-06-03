@@ -5,11 +5,12 @@ import { InitialDestructor } from "../../../../magmac/app/compile/node/InitialDe
 import { Node } from "../../../../magmac/app/compile/node/Node";
 import { Destructors } from "../../../../magmac/app/lang/Destructors";
 import { Serializable } from "../../../../magmac/app/lang/Serializable";
+import { Annotation } from "../../../../magmac/app/lang/common/Annotation";
 export class Definition<T> {
-	deserialize0(deserialize : InitialDestructor) : CompileResult<Definition<JavaType>> {;;}
-	deserialize(node : Node) : CompileResult<Definition<JavaType>> {;;}
-	deserializeWithType(node : Node) : Option<CompileResult<Definition<JavaType>>> {;;}
-	withType(newType : T) : Definition<T> {;;}
-	withName(name : String) : Definition<T> {;;}
-	serialize() : Node {;;}
+	deserialize0(deserialize : InitialDestructor) : CompileResult<Definition<JavaType>> {break;;}
+	deserialize(node : Node) : CompileResult<Definition<JavaType>> {break;;}
+	deserializeWithType(node : Node) : Option<CompileResult<Definition<JavaType>>> {break;;}
+	withType(newType : T) : Definition<T> {break;;}
+	withName(name : String) : Definition<T> {break;;}
+	serialize() : Node {break;;}
 }

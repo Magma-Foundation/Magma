@@ -3,13 +3,13 @@ import { Function } from "../../java/util/function/Function";
 import { Predicate } from "../../java/util/function/Predicate";
 import { Supplier } from "../../java/util/function/Supplier";
 export class Some<T> {
-	map(mapper : Function<T, R>) : Option<R> {;;}
-	isPresent() : boolean {;;}
-	orElseGet(other : Supplier<T>) : T {;;}
-	isEmpty() : boolean {;;}
-	flatMap(mapper : Function<T, Option<R>>) : Option<R> {;;}
-	orElse(other : T) : T {;;}
-	filter(predicate : Predicate<T>) : Option<T> {if(true){ ;;};;}
-	or(other : Supplier<Option<T>>) : Option<T> {;;}
-	ifPresent(consumer : Consumer<T>) : void {;;}
+	map(mapper : Function<T, R>) : Option<R> {break;;}
+	isPresent() : boolean {break;;}
+	orElseGet(other : Supplier<T>) : T {break;;}
+	isEmpty() : boolean {break;;}
+	flatMap(mapper : Function<T, Option<R>>) : Option<R> {break;;}
+	orElse(other : T) : T {break;;}
+	filter(predicate : Predicate<T>) : Option<T> {if(true){ break;;}break;;}
+	or(other : Supplier<Option<T>>) : Option<T> {break;;}
+	ifPresent(consumer : Consumer<T>) : void {break;;}
 }

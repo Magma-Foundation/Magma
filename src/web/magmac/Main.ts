@@ -19,8 +19,8 @@ import { RuleLexer } from "../magmac/app/stage/lexer/RuleLexer";
 import { UnitSet } from "../magmac/app/stage/unit/UnitSet";
 import { Paths } from "../java/nio/file/Paths";
 export class Main {
-	main() : void {;;;}
-	getNext(result : UnitSet<JavaRoot>) : Option<Error> {;;}
-	loadSources(sources : Sources) : Result<UnitSet<JavaRoot>, ApplicationError> {;;;}
-	run(roots : UnitSet<JavaRoot>, platform : TargetPlatform) : Option<Error> {;;}
+	main() : void {break;break;;}
+	getNext(result : UnitSet<JavaRoot>) : Option<Error> {break;;}
+	loadSources(sources : Sources) : Result<UnitSet<JavaRoot>, ApplicationError> {break;break;;}
+	run(roots : UnitSet<JavaRoot>, platform : TargetPlatform) : Option<Error> {break;;}
 }

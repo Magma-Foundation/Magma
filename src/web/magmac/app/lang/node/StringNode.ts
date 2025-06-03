@@ -10,7 +10,7 @@ import { SuffixRule } from "../../../../magmac/app/compile/rule/SuffixRule";
 import { TypeRule } from "../../../../magmac/app/compile/rule/TypeRule";
 import { Destructors } from "../../../../magmac/app/lang/Destructors";
 export class StringNode {
-	deserialize(node : Node) : Option<CompileResult<StringNode>> {;;}
-	createStringRule() : Rule {;;}
-	serialize() : Node {;;}
+	deserialize(node : Node) : Option<CompileResult<StringNode>> {break;;}
+	createStringRule() : Rule {break;;}
+	serialize() : Node {break;;}
 }

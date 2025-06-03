@@ -8,6 +8,6 @@ import { SuffixRule } from "../../../../magmac/app/compile/rule/SuffixRule";
 import { TypeRule } from "../../../../magmac/app/compile/rule/TypeRule";
 import { Destructors } from "../../../../magmac/app/lang/Destructors";
 export class SingleCaseValue {
-	deserialize(node : Node) : Option<CompileResult<SingleCaseValue>> {;;}
-	createRule(value : Rule) : TypeRule {;;}
+	deserialize(node : Node) : Option<CompileResult<SingleCaseValue>> {break;;}
+	createRule(value : Rule) : TypeRule {break;;}
 }

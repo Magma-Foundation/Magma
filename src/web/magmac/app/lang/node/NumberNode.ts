@@ -9,7 +9,7 @@ import { StripRule } from "../../../../magmac/app/compile/rule/StripRule";
 import { TypeRule } from "../../../../magmac/app/compile/rule/TypeRule";
 import { Destructors } from "../../../../magmac/app/lang/Destructors";
 export class NumberNode {
-	deserialize(node : Node) : Option<CompileResult<NumberNode>> {;;}
-	createNumberRule() : Rule {;;}
-	serialize() : Node {;;}
+	deserialize(node : Node) : Option<CompileResult<NumberNode>> {break;;}
+	createNumberRule() : Rule {break;;}
+	serialize() : Node {break;;}
 }

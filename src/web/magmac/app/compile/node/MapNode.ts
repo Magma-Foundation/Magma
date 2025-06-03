@@ -15,43 +15,43 @@ import { CompileErrors } from "../../../../magmac/app/compile/error/error/Compil
 import { BiFunction } from "../../../../java/util/function/BiFunction";
 import { Function } from "../../../../java/util/function/Function";
 export class MapNode {
-	MapNode() : public {;;}
-	MapNode(maybeType : Option<String>, strings : Map<String, String>, nodes : Map<String, Node>, nodeLists : Map<String, NodeList>) : private {;;;;;}
-	MapNode(type : String) : public {;;}
-	fold(node : Node, iter : Iter<Tuple2<String, T>>, mapper : Function<Node, BiFunction<String, T, Node>>) : Node {;;}
-	formatNodeList(depth : int, nodeList : NodeList) : String {;;}
-	createIndent(depth : int) : String {;;}
-	formatEntry(depth : int, key : String, value : String) : String {;;;}
-	toStream(depth : int, map : Map<String, T>, mapper : Function<T, String>) : Iter<String> {if(true){ ;;};;}
-	withNodeAndSerializer(key : String, element : T, serializer : Function<T, Node>) : Node {;;}
-	removeNode(key : String) : Option<Tuple2<Node, Node>> {;;}
-	iterNodes() : Iter<Tuple2<String, Node>> {;;}
-	display() : String {;;}
-	format(depth : int) : String {;;;;;;;}
-	withString(key : String, value : String) : Node {;;;}
-	findString(key : String) : Option<String> {if(true){ ;;}if(true){ ;;};}
-	strings() : Map<String, String> {;;}
-	is(type : String) : boolean {;;}
-	retype(type : String) : Node {;;}
-	withNode(key : String, value : Node) : Node {;;;}
-	findNode(key : String) : Option<Node> {if(true){ ;;}if(true){ ;;};}
-	merge(other : Node) : Node {;;;;}
-	iterStrings() : Iter<Tuple2<String, String>> {;;}
-	hasNodeList(key : String) : boolean {;;}
-	removeNodeListOrError(key : String) : CompileResult<Tuple2<Node, NodeList>> {;;}
-	removeNodeList(key : String) : Option<Tuple2<Node, NodeList>> {;;}
-	withNodeLists(nodeLists : Map<String, NodeList>) : Node {;;}
-	isEmpty() : boolean {;;}
-	withNodeListAndSerializer(key : String, list : List<T>, serializer : Function<T, Node>) : Node {;;;}
-	removeString(key : String) : CompileResult<Tuple2<Node, String>> {;;}
-	removeNodeOrError(key : String) : CompileResult<Tuple2<Node, Node>> {;;}
-	createNotPresent(key : String) : CompileResult<Tuple2<Node, T>> {;;}
-	withNodes(nodes : Map<String, Node>) : Node {;;}
-	withStrings(strings : Map<String, String>) : Node {;;}
-	iterNodeLists() : Iter<Tuple2<String, NodeList>> {;;}
-	withNodeList(key : String, values : NodeList) : Node {;;;}
-	toString() : String {;;}
-	findNodeList(key : String) : Option<NodeList> {if(true){ ;;}if(true){ ;;};}
-	findNodeOrError(key : String) : CompileResult<Node> {;;}
-	findNodeListOrError(key : String) : CompileResult<NodeList> {;;}
+	MapNode() : public {break;;}
+	MapNode(maybeType : Option<String>, strings : Map<String, String>, nodes : Map<String, Node>, nodeLists : Map<String, NodeList>) : private {break;break;break;break;;}
+	MapNode(type : String) : public {break;;}
+	fold(node : Node, iter : Iter<Tuple2<String, T>>, mapper : Function<Node, BiFunction<String, T, Node>>) : Node {break;;}
+	formatNodeList(depth : int, nodeList : NodeList) : String {break;;}
+	createIndent(depth : int) : String {break;;}
+	formatEntry(depth : int, key : String, value : String) : String {break;break;;}
+	toStream(depth : int, map : Map<String, T>, mapper : Function<T, String>) : Iter<String> {if(true){ break;;}break;;}
+	withNodeAndSerializer(key : String, element : T, serializer : Function<T, Node>) : Node {break;;}
+	removeNode(key : String) : Option<Tuple2<Node, Node>> {break;;}
+	iterNodes() : Iter<Tuple2<String, Node>> {break;;}
+	display() : String {break;;}
+	format(depth : int) : String {break;break;break;break;break;break;;}
+	withString(key : String, value : String) : Node {break;break;;}
+	findString(key : String) : Option<String> {if(true){ break;;}if(true){ break;;};}
+	strings() : Map<String, String> {break;;}
+	is(type : String) : boolean {break;;}
+	retype(type : String) : Node {break;;}
+	withNode(key : String, value : Node) : Node {break;break;;}
+	findNode(key : String) : Option<Node> {if(true){ break;;}if(true){ break;;};}
+	merge(other : Node) : Node {break;break;break;;}
+	iterStrings() : Iter<Tuple2<String, String>> {break;;}
+	hasNodeList(key : String) : boolean {break;;}
+	removeNodeListOrError(key : String) : CompileResult<Tuple2<Node, NodeList>> {break;;}
+	removeNodeList(key : String) : Option<Tuple2<Node, NodeList>> {break;;}
+	withNodeLists(nodeLists : Map<String, NodeList>) : Node {break;;}
+	isEmpty() : boolean {break;;}
+	withNodeListAndSerializer(key : String, list : List<T>, serializer : Function<T, Node>) : Node {break;break;;}
+	removeString(key : String) : CompileResult<Tuple2<Node, String>> {break;;}
+	removeNodeOrError(key : String) : CompileResult<Tuple2<Node, Node>> {break;;}
+	createNotPresent(key : String) : CompileResult<Tuple2<Node, T>> {break;;}
+	withNodes(nodes : Map<String, Node>) : Node {break;;}
+	withStrings(strings : Map<String, String>) : Node {break;;}
+	iterNodeLists() : Iter<Tuple2<String, NodeList>> {break;;}
+	withNodeList(key : String, values : NodeList) : Node {break;break;;}
+	toString() : String {break;;}
+	findNodeList(key : String) : Option<NodeList> {if(true){ break;;}if(true){ break;;};}
+	findNodeOrError(key : String) : CompileResult<Node> {break;;}
+	findNodeListOrError(key : String) : CompileResult<NodeList> {break;;}
 }

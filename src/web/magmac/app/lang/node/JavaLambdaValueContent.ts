@@ -1,3 +1,3 @@
 export class JavaLambdaValueContent {
-	JavaLambdaValueContent(value : JavaValue) : public {;;}
+	JavaLambdaValueContent(value : JavaValue) : public {break;;}
 }

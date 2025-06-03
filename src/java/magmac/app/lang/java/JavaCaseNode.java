@@ -1,4 +1,4 @@
-package magmac.app.lang.node;
+package magmac.app.lang.java;
 
 import magmac.api.Option;
 import magmac.api.collect.list.List;
@@ -16,18 +16,25 @@ import magmac.app.compile.rule.StringRule;
 import magmac.app.compile.rule.StripRule;
 import magmac.app.compile.rule.TypeRule;
 import magmac.app.lang.Destructors;
+import magmac.app.lang.node.CaseDefinition;
+import magmac.app.lang.node.CaseValue;
+import magmac.app.lang.node.CaseValues;
+import magmac.app.lang.node.JavaTypes;
+import magmac.app.lang.node.MultipleCaseValue;
+import magmac.app.lang.node.SingleCaseValue;
+import magmac.app.lang.node.TypescriptFunctionSegment;
 
-public record CaseNode(List<CaseDefinition> definitions, CaseValue value) implements JavaFunctionSegment, TypescriptFunctionSegment {
-    public static Option<CompileResult<CaseNode>> deserialize(Node node) {
+public record JavaCaseNode(List<CaseDefinition> definitions, CaseValue value) implements JavaFunctionSegment, TypescriptFunctionSegment {
+    public static Option<CompileResult<JavaCaseNode>> deserialize(Node node) {
         return Destructors.destructWithType("case", node).map(destructor -> {
             return destructor
                     .withNodeList("definitions", CaseDefinition::deserialize)
                     .withNode("value", CaseValues::deserializeOrError)
-                    .complete(tuple -> new CaseNode(tuple.left(), tuple.right()));
+                    .complete(tuple -> new JavaCaseNode(tuple.left(), tuple.right()));
         });
     }
 
-    static Rule createCaseRule(Rule value, Rule segment) {
+    public static Rule createCaseRule(Rule value, Rule segment) {
         Rule typeRule = JavaTypes.createTypeRule();
         Rule name = new StripRule(new StringRule("name"));
         Rule last = LocatingRule.Last(new NodeRule("type", typeRule), " ", name);

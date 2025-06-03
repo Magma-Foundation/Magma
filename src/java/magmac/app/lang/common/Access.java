@@ -1,4 +1,4 @@
-package magmac.app.lang.node;
+package magmac.app.lang.common;
 
 public class Access<T, V> {
     protected final T type;

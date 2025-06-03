@@ -18,10 +18,10 @@ import { JavaDeserializers } from "../../../../magmac/app/lang/JavaDeserializers
 import { JavaRules } from "../../../../magmac/app/lang/JavaRules";
 import { LazyRule } from "../../../../magmac/app/lang/LazyRule";
 export class Values {
-	deserializeOrError(node : Node) : CompileResult<JavaValue> {;;}
-	deserialize(node : Node) : Option<CompileResult<JavaValue>> {;;;;}
-	getWrap(operator : Operator) : TypedDeserializer<JavaValue> {;;}
-	initValueRule(segment : Rule, value : LazyRule, lambdaInfix : String, definition : Rule) : LazyRule {;;}
-	getValueRules(functionSegment : Rule, value : LazyRule, lambdaInfix : String, definition : Rule) : List<Rule> {;;;;}
-	createSwitchRule(functionSegmentRule : Rule, value : Rule) : TypeRule {;;;;}
+	deserializeOrError(node : Node) : CompileResult<JavaValue> {break;;}
+	deserialize(node : Node) : Option<CompileResult<JavaValue>> {break;break;break;;}
+	getWrap(operator : Operator) : TypedDeserializer<JavaValue> {break;;}
+	initValueRule(segment : Rule, value : LazyRule, lambdaInfix : String, definition : Rule) : LazyRule {break;;}
+	getValueRules(functionSegment : Rule, value : LazyRule, lambdaInfix : String, definition : Rule) : List<Rule> {break;break;break;;}
+	createSwitchRule(functionSegmentRule : Rule, value : Rule) : TypeRule {break;break;break;;}
 }

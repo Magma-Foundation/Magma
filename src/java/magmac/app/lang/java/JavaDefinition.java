@@ -1,4 +1,4 @@
-package magmac.app.lang.node;
+package magmac.app.lang.java;
 
 import magmac.api.Option;
 import magmac.api.collect.list.Lists;
@@ -24,6 +24,13 @@ import magmac.app.compile.rule.split.DividingSplitter;
 import magmac.app.lang.OptionNodeListRule;
 import magmac.app.lang.TypeSeparatorFolder;
 import magmac.app.lang.ValueFolder;
+import magmac.app.lang.node.Assignable;
+import magmac.app.lang.node.Definition;
+import magmac.app.lang.node.JavaType;
+import magmac.app.lang.node.JavaTypes;
+import magmac.app.lang.node.LambdaParameter;
+import magmac.app.lang.node.Modifier;
+import magmac.app.lang.node.StructureStatementValue;
 
 public record JavaDefinition(Definition<JavaType> definition)
         implements JavaParameter, Assignable, JavaMethodHeader, StructureStatementValue, LambdaParameter {

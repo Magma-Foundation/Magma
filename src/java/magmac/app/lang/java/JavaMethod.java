@@ -1,4 +1,4 @@
-package magmac.app.lang.node;
+package magmac.app.lang.java;
 
 import magmac.api.Option;
 import magmac.api.collect.list.List;
@@ -19,6 +19,8 @@ import magmac.app.compile.rule.TypeRule;
 import magmac.app.lang.CommonLang;
 import magmac.app.lang.Destructors;
 import magmac.app.lang.OptionNodeListRule;
+import magmac.app.lang.node.FunctionSegments;
+import magmac.app.lang.node.Parameters;
 
 public record JavaMethod(
         JavaMethodHeader header,
