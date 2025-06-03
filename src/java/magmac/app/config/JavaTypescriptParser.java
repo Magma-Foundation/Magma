@@ -11,18 +11,18 @@ import magmac.app.compile.error.CompileResultCollector;
 import magmac.app.compile.error.CompileResults;
 import magmac.app.io.Location;
 import magmac.app.io.sources.UnitSetCollector;
-import magmac.app.lang.node.Block;
 import magmac.app.lang.node.CaseNode;
-import magmac.app.lang.node.FunctionStatement;
-import magmac.app.lang.node.JavaBlock;
-import magmac.app.lang.node.JavaBlockHeader;
-import magmac.app.lang.node.JavaFunctionSegment;
+import magmac.app.lang.node.ConditionalType;
 import magmac.app.lang.node.Definition;
 import magmac.app.lang.node.EnumValues;
+import magmac.app.lang.node.FunctionStatement;
 import magmac.app.lang.node.JavaArrayType;
 import magmac.app.lang.node.JavaBase;
+import magmac.app.lang.node.JavaBlock;
+import magmac.app.lang.node.JavaBlockHeader;
 import magmac.app.lang.node.JavaConstructor;
 import magmac.app.lang.node.JavaDefinition;
+import magmac.app.lang.node.JavaFunctionSegment;
 import magmac.app.lang.node.JavaMethod;
 import magmac.app.lang.node.JavaMethodHeader;
 import magmac.app.lang.node.JavaNamespacedNode;
@@ -49,6 +49,9 @@ import magmac.app.lang.node.TypeScriptRootSegment;
 import magmac.app.lang.node.TypeScriptTemplateType;
 import magmac.app.lang.node.TypeScriptType;
 import magmac.app.lang.node.TypescriptArrayType;
+import magmac.app.lang.node.TypescriptBlock;
+import magmac.app.lang.node.TypescriptBlockHeader;
+import magmac.app.lang.node.TypescriptConditional;
 import magmac.app.lang.node.TypescriptConstructor;
 import magmac.app.lang.node.TypescriptFunctionSegment;
 import magmac.app.lang.node.TypescriptMethod;
@@ -179,12 +182,20 @@ class JavaTypescriptParser implements Parser<JavaRoot, TypescriptRoot> {
 
     private static TypescriptFunctionSegment parseFunctionSegment(JavaFunctionSegment segment) {
         return switch (segment) {
-            case JavaBlock block -> new Whitespace();
+            case JavaBlock block -> JavaTypescriptParser.parseBlock(block);
             case CaseNode caseNode -> new Whitespace();
             case FunctionStatement functionStatement -> new Whitespace();
             case JavaReturnNode javaReturnNode -> new Whitespace();
             case Whitespace whitespace -> new Whitespace();
         };
+    }
+
+    private static TypescriptBlock parseBlock(JavaBlock block) {
+        return new TypescriptBlock(JavaTypescriptParser.parseHeader(block.header()), JavaTypescriptParser.parseFunctionSegments(block.segments()));
+    }
+
+    private static TypescriptBlockHeader parseHeader(JavaBlockHeader header) {
+        return new TypescriptConditional(ConditionalType.If, new Symbol("true"));
     }
 
     private static TypeScriptParameter parseParameter(JavaParameter parameter) {

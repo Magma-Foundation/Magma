@@ -15,6 +15,6 @@ export class JVMMap<K,  V> {
 	containsKey(key : K) : boolean {;;}
 	get(key : K) : V {;;}
 	isEmpty() : boolean {;;}
-	mapOrPut(key : K, mapper : Function<V, V>, supplier : Supplier<V>) : Map<K, V> {;;;;}
-	removeByKey(key : K) : Option<Tuple2<Map<K, V>, V>> {;;;;;}
+	mapOrPut(key : K, mapper : Function<V, V>, supplier : Supplier<V>) : Map<K, V> {if(true){ ;;}if(true){ ;;};;}
+	removeByKey(key : K) : Option<Tuple2<Map<K, V>, V>> {if(true){ ;;};;;;}
 }

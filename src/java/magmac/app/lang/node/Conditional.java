@@ -1,25 +1,19 @@
 package magmac.app.lang.node;
 
-import magmac.api.Option;
-import magmac.app.compile.error.CompileResult;
-import magmac.app.compile.node.Node;
-import magmac.app.compile.rule.NodeRule;
-import magmac.app.compile.rule.PrefixRule;
-import magmac.app.compile.rule.Rule;
-import magmac.app.compile.rule.StripRule;
-import magmac.app.compile.rule.SuffixRule;
-import magmac.app.compile.rule.TypeRule;
-import magmac.app.lang.Destructors;
+public class Conditional<V> {
+    protected final ConditionalType type;
+    protected final V condition;
 
-public record Conditional(ConditionalType type, JavaValue condition) implements JavaBlockHeader {
-    public static Option<CompileResult<Conditional>> deserialize(ConditionalType type, Node node) {
-        return Destructors.destructWithType(type.name().toLowerCase(), node).map(deserializer -> deserializer.withNode("condition", Values::deserializeOrError)
-                .complete(value -> new Conditional(type, value)));
+    public Conditional(ConditionalType type, V condition) {
+        this.type = type;
+        this.condition = condition;
     }
 
-    public static Rule createConditionalRule(String type, Rule value) {
-        Rule condition = new NodeRule("condition", value);
-        Rule childRule = new StripRule(new PrefixRule("(", new SuffixRule(condition, ")")));
-        return new TypeRule(type, new StripRule(new PrefixRule(type, childRule)));
+    public ConditionalType type() {
+        return type;
+    }
+
+    public V condition() {
+        return condition;
     }
 }

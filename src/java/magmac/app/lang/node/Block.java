@@ -4,11 +4,11 @@ import magmac.api.collect.list.List;
 
 public class Block<H, S> {
     protected final H header;
-    protected final List<S> segments;
+    protected final List<S> children;
 
-    public Block(H header, List<S> segments) {
+    public Block(H header, List<S> children) {
         this.header = header;
-        this.segments = segments;
+        this.children = children;
     }
 
     public H header() {
@@ -16,6 +16,6 @@ public class Block<H, S> {
     }
 
     public List<S> segments() {
-        return this.segments;
+        return this.children;
     }
 }

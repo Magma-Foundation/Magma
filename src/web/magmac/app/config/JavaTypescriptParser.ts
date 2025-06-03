@@ -9,18 +9,18 @@ import { CompileResultCollector } from "../../../magmac/app/compile/error/Compil
 import { CompileResults } from "../../../magmac/app/compile/error/CompileResults";
 import { Location } from "../../../magmac/app/io/Location";
 import { UnitSetCollector } from "../../../magmac/app/io/sources/UnitSetCollector";
-import { Block } from "../../../magmac/app/lang/node/Block";
 import { CaseNode } from "../../../magmac/app/lang/node/CaseNode";
-import { FunctionStatement } from "../../../magmac/app/lang/node/FunctionStatement";
-import { JavaBlock } from "../../../magmac/app/lang/node/JavaBlock";
-import { JavaBlockHeader } from "../../../magmac/app/lang/node/JavaBlockHeader";
-import { JavaFunctionSegment } from "../../../magmac/app/lang/node/JavaFunctionSegment";
+import { ConditionalType } from "../../../magmac/app/lang/node/ConditionalType";
 import { Definition } from "../../../magmac/app/lang/node/Definition";
 import { EnumValues } from "../../../magmac/app/lang/node/EnumValues";
+import { FunctionStatement } from "../../../magmac/app/lang/node/FunctionStatement";
 import { JavaArrayType } from "../../../magmac/app/lang/node/JavaArrayType";
 import { JavaBase } from "../../../magmac/app/lang/node/JavaBase";
+import { JavaBlock } from "../../../magmac/app/lang/node/JavaBlock";
+import { JavaBlockHeader } from "../../../magmac/app/lang/node/JavaBlockHeader";
 import { JavaConstructor } from "../../../magmac/app/lang/node/JavaConstructor";
 import { JavaDefinition } from "../../../magmac/app/lang/node/JavaDefinition";
+import { JavaFunctionSegment } from "../../../magmac/app/lang/node/JavaFunctionSegment";
 import { JavaMethod } from "../../../magmac/app/lang/node/JavaMethod";
 import { JavaMethodHeader } from "../../../magmac/app/lang/node/JavaMethodHeader";
 import { JavaNamespacedNode } from "../../../magmac/app/lang/node/JavaNamespacedNode";
@@ -47,6 +47,9 @@ import { TypeScriptRootSegment } from "../../../magmac/app/lang/node/TypeScriptR
 import { TypeScriptTemplateType } from "../../../magmac/app/lang/node/TypeScriptTemplateType";
 import { TypeScriptType } from "../../../magmac/app/lang/node/TypeScriptType";
 import { TypescriptArrayType } from "../../../magmac/app/lang/node/TypescriptArrayType";
+import { TypescriptBlock } from "../../../magmac/app/lang/node/TypescriptBlock";
+import { TypescriptBlockHeader } from "../../../magmac/app/lang/node/TypescriptBlockHeader";
+import { TypescriptConditional } from "../../../magmac/app/lang/node/TypescriptConditional";
 import { TypescriptConstructor } from "../../../magmac/app/lang/node/TypescriptConstructor";
 import { TypescriptFunctionSegment } from "../../../magmac/app/lang/node/TypescriptFunctionSegment";
 import { TypescriptMethod } from "../../../magmac/app/lang/node/TypescriptMethod";
@@ -75,6 +78,8 @@ export class JavaTypescriptParser {
 	parseMethod(methodNode : JavaMethod) : TypescriptStructureMember {;;;;;}
 	parseFunctionSegments(segments : List<JavaFunctionSegment>) : List<TypescriptFunctionSegment> {;;}
 	parseFunctionSegment(segment : JavaFunctionSegment) : TypescriptFunctionSegment {;;;}
+	parseBlock(block : JavaBlock) : TypescriptBlock {;;}
+	parseHeader(header : JavaBlockHeader) : TypescriptBlockHeader {;;}
 	parseParameter(parameter : JavaParameter) : TypeScriptParameter {;;;}
 	parseMethodHeader(header : JavaMethodHeader) : TypeScriptMethodHeader {;;;}
 	parseDefinition(javaDefinition : JavaDefinition) : TypeScriptDefinition {;;;;}

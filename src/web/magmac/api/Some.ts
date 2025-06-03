@@ -9,7 +9,7 @@ export class Some<T> {
 	isEmpty() : boolean {;;}
 	flatMap(mapper : Function<T, Option<R>>) : Option<R> {;;}
 	orElse(other : T) : T {;;}
-	filter(predicate : Predicate<T>) : Option<T> {;;;}
+	filter(predicate : Predicate<T>) : Option<T> {if(true){ ;;};;}
 	or(other : Supplier<Option<T>>) : Option<T> {;;}
 	ifPresent(consumer : Consumer<T>) : void {;;}
 }

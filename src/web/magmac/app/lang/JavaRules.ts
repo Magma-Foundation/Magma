@@ -19,7 +19,6 @@ import { TypeRule } from "../../../magmac/app/compile/rule/TypeRule";
 import { FoldingDivider } from "../../../magmac/app/compile/rule/divide/FoldingDivider";
 import { DividingSplitter } from "../../../magmac/app/compile/rule/split/DividingSplitter";
 import { Arguments } from "../../../magmac/app/lang/node/Arguments";
-import { Conditional } from "../../../magmac/app/lang/node/Conditional";
 import { JavaDefinition } from "../../../magmac/app/lang/node/JavaDefinition";
 import { JavaLambdaValueContent } from "../../../magmac/app/lang/node/JavaLambdaValueContent";
 import { JavaNamespacedNode } from "../../../magmac/app/lang/node/JavaNamespacedNode";
@@ -45,4 +44,5 @@ export class JavaRules {
 	createBlockHeaderRule(value : Rule, definition : Rule) : Rule {;;}
 	createBlockRule(functionSegmentRule : LazyRule, value : Rule, definition : Rule) : Rule {;;;}
 	createBlockRule0(header : Rule, functionSegmentRule : Rule) : TypeRule {;;;;;}
+	createConditionalRule(type : String, value : Rule) : Rule {;;;;}
 }

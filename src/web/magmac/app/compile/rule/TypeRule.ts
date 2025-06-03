@@ -11,5 +11,5 @@ import { ImmutableCompileError } from "../../../../magmac/app/error/ImmutableCom
 export class TypeRule {
 	createError(context : Context, err : CompileError) : CompileError {;;}
 	lex(input : String) : CompileResult<Node> {;;}
-	generate(node : Node) : CompileResult<String> {;;;}
+	generate(node : Node) : CompileResult<String> {if(true){ ;;};;}
 }

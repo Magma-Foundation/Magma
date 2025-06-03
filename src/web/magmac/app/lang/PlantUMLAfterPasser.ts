@@ -21,10 +21,10 @@ export class PlantUMLAfterPasser {
 	createInherits(child : Node, key : String) : CompileResult<NodeList> {;;}
 	getNodeListCompileResult(child : Node, implemented : Node) : CompileResult<NodeList> {;;}
 	createInherits0(type : Node, child : String) : CompileResult<NodeList> {;;}
-	stringifyType(type : Node) : CompileResult<String> {;;;;}
+	stringifyType(type : Node) : CompileResult<String> {if(true){ ;;}if(true){ ;;};;}
 	replaceRootChild(child : Node) : CompileResult<NodeList> {;;;;}
 	replaceRootChildren(node : Node) : CompileResult<NodeList> {;;}
 	replaceChildrenToList(node : Node) : CompileResult<List<NodeList>> {;;}
-	pass(state : ParseState, node : Node) : ParseResult {;;;;}
+	pass(state : ParseState, node : Node) : ParseResult {if(true){ ;;;}if(true){ ;;;;;};;}
 	getTuple2CompileResult(state : ParseState, node : Node, values : NodeList) : CompileResult<ParseUnit<Node>> {;;}
 }

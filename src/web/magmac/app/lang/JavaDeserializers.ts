@@ -6,17 +6,18 @@ import { JavaConstruction } from "../../../magmac/app/lang/java/JavaConstruction
 import { JavaInvokable } from "../../../magmac/app/lang/java/JavaInvokable";
 import { Lang } from "../../../magmac/app/lang/java/Lang";
 import { Arguments } from "../../../magmac/app/lang/node/Arguments";
+import { Conditional } from "../../../magmac/app/lang/node/Conditional";
 import { FunctionSegments } from "../../../magmac/app/lang/node/FunctionSegments";
 import { JavaBlock } from "../../../magmac/app/lang/node/JavaBlock";
 import { JavaBlockHeader } from "../../../magmac/app/lang/node/JavaBlockHeader";
 import { Catch } from "../../../magmac/app/lang/node/Catch";
-import { Conditional } from "../../../magmac/app/lang/node/Conditional";
 import { ConditionalType } from "../../../magmac/app/lang/node/ConditionalType";
 import { Else } from "../../../magmac/app/lang/node/Else";
 import { FunctionSegmentValues } from "../../../magmac/app/lang/node/FunctionSegmentValues";
 import { FunctionStatement } from "../../../magmac/app/lang/node/FunctionStatement";
 import { JavaAccess } from "../../../magmac/app/lang/node/JavaAccess";
 import { JavaAccessType } from "../../../magmac/app/lang/node/JavaAccessType";
+import { JavaConditional } from "../../../magmac/app/lang/node/JavaConditional";
 import { JavaLambda } from "../../../magmac/app/lang/node/JavaLambda";
 import { JavaNamespacedNode } from "../../../magmac/app/lang/node/JavaNamespacedNode";
 import { JavaPost } from "../../../magmac/app/lang/node/JavaPost";
@@ -25,6 +26,7 @@ import { JavaRootSegment } from "../../../magmac/app/lang/node/JavaRootSegment";
 import { JavaStructureNodeDeserializer } from "../../../magmac/app/lang/node/JavaStructureNodeDeserializer";
 import { JavaStructureType } from "../../../magmac/app/lang/node/JavaStructureType";
 import { JavaTypes } from "../../../magmac/app/lang/node/JavaTypes";
+import { JavaValue } from "../../../magmac/app/lang/node/JavaValue";
 import { JavaYieldNode } from "../../../magmac/app/lang/node/JavaYieldNode";
 import { LambdaContents } from "../../../magmac/app/lang/node/LambdaContents";
 import { LambdaHeaders } from "../../../magmac/app/lang/node/LambdaHeaders";
@@ -47,4 +49,5 @@ export class JavaDeserializers {
 	deserializeReturn(node : Node) : Option<CompileResult<JavaReturnNode>> {;;}
 	deserializeBlockHeader(node : Node) : CompileResult<JavaBlockHeader> {;;}
 	deserializeBlock(node : Node) : Option<CompileResult<JavaBlock>> {;;}
+	deserializeConditional(type : ConditionalType, node : Node) : Option<CompileResult<JavaConditional>> {;;}
 }

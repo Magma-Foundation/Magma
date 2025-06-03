@@ -15,7 +15,7 @@ export class MutableDivideState {
 	enter() : DivideState {;;;}
 	exit() : DivideState {;;;}
 	isShallow() : boolean {;;}
-	pop() : Option<Tuple2<DivideState, Character>> {;;;}
+	pop() : Option<Tuple2<DivideState, Character>> {if(true){ ;;;;}if(true){ ;;};}
 	popAndAppendToTuple() : Option<Tuple2<DivideState, Character>> {;;}
 	popAndAppendToOption() : Option<DivideState> {;;}
 	peek() : char {;;}

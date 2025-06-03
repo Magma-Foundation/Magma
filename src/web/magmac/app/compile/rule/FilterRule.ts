@@ -8,6 +8,6 @@ export class FilterRule {
 	FilterRule(filter : Filter, childRule : Rule) : private {;;;}
 	Symbol(childRule : Rule) : Rule {;;}
 	Number(childRule : Rule) : Rule {;;}
-	lex(input : String) : CompileResult<Node> {;;;}
+	lex(input : String) : CompileResult<Node> {if(true){ ;;}if(true){ ;;};}
 	generate(node : Node) : CompileResult<String> {;;}
 }

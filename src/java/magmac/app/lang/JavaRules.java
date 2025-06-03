@@ -21,7 +21,6 @@ import magmac.app.compile.rule.TypeRule;
 import magmac.app.compile.rule.divide.FoldingDivider;
 import magmac.app.compile.rule.split.DividingSplitter;
 import magmac.app.lang.node.Arguments;
-import magmac.app.lang.node.Conditional;
 import magmac.app.lang.node.JavaDefinition;
 import magmac.app.lang.node.JavaLambdaValueContent;
 import magmac.app.lang.node.JavaNamespacedNode;
@@ -143,8 +142,8 @@ public final class JavaRules {
         return new OrRule(Lists.of(
                 new TypeRule("else", new StripRule(new ExactRule("else"))),
                 new TypeRule("try", new StripRule(new ExactRule("try"))),
-                Conditional.createConditionalRule("if", value),
-                Conditional.createConditionalRule("while", value),
+                createConditionalRule("if", value),
+                createConditionalRule("while", value),
                 new TypeRule("catch", new StripRule(new PrefixRule("catch", new StripRule(new PrefixRule("(", new SuffixRule(new NodeRule("definition", definition), ")"))))))
         ));
     }
@@ -159,5 +158,11 @@ public final class JavaRules {
         Splitter first = DividingSplitter.First(new FoldingDivider(new BlockFolder()), "");
         Rule childRule = new LocatingRule(new SuffixRule(header, "{"), first, children);
         return new TypeRule("block", new StripRule(new SuffixRule(childRule, "}")));
+    }
+
+    public static Rule createConditionalRule(String type, Rule value) {
+        Rule condition = new NodeRule("condition", value);
+        Rule childRule = new StripRule(new PrefixRule("(", new SuffixRule(condition, ")")));
+        return new TypeRule(type, new StripRule(new PrefixRule(type, childRule)));
     }
 }

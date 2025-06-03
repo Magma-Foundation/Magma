@@ -506,6 +506,11 @@ JVMList --> ArrayList
 JVMList --> BiFunction
 class JVMList
 List <|-- JVMList
+TypescriptConditional --> MapNode
+TypescriptConditional --> Node
+class TypescriptConditional
+Conditional <|-- TypescriptConditional
+TypescriptBlockHeader <|-- TypescriptConditional
 JavaDeserializers --> Option
 JavaDeserializers --> Lists
 JavaDeserializers --> CompileResult
@@ -514,17 +519,18 @@ JavaDeserializers --> JavaConstruction
 JavaDeserializers --> JavaInvokable
 JavaDeserializers --> Lang
 JavaDeserializers --> Arguments
+JavaDeserializers --> Conditional
 JavaDeserializers --> FunctionSegments
 JavaDeserializers --> JavaBlock
 JavaDeserializers --> JavaBlockHeader
 JavaDeserializers --> Catch
-JavaDeserializers --> Conditional
 JavaDeserializers --> ConditionalType
 JavaDeserializers --> Else
 JavaDeserializers --> FunctionSegmentValues
 JavaDeserializers --> FunctionStatement
 JavaDeserializers --> JavaAccess
 JavaDeserializers --> JavaAccessType
+JavaDeserializers --> JavaConditional
 JavaDeserializers --> JavaLambda
 JavaDeserializers --> JavaNamespacedNode
 JavaDeserializers --> JavaPost
@@ -533,6 +539,7 @@ JavaDeserializers --> JavaRootSegment
 JavaDeserializers --> JavaStructureNodeDeserializer
 JavaDeserializers --> JavaStructureType
 JavaDeserializers --> JavaTypes
+JavaDeserializers --> JavaValue
 JavaDeserializers --> JavaYieldNode
 JavaDeserializers --> LambdaContents
 JavaDeserializers --> LambdaHeaders
@@ -731,6 +738,12 @@ InlinePassResult --> ParseUnitImpl
 InlinePassResult --> Supplier
 class InlinePassResult
 ParseResult <|-- InlinePassResult
+TypescriptBlock --> List
+TypescriptBlock --> MapNode
+TypescriptBlock --> Node
+class TypescriptBlock
+Block <|-- TypescriptBlock
+TypescriptFunctionSegment <|-- TypescriptBlock
 InitialDestructor --> List
 InitialDestructor --> CompileResult
 InitialDestructor --> Deserializer
@@ -1076,18 +1089,18 @@ JavaTypescriptParser --> CompileResultCollector
 JavaTypescriptParser --> CompileResults
 JavaTypescriptParser --> Location
 JavaTypescriptParser --> UnitSetCollector
-JavaTypescriptParser --> Block
 JavaTypescriptParser --> CaseNode
-JavaTypescriptParser --> FunctionStatement
-JavaTypescriptParser --> JavaBlock
-JavaTypescriptParser --> JavaBlockHeader
-JavaTypescriptParser --> JavaFunctionSegment
+JavaTypescriptParser --> ConditionalType
 JavaTypescriptParser --> Definition
 JavaTypescriptParser --> EnumValues
+JavaTypescriptParser --> FunctionStatement
 JavaTypescriptParser --> JavaArrayType
 JavaTypescriptParser --> JavaBase
+JavaTypescriptParser --> JavaBlock
+JavaTypescriptParser --> JavaBlockHeader
 JavaTypescriptParser --> JavaConstructor
 JavaTypescriptParser --> JavaDefinition
+JavaTypescriptParser --> JavaFunctionSegment
 JavaTypescriptParser --> JavaMethod
 JavaTypescriptParser --> JavaMethodHeader
 JavaTypescriptParser --> JavaNamespacedNode
@@ -1114,6 +1127,9 @@ JavaTypescriptParser --> TypeScriptRootSegment
 JavaTypescriptParser --> TypeScriptTemplateType
 JavaTypescriptParser --> TypeScriptType
 JavaTypescriptParser --> TypescriptArrayType
+JavaTypescriptParser --> TypescriptBlock
+JavaTypescriptParser --> TypescriptBlockHeader
+JavaTypescriptParser --> TypescriptConditional
 JavaTypescriptParser --> TypescriptConstructor
 JavaTypescriptParser --> TypescriptFunctionSegment
 JavaTypescriptParser --> TypescriptMethod
@@ -1185,6 +1201,9 @@ Modifier --> Destructors
 Modifier --> Serializable
 class Modifier
 Serializable <|-- Modifier
+TypescriptBlockHeader --> Serializable
+interface TypescriptBlockHeader
+Serializable <|-- TypescriptBlockHeader
 Try --> Option
 Try --> CompileResult
 Try --> Node
@@ -1484,6 +1503,9 @@ LambdaHeaders --> CompileResult
 LambdaHeaders --> Node
 LambdaHeaders --> Deserializers
 class LambdaHeaders
+class JavaConditional
+Conditional <|-- JavaConditional
+JavaBlockHeader <|-- JavaConditional
 ResultCollector --> Tuple2
 ResultCollector --> Ok
 ResultCollector --> Result
@@ -1554,7 +1576,6 @@ JavaRules --> TypeRule
 JavaRules --> FoldingDivider
 JavaRules --> DividingSplitter
 JavaRules --> Arguments
-JavaRules --> Conditional
 JavaRules --> JavaDefinition
 JavaRules --> JavaLambdaValueContent
 JavaRules --> JavaNamespacedNode
@@ -1806,18 +1827,7 @@ interface Application
 ImmutableParseState --> Location
 class ImmutableParseState
 ParseState <|-- ImmutableParseState
-Conditional --> Option
-Conditional --> CompileResult
-Conditional --> Node
-Conditional --> NodeRule
-Conditional --> PrefixRule
-Conditional --> Rule
-Conditional --> StripRule
-Conditional --> SuffixRule
-Conditional --> TypeRule
-Conditional --> Destructors
 class Conditional
-JavaBlockHeader <|-- Conditional
 Operation --> MapNode
 Operation --> Node
 Operation --> LocatingRule

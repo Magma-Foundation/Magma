@@ -22,19 +22,19 @@ export class MapNode {
 	formatNodeList(depth : int, nodeList : NodeList) : String {;;}
 	createIndent(depth : int) : String {;;}
 	formatEntry(depth : int, key : String, value : String) : String {;;;}
-	toStream(depth : int, map : Map<String, T>, mapper : Function<T, String>) : Iter<String> {;;;}
+	toStream(depth : int, map : Map<String, T>, mapper : Function<T, String>) : Iter<String> {if(true){ ;;};;}
 	withNodeAndSerializer(key : String, element : T, serializer : Function<T, Node>) : Node {;;}
 	removeNode(key : String) : Option<Tuple2<Node, Node>> {;;}
 	iterNodes() : Iter<Tuple2<String, Node>> {;;}
 	display() : String {;;}
 	format(depth : int) : String {;;;;;;;}
 	withString(key : String, value : String) : Node {;;;}
-	findString(key : String) : Option<String> {;;;}
+	findString(key : String) : Option<String> {if(true){ ;;}if(true){ ;;};}
 	strings() : Map<String, String> {;;}
 	is(type : String) : boolean {;;}
 	retype(type : String) : Node {;;}
 	withNode(key : String, value : Node) : Node {;;;}
-	findNode(key : String) : Option<Node> {;;;}
+	findNode(key : String) : Option<Node> {if(true){ ;;}if(true){ ;;};}
 	merge(other : Node) : Node {;;;;}
 	iterStrings() : Iter<Tuple2<String, String>> {;;}
 	hasNodeList(key : String) : boolean {;;}
@@ -51,7 +51,7 @@ export class MapNode {
 	iterNodeLists() : Iter<Tuple2<String, NodeList>> {;;}
 	withNodeList(key : String, values : NodeList) : Node {;;;}
 	toString() : String {;;}
-	findNodeList(key : String) : Option<NodeList> {;;;}
+	findNodeList(key : String) : Option<NodeList> {if(true){ ;;}if(true){ ;;};}
 	findNodeOrError(key : String) : CompileResult<Node> {;;}
 	findNodeListOrError(key : String) : CompileResult<NodeList> {;;}
 }

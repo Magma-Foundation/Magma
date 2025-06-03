@@ -19,8 +19,8 @@ export class JVMList<T> {
 	sort(sorter : BiFunction<T, T, Integer>) : List<T> {;;;;}
 	contains(element : T) : boolean {;;}
 	size() : int {;;}
-	popLast() : Option<Tuple2<List<T>, T>> {;;;;}
-	popFirst() : Option<Tuple2<T, List<T>>> {;;;;}
+	popLast() : Option<Tuple2<List<T>, T>> {if(true){ ;;};;;}
+	popFirst() : Option<Tuple2<T, List<T>>> {if(true){ ;;};;;}
 	addFirst(element : T) : List<T> {;;;;;}
-	findLast() : Option<T> {;;;}
+	findLast() : Option<T> {if(true){ ;;};;}
 }
