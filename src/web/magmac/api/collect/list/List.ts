@@ -16,4 +16,5 @@ export interface List<T> {
 	 popFirst() : Option<Tuple2<T, List<T>>>;
 	 addFirst( element : T) : List<T>;
 	 isEmpty() : boolean;
+	 iterWithIndices() : Iter<Tuple2<Integer, T>>;
 }

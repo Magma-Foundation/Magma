@@ -12,7 +12,6 @@ import magmac.app.compile.error.CompileResults;
 import magmac.app.io.Location;
 import magmac.app.io.sources.UnitSetCollector;
 import magmac.app.lang.java.JavaBreak;
-import magmac.app.lang.java.JavaConstruction;
 import magmac.app.lang.java.JavaConstructor;
 import magmac.app.lang.java.JavaContinue;
 import magmac.app.lang.java.JavaEnumValues;
@@ -33,7 +32,6 @@ import magmac.app.lang.node.Modifier;
 import magmac.app.lang.node.ParameterizedMethodHeader;
 import magmac.app.lang.node.Segment;
 import magmac.app.lang.node.StructureValue;
-import magmac.app.lang.node.TypeArguments;
 import magmac.app.lang.web.Caller;
 import magmac.app.lang.web.FunctionStatement;
 import magmac.app.lang.web.Symbol;
@@ -218,7 +216,7 @@ class JavaTypescriptParser implements Parser<JavaLang.JavaRoot, TypescriptLang.T
     private static Caller parseCaller(JavaLang.JavaCaller caller) {
         return switch (caller) {
             case JavaLang.Value javaValue -> JavaTypescriptParser.parseValue(javaValue);
-            case JavaConstruction javaConstruction ->
+            case JavaLang.Construction javaConstruction ->
                     new TypescriptLang.Construction(JavaTypescriptParser.parseType(javaConstruction.type()));
         };
     }
@@ -334,8 +332,8 @@ class JavaTypescriptParser implements Parser<JavaLang.JavaRoot, TypescriptLang.T
 
     private static TypescriptLang.TemplateType parseTemplateType(JavaLang.JavaTemplateType type) {
         var base = JavaTypescriptParser.parseBaseType(type.base());
-        var collect = JavaTypescriptParser.parseTypeList(type.typeArguments().arguments());
-        return new TypescriptLang.TemplateType(base, new TypeArguments<>(collect));
+        var listOption = type.typeArguments().map(JavaTypescriptParser::parseTypeList);
+        return new TypescriptLang.TemplateType(base, listOption);
     }
 
     private static JavaLang.Symbol parseBaseType(JavaLang.Base base) {

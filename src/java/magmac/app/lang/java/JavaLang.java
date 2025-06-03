@@ -35,7 +35,6 @@ import magmac.app.lang.node.Segment;
 import magmac.app.lang.node.StructureMembers;
 import magmac.app.lang.node.StructureStatementValue;
 import magmac.app.lang.node.StructureValue;
-import magmac.app.lang.node.TypeArguments;
 import magmac.app.lang.node.TypedDeserializer;
 import magmac.app.lang.web.TypescriptLang;
 
@@ -43,7 +42,7 @@ public class JavaLang {
     public sealed interface JavaArgument permits Value, Whitespace {
     }
 
-    public sealed interface JavaCaller permits JavaConstruction, Value {
+    public sealed interface JavaCaller permits Construction, Value {
     }
 
     public sealed interface Assignable {
@@ -73,7 +72,8 @@ public class JavaLang {
     public interface InstanceOfDefinition {
     }
 
-    public record InstanceOfDefinitionWithParameters(Base base, List<Definition> parameters) implements InstanceOfDefinition {
+    public record InstanceOfDefinitionWithParameters(Base base,
+                                                     List<Definition> parameters) implements InstanceOfDefinition {
     }
 
     public record InstanceOfDefinitionWithName(Base base, String name) implements InstanceOfDefinition {
@@ -124,9 +124,9 @@ public class JavaLang {
         }
     }
 
-    public static final class Access extends magmac.app.lang.common.Access<JavaAccessType, Value> implements Value {
-        public Access(JavaAccessType type, Value receiver, String property) {
-            super(type, receiver, property);
+    public static final class Access extends magmac.app.lang.common.Access<JavaAccessType, Value, JavaType> implements Value {
+        public Access(JavaAccessType type, Value receiver, Option<List<JavaType>> arguments, String property) {
+            super(type, receiver, property, arguments);
         }
     }
 
@@ -149,7 +149,7 @@ public class JavaLang {
         }
     }
 
-    public record JavaTemplateType(Base base, TypeArguments<JavaType> typeArguments) implements JavaType {
+    public record JavaTemplateType(Base base, Option<List<JavaType>> typeArguments) implements JavaType {
     }
 
     public record JavaStructureNodeDeserializer(
@@ -347,6 +347,9 @@ public class JavaLang {
         public Option<List<JavaType>> extended() {
             return this.value.maybeExtended();
         }
+    }
+
+    public record Construction(JavaType type) implements JavaCaller {
     }
 
     public enum JavaAccessType {

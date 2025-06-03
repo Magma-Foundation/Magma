@@ -33,7 +33,6 @@ import { Segment } from "../../../../magmac/app/lang/node/Segment";
 import { StructureMembers } from "../../../../magmac/app/lang/node/StructureMembers";
 import { StructureStatementValue } from "../../../../magmac/app/lang/node/StructureStatementValue";
 import { StructureValue } from "../../../../magmac/app/lang/node/StructureValue";
-import { TypeArguments } from "../../../../magmac/app/lang/node/TypeArguments";
 import { TypedDeserializer } from "../../../../magmac/app/lang/node/TypedDeserializer";
 import { TypescriptLang } from "../../../../magmac/app/lang/web/TypescriptLang";
 export interface JavaArgument {
@@ -80,7 +79,7 @@ export class Lambda {
 	 Lambda( header : JavaLambdaHeader,  content : JavaLambdaContent) : public {super( header, content);;}
 }
 export class Access {
-	 Access( type : JavaAccessType,  receiver : Value,  property : String) : public {super( type, receiver, property);;}
+	 Access( type : JavaAccessType,  receiver : Value,  arguments : Option<List<JavaType>>,  property : String) : public {super( type, receiver, property, arguments);;}
 }
 export class JavaLambdaValueContent {
 	 JavaLambdaValueContent( value : Value) : public {super( value);;}
@@ -162,6 +161,8 @@ export class StructureNode {
 	public name() : String {return this.value.name( );;}
 	public implemented() : Option<List<JavaType>> {return this.value.maybeImplemented( );;}
 	public extended() : Option<List<JavaType>> {return this.value.maybeExtended( );;}
+}
+export class Construction {
 }
 export class JavaLang {
 }

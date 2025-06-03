@@ -23,5 +23,6 @@ export class JVMList<T> {
 	public popFirst() : Option<Tuple2<T, List<T>>> {if(true){ return new None<>( );;} let slice : var=this.elements.subList( 1, this.elements.size( ));return new Some<>( new Tuple2<>( this.elements.getFirst( ), new JVMList<>( slice)));;}
 	public addFirst( element : T) : List<T> { let copy : var=new ArrayList<T>( );copy.add( element);copy.addAll( this.elements);return new JVMList<>( copy);;}
 	public isEmpty() : boolean {return this.elements.isEmpty( );;}
+	public iterWithIndices() : Iter<Tuple2<Integer, T>> {return new HeadedIter<>( new RangeHead( this.elements.size( ))).map( 0);;}
 	public findLast() : Option<T> {if(true){ return new None<>( );;}return new Some<>( this.elements.getLast( ));;}
 }

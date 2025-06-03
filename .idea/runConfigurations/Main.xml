@@ -1,6 +1,6 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="Main" type="Application" factoryName="Application" nameIsGenerated="true">
-    <output_file path="C:\Users\mathm\IdeaProjects\Magma\.log" is_save="true" />
+    <output_file path="C:\Users\mathm\IdeaProjects\Magma\log.txt" is_save="true" />
     <option name="MAIN_CLASS_NAME" value="magmac.Main" />
     <module name="Magma" />
     <extension name="coverage">

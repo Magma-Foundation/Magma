@@ -33,6 +33,8 @@ import magmac.app.lang.node.Operator;
 import magmac.app.lang.node.SingleCaseValue;
 import magmac.app.lang.node.StructureMembers;
 
+import static magmac.app.compile.rule.NodeListRule.Values;
+
 public final class JavaRules {
     private static Rule createConstructionRule() {
         return new TypeRule("construction", new StripRule(new PrefixRule("new ", new NodeRule("type", JavaRules.createTypeRule()))));
@@ -86,7 +88,7 @@ public final class JavaRules {
         ));
 
         Rule withPermits = new OrRule(Lists.of(
-                LocatingRule.Last(withImplements, " permits ", NodeListRule.Values("variants", type)),
+                LocatingRule.Last(withImplements, " permits ", Values("variants", type)),
                 withImplements
         ));
 
@@ -96,7 +98,11 @@ public final class JavaRules {
 
     private static Rule createAccessRule(String type, String infix, LazyRule value) {
         var property = CommonRules.createSymbolRule("property");
-        return new TypeRule(type, LocatingRule.Last(new NodeRule("receiver", value), infix, property));
+        var typeArguments = Values("type-arguments", JavaRules.createTypeRule());
+        return new TypeRule(type, LocatingRule.Last(new NodeRule("receiver", value), infix, new OrRule(Lists.of(
+                new StripRule(new PrefixRule("<", LocatingRule.Last(typeArguments, ">", property))),
+                property
+        ))));
     }
 
     public static Option<CompileResult<JavaLang.JavaLambdaValueContent>> deserializeLambdaValueContent(Node node) {
@@ -285,7 +291,7 @@ public final class JavaRules {
                 name
         )));
 
-        var beforeArrow = NodeListRule.Values("definitions", definitions);
+        var beforeArrow = Values("definitions", definitions);
         var children = new OrRule(Lists.of(
                 SingleCaseValue.createRule(value),
                 MultipleCaseValue.createRule(segment)
@@ -326,7 +332,7 @@ public final class JavaRules {
     public static Rule createTemplateRule(Rule type) {
         Rule base = new NodeRule("base", JavaRules.createBaseRule());
 
-        var arguments = NodeListRule.Values("arguments", type);
+        var arguments = Values("arguments", type);
         return new TypeRule("template", new StripRule(new SuffixRule(LocatingRule.First(base, "<", new OrRule(Lists.of(
                 arguments,
                 JavaRules.createWhitespaceRule()
@@ -335,7 +341,7 @@ public final class JavaRules {
 
     public static Rule createArgumentsRule(Rule value) {
         return new OptionNodeListRule("arguments",
-                NodeListRule.Values("arguments", new OrRule(Lists.of(
+                Values("arguments", new OrRule(Lists.of(
                         JavaRules.createTypedWhitespaceRule(),
                         value
                 ))),

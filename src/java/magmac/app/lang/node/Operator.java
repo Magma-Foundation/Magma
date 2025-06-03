@@ -5,6 +5,7 @@ public enum Operator {
     And("and", "&&"),
     Equals("equals", "=="),
     GreaterThan("greater-than", ">"),
+    GreaterThanEquals("greater-than-equals", ">="),
     LessThan("less-than", "<"),
     NotEquals("not-equals", "!="),
     Or("or", "||"),

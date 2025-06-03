@@ -38,13 +38,13 @@ export class MapNode {
 	public merge( other : Node) : Node { let withStrings : var=MapNode.fold( this, other.iterStrings( ), 0); let withNodes : var=MapNode.fold( withStrings, other.iterNodes( ), 0);return MapNode.fold( withNodes, other.iterNodeLists( ), 0);;}
 	public iterStrings() : Iter<Tuple2<String, String>> {return this.strings( ).iter( );;}
 	public hasNodeList( key : String) : boolean {return this.nodeLists.containsKey( key);;}
-	public removeNodeListOrError( key : String) : CompileResult<Tuple2<Node, NodeList>> {return this.removeNodeList( key).map( CompileResults.Ok).orElseGet( 0);;}
+	public removeNodeListOrError( key : String) : CompileResult<Tuple2<Node, NodeList>> {return this.removeNodeList( key).map( CompileResults.Ok).orElseGet( ( )->this.createNotPresent( key));;}
 	public removeNodeList( key : String) : Option<Tuple2<Node, NodeList>> {return this.nodeLists.removeByKey( key).map( 0);;}
 	private withNodeLists( nodeLists : Map<String, NodeList>) : Node {return new MapNode( this.maybeType, this.strings, this.nodes, nodeLists);;}
 	public hasContent() : boolean {return !this.strings.isEmpty( )||!this.nodes.isEmpty( )||!this.nodeLists.isEmpty( );;}
 	public withNodeListAndSerializer( key : String,  list : List<T>,  serializer : Function<T, Node>) : Node { let nodeList : var=list.iter( ).map( serializer).collect( new NodeListCollector( ));return this.withNodeList( key, nodeList);;}
-	public removeString( key : String) : CompileResult<Tuple2<Node, String>> {return this.strings.removeByKey( key).map( 0).orElseGet( 0);;}
-	public removeNodeOrError( key : String) : CompileResult<Tuple2<Node, Node>> {return this.nodes.removeByKey( key).map( 0).orElseGet( 0);;}
+	public removeString( key : String) : CompileResult<Tuple2<Node, String>> {return this.strings.removeByKey( key).map( 0).orElseGet( ( )->this.createNotPresent( key));;}
+	public removeNodeOrError( key : String) : CompileResult<Tuple2<Node, Node>> {return this.nodes.removeByKey( key).map( 0).orElseGet( ( )->this.createNotPresent( key));;}
 	private createNotPresent( key : String) : CompileResult<Tuple2<Node, T>> {return CompileResults.NodeErr( "Key '" + key + "' not present", this);;}
 	private withNodes( nodes : Map<String, Node>) : Node {return new MapNode( this.maybeType, this.strings, nodes, this.nodeLists);;}
 	private withStrings( strings : Map<String, String>) : Node {return new MapNode( this.maybeType, strings, this.nodes, this.nodeLists);;}
@@ -52,6 +52,6 @@ export class MapNode {
 	public withNodeList( key : String,  values : NodeList) : Node {this.nodeLists=this.nodeLists.put( key, values);return this;;}
 	public toString() : String {return this.display( );;}
 	public findNodeList( key : String) : Option<NodeList> {if(true){ return new Some<>( this.nodeLists.get( key));;}if(true){ return new None<>( );;};}
-	public findNodeOrError( key : String) : CompileResult<Node> {return this.findNode( key).map( 0).orElseGet( 0);;}
-	public findNodeListOrError( key : String) : CompileResult<NodeList> {return this.findNodeList( key).map( CompileResults.Ok).orElseGet( 0);;}
+	public findNodeOrError( key : String) : CompileResult<Node> {return this.findNode( key).map( 0).orElseGet( ( )->CompileErrors.createNodeError( "Node '" + key + "' not present", this));;}
+	public findNodeListOrError( key : String) : CompileResult<NodeList> {return this.findNodeList( key).map( CompileResults.Ok).orElseGet( ( )->CompileErrors.createNodeError( "Node list '" + key + "' not present", this));;}
 }

@@ -22,7 +22,6 @@ import { OperationDeserializer } from "../../../../magmac/app/lang/node/Operatio
 import { Operator } from "../../../../magmac/app/lang/node/Operator";
 import { PostVariant } from "../../../../magmac/app/lang/node/PostVariant";
 import { StructureStatementValue } from "../../../../magmac/app/lang/node/StructureStatementValue";
-import { TypeArguments } from "../../../../magmac/app/lang/node/TypeArguments";
 import { TypedDeserializer } from "../../../../magmac/app/lang/node/TypedDeserializer";
 import { TypescriptLang } from "../../../../magmac/app/lang/web/TypescriptLang";
 import { * } from "../../../../static magmac/app/lang/java/JavaLang/*";
@@ -60,7 +59,7 @@ export class JavaDeserializers {
 	private static deserializeInstanceOfWithName( node : Node) : Option<CompileResult<InstanceOfDefinitionWithName>> {return Destructors.destructWithType( "with-name", node).map( 0);;}
 	private static deserializeInstanceOfWithParameters( node : Node) : Option<CompileResult<InstanceOfDefinitionWithParameters>> {return Destructors.destructWithType( "with-parameters", node).map( 0);;}
 	private static wrapAsDeserializer( operator : Operator) : TypedDeserializer<Value> {return Deserializers.wrap( Deserializers.wrap( new OperationDeserializer( operator)));;}
-	public static deserializeValueOrError( node : Node) : CompileResult<Value> {return JavaDeserializers.deserializeValue( node).orElseGet( 0);;}
+	public static deserializeValueOrError( node : Node) : CompileResult<Value> {return JavaDeserializers.deserializeValue( node).orElseGet( ( )->CompileResults.NodeErr( "Cannot deserialize value", node));;}
 	private static deserializeSymbol( node : Node) : Option<CompileResult<Symbol>> {return Destructors.destructWithType( "symbol", node).map( 0);;}
 	private static deserializeLambdaParameter( node : Node) : CompileResult<JavaLambdaParameter> {return Deserializers.orError( "lambda-parameter", node, Lists.of( Deserializers.wrap( JavaDeserializers.deserializeSymbol), Deserializers.wrap( JavaDeserializers.deserializeTypedDefinition)));;}
 	public static deserializeDefinition( node : Node) : CompileResult<Definition> {return JavaDeserializers.deserialize0( Destructors.destruct( node));;}

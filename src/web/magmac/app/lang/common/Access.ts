@@ -1,6 +1,8 @@
-export class Access<T,  V> {
-	 Access( type : T,  receiver : V,  property : String) : public {this.type=type;this.receiver=receiver;this.property=property;;}
-	public type() : T {return type;;}
-	public receiver() : V {return receiver;;}
-	public property() : String {return property;;}
+import { Option } from "../../../../magmac/api/Option";
+import { List } from "../../../../magmac/api/collect/list/List";
+export class Access<V,  R,  T> {
+	 Access( variant : V,  receiver : R,  property : String,  maybeArguments : Option<List<T>>) : public {this.variant=variant;this.receiver=receiver;this.property=property;this.maybeArguments=maybeArguments;;}
+	public type() : V {return this.variant;;}
+	public receiver() : R {return this.receiver;;}
+	public property() : String {return this.property;;}
 }

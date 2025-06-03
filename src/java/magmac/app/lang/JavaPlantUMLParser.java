@@ -110,8 +110,12 @@ public class JavaPlantUMLParser implements Parser<JavaLang.JavaRoot, PlantUMLRoo
         return maybeOption.orElse(Lists.empty())
                 .iter()
                 .map(JavaPlantUMLParser::createSimpleNameFromType)
-                .<PlantUMLRootSegment>map(parent -> new PlantUMLInherits(child, parent))
+                .map(parent -> JavaPlantUMLParser.getPlantUMLInherits(child, parent))
                 .collect(new ListCollector<>());
+    }
+
+    private static PlantUMLRootSegment getPlantUMLInherits(String child, String parent) {
+        return new PlantUMLInherits(child, parent);
     }
 
     @Override

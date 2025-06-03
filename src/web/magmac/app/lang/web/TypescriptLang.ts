@@ -17,7 +17,6 @@ import { ParameterizedMethodHeader } from "../../../../magmac/app/lang/node/Para
 import { PostVariant } from "../../../../magmac/app/lang/node/PostVariant";
 import { Segment } from "../../../../magmac/app/lang/node/Segment";
 import { StructureValue } from "../../../../magmac/app/lang/node/StructureValue";
-import { TypeArguments } from "../../../../magmac/app/lang/node/TypeArguments";
 export interface Argument {
 }
 export interface TypeScriptParameter {
@@ -60,8 +59,8 @@ export class TypescriptMethod {
 	public serialize() : Node { let node : var=new MapNode( "method").withNodeSerialized( "header", this.header);return this.maybeChildren.map( 0).orElse( node);;}
 }
 export class TemplateType {
-	 TemplateType( base : JavaLang.Symbol,  typeArguments : TypeArguments<Type>) : public {this.base=base;this.typeArguments=typeArguments;;}
-	public serialize() : Node {return new MapNode( "template").withNodeSerialized( "base", this.base).withNodeListSerialized( "arguments", this.typeArguments.arguments( ));;}
+	 TemplateType( base : JavaLang.Symbol,  maybeTypeArguments : Option<List<Type>>) : public {this.base=base;this.maybeTypeArguments=maybeTypeArguments;;}
+	public serialize() : Node { let node : var=new MapNode( "template").withNodeSerialized( "base", this.base);return this.maybeTypeArguments.map( 0).orElse( node);;}
 }
 export class TypescriptConditional {
 	 TypescriptConditional( type : ConditionalType,  condition : Value) : public {super( type, condition);;}

@@ -10,7 +10,6 @@ import { CompileResults } from "../../../magmac/app/compile/error/CompileResults
 import { Location } from "../../../magmac/app/io/Location";
 import { UnitSetCollector } from "../../../magmac/app/io/sources/UnitSetCollector";
 import { JavaBreak } from "../../../magmac/app/lang/java/JavaBreak";
-import { JavaConstruction } from "../../../magmac/app/lang/java/JavaConstruction";
 import { JavaConstructor } from "../../../magmac/app/lang/java/JavaConstructor";
 import { JavaContinue } from "../../../magmac/app/lang/java/JavaContinue";
 import { JavaEnumValues } from "../../../magmac/app/lang/java/JavaEnumValues";
@@ -31,7 +30,6 @@ import { Modifier } from "../../../magmac/app/lang/node/Modifier";
 import { ParameterizedMethodHeader } from "../../../magmac/app/lang/node/ParameterizedMethodHeader";
 import { Segment } from "../../../magmac/app/lang/node/Segment";
 import { StructureValue } from "../../../magmac/app/lang/node/StructureValue";
-import { TypeArguments } from "../../../magmac/app/lang/node/TypeArguments";
 import { Caller } from "../../../magmac/app/lang/web/Caller";
 import { FunctionStatement } from "../../../magmac/app/lang/web/FunctionStatement";
 import { Symbol } from "../../../magmac/app/lang/web/Symbol";
@@ -76,7 +74,7 @@ export class JavaTypescriptParser {
 	private static parseQualifiedType( qualified : JavaLang.Qualified) : Symbol { let joined : var=qualified.segments( ).iter( ).map( Segment.value).collect( new Joiner( ".")).orElse( "");return new Symbol( joined);;}
 	private static parseArrayType( type : JavaLang.JavaArrayType) : TypescriptLang.Type {return new TypescriptLang.ArrayType( JavaTypescriptParser.parseType( type.inner));;}
 	private static parseType( variadicType : JavaLang.JavaType) : TypescriptLang.Type {return 0;;}
-	private static parseTemplateType( type : JavaLang.JavaTemplateType) : TypescriptLang.TemplateType { let base : var=JavaTypescriptParser.parseBaseType( type.base( )); let collect : var=JavaTypescriptParser.parseTypeList( type.typeArguments( ).arguments( ));return new TypescriptLang.TemplateType( base, new TypeArguments<>( collect));;}
+	private static parseTemplateType( type : JavaLang.JavaTemplateType) : TypescriptLang.TemplateType { let base : var=JavaTypescriptParser.parseBaseType( type.base( )); let listOption : var=type.typeArguments( ).map( JavaTypescriptParser.parseTypeList);return new TypescriptLang.TemplateType( base, listOption);;}
 	private static parseBaseType( base : JavaLang.Base) : JavaLang.Symbol {return 0;;}
 	private static parseNamespaced( location : Location,  namespaced : JavaNamespacedNode) : TypescriptLang.TypeScriptRootSegment {return 0;;}
 	private static parseImport( location : Location,  segments : List<Segment>) : TypescriptLang.TypeScriptImport { let segmentValues : var=segments.iter( ).map( Segment.value).collect( new ListCollector<>( )); let before : var=location.namespace( ).iter( ).map( 0).map( Segment.new).collect( new ListCollector<>( )); let last : var=new Segment( segmentValues.findLast( ).orElse( ""));return new TypescriptLang.TypeScriptImport( Lists.of( last), before.addAllLast( segments));;}
