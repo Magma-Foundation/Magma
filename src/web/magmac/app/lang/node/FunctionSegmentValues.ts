@@ -12,6 +12,6 @@ import { JavaAssignmentNode } from "../../../../magmac/app/lang/java/JavaAssignm
 import { JavaFunctionSegmentValue } from "../../../../magmac/app/lang/java/JavaFunctionSegmentValue";
 import { JavaPost } from "../../../../magmac/app/lang/java/JavaPost";
 export class FunctionSegmentValues {
-	deserialize(node : Node) : CompileResult<JavaFunctionSegmentValue> {break;;}
-	createFunctionSegmentValueRule(value : Rule, definition : Rule) : Rule {break;;}
+	deserialize(node : Node) : CompileResult<JavaFunctionSegmentValue> {return 0;;}
+	createFunctionSegmentValueRule(value : Rule, definition : Rule) : Rule {return 0;;}
 }

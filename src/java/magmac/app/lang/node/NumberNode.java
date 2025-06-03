@@ -10,8 +10,9 @@ import magmac.app.compile.rule.StringRule;
 import magmac.app.compile.rule.StripRule;
 import magmac.app.compile.rule.TypeRule;
 import magmac.app.lang.Destructors;
+import magmac.app.lang.web.TypescriptValue;
 
-record NumberNode(String value) implements JavaValue, TypeScriptValue {
+public record NumberNode(String value) implements JavaValue, TypescriptValue {
     public static Option<CompileResult<NumberNode>> deserialize(Node node) {
         return Destructors.destructWithType("number", node).map(deserializer -> deserializer.withString("value").complete(NumberNode::new));
     }
@@ -22,6 +23,6 @@ record NumberNode(String value) implements JavaValue, TypeScriptValue {
 
     @Override
     public Node serialize() {
-        return new MapNode("number");
+        return new MapNode("number").withString("value", this.value);
     }
 }

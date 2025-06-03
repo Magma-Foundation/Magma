@@ -8,8 +8,9 @@ import { StringRule } from "../../../../magmac/app/compile/rule/StringRule";
 import { StripRule } from "../../../../magmac/app/compile/rule/StripRule";
 import { TypeRule } from "../../../../magmac/app/compile/rule/TypeRule";
 import { Destructors } from "../../../../magmac/app/lang/Destructors";
+import { TypescriptValue } from "../../../../magmac/app/lang/web/TypescriptValue";
 export class NumberNode {
-	deserialize(node : Node) : Option<CompileResult<NumberNode>> {break;;}
-	createNumberRule() : Rule {break;;}
-	serialize() : Node {break;;}
+	deserialize(node : Node) : Option<CompileResult<NumberNode>> {return 0;;}
+	createNumberRule() : Rule {return 0;;}
+	serialize() : Node {return 0;;}
 }

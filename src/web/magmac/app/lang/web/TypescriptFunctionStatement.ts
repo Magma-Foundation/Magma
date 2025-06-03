@@ -4,5 +4,5 @@ import { FunctionStatement } from "../../../../magmac/app/lang/common/FunctionSt
 import { TypescriptFunctionSegment } from "../../../../magmac/app/lang/node/TypescriptFunctionSegment";
 export class TypescriptFunctionStatement {
 	TypescriptFunctionStatement(child : TypescriptFunctionSegmentValue) : public {break;;}
-	serialize() : Node {break;;}
+	serialize() : Node {return 0;;}
 }

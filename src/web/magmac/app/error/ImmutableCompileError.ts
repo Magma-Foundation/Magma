@@ -7,9 +7,9 @@ import { Context } from "../../../magmac/app/compile/error/context/Context";
 import { CompileError } from "../../../magmac/app/compile/error/error/CompileError";
 export class ImmutableCompileError {
 	ImmutableCompileError(message : String, context : Context) : public {break;;}
-	formatEntry(depth : int, display : String) : String {break;break;;}
-	display() : String {break;;}
-	format(depth : int) : String {break;break;break;;}
-	joinSorted(depth : int, copy : List<CompileError>) : String {break;;}
-	computeMaxDepth() : int {break;break;;}
+	formatEntry(depth : int, display : String) : String {break;return 0;;}
+	display() : String {return 0;;}
+	format(depth : int) : String {break;break;return 0;;}
+	joinSorted(depth : int, copy : List<CompileError>) : String {return 0;;}
+	computeMaxDepth() : int {break;return 0;;}
 }

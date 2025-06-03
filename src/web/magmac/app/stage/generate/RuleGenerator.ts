@@ -11,7 +11,7 @@ import { Unit } from "../../../../magmac/app/stage/unit/Unit";
 import { UnitSet } from "../../../../magmac/app/stage/unit/UnitSet";
 export class RuleGenerator {
 	RuleGenerator(rootRule : Rule) : public {break;;}
-	apply(initial : UnitSet<Node>) : CompileResult<UnitSet<String>> {break;;}
-	generateEntry(entry : Unit<Node>) : CompileResult<Unit<String>> {break;;}
-	getDestruct(entry : Unit<Node>, err : CompileError) : CompileError {break;;}
+	apply(initial : UnitSet<Node>) : CompileResult<UnitSet<String>> {return 0;;}
+	generateEntry(entry : Unit<Node>) : CompileResult<Unit<String>> {return 0;;}
+	getDestruct(entry : Unit<Node>, err : CompileError) : CompileError {return 0;;}
 }

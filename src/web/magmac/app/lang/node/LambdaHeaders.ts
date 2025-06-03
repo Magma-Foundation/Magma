@@ -3,5 +3,5 @@ import { CompileResult } from "../../../../magmac/app/compile/error/CompileResul
 import { Node } from "../../../../magmac/app/compile/node/Node";
 import { Deserializers } from "../../../../magmac/app/lang/Deserializers";
 export class LambdaHeaders {
-	deserialize(node : Node) : CompileResult<LambdaHeader> {break;;}
+	deserialize(node : Node) : CompileResult<LambdaHeader> {return 0;;}
 }

@@ -9,6 +9,6 @@ import { JavaDeserializers } from "../../../../magmac/app/lang/JavaDeserializers
 import { JavaRules } from "../../../../magmac/app/lang/JavaRules";
 import { Lang } from "../../../../magmac/app/lang/java/Lang";
 export class Arguments {
-	deserialize(node : Node) : CompileResult<Lang.JavaArgument> {break;;}
-	createArgumentsRule(value : Rule) : Rule {break;;}
+	deserialize(node : Node) : CompileResult<Lang.JavaArgument> {return 0;;}
+	createArgumentsRule(value : Rule) : Rule {return 0;;}
 }

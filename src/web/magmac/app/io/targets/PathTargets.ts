@@ -8,6 +8,6 @@ import { IOException } from "../../../../java/io/IOException";
 import { Files } from "../../../../java/nio/file/Files";
 import { Path } from "../../../../java/nio/file/Path";
 export class PathTargets {
-	writeAll(outputs : UnitSet<String>) : Option<IOException> {break;;}
-	write(entry : Unit<String>) : Option<IOException> {break;;}
+	writeAll(outputs : UnitSet<String>) : Option<IOException> {return 0;;}
+	write(entry : Unit<String>) : Option<IOException> {return 0;;}
 }

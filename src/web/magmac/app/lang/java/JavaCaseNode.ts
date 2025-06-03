@@ -22,7 +22,7 @@ import { MultipleCaseValue } from "../../../../magmac/app/lang/node/MultipleCase
 import { SingleCaseValue } from "../../../../magmac/app/lang/node/SingleCaseValue";
 import { TypescriptFunctionSegment } from "../../../../magmac/app/lang/node/TypescriptFunctionSegment";
 export class JavaCaseNode {
-	deserialize(node : Node) : Option<CompileResult<JavaCaseNode>> {break;;}
-	createCaseRule(value : Rule, segment : Rule) : Rule {break;break;break;break;break;break;break;break;;}
-	serialize() : Node {break;;}
+	deserialize(node : Node) : Option<CompileResult<JavaCaseNode>> {return 0;;}
+	createCaseRule(value : Rule, segment : Rule) : Rule {break;break;break;break;break;break;break;return 0;;}
+	serialize() : Node {return 0;;}
 }

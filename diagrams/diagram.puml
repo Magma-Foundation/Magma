@@ -130,9 +130,10 @@ Not --> StripRule
 Not --> TypeRule
 Not --> Destructors
 Not --> LazyRule
+Not --> TypescriptValue
 class Not
 JavaValue <|-- Not
-TypeScriptValue <|-- Not
+TypescriptValue <|-- Not
 Compiler --> CompileResult
 Compiler --> JavaRoot
 Compiler --> UnitSet
@@ -520,6 +521,7 @@ class JavaContinue
 JavaFunctionSegmentValue <|-- JavaContinue
 TypescriptConditional --> MapNode
 TypescriptConditional --> Node
+TypescriptConditional --> TypescriptValue
 class TypescriptConditional
 Conditional <|-- TypescriptConditional
 TypescriptBlockHeader <|-- TypescriptConditional
@@ -632,9 +634,10 @@ IndexNode --> SuffixRule
 IndexNode --> TypeRule
 IndexNode --> Destructors
 IndexNode --> LazyRule
+IndexNode --> TypescriptValue
 class IndexNode
 JavaValue <|-- IndexNode
-TypeScriptValue <|-- IndexNode
+TypescriptValue <|-- IndexNode
 CompileResults --> Err
 CompileResults --> Ok
 CompileResults --> Result
@@ -735,6 +738,13 @@ InitialDestructor --> Function
 InitialDestructor --> Supplier
 interface InitialDestructor
 interface CaseValue
+TypescriptReturnNode --> MapNode
+TypescriptReturnNode --> Node
+TypescriptReturnNode --> ReturnNode
+class TypescriptReturnNode
+ReturnNode <|-- TypescriptReturnNode
+? <|-- TypescriptReturnNode
+? <|-- TypescriptReturnNode
 TypeRule --> Lists
 TypeRule --> CompileResult
 TypeRule --> CompileResults
@@ -951,9 +961,10 @@ StringNode --> StripRule
 StringNode --> SuffixRule
 StringNode --> TypeRule
 StringNode --> Destructors
+StringNode --> TypescriptValue
 class StringNode
 JavaValue <|-- StringNode
-TypeScriptValue <|-- StringNode
+TypescriptValue <|-- StringNode
 SafeFiles --> None
 SafeFiles --> Option
 SafeFiles --> Some
@@ -1195,6 +1206,8 @@ JavaTypescriptParser --> JavaBlockHeader
 JavaTypescriptParser --> JavaRoot
 JavaTypescriptParser --> JavaTemplateType
 JavaTypescriptParser --> JavaType
+JavaTypescriptParser --> JavaValue
+JavaTypescriptParser --> NumberNode
 JavaTypescriptParser --> ParameterizedMethodHeader
 JavaTypescriptParser --> Qualified
 JavaTypescriptParser --> Segment
@@ -1208,6 +1221,7 @@ JavaTypescriptParser --> TypeScriptParameter
 JavaTypescriptParser --> TypeScriptRootSegment
 JavaTypescriptParser --> TypeScriptTemplateType
 JavaTypescriptParser --> TypeScriptType
+JavaTypescriptParser --> TypescriptValue
 JavaTypescriptParser --> TypescriptArrayType
 JavaTypescriptParser --> TypescriptBlock
 JavaTypescriptParser --> TypescriptBlockHeader
@@ -1224,6 +1238,7 @@ JavaTypescriptParser --> TypescriptBreak
 JavaTypescriptParser --> TypescriptContinue
 JavaTypescriptParser --> TypescriptFunctionSegmentValue
 JavaTypescriptParser --> TypescriptFunctionStatement
+JavaTypescriptParser --> TypescriptReturnNode
 JavaTypescriptParser --> TypescriptWhitespace
 JavaTypescriptParser --> Parser
 JavaTypescriptParser --> SimpleUnit
@@ -1405,9 +1420,10 @@ NumberNode --> StringRule
 NumberNode --> StripRule
 NumberNode --> TypeRule
 NumberNode --> Destructors
+NumberNode --> TypescriptValue
 class NumberNode
 JavaValue <|-- NumberNode
-TypeScriptValue <|-- NumberNode
+TypescriptValue <|-- NumberNode
 TypeArguments --> List
 class TypeArguments
 Option --> Consumer
@@ -1415,6 +1431,10 @@ Option --> Function
 Option --> Predicate
 Option --> Supplier
 interface Option
+TypescriptValue --> Node
+TypescriptValue --> Serializable
+interface TypescriptValue
+Serializable <|-- TypescriptValue
 PlantUMLRoot --> List
 PlantUMLRoot --> MapNode
 PlantUMLRoot --> Node
@@ -1537,9 +1557,10 @@ SwitchNode --> MapNode
 SwitchNode --> Node
 SwitchNode --> Destructors
 SwitchNode --> JavaFunctionSegment
+SwitchNode --> TypescriptValue
 class SwitchNode
 JavaValue <|-- SwitchNode
-TypeScriptValue <|-- SwitchNode
+TypescriptValue <|-- SwitchNode
 FlatMapHead --> None
 FlatMapHead --> Iter
 FlatMapHead --> Option
@@ -1680,6 +1701,7 @@ JavaRules --> Values
 class JavaRules
 Symbol --> MapNode
 Symbol --> Node
+Symbol --> TypescriptValue
 class Symbol
 JavaType <|-- Symbol
 JavaValue <|-- Symbol
@@ -1687,7 +1709,7 @@ JavaBase <|-- Symbol
 TypeScriptType <|-- Symbol
 LambdaParameter <|-- Symbol
 LambdaHeader <|-- Symbol
-TypeScriptValue <|-- Symbol
+TypescriptValue <|-- Symbol
 MultipleHeader --> Option
 MultipleHeader --> List
 MultipleHeader --> CompileResult
@@ -1873,9 +1895,10 @@ CharNode --> StripRule
 CharNode --> SuffixRule
 CharNode --> TypeRule
 CharNode --> Destructors
+CharNode --> TypescriptValue
 class CharNode
 JavaValue <|-- CharNode
-TypeScriptValue <|-- CharNode
+TypescriptValue <|-- CharNode
 interface Context
 MergeDiagram --> Tuple2
 MergeDiagram --> List
@@ -1903,10 +1926,6 @@ Segment --> MapNode
 Segment --> Node
 Segment --> Destructors
 class Segment
-TypeScriptValue --> Node
-TypeScriptValue --> Serializable
-interface TypeScriptValue
-Serializable <|-- TypeScriptValue
 Application --> Option
 Application --> Error
 Application --> JavaRoot
@@ -1923,9 +1942,10 @@ Operation --> NodeRule
 Operation --> Rule
 Operation --> TypeRule
 Operation --> LazyRule
+Operation --> TypescriptValue
 class Operation
 JavaValue <|-- Operation
-TypeScriptValue <|-- Operation
+TypescriptValue <|-- Operation
 Divider --> Iter
 interface Divider
 Err --> Tuple2

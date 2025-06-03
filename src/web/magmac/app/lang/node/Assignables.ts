@@ -4,5 +4,5 @@ import { Node } from "../../../../magmac/app/compile/node/Node";
 import { Deserializers } from "../../../../magmac/app/lang/Deserializers";
 import { JavaDefinition } from "../../../../magmac/app/lang/java/JavaDefinition";
 export class Assignables {
-	deserializeError(node : Node) : CompileResult<Assignable> {break;;}
+	deserializeError(node : Node) : CompileResult<Assignable> {return 0;;}
 }

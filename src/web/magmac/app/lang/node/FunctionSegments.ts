@@ -13,6 +13,6 @@ import { LazyRule } from "../../../../magmac/app/lang/LazyRule";
 import { JavaCaseNode } from "../../../../magmac/app/lang/java/JavaCaseNode";
 import { JavaFunctionSegment } from "../../../../magmac/app/lang/java/JavaFunctionSegment";
 export class FunctionSegments {
-	deserialize(node : Node) : CompileResult<JavaFunctionSegment> {break;;}
-	initFunctionSegmentRule(functionSegmentRule : LazyRule, value : Rule, definition : Rule) : Rule {break;break;break;;}
+	deserialize(node : Node) : CompileResult<JavaFunctionSegment> {return 0;;}
+	initFunctionSegmentRule(functionSegmentRule : LazyRule, value : Rule, definition : Rule) : Rule {break;break;return 0;;}
 }

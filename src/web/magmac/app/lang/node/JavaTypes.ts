@@ -7,6 +7,6 @@ import { LazyRule } from "../../../../magmac/app/lang/LazyRule";
 import { MutableLazyRule } from "../../../../magmac/app/lang/MutableLazyRule";
 import { Deserializers } from "../../../../magmac/app/lang/Deserializers";
 export class JavaTypes {
-	deserialize(node : Node) : CompileResult<JavaType> {break;;}
-	createTypeRule() : Rule {break;break;;}
+	deserialize(node : Node) : CompileResult<JavaType> {return 0;;}
+	createTypeRule() : Rule {break;return 0;;}
 }

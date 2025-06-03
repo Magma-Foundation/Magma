@@ -16,6 +16,6 @@ import { JavaValue } from "../../../../magmac/app/lang/node/JavaValue";
 import { Symbols } from "../../../../magmac/app/lang/node/Symbols";
 import { Values } from "../../../../magmac/app/lang/node/Values";
 export class JavaEnumValue {
-	deserialize(node : Node) : CompileResult<JavaEnumValue> {break;;}
-	createEnumValueRule(value : Rule) : Rule {break;break;break;;}
+	deserialize(node : Node) : CompileResult<JavaEnumValue> {return 0;;}
+	createEnumValueRule(value : Rule) : Rule {break;break;return 0;;}
 }

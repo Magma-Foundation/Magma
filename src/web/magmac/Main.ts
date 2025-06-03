@@ -20,7 +20,7 @@ import { UnitSet } from "../magmac/app/stage/unit/UnitSet";
 import { Paths } from "../java/nio/file/Paths";
 export class Main {
 	main() : void {break;break;;}
-	getNext(result : UnitSet<JavaRoot>) : Option<Error> {break;;}
-	loadSources(sources : Sources) : Result<UnitSet<JavaRoot>, ApplicationError> {break;break;;}
-	run(roots : UnitSet<JavaRoot>, platform : TargetPlatform) : Option<Error> {break;;}
+	getNext(result : UnitSet<JavaRoot>) : Option<Error> {return 0;;}
+	loadSources(sources : Sources) : Result<UnitSet<JavaRoot>, ApplicationError> {break;return 0;;}
+	run(roots : UnitSet<JavaRoot>, platform : TargetPlatform) : Option<Error> {return 0;;}
 }

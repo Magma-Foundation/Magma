@@ -8,6 +8,6 @@ import { Lexer } from "../../magmac/app/stage/lexer/Lexer";
 import { UnitSet } from "../../magmac/app/stage/unit/UnitSet";
 import { Function } from "../../java/util/function/Function";
 export class LexingStage<T> {
-	getUnitSetApplicationErrorResult(sources1 : Sources) : Result<UnitSet<T>, ApplicationError> {break;;}
-	getUnitSetApplicationErrorResult(units : UnitSet<String>) : Result<UnitSet<T>, ApplicationError> {break;;}
+	getUnitSetApplicationErrorResult(sources1 : Sources) : Result<UnitSet<T>, ApplicationError> {return 0;;}
+	getUnitSetApplicationErrorResult(units : UnitSet<String>) : Result<UnitSet<T>, ApplicationError> {return 0;;}
 }

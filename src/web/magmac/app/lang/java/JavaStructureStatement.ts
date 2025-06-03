@@ -13,6 +13,6 @@ import { JavaDeserializers } from "../../../../magmac/app/lang/JavaDeserializers
 import { LazyRule } from "../../../../magmac/app/lang/LazyRule";
 import { StructureStatementValue } from "../../../../magmac/app/lang/node/StructureStatementValue";
 export class JavaStructureStatement {
-	deserialize(node : Node) : Option<CompileResult<JavaStructureMember>> {break;;}
-	createStructureStatementRule(definitionRule : Rule, valueRule : LazyRule) : Rule {break;break;;}
+	deserialize(node : Node) : Option<CompileResult<JavaStructureMember>> {return 0;;}
+	createStructureStatementRule(definitionRule : Rule, valueRule : LazyRule) : Rule {break;return 0;;}
 }

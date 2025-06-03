@@ -10,8 +10,9 @@ import { SuffixRule } from "../../../../magmac/app/compile/rule/SuffixRule";
 import { TypeRule } from "../../../../magmac/app/compile/rule/TypeRule";
 import { Destructors } from "../../../../magmac/app/lang/Destructors";
 import { LazyRule } from "../../../../magmac/app/lang/LazyRule";
+import { TypescriptValue } from "../../../../magmac/app/lang/web/TypescriptValue";
 export class IndexNode {
-	createIndexRule(value : LazyRule) : Rule {break;break;break;;}
-	deserialize(value : Node) : Option<CompileResult<IndexNode>> {break;;}
-	serialize() : Node {break;;}
+	createIndexRule(value : LazyRule) : Rule {break;break;return 0;;}
+	deserialize(value : Node) : Option<CompileResult<IndexNode>> {return 0;;}
+	serialize() : Node {return 0;;}
 }

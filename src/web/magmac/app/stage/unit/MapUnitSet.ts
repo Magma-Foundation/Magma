@@ -9,9 +9,9 @@ import { Location } from "../../../../magmac/app/io/Location";
 import { Function } from "../../../../java/util/function/Function";
 export class MapUnitSet<T> {
 	MapUnitSet() : public {break;;}
-	iter() : Iter<Unit<T>> {break;;}
-	add(element : Unit<T>) : UnitSet<T> {break;;}
-	mapValuesToResult(deserializer : Function<T, CompileResult<R>>) : CompileResult<UnitSet<R>> {break;;}
-	mapValues(serializer : Function<T, R>) : UnitSet<R> {break;;}
-	iterValues() : Iter<T> {break;;}
+	iter() : Iter<Unit<T>> {return 0;;}
+	add(element : Unit<T>) : UnitSet<T> {return 0;;}
+	mapValuesToResult(deserializer : Function<T, CompileResult<R>>) : CompileResult<UnitSet<R>> {return 0;;}
+	mapValues(serializer : Function<T, R>) : UnitSet<R> {return 0;;}
+	iterValues() : Iter<T> {return 0;;}
 }

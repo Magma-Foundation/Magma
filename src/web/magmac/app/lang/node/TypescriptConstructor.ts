@@ -4,5 +4,5 @@ import { MapNode } from "../../../../magmac/app/compile/node/MapNode";
 import { Node } from "../../../../magmac/app/compile/node/Node";
 import { Destructors } from "../../../../magmac/app/lang/Destructors";
 export class TypescriptConstructor {
-	serialize() : Node {break;;}
+	serialize() : Node {return 0;;}
 }

@@ -38,12 +38,12 @@ import { UnitSet } from "../../../magmac/app/stage/unit/UnitSet";
 export class JavaPlantUMLParser {
 	parseNamespaced(child : String, namespaced : JavaNamespacedNode) : Iter<PlantUMLRootSegment> {;;;}
 	createSimpleName(base : JavaBase) : String {;;;}
-	createSimpleNameFromQualifiedType(qualifiedType : Qualified) : String {break;;}
+	createSimpleNameFromQualifiedType(qualifiedType : Qualified) : String {return 0;;}
 	createStructureSegment(structureNode : JavaStructureNode) : PlantUMLRootSegment {break;break;;;;}
 	createSimpleNameFromType(type : JavaType) : String {;;;}
-	apply(initial : UnitSet<JavaRoot>) : CompileResult<UnitSet<PlantUMLRoot>> {break;break;break;break;;}
-	parseRoot(unit : Unit<JavaRoot>) : Iter<PlantUMLRootSegment> {break;;}
+	apply(initial : UnitSet<JavaRoot>) : CompileResult<UnitSet<PlantUMLRoot>> {break;break;break;return 0;;}
+	parseRoot(unit : Unit<JavaRoot>) : Iter<PlantUMLRootSegment> {return 0;;}
 	parseRootSegment(fileName : String, rootSegment : JavaRootSegment) : Iter<PlantUMLRootSegment> {;;;}
-	parseStructure(structureNode : JavaStructureNode) : Iter<PlantUMLRootSegment> {break;break;break;;}
-	toInherits(child : String, maybeOption : Option<List<JavaType>>) : List<PlantUMLRootSegment> {break;;}
+	parseStructure(structureNode : JavaStructureNode) : Iter<PlantUMLRootSegment> {break;break;return 0;;}
+	toInherits(child : String, maybeOption : Option<List<JavaType>>) : List<PlantUMLRootSegment> {return 0;;}
 }

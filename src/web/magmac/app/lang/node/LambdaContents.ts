@@ -4,5 +4,5 @@ import { Node } from "../../../../magmac/app/compile/node/Node";
 import { Deserializers } from "../../../../magmac/app/lang/Deserializers";
 import { JavaRules } from "../../../../magmac/app/lang/JavaRules";
 export class LambdaContents {
-	deserialize(node : Node) : CompileResult<JavaLambdaContent> {break;;}
+	deserialize(node : Node) : CompileResult<JavaLambdaContent> {return 0;;}
 }

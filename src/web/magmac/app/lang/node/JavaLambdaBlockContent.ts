@@ -5,5 +5,5 @@ import { Node } from "../../../../magmac/app/compile/node/Node";
 import { Destructors } from "../../../../magmac/app/lang/Destructors";
 import { JavaFunctionSegment } from "../../../../magmac/app/lang/java/JavaFunctionSegment";
 export class JavaLambdaBlockContent {
-	deserialize(node : Node) : Option<CompileResult<JavaLambdaBlockContent>> {break;;}
+	deserialize(node : Node) : Option<CompileResult<JavaLambdaBlockContent>> {return 0;;}
 }

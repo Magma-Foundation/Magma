@@ -9,11 +9,11 @@ import { CompileResultCollector } from "../../../../magmac/app/compile/error/Com
 import { Function } from "../../../../java/util/function/Function";
 export class InlineNodeList {
 	InlineNodeList(elements : List<Node>) : public {break;;}
-	empty() : NodeList {break;;}
-	of(...elements : Node[]) : NodeList {break;;}
-	iter() : Iter<Node> {break;;}
-	add(element : Node) : NodeList {break;;}
-	addAll(others : NodeList) : NodeList {break;;}
-	findLast() : Option<Node> {break;;}
-	join(delimiter : String, generator : Function<Node, CompileResult<String>>) : CompileResult<String> {break;;}
+	empty() : NodeList {return 0;;}
+	of(...elements : Node[]) : NodeList {return 0;;}
+	iter() : Iter<Node> {return 0;;}
+	add(element : Node) : NodeList {return 0;;}
+	addAll(others : NodeList) : NodeList {return 0;;}
+	findLast() : Option<Node> {return 0;;}
+	join(delimiter : String, generator : Function<Node, CompileResult<String>>) : CompileResult<String> {return 0;;}
 }

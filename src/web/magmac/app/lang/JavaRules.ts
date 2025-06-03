@@ -29,21 +29,21 @@ import { StructureMembers } from "../../../magmac/app/lang/node/StructureMembers
 import { Symbols } from "../../../magmac/app/lang/node/Symbols";
 import { Values } from "../../../magmac/app/lang/node/Values";
 export class JavaRules {
-	createConstructionRule() : Rule {break;;}
-	createInvokableRule(value : Rule) : Rule {break;break;break;break;break;;}
-	createRootSegmentRule() : Rule {break;break;;}
-	createRule() : Rule {break;;}
-	createStructureRule(keyword : String, structureMember : Rule) : Rule {break;break;break;break;break;break;break;break;break;break;break;;}
-	createAccessRule(type : String, infix : String, value : LazyRule) : Rule {break;break;;}
-	deserializeLambdaValueContent(node : Node) : Option<CompileResult<JavaLambdaValueContent>> {break;;}
-	createYieldRule(value : Rule) : Rule {break;;}
-	createLambdaRule(value : LazyRule, functionSegment : Rule, infix : String, definition : Rule) : Rule {break;break;break;break;break;break;;}
-	createStatementRule(rule : Rule) : Rule {break;break;;}
-	createLambdaParameterRule(definition : Rule) : Rule {break;;}
-	createBlockHeaderRule(value : Rule, definition : Rule) : Rule {break;;}
-	createBlockRule(functionSegmentRule : LazyRule, value : Rule, definition : Rule) : Rule {break;break;;}
-	createBlockRule0(header : Rule, functionSegmentRule : Rule) : TypeRule {break;break;break;break;;}
-	createConditionalRule(type : String, value : Rule) : Rule {break;break;break;;}
-	createReturnRule(value : Rule) : Rule {break;;}
-	createWhitespaceRule() : Rule {break;;}
+	createConstructionRule() : Rule {return 0;;}
+	createInvokableRule(value : Rule) : Rule {break;break;break;break;return 0;;}
+	createRootSegmentRule() : Rule {break;return 0;;}
+	createRule() : Rule {return 0;;}
+	createStructureRule(keyword : String, structureMember : Rule) : Rule {break;break;break;break;break;break;break;break;break;break;return 0;;}
+	createAccessRule(type : String, infix : String, value : LazyRule) : Rule {break;return 0;;}
+	deserializeLambdaValueContent(node : Node) : Option<CompileResult<JavaLambdaValueContent>> {return 0;;}
+	createYieldRule(value : Rule) : Rule {return 0;;}
+	createLambdaRule(value : LazyRule, functionSegment : Rule, infix : String, definition : Rule) : Rule {break;break;break;break;break;return 0;;}
+	createStatementRule(rule : Rule) : Rule {break;return 0;;}
+	createLambdaParameterRule(definition : Rule) : Rule {return 0;;}
+	createBlockHeaderRule(value : Rule, definition : Rule) : Rule {return 0;;}
+	createBlockRule(functionSegmentRule : LazyRule, value : Rule, definition : Rule) : Rule {break;return 0;;}
+	createBlockRule0(header : Rule, functionSegmentRule : Rule) : TypeRule {break;break;break;return 0;;}
+	createConditionalRule(type : String, value : Rule) : Rule {break;break;return 0;;}
+	createReturnRule(value : Rule) : Rule {return 0;;}
+	createWhitespaceRule() : Rule {return 0;;}
 }

@@ -1,4 +1,4 @@
 export class LambdaValueContent {
 	LambdaValueContent(value : JavaValue) : public {break;;}
-	value() : JavaValue {break;;}
+	value() : JavaValue {return 0;;}
 }

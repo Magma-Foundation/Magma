@@ -14,7 +14,7 @@ import { Deserializers } from "../../../../magmac/app/lang/Deserializers";
 import { Destructors } from "../../../../magmac/app/lang/Destructors";
 export class JavaTemplateType {
 	JavaTemplateType(base : JavaBase, typeArguments : TypeArguments<JavaType>) : public {break;break;;}
-	deserialize(node : Node) : Option<CompileResult<JavaTemplateType>> {break;;}
-	deserializeBase(node : Node) : CompileResult<JavaBase> {break;;}
-	createTemplateRule(type : Rule) : Rule {break;break;break;;}
+	deserialize(node : Node) : Option<CompileResult<JavaTemplateType>> {return 0;;}
+	deserializeBase(node : Node) : CompileResult<JavaBase> {return 0;;}
+	createTemplateRule(type : Rule) : Rule {break;break;return 0;;}
 }

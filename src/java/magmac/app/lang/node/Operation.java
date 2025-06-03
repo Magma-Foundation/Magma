@@ -7,8 +7,9 @@ import magmac.app.compile.rule.NodeRule;
 import magmac.app.compile.rule.Rule;
 import magmac.app.compile.rule.TypeRule;
 import magmac.app.lang.LazyRule;
+import magmac.app.lang.web.TypescriptValue;
 
-record Operation(JavaValue left, Operator operator, JavaValue right) implements JavaValue, TypeScriptValue {
+record Operation(JavaValue left, Operator operator, JavaValue right) implements JavaValue, TypescriptValue {
     static Rule createOperationRule(Operator operator, LazyRule value) {
         return new TypeRule(operator.type(), LocatingRule.First(new NodeRule("left", value), operator.text(), new NodeRule("right", value)));
     }

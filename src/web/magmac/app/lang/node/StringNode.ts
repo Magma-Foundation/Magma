@@ -9,8 +9,9 @@ import { StripRule } from "../../../../magmac/app/compile/rule/StripRule";
 import { SuffixRule } from "../../../../magmac/app/compile/rule/SuffixRule";
 import { TypeRule } from "../../../../magmac/app/compile/rule/TypeRule";
 import { Destructors } from "../../../../magmac/app/lang/Destructors";
+import { TypescriptValue } from "../../../../magmac/app/lang/web/TypescriptValue";
 export class StringNode {
-	deserialize(node : Node) : Option<CompileResult<StringNode>> {break;;}
-	createStringRule() : Rule {break;;}
-	serialize() : Node {break;;}
+	deserialize(node : Node) : Option<CompileResult<StringNode>> {return 0;;}
+	createStringRule() : Rule {return 0;;}
+	serialize() : Node {return 0;;}
 }

@@ -10,8 +10,8 @@ import { Node } from "../../../magmac/app/compile/node/Node";
 import { ImmutableCompileError } from "../../../magmac/app/error/ImmutableCompileError";
 import { TypedDeserializer } from "../../../magmac/app/lang/node/TypedDeserializer";
 export class Deserializers {
-	orError(type : String, node : Node, deserializers : List<TypedDeserializer<T>>) : CompileResult<T> {break;;}
-	wrap(type : String, node : Node, err : CompileError) : CompileError {break;;}
-	or(node : Node, deserializers : List<TypedDeserializer<T>>) : Option<CompileResult<T>> {break;;}
-	wrap(deserializer : TypedDeserializer<T>) : TypedDeserializer<R> {break;;}
+	orError(type : String, node : Node, deserializers : List<TypedDeserializer<T>>) : CompileResult<T> {return 0;;}
+	wrap(type : String, node : Node, err : CompileError) : CompileError {return 0;;}
+	or(node : Node, deserializers : List<TypedDeserializer<T>>) : Option<CompileResult<T>> {return 0;;}
+	wrap(deserializer : TypedDeserializer<T>) : TypedDeserializer<R> {return 0;;}
 }

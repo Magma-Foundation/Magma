@@ -14,12 +14,12 @@ import { Unit } from "../../../../magmac/app/stage/unit/Unit";
 import { UnitSet } from "../../../../magmac/app/stage/unit/UnitSet";
 export class TreeParser {
 	TreeParser(beforeChild : Passer, afterChild : Passer, afterAllChildren : AfterAll) : public {break;break;break;;}
-	parseNodeListEntry(current : ParseUnit<Node>, entry : Tuple2<String, NodeList>) : CompileResult<ParseUnit<Node>> {break;break;break;break;;}
-	getParseUnitCompileResult(node : Node, currentState1 : ParseState, currentElements : NodeList) : CompileResult<ParseUnit<NodeList>> {break;;}
-	parseTree(state : ParseState, root : Node) : CompileResult<ParseUnit<Node>> {break;;}
-	parseNodes(withNodeLists : ParseUnit<Node>) : CompileResult<ParseUnit<Node>> {break;;}
-	parseNodeEntry(current : ParseUnit<Node>, entry : Tuple2<String, Node>) : CompileResult<ParseUnit<Node>> {break;break;break;break;;}
-	parseNodeLists(beforeTuple : ParseUnit<Node>) : CompileResult<ParseUnit<Node>> {break;;}
-	apply(initial : UnitSet<Node>) : CompileResult<UnitSet<Node>> {break;;}
-	parseUnit(unit : Unit<Node>) : CompileResult<Unit<Node>> {break;;}
+	parseNodeListEntry(current : ParseUnit<Node>, entry : Tuple2<String, NodeList>) : CompileResult<ParseUnit<Node>> {break;break;break;return 0;;}
+	getParseUnitCompileResult(node : Node, currentState1 : ParseState, currentElements : NodeList) : CompileResult<ParseUnit<NodeList>> {return 0;;}
+	parseTree(state : ParseState, root : Node) : CompileResult<ParseUnit<Node>> {return 0;;}
+	parseNodes(withNodeLists : ParseUnit<Node>) : CompileResult<ParseUnit<Node>> {return 0;;}
+	parseNodeEntry(current : ParseUnit<Node>, entry : Tuple2<String, Node>) : CompileResult<ParseUnit<Node>> {break;break;break;return 0;;}
+	parseNodeLists(beforeTuple : ParseUnit<Node>) : CompileResult<ParseUnit<Node>> {return 0;;}
+	apply(initial : UnitSet<Node>) : CompileResult<UnitSet<Node>> {return 0;;}
+	parseUnit(unit : Unit<Node>) : CompileResult<Unit<Node>> {return 0;;}
 }

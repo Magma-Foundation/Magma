@@ -18,11 +18,11 @@ import { TypeScriptImport } from "../../../magmac/app/lang/node/TypeScriptImport
 import { TypescriptStructureNode } from "../../../magmac/app/lang/node/TypescriptStructureNode";
 import { Values } from "../../../magmac/app/lang/node/Values";
 export class TypescriptLang {
-	createRule() : Rule {break;;}
-	createStructureMemberRule() : Rule {break;break;break;;}
-	createMethodRule(definition : Rule, valueLazy : LazyRule) : Rule {break;break;break;break;break;break;;}
-	createConstructorRule(definition : Rule) : Rule {break;break;;}
-	createDefinitionRule() : Rule {break;break;break;break;break;break;break;;}
-	createTypeRule() : Rule {break;break;;}
-	createArrayRule(orRule : LazyRule) : TypeRule {break;;}
+	createRule() : Rule {return 0;;}
+	createStructureMemberRule() : Rule {break;break;return 0;;}
+	createMethodRule(definition : Rule, valueLazy : LazyRule) : Rule {break;break;break;break;break;return 0;;}
+	createConstructorRule(definition : Rule) : Rule {break;return 0;;}
+	createDefinitionRule() : Rule {break;break;break;break;break;break;return 0;;}
+	createTypeRule() : Rule {break;return 0;;}
+	createArrayRule(orRule : LazyRule) : TypeRule {return 0;;}
 }

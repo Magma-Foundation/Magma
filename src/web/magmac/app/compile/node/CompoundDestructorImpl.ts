@@ -10,11 +10,11 @@ import { CompileResults } from "../../../../magmac/app/compile/error/CompileResu
 import { Function } from "../../../../java/util/function/Function";
 export class CompoundDestructorImpl<T> {
 	CompoundDestructorImpl(result : CompileResult<Tuple2<Node, T>>) : public {break;;}
-	complete(mapper : Function<T, R>) : CompileResult<R> {break;;}
-	withNodeList(key : String, deserializer : Function<Node, CompileResult<R>>) : CompoundDestructor<Tuple2<T, List<R>>> {break;;}
-	withNode(key : String, deserializer : Function<Node, CompileResult<R>>) : CompoundDestructor<Tuple2<T, R>> {break;;}
-	withNodeOptionally(key : String, deserializer : Function<Node, CompileResult<R>>) : CompoundDestructor<Tuple2<T, Option<R>>> {break;;}
-	withNodeListOptionally(key : String, deserializer : Function<Node, CompileResult<R>>) : CompoundDestructor<Tuple2<T, Option<List<R>>>> {break;;}
-	getTuple2CompileResult(deserializer : Function<Node, CompileResult<R>>, inner : Tuple2<Node, T>, tuple : Tuple2<Node, Node>) : CompileResult<Tuple2<Node, Tuple2<T, Option<R>>>> {break;;}
-	mapElements(current : Node, elements : NodeList, deserializer : Function<Node, CompileResult<R>>, more : T) : CompileResult<Tuple2<Node, Tuple2<T, Option<List<R>>>>> {break;;}
+	complete(mapper : Function<T, R>) : CompileResult<R> {return 0;;}
+	withNodeList(key : String, deserializer : Function<Node, CompileResult<R>>) : CompoundDestructor<Tuple2<T, List<R>>> {return 0;;}
+	withNode(key : String, deserializer : Function<Node, CompileResult<R>>) : CompoundDestructor<Tuple2<T, R>> {return 0;;}
+	withNodeOptionally(key : String, deserializer : Function<Node, CompileResult<R>>) : CompoundDestructor<Tuple2<T, Option<R>>> {return 0;;}
+	withNodeListOptionally(key : String, deserializer : Function<Node, CompileResult<R>>) : CompoundDestructor<Tuple2<T, Option<List<R>>>> {return 0;;}
+	getTuple2CompileResult(deserializer : Function<Node, CompileResult<R>>, inner : Tuple2<Node, T>, tuple : Tuple2<Node, Node>) : CompileResult<Tuple2<Node, Tuple2<T, Option<R>>>> {return 0;;}
+	mapElements(current : Node, elements : NodeList, deserializer : Function<Node, CompileResult<R>>, more : T) : CompileResult<Tuple2<Node, Tuple2<T, Option<List<R>>>>> {return 0;;}
 }

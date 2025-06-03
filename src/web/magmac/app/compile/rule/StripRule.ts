@@ -2,6 +2,6 @@ import { CompileResult } from "../../../../magmac/app/compile/error/CompileResul
 import { Node } from "../../../../magmac/app/compile/node/Node";
 export class StripRule {
 	StripRule(rule : Rule) : public {break;;}
-	lex(input : String) : CompileResult<Node> {break;;}
-	generate(node : Node) : CompileResult<String> {break;break;break;;}
+	lex(input : String) : CompileResult<Node> {return 0;;}
+	generate(node : Node) : CompileResult<String> {break;break;return 0;;}
 }

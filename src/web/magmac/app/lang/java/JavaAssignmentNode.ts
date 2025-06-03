@@ -16,7 +16,7 @@ import { StructureStatementValue } from "../../../../magmac/app/lang/node/Struct
 import { Values } from "../../../../magmac/app/lang/node/Values";
 import { TypescriptFunctionSegmentValue } from "../../../../magmac/app/lang/web/TypescriptFunctionSegmentValue";
 export class JavaAssignmentNode {
-	deserialize(node : Node) : Option<CompileResult<JavaAssignmentNode>> {break;;}
-	createAssignmentRule(definition : Rule, value : Rule) : Rule {break;break;break;;}
-	serialize() : Node {break;;}
+	deserialize(node : Node) : Option<CompileResult<JavaAssignmentNode>> {return 0;;}
+	createAssignmentRule(definition : Rule, value : Rule) : Rule {break;break;return 0;;}
+	serialize() : Node {return 0;;}
 }

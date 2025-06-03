@@ -4,6 +4,6 @@ import { LocatingRule } from "../../../../magmac/app/compile/rule/LocatingRule";
 import { StringRule } from "../../../../magmac/app/compile/rule/StringRule";
 import { TypeRule } from "../../../../magmac/app/compile/rule/TypeRule";
 export class PlantUMLInherits {
-	createInheritsRule() : TypeRule {break;;}
-	serialize() : Node {break;;}
+	createInheritsRule() : TypeRule {return 0;;}
+	serialize() : Node {return 0;;}
 }

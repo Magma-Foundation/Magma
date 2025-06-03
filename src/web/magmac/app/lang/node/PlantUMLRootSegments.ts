@@ -3,5 +3,5 @@ import { OrRule } from "../../../../magmac/app/compile/rule/OrRule";
 import { Rule } from "../../../../magmac/app/compile/rule/Rule";
 import { SuffixRule } from "../../../../magmac/app/compile/rule/SuffixRule";
 export class PlantUMLRootSegments {
-	createRootSegmentRule() : Rule {break;;}
+	createRootSegmentRule() : Rule {return 0;;}
 }

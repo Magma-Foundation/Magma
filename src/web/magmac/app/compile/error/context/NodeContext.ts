@@ -1,4 +1,4 @@
 import { Node } from "../../../../../magmac/app/compile/node/Node";
 export class NodeContext {
-	display() : String {break;;}
+	display() : String {return 0;;}
 }

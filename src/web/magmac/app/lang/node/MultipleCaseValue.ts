@@ -12,6 +12,6 @@ import { StatementFolder } from "../../../../magmac/app/compile/rule/fold/Statem
 import { Destructors } from "../../../../magmac/app/lang/Destructors";
 import { JavaFunctionSegment } from "../../../../magmac/app/lang/java/JavaFunctionSegment";
 export class MultipleCaseValue {
-	deserialize(node : Node) : Option<CompileResult<CaseValue>> {break;;}
-	createRule(segment : Rule) : TypeRule {break;;}
+	deserialize(node : Node) : Option<CompileResult<CaseValue>> {return 0;;}
+	createRule(segment : Rule) : TypeRule {return 0;;}
 }

@@ -9,8 +9,8 @@ import { Function } from "../../../../java/util/function/Function";
 import { Supplier } from "../../../../java/util/function/Supplier";
 export class InitialDestructorImpl {
 	InitialDestructorImpl(node : Node) : public {break;;}
-	withNodeList(key : String, deserializer : Deserializer<T>) : CompoundDestructor<List<T>> {break;;}
-	withString(key : String) : CompoundDestructor<String> {break;;}
-	withNode(key : String, deserializer : Function<Node, CompileResult<T>>) : CompoundDestructor<T> {break;;}
-	complete(supplier : Supplier<T>) : CompileResult<T> {if(true){ break;;}break;;}
+	withNodeList(key : String, deserializer : Deserializer<T>) : CompoundDestructor<List<T>> {return 0;;}
+	withString(key : String) : CompoundDestructor<String> {return 0;;}
+	withNode(key : String, deserializer : Function<Node, CompileResult<T>>) : CompoundDestructor<T> {return 0;;}
+	complete(supplier : Supplier<T>) : CompileResult<T> {if(true){ return 0;;}return 0;;}
 }

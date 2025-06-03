@@ -12,9 +12,9 @@ import { TypescriptLang } from "../../../../magmac/app/lang/TypescriptLang";
 import { JavaDefinition } from "../../../../magmac/app/lang/java/JavaDefinition";
 export class TypescriptStructureNode {
 	TypescriptStructureNode(type : TypescriptStructureType, structureNode : StructureValue<TypeScriptType, TypescriptStructureMember>) : public {break;break;;}
-	createStructureRule(type : String) : Rule {break;break;break;break;;}
-	serializeImplementsParams() : Node {break;;}
-	serializeExtendedParams() : Node {break;;}
-	serializeTypeParams() : Node {break;;}
-	serialize() : Node {break;;}
+	createStructureRule(type : String) : Rule {break;break;break;return 0;;}
+	serializeImplementsParams() : Node {return 0;;}
+	serializeExtendedParams() : Node {return 0;;}
+	serializeTypeParams() : Node {return 0;;}
+	serialize() : Node {return 0;;}
 }

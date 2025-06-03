@@ -15,9 +15,9 @@ import { MapUnitSet } from "../../../magmac/app/stage/unit/MapUnitSet";
 import { SimpleUnit } from "../../../magmac/app/stage/unit/SimpleUnit";
 import { UnitSet } from "../../../magmac/app/stage/unit/UnitSet";
 export class MergeDiagram {
-	findParentDependencies(child : String, childToParents : Map<String, List<String>>, dependencyMap : Map<String, List<String>>) : List<String> {break;;}
-	findChildrenWithDependencies(rootSegments : NodeList) : Map<String, List<String>> {break;;}
-	findChildrenWithInheritedTypes(rootSegments : NodeList) : Map<String, List<String>> {break;;}
-	createInitial() : MapUnitSet<Node> {break;;}
-	afterAll(roots : UnitSet<Node>) : UnitSet<Node> {break;break;break;break;break;break;break;break;break;break;;}
+	findParentDependencies(child : String, childToParents : Map<String, List<String>>, dependencyMap : Map<String, List<String>>) : List<String> {return 0;;}
+	findChildrenWithDependencies(rootSegments : NodeList) : Map<String, List<String>> {return 0;;}
+	findChildrenWithInheritedTypes(rootSegments : NodeList) : Map<String, List<String>> {return 0;;}
+	createInitial() : MapUnitSet<Node> {return 0;;}
+	afterAll(roots : UnitSet<Node>) : UnitSet<Node> {break;break;break;break;break;break;break;break;break;return 0;;}
 }

@@ -41,22 +41,22 @@ import { TypedDeserializer } from "../../../magmac/app/lang/node/TypedDeserializ
 import { Values } from "../../../magmac/app/lang/node/Values";
 import { JavaWhitespace } from "../../../magmac/app/lang/java/JavaWhitespace";
 export class JavaDeserializers {
-	deserialize(node : Node) : CompileResult<Lang.JavaCaller> {break;;}
-	deserializeConstruction(node : Node) : Option<CompileResult<Lang.JavaCaller>> {break;;}
-	deserializeInvocation(node : Node) : Option<CompileResult<JavaInvokable>> {break;;}
-	deserializeRootSegment(node : Node) : CompileResult<JavaRootSegment> {break;;}
-	deserializeAccess(type : JavaAccessType, node : Node) : Option<CompileResult<JavaAccess>> {break;;}
-	deserializeYield(node : Node) : Option<CompileResult<JavaYieldNode>> {break;;}
-	deserializePost(variant : PostVariant, node : Node) : Option<CompileResult<JavaPost>> {break;;}
-	deserializeLambda(node : Node) : Option<CompileResult<JavaLambda>> {break;;}
-	deserializeAccessWithType(type : JavaAccessType) : TypedDeserializer<JavaAccess> {break;;}
-	deserializeFunctionStatement(node : Node) : Option<CompileResult<JavaFunctionStatement>> {break;;}
-	deserializeReturn(node : Node) : Option<CompileResult<JavaReturnNode>> {break;;}
-	deserializeBlockHeader(node : Node) : CompileResult<JavaBlockHeader> {break;;}
-	deserializeBlock(node : Node) : Option<CompileResult<JavaBlock>> {break;;}
-	deserializeConditional(type : ConditionalType, node : Node) : Option<CompileResult<JavaConditional>> {break;;}
-	deserializeStructureStatement(node : Node) : CompileResult<StructureStatementValue> {break;;}
-	deserializeBreak(node : Node) : Option<CompileResult<JavaBreak>> {break;;}
-	deserializeContinue(node : Node) : Option<CompileResult<JavaContinue>> {break;;}
-	deserializeWhitespace(node : Node) : Option<CompileResult<JavaWhitespace>> {break;;}
+	deserialize(node : Node) : CompileResult<Lang.JavaCaller> {return 0;;}
+	deserializeConstruction(node : Node) : Option<CompileResult<Lang.JavaCaller>> {return 0;;}
+	deserializeInvocation(node : Node) : Option<CompileResult<JavaInvokable>> {return 0;;}
+	deserializeRootSegment(node : Node) : CompileResult<JavaRootSegment> {return 0;;}
+	deserializeAccess(type : JavaAccessType, node : Node) : Option<CompileResult<JavaAccess>> {return 0;;}
+	deserializeYield(node : Node) : Option<CompileResult<JavaYieldNode>> {return 0;;}
+	deserializePost(variant : PostVariant, node : Node) : Option<CompileResult<JavaPost>> {return 0;;}
+	deserializeLambda(node : Node) : Option<CompileResult<JavaLambda>> {return 0;;}
+	deserializeAccessWithType(type : JavaAccessType) : TypedDeserializer<JavaAccess> {return 0;;}
+	deserializeFunctionStatement(node : Node) : Option<CompileResult<JavaFunctionStatement>> {return 0;;}
+	deserializeReturn(node : Node) : Option<CompileResult<JavaReturnNode>> {return 0;;}
+	deserializeBlockHeader(node : Node) : CompileResult<JavaBlockHeader> {return 0;;}
+	deserializeBlock(node : Node) : Option<CompileResult<JavaBlock>> {return 0;;}
+	deserializeConditional(type : ConditionalType, node : Node) : Option<CompileResult<JavaConditional>> {return 0;;}
+	deserializeStructureStatement(node : Node) : CompileResult<StructureStatementValue> {return 0;;}
+	deserializeBreak(node : Node) : Option<CompileResult<JavaBreak>> {return 0;;}
+	deserializeContinue(node : Node) : Option<CompileResult<JavaContinue>> {return 0;;}
+	deserializeWhitespace(node : Node) : Option<CompileResult<JavaWhitespace>> {return 0;;}
 }

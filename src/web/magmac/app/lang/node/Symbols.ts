@@ -8,7 +8,7 @@ import { StripRule } from "../../../../magmac/app/compile/rule/StripRule";
 import { TypeRule } from "../../../../magmac/app/compile/rule/TypeRule";
 import { Destructors } from "../../../../magmac/app/lang/Destructors";
 export class Symbols {
-	deserialize(node : Node) : Option<CompileResult<Symbol>> {break;;}
-	createSymbolRule(key : String) : Rule {break;;}
-	createSymbolRule() : Rule {break;;}
+	deserialize(node : Node) : Option<CompileResult<Symbol>> {return 0;;}
+	createSymbolRule(key : String) : Rule {return 0;;}
+	createSymbolRule() : Rule {return 0;;}
 }

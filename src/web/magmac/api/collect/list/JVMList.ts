@@ -10,17 +10,17 @@ import { ArrayList } from "../../../../java/util/ArrayList";
 import { BiFunction } from "../../../../java/util/function/BiFunction";
 export class JVMList<T> {
 	JVMList() : public {break;;}
-	addLast(element : T) : List<T> {break;break;break;;}
-	iter() : Iter<T> {break;;}
-	addAllLast(others : List<T>) : List<T> {break;;}
-	createInitial() : List<T> {break;;}
-	removeAll(others : List<T>) : List<T> {break;;}
-	get(index : int) : T {break;;}
-	sort(sorter : BiFunction<T, T, Integer>) : List<T> {break;break;break;;}
-	contains(element : T) : boolean {break;;}
-	size() : int {break;;}
-	popLast() : Option<Tuple2<List<T>, T>> {if(true){ break;;}break;break;;}
-	popFirst() : Option<Tuple2<T, List<T>>> {if(true){ break;;}break;break;;}
-	addFirst(element : T) : List<T> {break;break;break;break;;}
-	findLast() : Option<T> {if(true){ break;;}break;;}
+	addLast(element : T) : List<T> {break;break;return 0;;}
+	iter() : Iter<T> {return 0;;}
+	addAllLast(others : List<T>) : List<T> {return 0;;}
+	createInitial() : List<T> {return 0;;}
+	removeAll(others : List<T>) : List<T> {return 0;;}
+	get(index : int) : T {return 0;;}
+	sort(sorter : BiFunction<T, T, Integer>) : List<T> {break;break;return 0;;}
+	contains(element : T) : boolean {return 0;;}
+	size() : int {return 0;;}
+	popLast() : Option<Tuple2<List<T>, T>> {if(true){ return 0;;}break;return 0;;}
+	popFirst() : Option<Tuple2<T, List<T>>> {if(true){ return 0;;}break;return 0;;}
+	addFirst(element : T) : List<T> {break;break;break;return 0;;}
+	findLast() : Option<T> {if(true){ return 0;;}return 0;;}
 }

@@ -2,9 +2,10 @@ package magmac.app.lang.node;
 
 import magmac.app.compile.node.MapNode;
 import magmac.app.compile.node.Node;
+import magmac.app.lang.web.TypescriptValue;
 
-public final class TypescriptConditional extends Conditional<TypeScriptValue> implements TypescriptBlockHeader {
-    public TypescriptConditional(ConditionalType type, TypeScriptValue condition) {
+public final class TypescriptConditional extends Conditional<TypescriptValue> implements TypescriptBlockHeader {
+    public TypescriptConditional(ConditionalType type, TypescriptValue condition) {
         super(type, condition);
     }
 

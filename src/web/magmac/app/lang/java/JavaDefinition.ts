@@ -30,9 +30,9 @@ import { LambdaParameter } from "../../../../magmac/app/lang/node/LambdaParamete
 import { Modifier } from "../../../../magmac/app/lang/node/Modifier";
 import { StructureStatementValue } from "../../../../magmac/app/lang/node/StructureStatementValue";
 export class JavaDefinition {
-	deserialize(node : Node) : CompileResult<JavaDefinition> {break;;}
-	deserializeTyped(node : Node) : Option<CompileResult<JavaDefinition>> {break;;}
-	createRule() : Rule {break;break;break;break;break;break;break;break;break;break;;}
-	attachTypeParams(beforeTypeParams : Rule) : Rule {break;break;;}
-	serialize() : Node {break;;}
+	deserialize(node : Node) : CompileResult<JavaDefinition> {return 0;;}
+	deserializeTyped(node : Node) : Option<CompileResult<JavaDefinition>> {return 0;;}
+	createRule() : Rule {break;break;break;break;break;break;break;break;break;return 0;;}
+	attachTypeParams(beforeTypeParams : Rule) : Rule {break;return 0;;}
+	serialize() : Node {return 0;;}
 }

@@ -5,6 +5,6 @@ import { InitialDestructor } from "../../../magmac/app/compile/node/InitialDestr
 import { InitialDestructorImpl } from "../../../magmac/app/compile/node/InitialDestructorImpl";
 import { Node } from "../../../magmac/app/compile/node/Node";
 export class Destructors {
-	destructWithType(type : String, node : Node) : Option<InitialDestructor> {if(true){ break;;}break;;}
-	destruct(node : Node) : InitialDestructor {break;;}
+	destructWithType(type : String, node : Node) : Option<InitialDestructor> {if(true){ return 0;;}return 0;;}
+	destruct(node : Node) : InitialDestructor {return 0;;}
 }

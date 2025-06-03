@@ -10,7 +10,7 @@ import { ParseUnit } from "../../../../magmac/app/stage/unit/ParseUnit";
 import { ParseUnitImpl } from "../../../../magmac/app/stage/unit/ParseUnitImpl";
 import { Supplier } from "../../../../java/util/function/Supplier";
 export class InlinePassResult {
-	empty() : ParseResult {break;;}
-	from(state : ParseState, node : Node) : ParseResult {break;;}
-	orElseGet(other : Supplier<ParseUnit<Node>>) : CompileResult<ParseUnit<Node>> {break;;}
+	empty() : ParseResult {return 0;;}
+	from(state : ParseState, node : Node) : ParseResult {return 0;;}
+	orElseGet(other : Supplier<ParseUnit<Node>>) : CompileResult<ParseUnit<Node>> {return 0;;}
 }

@@ -6,9 +6,9 @@ import { Splitter } from "../../../../../magmac/app/compile/rule/Splitter";
 import { Divider } from "../../../../../magmac/app/compile/rule/divide/Divider";
 export class DividingSplitter {
 	DividingSplitter(divider : Divider, selector : Selector) : private {break;break;;}
-	Last(divider : Divider, delimiter : String) : Splitter {break;;}
-	First(divider : Divider, delimiter : String) : Splitter {break;;}
-	split(input : String) : Option<Tuple2<String, String>> {break;break;;}
-	createMessage() : String {break;;}
-	merge(leftString : String, rightString : String) : String {break;;}
+	Last(divider : Divider, delimiter : String) : Splitter {return 0;;}
+	First(divider : Divider, delimiter : String) : Splitter {return 0;;}
+	split(input : String) : Option<Tuple2<String, String>> {break;return 0;;}
+	createMessage() : String {return 0;;}
+	merge(leftString : String, rightString : String) : String {return 0;;}
 }

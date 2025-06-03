@@ -43,6 +43,8 @@ import magmac.app.lang.node.JavaBlockHeader;
 import magmac.app.lang.node.JavaRoot;
 import magmac.app.lang.node.JavaTemplateType;
 import magmac.app.lang.node.JavaType;
+import magmac.app.lang.node.JavaValue;
+import magmac.app.lang.node.NumberNode;
 import magmac.app.lang.node.ParameterizedMethodHeader;
 import magmac.app.lang.node.Qualified;
 import magmac.app.lang.node.Segment;
@@ -56,6 +58,7 @@ import magmac.app.lang.node.TypeScriptParameter;
 import magmac.app.lang.node.TypeScriptRootSegment;
 import magmac.app.lang.node.TypeScriptTemplateType;
 import magmac.app.lang.node.TypeScriptType;
+import magmac.app.lang.web.TypescriptValue;
 import magmac.app.lang.node.TypescriptArrayType;
 import magmac.app.lang.node.TypescriptBlock;
 import magmac.app.lang.node.TypescriptBlockHeader;
@@ -72,6 +75,7 @@ import magmac.app.lang.web.TypescriptBreak;
 import magmac.app.lang.web.TypescriptContinue;
 import magmac.app.lang.web.TypescriptFunctionSegmentValue;
 import magmac.app.lang.web.TypescriptFunctionStatement;
+import magmac.app.lang.web.TypescriptReturnNode;
 import magmac.app.lang.web.TypescriptWhitespace;
 import magmac.app.stage.parse.Parser;
 import magmac.app.stage.unit.SimpleUnit;
@@ -211,12 +215,16 @@ class JavaTypescriptParser implements Parser<JavaRoot, TypescriptRoot> {
         return switch (child) {
             case JavaBreak javaBreak -> new TypescriptBreak();
             case JavaContinue javaContinue -> new TypescriptContinue();
-            case JavaReturnNode javaReturnNode -> new TypescriptBreak();
+            case JavaReturnNode javaReturnNode -> new TypescriptReturnNode(parseValue(javaReturnNode.child()));
             case JavaYieldNode javaYieldNode -> new TypescriptBreak();
             case JavaInvokable javaInvokable -> new TypescriptBreak();
             case JavaPost javaPost -> new TypescriptBreak();
             case JavaAssignmentNode javaAssignmentNode -> new TypescriptBreak();
         };
+    }
+
+    private static TypescriptValue parseValue(JavaValue child) {
+        return new NumberNode("0");
     }
 
     private static TypescriptBlock parseBlock(JavaBlock block) {

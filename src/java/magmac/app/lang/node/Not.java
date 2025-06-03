@@ -10,8 +10,9 @@ import magmac.app.compile.rule.StripRule;
 import magmac.app.compile.rule.TypeRule;
 import magmac.app.lang.Destructors;
 import magmac.app.lang.LazyRule;
+import magmac.app.lang.web.TypescriptValue;
 
-record Not(JavaValue value) implements JavaValue, TypeScriptValue {
+record Not(JavaValue value) implements JavaValue, TypescriptValue {
     public static TypeRule createNotRule(LazyRule value) {
         return new TypeRule("not", new StripRule(new PrefixRule("!", new NodeRule("child", value))));
     }

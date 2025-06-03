@@ -4,8 +4,8 @@ import { HeadedIter } from "../../../magmac/api/head/HeadedIter";
 import { RangeHead } from "../../../magmac/api/head/RangeHead";
 import { SingleHead } from "../../../magmac/api/head/SingleHead";
 export class Iters {
-	fromArray(array : T[]) : Iter<T> {break;;}
-	fromOption(option : Option<T>) : Iter<T> {break;;}
-	fromValues(...values : T[]) : Iter<T> {break;;}
-	empty() : Iter<T> {break;;}
+	fromArray(array : T[]) : Iter<T> {return 0;;}
+	fromOption(option : Option<T>) : Iter<T> {return 0;;}
+	fromValues(...values : T[]) : Iter<T> {return 0;;}
+	empty() : Iter<T> {return 0;;}
 }

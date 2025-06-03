@@ -9,8 +9,8 @@ import { TypeRule } from "../../../../magmac/app/compile/rule/TypeRule";
 import { DelimitedFolder } from "../../../../magmac/app/compile/rule/fold/DelimitedFolder";
 import { Destructors } from "../../../../magmac/app/lang/Destructors";
 export class Qualified {
-	deserializeQualified(node : Node) : Option<CompileResult<Qualified>> {break;;}
-	createQualifiedRule() : TypeRule {break;;}
-	createSegmentsRule(key : String) : Rule {break;;}
-	serialize() : Node {break;;}
+	deserializeQualified(node : Node) : Option<CompileResult<Qualified>> {return 0;;}
+	createQualifiedRule() : TypeRule {return 0;;}
+	createSegmentsRule(key : String) : Rule {return 0;;}
+	serialize() : Node {return 0;;}
 }

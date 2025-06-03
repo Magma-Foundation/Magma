@@ -7,8 +7,9 @@ import magmac.app.compile.node.MapNode;
 import magmac.app.compile.node.Node;
 import magmac.app.lang.Destructors;
 import magmac.app.lang.java.JavaFunctionSegment;
+import magmac.app.lang.web.TypescriptValue;
 
-public record SwitchNode(JavaValue value, List<JavaFunctionSegment> children) implements JavaValue, TypeScriptValue {
+public record SwitchNode(JavaValue value, List<JavaFunctionSegment> children) implements JavaValue, TypescriptValue {
     public static Option<CompileResult<SwitchNode>> deserialize(Node node) {
         return Destructors.destructWithType("switch", node).map(deserializer -> {
             return deserializer

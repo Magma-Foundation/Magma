@@ -1,3 +1,3 @@
 export class StringContext {
-	display() : String {break;;}
+	display() : String {return 0;;}
 }

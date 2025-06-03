@@ -12,8 +12,9 @@ import magmac.app.compile.rule.SuffixRule;
 import magmac.app.compile.rule.TypeRule;
 import magmac.app.lang.Destructors;
 import magmac.app.lang.LazyRule;
+import magmac.app.lang.web.TypescriptValue;
 
-public record IndexNode(JavaValue parent, JavaValue argument) implements JavaValue, TypeScriptValue {
+public record IndexNode(JavaValue parent, JavaValue argument) implements JavaValue, TypescriptValue {
     public static Rule createIndexRule(LazyRule value) {
         NodeRule parent = new NodeRule("parent", value);
         NodeRule argument = new NodeRule("argument", value);

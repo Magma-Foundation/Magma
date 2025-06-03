@@ -16,7 +16,7 @@ import { Destructors } from "../../../../magmac/app/lang/Destructors";
 import { NamespacedType } from "../../../../magmac/app/lang/node/NamespacedType";
 import { Segment } from "../../../../magmac/app/lang/node/Segment";
 export class JavaNamespacedNode {
-	deserialize(type : NamespacedType, node : Node) : Option<CompileResult<JavaRootSegment>> {break;;}
-	deserialize(node : Node) : Option<CompileResult<JavaRootSegment>> {break;;}
-	createNamespacedRule(type : String) : Rule {break;break;;}
+	deserialize(type : NamespacedType, node : Node) : Option<CompileResult<JavaRootSegment>> {return 0;;}
+	deserialize(node : Node) : Option<CompileResult<JavaRootSegment>> {return 0;;}
+	createNamespacedRule(type : String) : Rule {break;return 0;;}
 }

@@ -8,8 +8,9 @@ import { StripRule } from "../../../../magmac/app/compile/rule/StripRule";
 import { TypeRule } from "../../../../magmac/app/compile/rule/TypeRule";
 import { Destructors } from "../../../../magmac/app/lang/Destructors";
 import { LazyRule } from "../../../../magmac/app/lang/LazyRule";
+import { TypescriptValue } from "../../../../magmac/app/lang/web/TypescriptValue";
 export class Not {
-	createNotRule(value : LazyRule) : TypeRule {break;;}
-	deserialize(node : Node) : Option<CompileResult<Not>> {break;;}
-	serialize() : Node {break;;}
+	createNotRule(value : LazyRule) : TypeRule {return 0;;}
+	deserialize(node : Node) : Option<CompileResult<Not>> {return 0;;}
+	serialize() : Node {return 0;;}
 }

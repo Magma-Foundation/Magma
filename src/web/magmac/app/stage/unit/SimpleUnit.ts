@@ -4,7 +4,7 @@ import { BiFunction } from "../../../../java/util/function/BiFunction";
 import { Function } from "../../../../java/util/function/Function";
 export class SimpleUnit<T> {
 	SimpleUnit(location : Location, value : T) : public {break;break;;}
-	destruct(merger : BiFunction<Location, T, R>) : R {break;;}
-	mapValue(mapper : Function<T, CompileResult<R>>) : CompileResult<Unit<R>> {break;;}
-	display() : String {break;;}
+	destruct(merger : BiFunction<Location, T, R>) : R {return 0;;}
+	mapValue(mapper : Function<T, CompileResult<R>>) : CompileResult<Unit<R>> {return 0;;}
+	display() : String {return 0;;}
 }

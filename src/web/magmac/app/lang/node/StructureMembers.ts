@@ -15,6 +15,6 @@ import { JavaMethod } from "../../../../magmac/app/lang/java/JavaMethod";
 import { JavaStructureMember } from "../../../../magmac/app/lang/java/JavaStructureMember";
 import { JavaStructureStatement } from "../../../../magmac/app/lang/java/JavaStructureStatement";
 export class StructureMembers {
-	deserialize(node : Node) : CompileResult<JavaStructureMember> {break;;}
-	createClassMemberRule() : Rule {break;break;break;break;break;break;;}
+	deserialize(node : Node) : CompileResult<JavaStructureMember> {return 0;;}
+	createClassMemberRule() : Rule {break;break;break;break;break;return 0;;}
 }

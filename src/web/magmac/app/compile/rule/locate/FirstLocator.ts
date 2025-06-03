@@ -2,5 +2,5 @@ import { None } from "../../../../../magmac/api/None";
 import { Option } from "../../../../../magmac/api/Option";
 import { Some } from "../../../../../magmac/api/Some";
 export class FirstLocator {
-	locate(input : String, infix : String) : Option<Integer> {break;if(true){ break;;}break;;}
+	locate(input : String, infix : String) : Option<Integer> {break;if(true){ return 0;;}return 0;;}
 }

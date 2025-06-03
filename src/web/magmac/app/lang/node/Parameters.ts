@@ -11,6 +11,6 @@ import { Deserializers } from "../../../../magmac/app/lang/Deserializers";
 import { JavaDefinition } from "../../../../magmac/app/lang/java/JavaDefinition";
 import { JavaParameter } from "../../../../magmac/app/lang/java/JavaParameter";
 export class Parameters {
-	deserialize(node : Node) : CompileResult<JavaParameter> {break;;}
-	createParametersRule(definition : Rule) : Rule {break;;}
+	deserialize(node : Node) : CompileResult<JavaParameter> {return 0;;}
+	createParametersRule(definition : Rule) : Rule {return 0;;}
 }

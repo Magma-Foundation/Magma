@@ -8,7 +8,7 @@ import { Post } from "../../../../magmac/app/lang/node/Post";
 import { PostVariant } from "../../../../magmac/app/lang/node/PostVariant";
 export class JavaPost {
 	JavaPost(variant : PostVariant, value : JavaValue) : public {break;;}
-	createPostRule(type : String, suffix : String, value : Rule) : Rule {break;;}
-	variant() : PostVariant {break;;}
-	value() : JavaValue {break;;}
+	createPostRule(type : String, suffix : String, value : Rule) : Rule {return 0;;}
+	variant() : PostVariant {return 0;;}
+	value() : JavaValue {return 0;;}
 }

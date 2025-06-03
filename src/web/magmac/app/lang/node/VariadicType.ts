@@ -8,6 +8,6 @@ import { SuffixRule } from "../../../../magmac/app/compile/rule/SuffixRule";
 import { TypeRule } from "../../../../magmac/app/compile/rule/TypeRule";
 import { Destructors } from "../../../../magmac/app/lang/Destructors";
 export class VariadicType {
-	deserialize(node : Node) : Option<CompileResult<JavaType>> {break;;}
-	createVariadicRule(rule : Rule) : Rule {break;break;;}
+	deserialize(node : Node) : Option<CompileResult<JavaType>> {return 0;;}
+	createVariadicRule(rule : Rule) : Rule {break;return 0;;}
 }

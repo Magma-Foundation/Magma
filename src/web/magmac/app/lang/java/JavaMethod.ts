@@ -20,6 +20,6 @@ import { OptionNodeListRule } from "../../../../magmac/app/lang/OptionNodeListRu
 import { FunctionSegments } from "../../../../magmac/app/lang/node/FunctionSegments";
 import { Parameters } from "../../../../magmac/app/lang/node/Parameters";
 export class JavaMethod {
-	deserialize(node : Node) : Option<CompileResult<JavaStructureMember>> {break;;}
-	createMethodRule(childRule : Rule) : Rule {break;break;break;break;break;break;;}
+	deserialize(node : Node) : Option<CompileResult<JavaStructureMember>> {return 0;;}
+	createMethodRule(childRule : Rule) : Rule {break;break;break;break;break;return 0;;}
 }

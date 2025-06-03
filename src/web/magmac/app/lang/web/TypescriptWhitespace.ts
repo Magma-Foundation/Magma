@@ -5,5 +5,5 @@ import { TypeScriptRootSegment } from "../../../../magmac/app/lang/node/TypeScri
 import { TypescriptFunctionSegment } from "../../../../magmac/app/lang/node/TypescriptFunctionSegment";
 import { TypescriptStructureMember } from "../../../../magmac/app/lang/node/TypescriptStructureMember";
 export class TypescriptWhitespace {
-	serialize() : Node {break;;}
+	serialize() : Node {return 0;;}
 }
