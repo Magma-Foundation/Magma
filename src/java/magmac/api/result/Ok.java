@@ -5,6 +5,10 @@ import magmac.api.Tuple2;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+/**
+ * Successful variant of {@link Result}.
+ */
+
 public record Ok<T, X>(T value) implements Result<T, X> {
     @Override
     public <R> Result<R, X> mapValue(Function<T, R> mapper) {

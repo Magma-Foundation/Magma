@@ -12,6 +12,10 @@ import java.util.HashMap;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+/**
+ * {@link Map} implementation backed by a Java {@link java.util.Map}.
+ */
+
 public
 record JVMMap<K, V>(java.util.Map<K, V> map) implements Map<K, V> {
     @Override

@@ -4,6 +4,10 @@ import magmac.api.None;
 import magmac.api.Option;
 import magmac.api.Some;
 
+/**
+ * {@link Head} producing a range of integers.
+ */
+
 public class RangeHead implements Head<Integer> {
     private final int length;
     private int counter;
