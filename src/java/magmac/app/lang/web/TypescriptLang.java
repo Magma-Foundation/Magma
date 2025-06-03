@@ -259,6 +259,13 @@ public final class TypescriptLang {
         }
     }
 
+    public record Construction(TypeScriptType type) implements TypescriptCaller {
+        @Override
+        public Node serialize() {
+            return new MapNode("construction").withNodeSerialized("type", this.type);
+        }
+    }
+
     public static TypeRule createArrayRule(LazyRule orRule) {
         return new TypeRule("array", new SuffixRule(new NodeRule("child", orRule), "[]"));
     }

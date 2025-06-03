@@ -200,8 +200,9 @@ class JavaTypescriptParser implements Parser<JavaLang.JavaRoot, TypescriptLang.T
 
     private static TypescriptCaller parseCaller(JavaLang.JavaCaller caller) {
         return switch (caller) {
-            case JavaLang.JavaValue javaValue -> new TypescriptLang.NumberNode("0F");
-            case JavaConstruction javaConstruction -> new TypescriptLang.NumberNode("0");
+            case JavaLang.JavaValue javaValue -> JavaTypescriptParser.parseValue(javaValue);
+            case JavaConstruction javaConstruction ->
+                    new TypescriptLang.Construction(JavaTypescriptParser.parseType(javaConstruction.type()));
         };
     }
 

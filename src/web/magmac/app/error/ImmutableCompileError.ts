@@ -6,7 +6,7 @@ import { Max } from "../../../magmac/api/iter/collect/Max";
 import { Context } from "../../../magmac/app/compile/error/context/Context";
 import { CompileError } from "../../../magmac/app/compile/error/error/CompileError";
 export class ImmutableCompileError {
-	ImmutableCompileError(message : String, context : Context) : public {0F( 0, 0, 0);;}
+	ImmutableCompileError(message : String, context : Context) : public {0( 0, 0, 0);;}
 	formatEntry(depth : int, display : String) : String {break;return 0;;}
 	display() : String {return 0;;}
 	format(depth : int) : String {break;break;return 0;;}

@@ -7,19 +7,24 @@ import magmac.api.iter.Iters;
 import magmac.api.iter.collect.ListCollector;
 import magmac.app.compile.error.CompileResult;
 import magmac.app.compile.error.CompileResults;
+import magmac.app.compile.node.InitialDestructor;
 import magmac.app.compile.node.Node;
+import magmac.app.lang.CommonLang;
 import magmac.app.lang.Deserializers;
 import magmac.app.lang.Destructors;
+import magmac.app.lang.common.Annotation;
 import magmac.app.lang.node.Arguments;
 import magmac.app.lang.node.ConditionalType;
 import magmac.app.lang.node.FunctionSegmentValues;
 import magmac.app.lang.node.FunctionSegments;
 import magmac.app.lang.node.LambdaContents;
+import magmac.app.lang.node.Modifier;
 import magmac.app.lang.node.OperationDeserializer;
 import magmac.app.lang.node.Operator;
 import magmac.app.lang.node.PostVariant;
 import magmac.app.lang.node.StructureStatementValue;
 import magmac.app.lang.node.TypedDeserializer;
+import magmac.app.lang.web.TypescriptLang;
 
 import static magmac.app.lang.java.JavaLang.*;
 
@@ -231,17 +236,26 @@ public final class JavaDeserializers {
     }
 
     public static CompileResult<JavaDefinition> deserializeDefinition(Node node) {
-        return Deserializers.deserialize0(Destructors.destruct(node)).mapValue(JavaDefinition::new);
+        return deserialize0(Destructors.destruct(node)).mapValue(JavaDefinition::new);
     }
 
     public static Option<CompileResult<JavaDefinition>> deserializeTypedDefinition(Node node) {
         return Destructors.destructWithType("definition", node)
-                .map(Deserializers::deserialize0).map(value -> value.mapValue(JavaDefinition::new));
+                .map(JavaDeserializers::deserialize0).map(value -> value.mapValue(JavaDefinition::new));
     }
 
     public static Option<CompileResult<JavaLambdaHeader>> deserializeMultipleHeader(Node node) {
         return Destructors.destructWithType("multiple", node).map(destructor -> {
             return destructor.withNodeList("parameters", JavaDeserializers::deserializeLambdaParameter).complete(JavaMultipleHeader::new);
         });
+    }
+
+    public static CompileResult<CommonLang.Definition<JavaType>> deserialize0(InitialDestructor deserialize) {
+        return deserialize.withString("name")
+                .withNode("type", JavaTypes::deserialize)
+                .withNodeList("modifiers", Modifier::deserialize)
+                .withNodeListOptionally("annotations", Annotation::deserialize)
+                .withNodeListOptionally("type-parameters", TypescriptLang.TypeParam::deserialize)
+                .complete((result) -> new CommonLang.Definition<JavaType>(result.left().right(), result.left().left().right(), result.left().left().left().left(), result.right(), result.left().left().left().right()));
     }
 }

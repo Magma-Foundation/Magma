@@ -15,9 +15,9 @@ import { CompileErrors } from "../../../../magmac/app/compile/error/error/Compil
 import { BiFunction } from "../../../../java/util/function/BiFunction";
 import { Function } from "../../../../java/util/function/Function";
 export class MapNode {
-	MapNode() : public {0F( 0, 0, 0, 0);;}
+	MapNode() : public {0( 0, 0, 0, 0);;}
 	MapNode(maybeType : Option<String>, strings : Map<String, String>, nodes : Map<String, Node>, nodeLists : Map<String, NodeList>) : private {break;break;break;break;;}
-	MapNode(type : String) : public {0F( 0, 0, 0, 0);;}
+	MapNode(type : String) : public {0( 0, 0, 0, 0);;}
 	fold(node : Node, iter : Iter<Tuple2<String, T>>, mapper : Function<Node, BiFunction<String, T, Node>>) : Node {return 0;;}
 	formatNodeList(depth : int, nodeList : NodeList) : String {return 0;;}
 	createIndent(depth : int) : String {return 0;;}

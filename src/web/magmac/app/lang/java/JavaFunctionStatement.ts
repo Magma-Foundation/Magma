@@ -1,4 +1,4 @@
 import { FunctionStatement } from "../../../../magmac/app/lang/common/FunctionStatement";
 export class JavaFunctionStatement {
-	JavaFunctionStatement(child : JavaFunctionSegmentValue) : public {0F( 0);;}
+	JavaFunctionStatement(child : JavaFunctionSegmentValue) : public {0( 0);;}
 }
