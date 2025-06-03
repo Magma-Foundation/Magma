@@ -227,13 +227,13 @@ class JavaTypescriptParser implements Parser<JavaLang.JavaRoot, TypescriptLang.T
             case JavaLang.Index index ->
                     new TypescriptLang.Index(JavaTypescriptParser.parseValue(index.parent()), JavaTypescriptParser.parseValue(index.argument()));
             case JavaLang.Invokable invokable -> JavaTypescriptParser.parseInvokable(invokable);
-            case JavaLang.JavaLambda javaLambda -> new TypescriptLang.NumberNode("0");
-            case JavaLang.JavaNot javaNot -> new TypescriptLang.NumberNode("0");
-            case JavaLang.JavaNumberNode javaNumberNode -> new TypescriptLang.NumberNode("0");
-            case JavaLang.JavaOperation javaOperation -> new TypescriptLang.NumberNode("0");
-            case JavaLang.JavaStringNode javaStringNode -> new TypescriptLang.NumberNode("0");
-            case JavaLang.JavaSwitchNode javaSwitchNode -> new TypescriptLang.NumberNode("0");
-            case JavaLang.JavaSymbol javaSymbol -> new TypescriptLang.NumberNode("0");
+            case JavaLang.JavaLambda javaLambda -> new TypescriptLang.Number("0");
+            case JavaLang.Not not -> new TypescriptLang.Not(JavaTypescriptParser.parseValue(not.value()));
+            case JavaLang.Number number -> new TypescriptLang.Number(number.value());
+            case JavaLang.JavaOperation javaOperation -> new TypescriptLang.Number("0");
+            case JavaLang.JavaStringNode javaStringNode -> new TypescriptLang.Number("0");
+            case JavaLang.JavaSwitchNode javaSwitchNode -> new TypescriptLang.Number("0");
+            case JavaLang.JavaSymbol javaSymbol -> new TypescriptLang.Number("0");
         };
     }
 

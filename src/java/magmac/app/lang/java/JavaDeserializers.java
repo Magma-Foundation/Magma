@@ -166,13 +166,13 @@ public final class JavaDeserializers {
         ));
     }
 
-    public static Option<CompileResult<JavaNumberNode>> deserializeNumber(Node node) {
-        return Destructors.destructWithType("number", node).map(deserializer -> deserializer.withString("value").complete(JavaNumberNode::new));
+    public static Option<CompileResult<JavaLang.Number>> deserializeNumber(Node node) {
+        return Destructors.destructWithType("number", node).map(deserializer -> deserializer.withString("value").complete(JavaLang.Number::new));
     }
 
-    public static Option<CompileResult<JavaNot>> deserializeNot(Node node) {
+    public static Option<CompileResult<Not>> deserializeNot(Node node) {
         return Destructors.destructWithType("not", node).map(deserializer -> deserializer.withNode("child", JavaDeserializers::deserializeJavaOrError)
-                .complete(JavaNot::new));
+                .complete(Not::new));
     }
 
     public static Option<CompileResult<Index>> deserializeIndex(Node value) {

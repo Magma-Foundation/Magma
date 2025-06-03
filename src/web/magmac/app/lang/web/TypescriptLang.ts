@@ -39,7 +39,7 @@ export interface TypescriptFunctionSegment {
 }
 export interface TypescriptValue {
 }
-export class NumberNode {
+export class Number {
 	serialize() : Node {return new MapNode( 0).withString( 0, 0.value);;}
 }
 export class TypescriptStructureNode {
@@ -113,6 +113,9 @@ export class Char {
 }
 export class Index {
 	serialize() : Node {return new MapNode( 0).withNodeSerialized( 0, 0.parent).withNodeSerialized( 0, 0.argument);;}
+}
+export class Not {
+	serialize() : Node {return new MapNode( 0).withNodeSerialized( 0, 0.child);;}
 }
 export class TypescriptLang {
 }

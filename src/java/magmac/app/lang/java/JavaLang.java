@@ -51,7 +51,7 @@ public class JavaLang {
     public sealed interface JavaCaller permits JavaConstruction, JavaValue {
     }
 
-    public sealed interface JavaValue extends JavaCaller, JavaArgument, JavaAssignable permits Access, Char, Index, Invokable, JavaLambda, JavaNot, JavaNumberNode, JavaOperation, JavaStringNode, JavaSwitchNode, JavaSymbol {
+    public sealed interface JavaValue extends JavaCaller, JavaArgument, JavaAssignable permits Access, Char, Index, Invokable, JavaLambda, Not, Number, JavaOperation, JavaStringNode, JavaSwitchNode, JavaSymbol {
     }
 
     public interface JavaAssignable {
@@ -286,8 +286,8 @@ public class JavaLang {
         }
     }
 
-    public static final class JavaNumberNode extends NumberNode implements JavaValue {
-        public JavaNumberNode(String value) {
+    public static final class Number extends NumberNode implements JavaValue {
+        public Number(String value) {
             super(value);
         }
     }
@@ -312,7 +312,7 @@ public class JavaLang {
     public record Char(String value) implements JavaValue {
     }
 
-    public record JavaNot(JavaValue value) implements JavaValue {
+    public record Not(JavaValue value) implements JavaValue {
     }
 
     public record Index(JavaValue parent, JavaValue argument) implements JavaValue {

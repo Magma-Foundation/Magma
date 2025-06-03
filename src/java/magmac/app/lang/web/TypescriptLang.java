@@ -61,7 +61,7 @@ public final class TypescriptLang {
     public interface TypescriptValue extends TypescriptCaller, TypescriptArgument {
     }
 
-    public record NumberNode(String value) implements TypescriptValue {
+    public record Number(String value) implements TypescriptValue {
         @Override
         public Node serialize() {
             return new MapNode("number").withString("value", this.value);
@@ -299,6 +299,13 @@ public final class TypescriptLang {
         @Override
         public Node serialize() {
             return new MapNode("index").withNodeSerialized("parent", this.parent).withNodeSerialized("argument", this.argument);
+        }
+    }
+
+    public record Not(TypescriptValue child) implements TypescriptValue {
+        @Override
+        public Node serialize() {
+            return new MapNode("not").withNodeSerialized("child", this.child);
         }
     }
 

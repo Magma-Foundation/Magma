@@ -48,8 +48,8 @@ export class JavaDeserializers {
 	deserializeString(node : Node) : Option<CompileResult<JavaStringNode>> {return 0.destructWithType( 0, 0).map( 0);;}
 	deserializeChar(node : Node) : Option<CompileResult<Char>> {return 0.destructWithType( 0, 0).map( 0);;}
 	deserializeLambdaHeader(node : Node) : CompileResult<JavaLambdaHeader> {return 0.orError( 0, 0, 0.of( 0.wrap( 0.deserializeSymbol), 0.wrap( 0.deserializeMultipleHeader)));;}
-	deserializeNumber(node : Node) : Option<CompileResult<JavaNumberNode>> {return 0.destructWithType( 0, 0).map( 0);;}
-	deserializeNot(node : Node) : Option<CompileResult<JavaNot>> {return 0.destructWithType( 0, 0).map( 0);;}
+	deserializeNumber(node : Node) : Option<CompileResult<JavaLang.Number>> {return 0.destructWithType( 0, 0).map( 0);;}
+	deserializeNot(node : Node) : Option<CompileResult<Not>> {return 0.destructWithType( 0, 0).map( 0);;}
 	deserializeIndex(value : Node) : Option<CompileResult<Index>> {return 0.destructWithType( 0, 0).map( 0);;}
 	deserializeSwitch(node : Node) : Option<CompileResult<JavaSwitchNode>> {return 0.destructWithType( 0, 0).map( 0);;}
 	deserializeValue(node : Node) : Option<CompileResult<JavaValue>> {break;break;return 0.or( 0, 0.addAllLast( 0));;}

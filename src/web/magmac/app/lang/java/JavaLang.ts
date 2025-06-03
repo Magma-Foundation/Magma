@@ -124,8 +124,8 @@ export class JavaVariadicType {
 	deserialize(node : Node) : Option<CompileResult<JavaType>> {return 0.destructWithType( 0, 0).map( 0);;}
 	createVariadicRule(rule : Rule) : Rule {break;return new TypeRule( 0, new StripRule( new SuffixRule( 0, 0)));;}
 }
-export class JavaNumberNode {
-	JavaNumberNode(value : String) : public {0( 0);;}
+export class Number {
+	Number(value : String) : public {0( 0);;}
 }
 export class JavaStringNode {
 	JavaStringNode(value : String) : public {0( 0);;}
@@ -135,7 +135,7 @@ export class JavaOperation {
 }
 export class Char {
 }
-export class JavaNot {
+export class Not {
 }
 export class Index {
 }
