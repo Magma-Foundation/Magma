@@ -28,7 +28,6 @@ import magmac.app.lang.java.JavaParameter;
 import magmac.app.lang.java.JavaPost;
 import magmac.app.lang.java.JavaRootSegment;
 import magmac.app.lang.java.JavaStructureMember;
-import magmac.app.lang.java.JavaStructureNode;
 import magmac.app.lang.java.JavaStructureStatement;
 import magmac.app.lang.java.JavaYieldNode;
 import magmac.app.lang.node.ConditionalType;
@@ -37,9 +36,9 @@ import magmac.app.lang.node.ParameterizedMethodHeader;
 import magmac.app.lang.node.Segment;
 import magmac.app.lang.node.StructureValue;
 import magmac.app.lang.node.TypeArguments;
+import magmac.app.lang.web.Caller;
 import magmac.app.lang.web.FunctionStatement;
 import magmac.app.lang.web.Symbol;
-import magmac.app.lang.web.Caller;
 import magmac.app.lang.web.TypescriptLang;
 import magmac.app.stage.parse.Parser;
 import magmac.app.stage.unit.SimpleUnit;
@@ -65,11 +64,11 @@ class JavaTypescriptParser implements Parser<JavaLang.JavaRoot, TypescriptLang.T
         return switch (rootSegment) {
             case JavaLang.Whitespace whitespace -> Lists.of(new TypescriptLang.Whitespace());
             case JavaNamespacedNode namespaced -> Lists.of(JavaTypescriptParser.parseNamespaced(location, namespaced));
-            case JavaStructureNode structureNode -> JavaTypescriptParser.getCollect(structureNode);
+            case JavaLang.StructureNode structureNode -> JavaTypescriptParser.getCollect(structureNode);
         };
     }
 
-    private static List<TypescriptLang.TypeScriptRootSegment> getCollect(JavaStructureNode structureNode) {
+    private static List<TypescriptLang.TypeScriptRootSegment> getCollect(JavaLang.StructureNode structureNode) {
         return JavaTypescriptParser.parseStructure(structureNode)
                 .iter()
                 .map(JavaTypescriptParser::wrap)
@@ -80,7 +79,7 @@ class JavaTypescriptParser implements Parser<JavaLang.JavaRoot, TypescriptLang.T
         return value;
     }
 
-    private static List<TypescriptLang.StructureNode> parseStructure(JavaStructureNode structureNode) {
+    private static List<TypescriptLang.StructureNode> parseStructure(JavaLang.StructureNode structureNode) {
         return switch (structureNode.type()) {
             case Class, Record ->
                     JavaTypescriptParser.parseStructureWithType(TypescriptLang.StructureType.Class, structureNode);
@@ -90,7 +89,10 @@ class JavaTypescriptParser implements Parser<JavaLang.JavaRoot, TypescriptLang.T
         };
     }
 
-    private static List<TypescriptLang.StructureNode> parseStructureWithType(TypescriptLang.StructureType type, JavaStructureNode structureNode) {
+    private static List<TypescriptLang.StructureNode> parseStructureWithType(
+            TypescriptLang.StructureType type,
+            JavaLang.StructureNode structureNode
+    ) {
         StructureValue<JavaLang.JavaType, JavaStructureMember> value = structureNode.value;
         Tuple2<List<List<TypescriptLang.TypescriptStructureMember>>, List<List<TypescriptLang.StructureNode>>> membersTuple = value.members()
                 .iter()
@@ -130,7 +132,7 @@ class JavaTypescriptParser implements Parser<JavaLang.JavaRoot, TypescriptLang.T
             case JavaStructureStatement structureStatement -> JavaTypescriptParser.getList();
             case JavaMethod methodNode ->
                     JavaTypescriptParser.getListListTuple2(JavaTypescriptParser.parseMethod(methodNode));
-            case JavaStructureNode javaStructureNode ->
+            case JavaLang.StructureNode javaStructureNode ->
                     new Tuple2<>(Lists.empty(), JavaTypescriptParser.parseStructure(javaStructureNode));
         };
     }

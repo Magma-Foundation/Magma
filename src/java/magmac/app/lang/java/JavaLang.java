@@ -146,8 +146,8 @@ public class JavaLang {
     }
 
     public record JavaStructureNodeDeserializer(
-            JavaStructureType type) implements TypedDeserializer<JavaStructureNode> {
-        private static CompileResult<JavaStructureNode> deserializeHelper(JavaStructureType type, InitialDestructor deserializer) {
+            JavaStructureType type) implements TypedDeserializer<StructureNode> {
+        private static CompileResult<StructureNode> deserializeHelper(JavaStructureType type, InitialDestructor deserializer) {
             return JavaStructureNodeDeserializer.attachOptionals(JavaStructureNodeDeserializer.attachRequired(deserializer))
                     .complete(tuple -> JavaStructureNodeDeserializer.from(type, tuple));
         }
@@ -166,16 +166,16 @@ public class JavaLang {
                     .withNodeListOptionally("variants", JavaDeserializers::deserializeType);
         }
 
-        private static JavaStructureNode from(
+        private static StructureNode from(
                 JavaStructureType type,
                 Tuple2<Tuple2<Tuple2<Tuple2<Tuple2<Tuple2<Tuple2<String, List<Modifier>>, List<JavaStructureMember>>, Option<List<JavaType>>>, Option<List<TypescriptLang.TypeParam>>>, Option<List<JavaParameter>>>, Option<List<JavaType>>>, Option<List<JavaType>>> tuple) {
-            return new JavaStructureNode(type,
+            return new StructureNode(type,
                     new StructureValue<JavaType, JavaStructureMember>(tuple.left().left().left().left().left().left().left(), tuple.left().left().left().left().left().left().right(), tuple.left().left().left().left().left().right(), tuple.left().left().left().right(), tuple.left().right(), tuple.left().left().left().left().right()), tuple.left().left().right(),
                     tuple.right()
             );
         }
 
-        public Option<CompileResult<JavaStructureNode>> deserialize(Node node) {
+        public Option<CompileResult<StructureNode>> deserialize(Node node) {
             return Destructors.destructWithType(this.type().name().toLowerCase(), node)
                     .map((InitialDestructor deserializer) -> JavaStructureNodeDeserializer.deserializeHelper(this.type(), deserializer));
         }
@@ -329,5 +329,40 @@ public class JavaLang {
         Record,
         Enum,
         Interface
+    }
+
+    public static final class StructureNode implements JavaRootSegment, JavaStructureMember {
+        private final JavaStructureType type;
+        public final StructureValue<JavaType, JavaStructureMember> value;
+        private final Option<List<JavaParameter>> parameters;
+        private final Option<List<JavaType>> variants;
+
+        public StructureNode(
+                JavaStructureType type,
+                StructureValue<JavaType, JavaStructureMember> structureNode,
+                Option<List<JavaParameter>> parameters,
+                Option<List<JavaType>> variants
+        ) {
+            this.type = type;
+            this.value = structureNode;
+            this.parameters = parameters;
+            this.variants = variants;
+        }
+
+        public JavaStructureType type() {
+            return this.type;
+        }
+
+        public String name() {
+            return this.value.name();
+        }
+
+        public Option<List<JavaType>> implemented() {
+            return this.value.maybeImplemented();
+        }
+
+        public Option<List<JavaType>> extended() {
+            return this.value.maybeExtended();
+        }
     }
 }

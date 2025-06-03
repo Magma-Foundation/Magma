@@ -22,7 +22,6 @@ import magmac.app.lang.node.PlantUMLRootSegment;
 import magmac.app.lang.node.PlantUMLStructure;
 import magmac.app.lang.node.PlantUMLStructureType;
 import magmac.app.lang.node.Segment;
-import magmac.app.lang.java.JavaStructureNode;
 import magmac.app.stage.parse.Parser;
 import magmac.app.stage.unit.MapUnitSet;
 import magmac.app.stage.unit.SimpleUnit;
@@ -57,7 +56,7 @@ public class JavaPlantUMLParser implements Parser<JavaLang.JavaRoot, PlantUMLRoo
                 .orElse("");
     }
 
-    private static PlantUMLRootSegment createStructureSegment(JavaStructureNode structureNode) {
+    private static PlantUMLRootSegment createStructureSegment(JavaLang.StructureNode structureNode) {
         String name = structureNode.name();
         JavaLang.JavaStructureType type = structureNode.type();
 
@@ -102,11 +101,11 @@ public class JavaPlantUMLParser implements Parser<JavaLang.JavaRoot, PlantUMLRoo
         return switch (rootSegment) {
             case JavaLang.Whitespace _ -> Iters.empty();
             case JavaNamespacedNode namespaced -> JavaPlantUMLParser.parseNamespaced(fileName, namespaced);
-            case JavaStructureNode structureNode -> JavaPlantUMLParser.parseStructure(structureNode);
+            case JavaLang.StructureNode structureNode -> JavaPlantUMLParser.parseStructure(structureNode);
         };
     }
 
-    private static Iter<PlantUMLRootSegment> parseStructure(JavaStructureNode structureNode) {
+    private static Iter<PlantUMLRootSegment> parseStructure(JavaLang.StructureNode structureNode) {
         PlantUMLRootSegment segment = JavaPlantUMLParser.createStructureSegment(structureNode);
         String child = structureNode.name();
 
