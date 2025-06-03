@@ -1,10 +1,3 @@
-import { Option } from "../../../../magmac/api/Option";
-import { Tuple2 } from "../../../../magmac/api/Tuple2";
-import { List } from "../../../../magmac/api/collect/list/List";
-import { Iter } from "../../../../magmac/api/iter/Iter";
-import { CompileResult } from "../../../../magmac/app/compile/error/CompileResult";
-import { Serializable } from "../../../../magmac/app/lang/Serializable";
-import { Function } from "../../../../java/util/function/Function";
 export interface Node {
 	 findNodeListOrError( key : String) : CompileResult<NodeList>;
 	 findNodeOrError( key : String) : CompileResult<Node>;

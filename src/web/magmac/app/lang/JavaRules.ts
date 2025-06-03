@@ -1,36 +1,3 @@
-import { Option } from "../../../magmac/api/Option";
-import { List } from "../../../magmac/api/collect/list/List";
-import { Lists } from "../../../magmac/api/collect/list/Lists";
-import { Iters } from "../../../magmac/api/iter/Iters";
-import { ListCollector } from "../../../magmac/api/iter/collect/ListCollector";
-import { CompileResult } from "../../../magmac/app/compile/error/CompileResult";
-import { Node } from "../../../magmac/app/compile/node/Node";
-import { ContextRule } from "../../../magmac/app/compile/rule/ContextRule";
-import { ExactRule } from "../../../magmac/app/compile/rule/ExactRule";
-import { FilterRule } from "../../../magmac/app/compile/rule/FilterRule";
-import { LocatingRule } from "../../../magmac/app/compile/rule/LocatingRule";
-import { NodeListRule } from "../../../magmac/app/compile/rule/NodeListRule";
-import { NodeRule } from "../../../magmac/app/compile/rule/NodeRule";
-import { OrRule } from "../../../magmac/app/compile/rule/OrRule";
-import { PrefixRule } from "../../../magmac/app/compile/rule/PrefixRule";
-import { Rule } from "../../../magmac/app/compile/rule/Rule";
-import { StringRule } from "../../../magmac/app/compile/rule/StringRule";
-import { StripRule } from "../../../magmac/app/compile/rule/StripRule";
-import { SuffixRule } from "../../../magmac/app/compile/rule/SuffixRule";
-import { TypeRule } from "../../../magmac/app/compile/rule/TypeRule";
-import { Divider } from "../../../magmac/app/compile/rule/divide/Divider";
-import { FoldingDivider } from "../../../magmac/app/compile/rule/divide/FoldingDivider";
-import { DelimitedFolder } from "../../../magmac/app/compile/rule/fold/DelimitedFolder";
-import { DividingSplitter } from "../../../magmac/app/compile/rule/split/DividingSplitter";
-import { JavaDeserializers } from "../../../magmac/app/lang/java/JavaDeserializers";
-import { JavaLang } from "../../../magmac/app/lang/java/JavaLang";
-import { JavaNamespacedNode } from "../../../magmac/app/lang/java/JavaNamespacedNode";
-import { Modifier } from "../../../magmac/app/lang/node/Modifier";
-import { MultipleCaseValue } from "../../../magmac/app/lang/node/MultipleCaseValue";
-import { Operator } from "../../../magmac/app/lang/node/Operator";
-import { SingleCaseValue } from "../../../magmac/app/lang/node/SingleCaseValue";
-import { StructureMembers } from "../../../magmac/app/lang/node/StructureMembers";
-import { Values } from "../../../static magmac/app/compile/rule/NodeListRule/Values";
 export class JavaRules {
 	private static createConstructionRule() : Rule {return new TypeRule( "construction", new StripRule( new PrefixRule( "new ", new NodeRule( "type", JavaRules.createTypeRule( )))));;}
 	public static createInvokableRule( value : Rule) : Rule { let childRule : Rule=new OrRule( Lists.of( JavaRules.createConstructionRule( ), value)); let caller : Rule=new NodeRule( "caller", new SuffixRule( childRule, "(")); let arguments : var=JavaRules.createArgumentsRule( value); let splitter : var=DividingSplitter.Last( new FoldingDivider( new InvocationFolder( )), "");return new TypeRule( "invokable", new StripRule( new SuffixRule( new LocatingRule( caller, splitter, arguments), ")")));;}

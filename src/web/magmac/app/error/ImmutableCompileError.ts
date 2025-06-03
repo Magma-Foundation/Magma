@@ -1,10 +1,3 @@
-import { Tuple2 } from "../../../magmac/api/Tuple2";
-import { List } from "../../../magmac/api/collect/list/List";
-import { Lists } from "../../../magmac/api/collect/list/Lists";
-import { Joiner } from "../../../magmac/api/iter/collect/Joiner";
-import { Max } from "../../../magmac/api/iter/collect/Max";
-import { Context } from "../../../magmac/app/compile/error/context/Context";
-import { CompileError } from "../../../magmac/app/compile/error/error/CompileError";
 export class ImmutableCompileError {
 	 ImmutableCompileError( message : String,  context : Context) : public {this( message, context, Lists.empty( ));;}
 	private static formatEntry( depth : int,  display : String) : String { let repeated : var="| ".repeat( depth+1);return "\n"+repeated+display;;}

@@ -1,44 +1,3 @@
-import { Tuple2 } from "../../../magmac/api/Tuple2";
-import { TupleCollector } from "../../../magmac/api/collect/TupleCollector";
-import { List } from "../../../magmac/api/collect/list/List";
-import { Lists } from "../../../magmac/api/collect/list/Lists";
-import { Iter } from "../../../magmac/api/iter/Iter";
-import { Joiner } from "../../../magmac/api/iter/collect/Joiner";
-import { ListCollector } from "../../../magmac/api/iter/collect/ListCollector";
-import { CompileResult } from "../../../magmac/app/compile/error/CompileResult";
-import { CompileResultCollector } from "../../../magmac/app/compile/error/CompileResultCollector";
-import { CompileResults } from "../../../magmac/app/compile/error/CompileResults";
-import { Location } from "../../../magmac/app/io/Location";
-import { UnitSetCollector } from "../../../magmac/app/io/sources/UnitSetCollector";
-import { JavaBreak } from "../../../magmac/app/lang/java/JavaBreak";
-import { JavaConstructor } from "../../../magmac/app/lang/java/JavaConstructor";
-import { JavaContinue } from "../../../magmac/app/lang/java/JavaContinue";
-import { JavaEnumValues } from "../../../magmac/app/lang/java/JavaEnumValues";
-import { JavaFunctionSegment } from "../../../magmac/app/lang/java/JavaFunctionSegment";
-import { JavaFunctionSegmentValue } from "../../../magmac/app/lang/java/JavaFunctionSegmentValue";
-import { JavaLang } from "../../../magmac/app/lang/java/JavaLang";
-import { JavaMethod } from "../../../magmac/app/lang/java/JavaMethod";
-import { JavaMethodHeader } from "../../../magmac/app/lang/java/JavaMethodHeader";
-import { JavaNamespacedNode } from "../../../magmac/app/lang/java/JavaNamespacedNode";
-import { JavaParameter } from "../../../magmac/app/lang/java/JavaParameter";
-import { JavaPost } from "../../../magmac/app/lang/java/JavaPost";
-import { JavaRootSegment } from "../../../magmac/app/lang/java/JavaRootSegment";
-import { JavaStructureMember } from "../../../magmac/app/lang/java/JavaStructureMember";
-import { JavaStructureStatement } from "../../../magmac/app/lang/java/JavaStructureStatement";
-import { JavaYieldNode } from "../../../magmac/app/lang/java/JavaYieldNode";
-import { ConditionalType } from "../../../magmac/app/lang/node/ConditionalType";
-import { Modifier } from "../../../magmac/app/lang/node/Modifier";
-import { ParameterizedMethodHeader } from "../../../magmac/app/lang/node/ParameterizedMethodHeader";
-import { Segment } from "../../../magmac/app/lang/node/Segment";
-import { StructureValue } from "../../../magmac/app/lang/node/StructureValue";
-import { Caller } from "../../../magmac/app/lang/web/Caller";
-import { FunctionStatement } from "../../../magmac/app/lang/web/FunctionStatement";
-import { Symbol } from "../../../magmac/app/lang/web/Symbol";
-import { TypescriptLang } from "../../../magmac/app/lang/web/TypescriptLang";
-import { Parser } from "../../../magmac/app/stage/parse/Parser";
-import { SimpleUnit } from "../../../magmac/app/stage/unit/SimpleUnit";
-import { Unit } from "../../../magmac/app/stage/unit/Unit";
-import { UnitSet } from "../../../magmac/app/stage/unit/UnitSet";
 export class JavaTypescriptParser {
 	private static parseUnit( unit : Unit<JavaLang.Root>) : CompileResult<Unit<TypescriptLang.TypescriptRoot>> {return unit.destruct( JavaTypescriptParser.parseRoot);;}
 	private static parseRoot( location : Location,  root : JavaLang.Root) : CompileResult<Unit<TypescriptLang.TypescriptRoot>> { let rootSegments : var=root.children( ).iter( ).map( 0).flatMap( List.iter).collect( new ListCollector<>( ));return CompileResults.Ok( new SimpleUnit<>( location, new TypescriptLang.TypescriptRoot( rootSegments)));;}
@@ -77,7 +36,7 @@ export class JavaTypescriptParser {
 	private static parseType( variadicType : JavaLang.JavaType) : TypescriptLang.Type {return 0;;}
 	private static parseTemplateType( type : JavaLang.JavaTemplateType) : TypescriptLang.TemplateType { let base : var=JavaTypescriptParser.parseBaseType( type.base( )); let listOption : var=type.typeArguments( ).map( JavaTypescriptParser.parseTypeList);return new TypescriptLang.TemplateType( base, listOption);;}
 	private static parseBaseType( base : JavaLang.Base) : JavaLang.Symbol {return 0;;}
-	private static parseNamespaced( location : Location,  namespaced : JavaNamespacedNode) : TypescriptLang.TypeScriptRootSegment {return 0;;}
+	private static parseNamespaced( location : Location,  namespaced : JavaNamespacedNode) : TypescriptLang.TypeScriptRootSegment {return new TypescriptLang.Whitespace( );;}
 	private static parseImport( location : Location,  segments : List<Segment>) : TypescriptLang.TypeScriptImport { let segmentValues : var=segments.iter( ).map( Segment.value).collect( new ListCollector<>( )); let before : var=location.namespace( ).iter( ).map( 0).map( Segment.new).collect( new ListCollector<>( )); let last : var=new Segment( segmentValues.findLast( ).orElse( ""));return new TypescriptLang.TypeScriptImport( Lists.of( last), before.addAllLast( segments));;}
 	private static attachNamespace( location : Location,  tuple : Tuple2<List<String>, String>) : Tuple2<List<String>, String> { let namespace : var=location.namespace( ).addAllLast( tuple.left( ));return new Tuple2<>( namespace, tuple.right( ));;}
 	private static findStructuresInRootSegment( child : JavaRootSegment) : List<Tuple2<List<String>, String>> {if(true){ return JavaTypescriptParser.findStructuresInNode( Lists.empty( ), structure);;}return Lists.empty( );;}

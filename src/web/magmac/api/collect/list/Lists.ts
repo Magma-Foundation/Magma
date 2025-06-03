@@ -1,5 +1,3 @@
-import { ArrayList } from "../../../../java/util/ArrayList";
-import { Arrays } from "../../../../java/util/Arrays";
 export class Lists {
 	public static of( ...elements : T[]) : List<T> {return new JVMList<>( new ArrayList<>( Arrays.asList( elements)));;}
 	public static empty() : List<T> {return new JVMList<>( );;}

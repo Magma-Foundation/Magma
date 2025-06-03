@@ -1,22 +1,3 @@
-import { Option } from "../../../../magmac/api/Option";
-import { List } from "../../../../magmac/api/collect/list/List";
-import { CompileResult } from "../../../../magmac/app/compile/error/CompileResult";
-import { MapNode } from "../../../../magmac/app/compile/node/MapNode";
-import { Node } from "../../../../magmac/app/compile/node/Node";
-import { CommonLang } from "../../../../magmac/app/lang/CommonLang";
-import { Destructors } from "../../../../magmac/app/lang/Destructors";
-import { Serializable } from "../../../../magmac/app/lang/Serializable";
-import { Annotation } from "../../../../magmac/app/lang/common/Annotation";
-import { JavaLang } from "../../../../magmac/app/lang/java/JavaLang";
-import { AbstractReturnNode } from "../../../../magmac/app/lang/node/AbstractReturnNode";
-import { Conditional } from "../../../../magmac/app/lang/node/Conditional";
-import { ConditionalType } from "../../../../magmac/app/lang/node/ConditionalType";
-import { Modifier } from "../../../../magmac/app/lang/node/Modifier";
-import { Operator } from "../../../../magmac/app/lang/node/Operator";
-import { ParameterizedMethodHeader } from "../../../../magmac/app/lang/node/ParameterizedMethodHeader";
-import { PostVariant } from "../../../../magmac/app/lang/node/PostVariant";
-import { Segment } from "../../../../magmac/app/lang/node/Segment";
-import { StructureValue } from "../../../../magmac/app/lang/node/StructureValue";
 export interface Argument {
 }
 export interface TypeScriptParameter {

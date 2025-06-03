@@ -1,7 +1,3 @@
-import { Option } from "../../../../magmac/api/Option";
-import { Tuple2 } from "../../../../magmac/api/Tuple2";
-import { Iter } from "../../../../magmac/api/iter/Iter";
-import { BiFunction } from "../../../../java/util/function/BiFunction";
 export interface List<T> {
 	 addLast( element : T) : List<T>;
 	 iter() : Iter<T>;

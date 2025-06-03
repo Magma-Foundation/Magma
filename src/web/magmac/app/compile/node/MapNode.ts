@@ -1,19 +1,3 @@
-import { None } from "../../../../magmac/api/None";
-import { Option } from "../../../../magmac/api/Option";
-import { Some } from "../../../../magmac/api/Some";
-import { Tuple2 } from "../../../../magmac/api/Tuple2";
-import { List } from "../../../../magmac/api/collect/list/List";
-import { Map } from "../../../../magmac/api/collect/map/Map";
-import { Maps } from "../../../../magmac/api/collect/map/Maps";
-import { Iter } from "../../../../magmac/api/iter/Iter";
-import { Iters } from "../../../../magmac/api/iter/Iters";
-import { Joiner } from "../../../../magmac/api/iter/collect/Joiner";
-import { Ok } from "../../../../magmac/api/result/Ok";
-import { CompileResult } from "../../../../magmac/app/compile/error/CompileResult";
-import { CompileResults } from "../../../../magmac/app/compile/error/CompileResults";
-import { CompileErrors } from "../../../../magmac/app/compile/error/error/CompileErrors";
-import { BiFunction } from "../../../../java/util/function/BiFunction";
-import { Function } from "../../../../java/util/function/Function";
 export class MapNode {
 	 MapNode() : public {this( new None<String>( ), Maps.empty( ), Maps.empty( ), Maps.empty( ));;}
 	 MapNode( maybeType : Option<String>,  strings : Map<String, String>,  nodes : Map<String, Node>,  nodeLists : Map<String, NodeList>) : private {this.strings=strings;this.maybeType=maybeType;this.nodes=nodes;this.nodeLists=nodeLists;;}

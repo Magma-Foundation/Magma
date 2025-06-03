@@ -1,13 +1,3 @@
-import { None } from "../../../../magmac/api/None";
-import { Option } from "../../../../magmac/api/Option";
-import { Some } from "../../../../magmac/api/Some";
-import { Tuple2 } from "../../../../magmac/api/Tuple2";
-import { HeadedIter } from "../../../../magmac/api/head/HeadedIter";
-import { RangeHead } from "../../../../magmac/api/head/RangeHead";
-import { Iter } from "../../../../magmac/api/iter/Iter";
-import { ListCollector } from "../../../../magmac/api/iter/collect/ListCollector";
-import { ArrayList } from "../../../../java/util/ArrayList";
-import { BiFunction } from "../../../../java/util/function/BiFunction";
 export class JVMList<T> {
 	 JVMList() : public {this( new ArrayList<>( ));;}
 	public addLast( element : T) : List<T> { let copy : var=new ArrayList<T>( this.elements);copy.add( element);return new JVMList<>( copy);;}

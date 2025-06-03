@@ -1,4 +1,3 @@
-import { DivideState } from "../../../../../magmac/app/compile/rule/divide/DivideState";
 export class DelimitedFolder {
 	 DelimitedFolder( delimter : char) : public {this.delimter=delimter;;}
 	public fold( state : DivideState,  c : char) : DivideState {if(true){ return state.advance( );;}return state.append( c);;}

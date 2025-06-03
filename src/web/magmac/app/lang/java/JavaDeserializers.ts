@@ -1,30 +1,3 @@
-import { Option } from "../../../../magmac/api/Option";
-import { List } from "../../../../magmac/api/collect/list/List";
-import { Lists } from "../../../../magmac/api/collect/list/Lists";
-import { Iters } from "../../../../magmac/api/iter/Iters";
-import { ListCollector } from "../../../../magmac/api/iter/collect/ListCollector";
-import { CompileResult } from "../../../../magmac/app/compile/error/CompileResult";
-import { CompileResults } from "../../../../magmac/app/compile/error/CompileResults";
-import { InitialDestructor } from "../../../../magmac/app/compile/node/InitialDestructor";
-import { Node } from "../../../../magmac/app/compile/node/Node";
-import { Deserializers } from "../../../../magmac/app/lang/Deserializers";
-import { Destructors } from "../../../../magmac/app/lang/Destructors";
-import { Annotation } from "../../../../magmac/app/lang/common/Annotation";
-import { Assignables } from "../../../../magmac/app/lang/node/Assignables";
-import { CaseDefinition } from "../../../../magmac/app/lang/node/CaseDefinition";
-import { CaseValues } from "../../../../magmac/app/lang/node/CaseValues";
-import { ConditionalType } from "../../../../magmac/app/lang/node/ConditionalType";
-import { FunctionSegmentValues } from "../../../../magmac/app/lang/node/FunctionSegmentValues";
-import { FunctionSegments } from "../../../../magmac/app/lang/node/FunctionSegments";
-import { LambdaContents } from "../../../../magmac/app/lang/node/LambdaContents";
-import { Modifier } from "../../../../magmac/app/lang/node/Modifier";
-import { OperationDeserializer } from "../../../../magmac/app/lang/node/OperationDeserializer";
-import { Operator } from "../../../../magmac/app/lang/node/Operator";
-import { PostVariant } from "../../../../magmac/app/lang/node/PostVariant";
-import { StructureStatementValue } from "../../../../magmac/app/lang/node/StructureStatementValue";
-import { TypedDeserializer } from "../../../../magmac/app/lang/node/TypedDeserializer";
-import { TypescriptLang } from "../../../../magmac/app/lang/web/TypescriptLang";
-import { * } from "../../../../static magmac/app/lang/java/JavaLang/*";
 export class JavaDeserializers {
 	private static deserializeCaller( node : Node) : CompileResult<JavaCaller> {return Deserializers.orError( "caller", node, Lists.of( Deserializers.wrap( JavaDeserializers.deserializeConstruction), Deserializers.wrap( JavaDeserializers.deserializeValue)));;}
 	private static deserializeConstruction( node : Node) : Option<CompileResult<JavaCaller>> {return Destructors.destructWithType( "construction", node).map( 0);;}

@@ -1,13 +1,3 @@
-import { None } from "../../../../magmac/api/None";
-import { Option } from "../../../../magmac/api/Option";
-import { Some } from "../../../../magmac/api/Some";
-import { Tuple2 } from "../../../../magmac/api/Tuple2";
-import { JVMList } from "../../../../magmac/api/collect/list/JVMList";
-import { Iter } from "../../../../magmac/api/iter/Iter";
-import { ArrayList } from "../../../../java/util/ArrayList";
-import { HashMap } from "../../../../java/util/HashMap";
-import { Function } from "../../../../java/util/function/Function";
-import { Supplier } from "../../../../java/util/function/Supplier";
 export class JVMMap<K,  V> {
 	public getOrDefault( key : K,  other : V) : V {return this.map.getOrDefault( key, other);;}
 	public iter() : Iter<Tuple2<K, V>> {return new JVMList<>( new ArrayList<>( this.map.entrySet( ))).iter( ).map( 0);;}

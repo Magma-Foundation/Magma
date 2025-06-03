@@ -1,11 +1,3 @@
-import { Option } from "../../../magmac/api/Option";
-import { Iter } from "../../../magmac/api/iter/Iter";
-import { Collector } from "../../../magmac/api/iter/collect/Collector";
-import { Ok } from "../../../magmac/api/result/Ok";
-import { Result } from "../../../magmac/api/result/Result";
-import { BiFunction } from "../../../java/util/function/BiFunction";
-import { Function } from "../../../java/util/function/Function";
-import { Predicate } from "../../../java/util/function/Predicate";
 export class HeadedIter<T> {
 	public foldToResult( initial : R,  folder : BiFunction<R, T, Result<R, X>>) : Result<R, X> {return this.fold( HeadedIter.createInitial( initial), 0);;}
 	private static createInitial( initial : R) : Result<R, X> {return new Ok<>( initial);;}
