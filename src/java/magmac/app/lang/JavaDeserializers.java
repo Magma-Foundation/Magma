@@ -8,6 +8,8 @@ import magmac.app.lang.java.JavaConstruction;
 import magmac.app.lang.java.JavaInvokable;
 import magmac.app.lang.java.Lang;
 import magmac.app.lang.node.Arguments;
+import magmac.app.lang.node.FunctionSegments;
+import magmac.app.lang.node.JavaBlock;
 import magmac.app.lang.node.JavaBlockHeader;
 import magmac.app.lang.node.Catch;
 import magmac.app.lang.node.Conditional;
@@ -115,5 +117,12 @@ public final class JavaDeserializers {
                 Deserializers.wrap(Try::deserialize),
                 Deserializers.wrap(Catch::deserialize)
         ));
+    }
+
+    public static Option<CompileResult<JavaBlock>> deserializeBlock(Node node) {
+        return Destructors.destructWithType("block", node).map(deserializer -> deserializer
+                .withNodeList("children", FunctionSegments::deserialize)
+                .withNode("header", JavaDeserializers::deserializeBlockHeader)
+                .complete(tuple -> new JavaBlock(tuple.right(), tuple.left())));
     }
 }

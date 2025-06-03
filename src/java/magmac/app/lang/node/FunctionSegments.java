@@ -18,7 +18,7 @@ public class FunctionSegments {
         return Deserializers.orError("function-segment", node, Lists.of(
                 Deserializers.wrap(Whitespace::deserialize),
                 Deserializers.wrap(JavaDeserializers::deserializeFunctionStatement),
-                Deserializers.wrap(Block::deserialize),
+                Deserializers.wrap(JavaDeserializers::deserializeBlock),
                 Deserializers.wrap(JavaDeserializers::deserializeReturn),
                 Deserializers.wrap(CaseNode::deserialize)
         ));
@@ -31,7 +31,7 @@ public class FunctionSegments {
                 new TypeRule("whitespace", new StripRule(new ExactRule(";"))),
                 Whitespace.createWhitespaceRule(),
                 JavaRules.createStatementRule(functionSegmentValueRule),
-                Block.createBlockRule(functionSegmentRule, value, definition),
+                JavaRules.createBlockRule(functionSegmentRule, value, definition),
                 JavaReturnNode.createReturnRule(value),
                 CaseNode.createCaseRule(value, functionSegmentRule)
         ));

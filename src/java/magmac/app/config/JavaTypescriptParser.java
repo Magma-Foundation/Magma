@@ -14,6 +14,8 @@ import magmac.app.io.sources.UnitSetCollector;
 import magmac.app.lang.node.Block;
 import magmac.app.lang.node.CaseNode;
 import magmac.app.lang.node.FunctionStatement;
+import magmac.app.lang.node.JavaBlock;
+import magmac.app.lang.node.JavaBlockHeader;
 import magmac.app.lang.node.JavaFunctionSegment;
 import magmac.app.lang.node.Definition;
 import magmac.app.lang.node.EnumValues;
@@ -177,7 +179,7 @@ class JavaTypescriptParser implements Parser<JavaRoot, TypescriptRoot> {
 
     private static TypescriptFunctionSegment parseFunctionSegment(JavaFunctionSegment segment) {
         return switch (segment) {
-            case Block block -> new Whitespace();
+            case JavaBlock block -> new Whitespace();
             case CaseNode caseNode -> new Whitespace();
             case FunctionStatement functionStatement -> new Whitespace();
             case JavaReturnNode javaReturnNode -> new Whitespace();

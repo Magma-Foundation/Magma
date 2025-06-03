@@ -148,4 +148,16 @@ public final class JavaRules {
                 new TypeRule("catch", new StripRule(new PrefixRule("catch", new StripRule(new PrefixRule("(", new SuffixRule(new NodeRule("definition", definition), ")"))))))
         ));
     }
+
+    public static Rule createBlockRule(LazyRule functionSegmentRule, Rule value, Rule definition) {
+        Rule header = new NodeRule("header", createBlockHeaderRule(value, definition));
+        return createBlockRule0(header, functionSegmentRule);
+    }
+
+    public static TypeRule createBlockRule0(Rule header, Rule functionSegmentRule) {
+        Rule children = CommonLang.Statements("children", functionSegmentRule);
+        Splitter first = DividingSplitter.First(new FoldingDivider(new BlockFolder()), "");
+        Rule childRule = new LocatingRule(new SuffixRule(header, "{"), first, children);
+        return new TypeRule("block", new StripRule(new SuffixRule(childRule, "}")));
+    }
 }

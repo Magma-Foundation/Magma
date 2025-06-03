@@ -19,7 +19,6 @@ import magmac.app.lang.Deserializers;
 import magmac.app.lang.JavaDeserializers;
 import magmac.app.lang.JavaRules;
 import magmac.app.lang.LazyRule;
-import magmac.app.lang.java.JavaInvokable;
 
 public final class Values {
     public static CompileResult<JavaValue> deserializeOrError(Node node) {
@@ -81,6 +80,6 @@ public final class Values {
     private static TypeRule createSwitchRule(Rule functionSegmentRule, Rule value) {
         NodeRule value1 = new NodeRule("value", value);
         PrefixRule header = new PrefixRule("switch", new StripRule(new PrefixRule("(", new SuffixRule(value1, ")"))));
-        return new TypeRule("switch", Block.createBlockRule0(new StripRule(header), functionSegmentRule));
+        return new TypeRule("switch", JavaRules.createBlockRule0(new StripRule(header), functionSegmentRule));
     }
 }

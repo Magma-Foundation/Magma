@@ -1,48 +1,21 @@
 package magmac.app.lang.node;
 
-import magmac.api.Option;
 import magmac.api.collect.list.List;
-import magmac.app.compile.error.CompileResult;
-import magmac.app.compile.node.MapNode;
-import magmac.app.compile.node.Node;
-import magmac.app.compile.rule.LocatingRule;
-import magmac.app.compile.rule.NodeRule;
-import magmac.app.compile.rule.Rule;
-import magmac.app.compile.rule.Splitter;
-import magmac.app.compile.rule.StripRule;
-import magmac.app.compile.rule.SuffixRule;
-import magmac.app.compile.rule.TypeRule;
-import magmac.app.compile.rule.divide.FoldingDivider;
-import magmac.app.compile.rule.split.DividingSplitter;
-import magmac.app.lang.BlockFolder;
-import magmac.app.lang.CommonLang;
-import magmac.app.lang.Destructors;
-import magmac.app.lang.JavaDeserializers;
-import magmac.app.lang.JavaRules;
-import magmac.app.lang.LazyRule;
 
-public record Block(JavaBlockHeader header, List<JavaFunctionSegment> segments) implements JavaFunctionSegment, TypescriptFunctionSegment {
-    public static Option<CompileResult<Block>> deserialize(Node node) {
-        return Destructors.destructWithType("block", node).map(deserializer -> deserializer
-                .withNodeList("children", FunctionSegments::deserialize)
-                .withNode("header", JavaDeserializers::deserializeBlockHeader)
-                .complete(tuple -> new Block(tuple.right(), tuple.left())));
+public class Block<H, S> {
+    protected final H header;
+    protected final List<S> segments;
+
+    public Block(H header, List<S> segments) {
+        this.header = header;
+        this.segments = segments;
     }
 
-    public static Rule createBlockRule(LazyRule functionSegmentRule, Rule value, Rule definition) {
-        Rule header = new NodeRule("header", JavaRules.createBlockHeaderRule(value, definition));
-        return createBlockRule0(header, functionSegmentRule);
+    public H header() {
+        return this.header;
     }
 
-    public static TypeRule createBlockRule0(Rule header, Rule functionSegmentRule) {
-        Rule children = CommonLang.Statements("children", functionSegmentRule);
-        Splitter first = DividingSplitter.First(new FoldingDivider(new BlockFolder()), "");
-        Rule childRule = new LocatingRule(new SuffixRule(header, "{"), first, children);
-        return new TypeRule("block", new StripRule(new SuffixRule(childRule, "}")));
-    }
-
-    @Override
-    public Node serialize() {
-        return new MapNode("block");
+    public List<S> segments() {
+        return this.segments;
     }
 }
