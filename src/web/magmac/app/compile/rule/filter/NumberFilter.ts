@@ -1,4 +1,4 @@
 export class NumberFilter {
-	test(input : String) : boolean {length : var=input.length( );i : var=0;if(true){ c : var=input.charAt( i);if(true){ i++;continue;;}return false;;}return true;;}
-	createMessage() : String {return "Not a number";;}
+	public test( input : String) : boolean { let length : var=input.length( ); let i : var=0;if(true){  let c : var=input.charAt( i);if(true){ i++;continue;;}return false;;}return true;;}
+	public createMessage() : String {return "Not a number";;}
 }

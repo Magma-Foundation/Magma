@@ -186,9 +186,16 @@ public final class TypescriptLang {
 
         @Override
         public Node serialize() {
-            return new MapNode("definition")
+            var node = new MapNode("definition")
                     .withString("name", this.name)
                     .withNodeSerialized("type", this.type);
+
+            if (this.modifiers.isEmpty()) {
+                return node;
+            }
+            else {
+                return node.withNodeListSerialized("modifiers", this.modifiers);
+            }
         }
 
         public Definition withModifier(Modifier modifier) {

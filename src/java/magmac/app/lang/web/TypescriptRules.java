@@ -27,18 +27,18 @@ public final class TypescriptRules {
     public static Rule createRule() {
         return new TypeRule("root", CommonLang.Statements("children", new OrRule(Lists.of(
                 JavaRules.createWhitespaceRule(),
-                createImportRule(),
-                createStructureRule("class"),
-                createStructureRule("interface")
+                TypescriptRules.createImportRule(),
+                TypescriptRules.createStructureRule("class"),
+                TypescriptRules.createStructureRule("interface")
         ))));
     }
 
     private static Rule createStructureMemberRule() {
-        var definitionRule = createDefinitionRule();
+        var definitionRule = TypescriptRules.createDefinitionRule();
         LazyRule valueLazy = new MutableLazyRule();
         return new OrRule(Lists.of(
                 JavaRules.createWhitespaceRule(),
-                createMethodRule(definitionRule, valueLazy),
+                TypescriptRules.createMethodRule(definitionRule, valueLazy),
                 JavaStructureStatement.createStructureStatementRule(definitionRule, valueLazy)
         ));
     }
@@ -46,7 +46,7 @@ public final class TypescriptRules {
     private static Rule createMethodRule(Rule definition, LazyRule valueLazy) {
         Rule header = new PrefixRule("\n\t", new NodeRule("header", new OrRule(Lists.of(
                 definition,
-                createConstructorRule(definition)
+                TypescriptRules.createConstructorRule(definition)
         ))));
 
         LazyRule functionSegmentRule = new MutableLazyRule();
@@ -75,7 +75,7 @@ public final class TypescriptRules {
                 name
         );
 
-        var first = LocatingRule.First(leftRule, " : ", new NodeRule("type", createTypeRule()));
+        var first = LocatingRule.First(leftRule, " : ", new NodeRule("type", TypescriptRules.createTypeRule()));
         return definition.set(new OptionNodeListRule("modifiers", LocatingRule.Last(modifiers, " ", first), first));
     }
 
@@ -83,13 +83,13 @@ public final class TypescriptRules {
         LazyRule type = new MutableLazyRule();
         return type.set(new OrRule(Lists.of(
                 JavaRules.createTemplateRule(type),
-                createArrayRule(type),
+                TypescriptRules.createArrayRule(type),
                 CommonRules.createSymbolRule()
         )));
     }
 
     private static Rule createStructureRule(String type) {
-        var children = CommonLang.Statements("members", createStructureMemberRule());
+        var children = CommonLang.Statements("members", TypescriptRules.createStructureMemberRule());
         Rule name = new StringRule("name");
         var afterKeyword = LocatingRule.First(JavaRules.attachTypeParams(name), " {", new SuffixRule(children, "\n}\n"));
         return new TypeRule(type, new PrefixRule("export " + type + " ", afterKeyword));

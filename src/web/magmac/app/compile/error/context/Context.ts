@@ -1,3 +1,3 @@
 export interface Context {
-	display() : String;
+	 display() : String;
 }

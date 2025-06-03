@@ -1,4 +1,4 @@
 export class StringNode {
-	StringNode(value : String) : public {this.value=value;;}
-	value() : String {return value;;}
+	 StringNode( value : String) : public {this.value=value;;}
+	public value() : String {return value;;}
 }

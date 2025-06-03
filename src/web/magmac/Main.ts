@@ -19,8 +19,8 @@ import { RuleLexer } from "../magmac/app/stage/lexer/RuleLexer";
 import { UnitSet } from "../magmac/app/stage/unit/UnitSet";
 import { Paths } from "../java/nio/file/Paths";
 export class Main {
-	main() : void {sources : Sources=new PathSources( Paths.get( ".", "src", "java"));Main.loadSources( sources).match( Main.getNext, Some.new).ifPresent( 0);;}
-	getNext(result : UnitSet<JavaLang.JavaRoot>) : Option<Error> {return Iters.fromValues( new PlantUMLTargetPlatform( ), new TypeScriptTargetPlatform( )).map( 0).flatMap( Iters.fromOption).next( );;}
-	loadSources(sources : Sources) : Result<UnitSet<JavaLang.JavaRoot>, ApplicationError> {lexer : Lexer=new RuleLexer( JavaRules.createRule( ));return new LexingStage<JavaLang.JavaRoot>( lexer, 0).getUnitSetApplicationErrorResult( sources);;}
-	run(roots : UnitSet<JavaLang.JavaRoot>, platform : TargetPlatform) : Option<Error> {return platform.createApplication( ).parseAndStore( roots);;}
+	public static main() : void { let sources : Sources=new PathSources( Paths.get( ".", "src", "java"));Main.loadSources( sources).match( Main.getNext, Some.new).ifPresent( 0);;}
+	private static getNext( result : UnitSet<JavaLang.JavaRoot>) : Option<Error> {return Iters.fromValues( new PlantUMLTargetPlatform( ), new TypeScriptTargetPlatform( )).map( 0).flatMap( Iters.fromOption).next( );;}
+	private static loadSources( sources : Sources) : Result<UnitSet<JavaLang.JavaRoot>, ApplicationError> { let lexer : Lexer=new RuleLexer( JavaRules.createRule( ));return new LexingStage<JavaLang.JavaRoot>( lexer, 0).getUnitSetApplicationErrorResult( sources);;}
+	private static run( roots : UnitSet<JavaLang.JavaRoot>,  platform : TargetPlatform) : Option<Error> {return platform.createApplication( ).parseAndStore( roots);;}
 }

@@ -3,5 +3,5 @@ import { Node } from "../../../../magmac/app/compile/node/Node";
 import { Serializable } from "../../../../magmac/app/lang/Serializable";
 import { TypescriptLang } from "../../../../magmac/app/lang/web/TypescriptLang";
 export class ParameterizedMethodHeader<T extends Serializable> {
-	serialize() : Node {return this.header.serialize( ).withNodeListSerialized( "parameters", this.parameters);;}
+	public serialize() : Node {return this.header.serialize( ).withNodeListSerialized( "parameters", this.parameters);;}
 }

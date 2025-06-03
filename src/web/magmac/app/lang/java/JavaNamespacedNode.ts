@@ -16,7 +16,7 @@ import { Destructors } from "../../../../magmac/app/lang/Destructors";
 import { NamespacedType } from "../../../../magmac/app/lang/node/NamespacedType";
 import { Segment } from "../../../../magmac/app/lang/node/Segment";
 export class JavaNamespacedNode {
-	deserialize(type : NamespacedType, node : Node) : Option<CompileResult<JavaRootSegment>> {return Destructors.destructWithType( type.type( ), node).map( 0);;}
-	deserialize(node : Node) : Option<CompileResult<JavaRootSegment>> {return Iters.fromValues( NamespacedType.values( )).map( 0).flatMap( Iters.fromOption).next( );;}
-	createNamespacedRule(type : String) : Rule {childRule : var=NodeListRule.createNodeListRule( "segments", new DelimitedFolder( '.'), new StringRule( "value"));return new TypeRule( type, new StripRule( new SuffixRule( new PrefixRule( type+" ", childRule), ";")));;}
+	private static deserialize( type : NamespacedType,  node : Node) : Option<CompileResult<JavaRootSegment>> {return Destructors.destructWithType( type.type( ), node).map( 0);;}
+	public static deserialize( node : Node) : Option<CompileResult<JavaRootSegment>> {return Iters.fromValues( NamespacedType.values( )).map( 0).flatMap( Iters.fromOption).next( );;}
+	public static createNamespacedRule( type : String) : Rule { let childRule : var=NodeListRule.createNodeListRule( "segments", new DelimitedFolder( '.'), new StringRule( "value"));return new TypeRule( type, new StripRule( new SuffixRule( new PrefixRule( type+" ", childRule), ";")));;}
 }

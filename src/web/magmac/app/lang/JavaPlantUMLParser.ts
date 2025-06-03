@@ -26,14 +26,14 @@ import { SimpleUnit } from "../../../magmac/app/stage/unit/SimpleUnit";
 import { Unit } from "../../../magmac/app/stage/unit/Unit";
 import { UnitSet } from "../../../magmac/app/stage/unit/UnitSet";
 export class JavaPlantUMLParser {
-	parseNamespaced(child : String, namespaced : JavaNamespacedNode) : Iter<PlantUMLRootSegment> {return 0;;}
-	createSimpleName(base : JavaLang.Base) : String {return 0;;}
-	createStructureSegment(structureNode : JavaLang.StructureNode) : PlantUMLRootSegment {name : var=structureNode.name( );type : var=structureNode.type( );return 0;;}
-	createSimpleNameFromType(type : JavaLang.JavaType) : String {return 0;;}
-	createSimpleNameFromQualifiedType(qualified : JavaLang.Qualified) : String {return qualified.segments( ).iter( ).map( Segment.value).collect( new Joiner( ".")).orElse( "");;}
-	parseRoot(unit : Unit<JavaLang.JavaRoot>) : Iter<PlantUMLRootSegment> {return unit.destruct( 0);;}
-	parseRootSegment(fileName : String, rootSegment : JavaRootSegment) : Iter<PlantUMLRootSegment> {return 0;;}
-	parseStructure(structureNode : JavaLang.StructureNode) : Iter<PlantUMLRootSegment> {segment : var=JavaPlantUMLParser.createStructureSegment( structureNode);child : var=structureNode.name( );return Lists.of( segment).addAllLast( JavaPlantUMLParser.toInherits( child, structureNode.extended( ))).addAllLast( JavaPlantUMLParser.toInherits( child, structureNode.implemented( ))).iter( );;}
-	toInherits(child : String, maybeOption : Option<List<JavaLang.JavaType>>) : List<PlantUMLRootSegment> {return maybeOption.orElse( Lists.empty( )).iter( ).map( JavaPlantUMLParser.createSimpleNameFromType).<PlantUMLRootSegment>map( 0).collect( new ListCollector<>( ));;}
-	apply(initial : UnitSet<JavaLang.JavaRoot>) : CompileResult<UnitSet<PlantUMLRoot>> {roots : var=initial.iter( ).flatMap( JavaPlantUMLParser.parseRoot).collect( new ListCollector<>( )).addFirst( new PlantUMLHeader( )).addLast( new PlantUMLFooter( ));defaultLocation : var=new Location( Lists.empty( ), "diagram");mergedRoot : var=new PlantUMLRoot( roots);return CompileResults.Ok( new MapUnitSet<PlantUMLRoot>( ).add( new SimpleUnit<>( defaultLocation, mergedRoot)));;}
+	private static parseNamespaced( child : String,  namespaced : JavaNamespacedNode) : Iter<PlantUMLRootSegment> {return 0;;}
+	private static createSimpleName( base : JavaLang.Base) : String {return 0;;}
+	private static createStructureSegment( structureNode : JavaLang.StructureNode) : PlantUMLRootSegment { let name : var=structureNode.name( ); let type : var=structureNode.type( );return 0;;}
+	private static createSimpleNameFromType( type : JavaLang.JavaType) : String {return 0;;}
+	private static createSimpleNameFromQualifiedType( qualified : JavaLang.Qualified) : String {return qualified.segments( ).iter( ).map( Segment.value).collect( new Joiner( ".")).orElse( "");;}
+	private static parseRoot( unit : Unit<JavaLang.JavaRoot>) : Iter<PlantUMLRootSegment> {return unit.destruct( 0);;}
+	private static parseRootSegment( fileName : String,  rootSegment : JavaRootSegment) : Iter<PlantUMLRootSegment> {return 0;;}
+	private static parseStructure( structureNode : JavaLang.StructureNode) : Iter<PlantUMLRootSegment> { let segment : var=JavaPlantUMLParser.createStructureSegment( structureNode); let child : var=structureNode.name( );return Lists.of( segment).addAllLast( JavaPlantUMLParser.toInherits( child, structureNode.extended( ))).addAllLast( JavaPlantUMLParser.toInherits( child, structureNode.implemented( ))).iter( );;}
+	private static toInherits( child : String,  maybeOption : Option<List<JavaLang.JavaType>>) : List<PlantUMLRootSegment> {return maybeOption.orElse( Lists.empty( )).iter( ).map( JavaPlantUMLParser.createSimpleNameFromType).<PlantUMLRootSegment>map( 0).collect( new ListCollector<>( ));;}
+	public apply( initial : UnitSet<JavaLang.JavaRoot>) : CompileResult<UnitSet<PlantUMLRoot>> { let roots : var=initial.iter( ).flatMap( JavaPlantUMLParser.parseRoot).collect( new ListCollector<>( )).addFirst( new PlantUMLHeader( )).addLast( new PlantUMLFooter( )); let defaultLocation : var=new Location( Lists.empty( ), "diagram"); let mergedRoot : var=new PlantUMLRoot( roots);return CompileResults.Ok( new MapUnitSet<PlantUMLRoot>( ).add( new SimpleUnit<>( defaultLocation, mergedRoot)));;}
 }

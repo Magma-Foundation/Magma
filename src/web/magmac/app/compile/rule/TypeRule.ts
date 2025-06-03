@@ -9,7 +9,7 @@ import { CompileErrors } from "../../../../magmac/app/compile/error/error/Compil
 import { Node } from "../../../../magmac/app/compile/node/Node";
 import { ImmutableCompileError } from "../../../../magmac/app/error/ImmutableCompileError";
 export class TypeRule {
-	createError(context : Context, err : CompileError) : CompileError {return new ImmutableCompileError( "Cannot use type '" + this.type + "'", context, Lists.of( err));;}
-	lex(input : String) : CompileResult<Node> {return CompileResults.fromResult( this.childRule.lex( input).toResult( ).mapValue( 0).mapErr( 0));;}
-	generate(node : Node) : CompileResult<String> {if(true){ return CompileResults.fromResult( this.childRule.generate( node).toResult( ).mapErr( 0));;}return CompileErrors.createNodeError( "Type '" + this.type + "' not present", node);;}
+	private createError( context : Context,  err : CompileError) : CompileError {return new ImmutableCompileError( "Cannot use type '" + this.type + "'", context, Lists.of( err));;}
+	public lex( input : String) : CompileResult<Node> {return CompileResults.fromResult( this.childRule.lex( input).toResult( ).mapValue( 0).mapErr( 0));;}
+	public generate( node : Node) : CompileResult<String> {if(true){ return CompileResults.fromResult( this.childRule.generate( node).toResult( ).mapErr( 0));;}return CompileErrors.createNodeError( "Type '" + this.type + "' not present", node);;}
 }

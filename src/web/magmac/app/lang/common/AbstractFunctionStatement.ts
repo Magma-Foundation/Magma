@@ -1,4 +1,4 @@
 export class AbstractFunctionStatement<V> {
-	AbstractFunctionStatement(child : V) : public {this.child=child;;}
-	child() : V {return this.child;;}
+	 AbstractFunctionStatement( child : V) : public {this.child=child;;}
+	public child() : V {return this.child;;}
 }

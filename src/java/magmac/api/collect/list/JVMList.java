@@ -96,6 +96,11 @@ public record JVMList<T>(java.util.List<T> elements) implements List<T> {
     }
 
     @Override
+    public boolean isEmpty() {
+        return this.elements.isEmpty();
+    }
+
+    @Override
     public Option<T> findLast() {
         if (this.elements.isEmpty()) {
             return new None<>();

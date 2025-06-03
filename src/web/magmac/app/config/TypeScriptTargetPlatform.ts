@@ -14,9 +14,9 @@ import { Parser } from "../../../magmac/app/stage/parse/Parser";
 import { Path } from "../../../java/nio/file/Path";
 import { Paths } from "../../../java/nio/file/Paths";
 export class TypeScriptTargetPlatform {
-	createTargetPath() : Path {return Paths.get( ".", "src", "web");;}
-	createExtension() : String {return "ts";;}
-	createRule() : Rule {return TypescriptRules.createRule( );;}
-	createCompiler() : Compiler {parser : Parser<JavaLang.JavaRoot, TypescriptLang.TypescriptRoot>=new JavaTypescriptParser( );generator : Generator=new RuleGenerator( this.createRule( ));return new StagedCompiler<TypescriptLang.TypescriptRoot>( parser, generator);;}
-	createApplication() : Application {targetPath : var=this.createTargetPath( );extension : var=this.createExtension( );targets : Targets=new PathTargets( targetPath, extension);return new CompileApplication<>( this.createCompiler( ), targets);;}
+	public createTargetPath() : Path {return Paths.get( ".", "src", "web");;}
+	public createExtension() : String {return "ts";;}
+	public createRule() : Rule {return TypescriptRules.createRule( );;}
+	public createCompiler() : Compiler { let parser : Parser<JavaLang.JavaRoot, TypescriptLang.TypescriptRoot>=new JavaTypescriptParser( ); let generator : Generator=new RuleGenerator( this.createRule( ));return new StagedCompiler<TypescriptLang.TypescriptRoot>( parser, generator);;}
+	public createApplication() : Application { let targetPath : var=this.createTargetPath( ); let extension : var=this.createExtension( ); let targets : Targets=new PathTargets( targetPath, extension);return new CompileApplication<>( this.createCompiler( ), targets);;}
 }

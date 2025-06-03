@@ -4,6 +4,6 @@ import { LocatingRule } from "../../../../magmac/app/compile/rule/LocatingRule";
 import { StringRule } from "../../../../magmac/app/compile/rule/StringRule";
 import { TypeRule } from "../../../../magmac/app/compile/rule/TypeRule";
 export class PlantUMLDependency {
-	createDependencyRule() : TypeRule {return new TypeRule( "dependency", LocatingRule.First( new StringRule( "child"), " --> ", new StringRule( "parent")));;}
-	serialize() : Node {return new MapNode( "dependency").withString( "parent", this.parent).withString( "child", this.child);;}
+	static createDependencyRule() : TypeRule {return new TypeRule( "dependency", LocatingRule.First( new StringRule( "child"), " --> ", new StringRule( "parent")));;}
+	public serialize() : Node {return new MapNode( "dependency").withString( "parent", this.parent).withString( "child", this.child);;}
 }

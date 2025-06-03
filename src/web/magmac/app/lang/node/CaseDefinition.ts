@@ -5,5 +5,5 @@ import { Destructors } from "../../../../magmac/app/lang/Destructors";
 import { JavaDeserializers } from "../../../../magmac/app/lang/java/JavaDeserializers";
 import { JavaLang } from "../../../../magmac/app/lang/java/JavaLang";
 export class CaseDefinition {
-	deserialize(node : Node) : CompileResult<CaseDefinition> {return Destructors.destruct( node).withString( "name").withNodeOptionally( "type", JavaDeserializers.deserializeType).complete( 0);;}
+	public static deserialize( node : Node) : CompileResult<CaseDefinition> {return Destructors.destruct( node).withString( "name").withNodeOptionally( "type", JavaDeserializers.deserializeType).complete( 0);;}
 }

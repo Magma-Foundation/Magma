@@ -1,3 +1,3 @@
 export interface Error {
-	display() : String;
+	 display() : String;
 }

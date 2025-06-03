@@ -12,10 +12,10 @@ import { RuleGenerator } from "../../../magmac/app/stage/generate/RuleGenerator"
 import { Path } from "../../../java/nio/file/Path";
 import { Paths } from "../../../java/nio/file/Paths";
 export class PlantUMLTargetPlatform {
-	createTargetPath() : Path {return Paths.get( ".", "diagrams");;}
-	createExtension() : String {return "puml";;}
-	createRule() : Rule {return PlantUMLRoot.createRule( );;}
-	createCompiler() : Compiler {generator : Generator=new RuleGenerator( this.createRule( ));return new StagedCompiler<PlantUMLRoot>( new JavaPlantUMLParser( ), generator);;}
-	createApplication0(targets : Targets) : Application {return new CompileApplication<>( createCompiler( ), targets);;}
-	createApplication() : Application {targetPath : var=this.createTargetPath( );extension : var=this.createExtension( );targets : Targets=new PathTargets( targetPath, extension);return this.createApplication0( targets);;}
+	public createTargetPath() : Path {return Paths.get( ".", "diagrams");;}
+	public createExtension() : String {return "puml";;}
+	public createRule() : Rule {return PlantUMLRoot.createRule( );;}
+	public createCompiler() : Compiler { let generator : Generator=new RuleGenerator( this.createRule( ));return new StagedCompiler<PlantUMLRoot>( new JavaPlantUMLParser( ), generator);;}
+	private createApplication0( targets : Targets) : Application {return new CompileApplication<>( createCompiler( ), targets);;}
+	public createApplication() : Application { let targetPath : var=this.createTargetPath( ); let extension : var=this.createExtension( ); let targets : Targets=new PathTargets( targetPath, extension);return this.createApplication0( targets);;}
 }

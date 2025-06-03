@@ -2,5 +2,5 @@ import { CompileResult } from "../../../../magmac/app/compile/error/CompileResul
 import { Node } from "../../../../magmac/app/compile/node/Node";
 import { Serializable } from "../../../../magmac/app/lang/Serializable";
 export interface Deserializer<T> {
-	deserialize(node : Node) : CompileResult<T>;
+	 deserialize( node : Node) : CompileResult<T>;
 }

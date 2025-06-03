@@ -30,4 +30,6 @@ public interface List<T> {
     Option<Tuple2<T, List<T>>> popFirst();
 
     List<T> addFirst(T element);
+
+    boolean isEmpty();
 }

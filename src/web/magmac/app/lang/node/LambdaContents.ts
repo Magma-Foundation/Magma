@@ -5,5 +5,5 @@ import { Deserializers } from "../../../../magmac/app/lang/Deserializers";
 import { JavaRules } from "../../../../magmac/app/lang/JavaRules";
 import { JavaLang } from "../../../../magmac/app/lang/java/JavaLang";
 export class LambdaContents {
-	deserialize(node : Node) : CompileResult<JavaLang.JavaLambdaContent> {return Deserializers.orError( "lambda-content", node, Lists.of( Deserializers.wrap( JavaRules.deserializeLambdaValueContent), Deserializers.wrap( JavaLang.JavaLambdaBlockContent.deserialize)));;}
+	public static deserialize( node : Node) : CompileResult<JavaLang.JavaLambdaContent> {return Deserializers.orError( "lambda-content", node, Lists.of( Deserializers.wrap( JavaRules.deserializeLambdaValueContent), Deserializers.wrap( JavaLang.JavaLambdaBlockContent.deserialize)));;}
 }
