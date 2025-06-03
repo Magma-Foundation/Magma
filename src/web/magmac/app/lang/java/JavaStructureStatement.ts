@@ -9,6 +9,7 @@ import { StripRule } from "../../../../magmac/app/compile/rule/StripRule";
 import { SuffixRule } from "../../../../magmac/app/compile/rule/SuffixRule";
 import { TypeRule } from "../../../../magmac/app/compile/rule/TypeRule";
 import { Destructors } from "../../../../magmac/app/lang/Destructors";
+import { JavaRules } from "../../../../magmac/app/lang/JavaRules";
 import { LazyRule } from "../../../../magmac/app/lang/LazyRule";
 import { StructureStatementValue } from "../../../../magmac/app/lang/node/StructureStatementValue";
 export class JavaStructureStatement {

@@ -12,6 +12,7 @@ import { Deserializers } from "../../../../magmac/app/lang/Deserializers";
 import { Destructors } from "../../../../magmac/app/lang/Destructors";
 import { Annotation } from "../../../../magmac/app/lang/common/Annotation";
 import { Arguments } from "../../../../magmac/app/lang/node/Arguments";
+import { Assignables } from "../../../../magmac/app/lang/node/Assignables";
 import { CaseDefinition } from "../../../../magmac/app/lang/node/CaseDefinition";
 import { CaseValues } from "../../../../magmac/app/lang/node/CaseValues";
 import { ConditionalType } from "../../../../magmac/app/lang/node/ConditionalType";
@@ -34,14 +35,14 @@ export class JavaDeserializers {
 	deserializeAccess(type : JavaAccessType, node : Node) : Option<CompileResult<Access>> {return Destructors.destructWithType( type.type( ), node).map( 0);;}
 	deserializeYield(node : Node) : Option<CompileResult<JavaYieldNode>> {return Destructors.destructWithType( "yield", node).map( 0);;}
 	deserializePost(variant : PostVariant, node : Node) : Option<CompileResult<JavaPost>> {return Destructors.destructWithType( variant.type( ), node).map( 0);;}
-	deserializeLambda(node : Node) : Option<CompileResult<JavaLambda>> {return Destructors.destructWithType( "lambda", node).map( 0);;}
+	deserializeLambda(node : Node) : Option<CompileResult<Lambda>> {return Destructors.destructWithType( "lambda", node).map( 0);;}
 	deserializeAccessWithType(type : JavaAccessType) : TypedDeserializer<Access> {return 0;;}
 	deserializeFunctionStatement(node : Node) : Option<CompileResult<JavaLang.FunctionStatement>> {return Destructors.destructWithType( "statement", node).map( 0);;}
 	deserializeReturn(node : Node) : Option<CompileResult<JavaLang.Return>> {return Destructors.destructWithType( "return", node).map( 0);;}
 	deserializeBlockHeader(node : Node) : CompileResult<BlockHeader> {return Deserializers.orError( "header", node, Lists.of( Deserializers.wrap( 0), Deserializers.wrap( 0), Deserializers.wrap( JavaDeserializers.deserializeElse), Deserializers.wrap( JavaDeserializers.deserializeTry), Deserializers.wrap( Catch.deserialize)));;}
 	deserializeBlock(node : Node) : Option<CompileResult<Block>> {return Destructors.destructWithType( "block", node).map( 0);;}
 	deserializeConditional(type : ConditionalType, node : Node) : Option<CompileResult<Conditional>> {return Destructors.destructWithType( type.name( ).toLowerCase( ), node).map( 0);;}
-	deserializeStructureStatement(node : Node) : CompileResult<StructureStatementValue> {return Deserializers.orError( "structure-statement-value", node, Lists.of( Deserializers.wrap( JavaDeserializers.deserializeTypedDefinition), Deserializers.wrap( JavaAssignmentNode.deserialize)));;}
+	deserializeStructureStatement(node : Node) : CompileResult<StructureStatementValue> {return Deserializers.orError( "structure-statement-value", node, Lists.of( Deserializers.wrap( JavaDeserializers.deserializeTypedDefinition), Deserializers.wrap( JavaDeserializers.deserializeAssignment)));;}
 	deserializeBreak(node : Node) : Option<CompileResult<JavaBreak>> {return Destructors.destructWithType( "break", node).map( 0);;}
 	deserializeContinue(node : Node) : Option<CompileResult<JavaContinue>> {return Destructors.destructWithType( "continue", node).map( 0);;}
 	deserializeWhitespace(node : Node) : Option<CompileResult<Whitespace>> {return Destructors.destructWithType( "whitespace", node).map( 0);;}
@@ -53,15 +54,16 @@ export class JavaDeserializers {
 	deserializeNumber(node : Node) : Option<CompileResult<JavaLang.Number>> {return Destructors.destructWithType( "number", node).map( 0);;}
 	deserializeNot(node : Node) : Option<CompileResult<Not>> {return Destructors.destructWithType( "not", node).map( 0);;}
 	deserializeIndex(value : Node) : Option<CompileResult<Index>> {return Destructors.destructWithType( "index", value).map( 0);;}
-	deserializeSwitch(node : Node) : Option<CompileResult<JavaSwitchNode>> {return Destructors.destructWithType( "switch", node).map( 0);;}
-	deserializeValue(node : Node) : Option<CompileResult<JavaValue>> {break;break;return Deserializers.or( node, deserializers.addAllLast( operatorRules));;}
-	wrapAsDeserializer(operator : Operator) : TypedDeserializer<JavaValue> {return Deserializers.wrap( Deserializers.wrap( new OperationDeserializer( operator)));;}
-	deserializeJavaOrError(node : Node) : CompileResult<JavaValue> {return JavaDeserializers.deserializeValue( node).orElseGet( 0);;}
+	deserializeSwitch(node : Node) : Option<CompileResult<SwitchNode>> {return Destructors.destructWithType( "switch", node).map( 0);;}
+	deserializeValue(node : Node) : Option<CompileResult<Value>> {break;break;return Deserializers.or( node, deserializers.addAllLast( operatorRules));;}
+	wrapAsDeserializer(operator : Operator) : TypedDeserializer<Value> {return Deserializers.wrap( Deserializers.wrap( new OperationDeserializer( operator)));;}
+	deserializeJavaOrError(node : Node) : CompileResult<Value> {return JavaDeserializers.deserializeValue( node).orElseGet( 0);;}
 	deserializeSymbol(node : Node) : Option<CompileResult<Symbol>> {return Destructors.destructWithType( "symbol", node).map( 0);;}
 	deserializeLambdaParameter(node : Node) : CompileResult<JavaLambdaParameter> {return Deserializers.orError( "lambda-parameter", node, Lists.of( Deserializers.wrap( JavaDeserializers.deserializeSymbol), Deserializers.wrap( JavaDeserializers.deserializeTypedDefinition)));;}
-	deserializeDefinition(node : Node) : CompileResult<JavaDefinition> {return deserialize0( Destructors.destruct( node)).mapValue( JavaDefinition.new);;}
-	deserializeTypedDefinition(node : Node) : Option<CompileResult<JavaDefinition>> {return Destructors.destructWithType( "definition", node).map( JavaDeserializers.deserialize0).map( 0);;}
+	deserializeDefinition(node : Node) : CompileResult<Definition> {return deserialize0( Destructors.destruct( node)).mapValue( Definition.new);;}
+	deserializeTypedDefinition(node : Node) : Option<CompileResult<Definition>> {return Destructors.destructWithType( "definition", node).map( JavaDeserializers.deserialize0).map( 0);;}
 	deserializeMultipleHeader(node : Node) : Option<CompileResult<JavaLambdaHeader>> {return Destructors.destructWithType( "multiple", node).map( 0);;}
 	deserialize0(deserialize : InitialDestructor) : CompileResult<CommonLang.Definition<JavaType>> {return deserialize.withString( "name").withNode( "type", JavaTypes.deserialize).withNodeList( "modifiers", Modifier.deserialize).withNodeListOptionally( "annotations", Annotation.deserialize).withNodeListOptionally( "type-parameters", TypescriptLang.TypeParam.deserialize).complete( 0);;}
 	deserializeCase(node : Node) : Option<CompileResult<Case>> {return Destructors.destructWithType( "case", node).map( 0);;}
+	deserializeAssignment(node : Node) : Option<CompileResult<Assignment>> {return Destructors.destructWithType( "assignment", node).map( 0);;}
 }

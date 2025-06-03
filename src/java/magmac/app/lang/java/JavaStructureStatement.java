@@ -11,6 +11,7 @@ import magmac.app.compile.rule.StripRule;
 import magmac.app.compile.rule.SuffixRule;
 import magmac.app.compile.rule.TypeRule;
 import magmac.app.lang.Destructors;
+import magmac.app.lang.JavaRules;
 import magmac.app.lang.LazyRule;
 import magmac.app.lang.node.StructureStatementValue;
 
@@ -24,7 +25,7 @@ public record JavaStructureStatement(StructureStatementValue value) implements J
     public static Rule createStructureStatementRule(Rule definitionRule, LazyRule valueRule) {
         Rule definition = new NodeRule("value", new OrRule(Lists.of(
                 definitionRule,
-                JavaAssignmentNode.createAssignmentRule(definitionRule, valueRule))
+                JavaRules.createAssignmentRule(definitionRule, valueRule))
         ));
 
         return new TypeRule("structure-statement", new StripRule(new SuffixRule(definition, ";")));

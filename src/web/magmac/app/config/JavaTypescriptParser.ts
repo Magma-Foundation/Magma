@@ -10,7 +10,6 @@ import { CompileResults } from "../../../magmac/app/compile/error/CompileResults
 import { Location } from "../../../magmac/app/io/Location";
 import { UnitSetCollector } from "../../../magmac/app/io/sources/UnitSetCollector";
 import { CommonLang } from "../../../magmac/app/lang/CommonLang";
-import { JavaAssignmentNode } from "../../../magmac/app/lang/java/JavaAssignmentNode";
 import { JavaBreak } from "../../../magmac/app/lang/java/JavaBreak";
 import { JavaConstruction } from "../../../magmac/app/lang/java/JavaConstruction";
 import { JavaConstructor } from "../../../magmac/app/lang/java/JavaConstructor";
@@ -62,7 +61,7 @@ export class JavaTypescriptParser {
 	parseCaller(caller : JavaLang.JavaCaller) : TypescriptCaller {return 0;;}
 	parseArguments(arguments : List<JavaLang.JavaArgument>) : List<TypescriptLang.Argument> {return arguments.iter( ).map( JavaTypescriptParser.parseArgument).collect( new ListCollector<>( ));;}
 	parseArgument(argument : JavaLang.JavaArgument) : TypescriptLang.Argument {return 0;;}
-	parseValue(child : JavaLang.JavaValue) : TypescriptLang.Value {return 0;;}
+	parseValue(child : JavaLang.Value) : TypescriptLang.Value {return 0;;}
 	parseAccess(access : JavaLang.Access) : TypescriptLang.Access {return new TypescriptLang.Access( JavaTypescriptParser.parseValue( access.receiver( )), access.property( ));;}
 	parseIndex(index : JavaLang.Index) : TypescriptLang.Index {return new TypescriptLang.Index( JavaTypescriptParser.parseValue( index.parent( )), JavaTypescriptParser.parseValue( index.argument( )));;}
 	parseOperation(operation : JavaLang.operation) : TypescriptLang.Operation {return new TypescriptLang.Operation( JavaTypescriptParser.parseValue( operation.left( )), operation.operator( ), JavaTypescriptParser.parseValue( operation.right( )));;}
@@ -70,7 +69,7 @@ export class JavaTypescriptParser {
 	parseHeader(header : JavaLang.BlockHeader) : TypescriptLang.TypescriptBlockHeader {return new TypescriptLang.TypescriptConditional( ConditionalType.If, new Symbol( "true"));;}
 	parseParameter(parameter : JavaParameter) : TypescriptLang.TypeScriptParameter {return 0;;}
 	parseMethodHeader(header : JavaMethodHeader) : TypescriptLang.TypeScriptMethodHeader {return 0;;}
-	parseDefinition(javaDefinition : JavaLang.JavaDefinition) : TypescriptLang.TypeScriptDefinition {break;return 0;;}
+	parseDefinition(javaDefinition : JavaLang.Definition) : TypescriptLang.TypeScriptDefinition {break;return 0;;}
 	parseSymbol(symbol : JavaLang.Symbol) : Symbol {return new Symbol( symbol.value( ));;}
 	parseQualifiedType(qualified : JavaLang.JavaQualified) : Symbol {break;return new Symbol( joined);;}
 	parseArrayType(type : JavaLang.JavaArrayType) : TypescriptLang.TypeScriptType {return new TypescriptLang.TypescriptArrayType( JavaTypescriptParser.parseType( type.inner));;}

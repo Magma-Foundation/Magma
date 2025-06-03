@@ -14,6 +14,7 @@ import magmac.app.lang.Deserializers;
 import magmac.app.lang.Destructors;
 import magmac.app.lang.common.Annotation;
 import magmac.app.lang.node.Arguments;
+import magmac.app.lang.node.Assignables;
 import magmac.app.lang.node.CaseDefinition;
 import magmac.app.lang.node.CaseValues;
 import magmac.app.lang.node.ConditionalType;
@@ -80,11 +81,11 @@ public final class JavaDeserializers {
                 .complete(child -> new JavaPost(variant, child)));
     }
 
-    public static Option<CompileResult<JavaLambda>> deserializeLambda(Node node) {
+    public static Option<CompileResult<Lambda>> deserializeLambda(Node node) {
         return Destructors.destructWithType("lambda", node).map(deserializer -> deserializer
                 .withNode("header", JavaDeserializers::deserializeLambdaHeader)
                 .withNode("content", LambdaContents::deserialize)
-                .complete(tuple -> new JavaLambda(tuple.left(), tuple.right())));
+                .complete(tuple -> new Lambda(tuple.left(), tuple.right())));
     }
 
     public static TypedDeserializer<Access> deserializeAccessWithType(JavaAccessType type) {
@@ -128,7 +129,7 @@ public final class JavaDeserializers {
     public static CompileResult<StructureStatementValue> deserializeStructureStatement(Node node) {
         return Deserializers.orError("structure-statement-value", node, Lists.of(
                 Deserializers.wrap(JavaDeserializers::deserializeTypedDefinition),
-                Deserializers.wrap(JavaAssignmentNode::deserialize)
+                Deserializers.wrap(JavaDeserializers::deserializeAssignment)
         ));
     }
 
@@ -185,17 +186,17 @@ public final class JavaDeserializers {
         });
     }
 
-    public static Option<CompileResult<JavaSwitchNode>> deserializeSwitch(Node node) {
+    public static Option<CompileResult<SwitchNode>> deserializeSwitch(Node node) {
         return Destructors.destructWithType("switch", node).map(deserializer -> {
             return deserializer
                     .withNode("value", JavaDeserializers::deserializeJavaOrError)
                     .withNodeList("children", FunctionSegments::deserialize)
-                    .complete(tuple -> new JavaSwitchNode(tuple.left(), tuple.right()));
+                    .complete(tuple -> new SwitchNode(tuple.left(), tuple.right()));
         });
     }
 
-    public static Option<CompileResult<JavaValue>> deserializeValue(Node node) {
-        List<TypedDeserializer<JavaValue>> deserializers = Lists.of(
+    public static Option<CompileResult<Value>> deserializeValue(Node node) {
+        List<TypedDeserializer<Value>> deserializers = Lists.of(
                 Deserializers.wrap(JavaDeserializers::deserializeSwitch),
                 Deserializers.wrap(JavaDeserializers::deserializeInvocation),
                 Deserializers.wrap(JavaDeserializers::deserializeString),
@@ -209,18 +210,18 @@ public final class JavaDeserializers {
                 Deserializers.wrap(JavaDeserializers::deserializeIndex)
         );
 
-        List<TypedDeserializer<JavaValue>> operatorRules = Iters.fromValues(Operator.values())
+        List<TypedDeserializer<Value>> operatorRules = Iters.fromValues(Operator.values())
                 .map(JavaDeserializers::wrapAsDeserializer)
                 .collect(new ListCollector<>());
 
         return Deserializers.or(node, deserializers.addAllLast(operatorRules));
     }
 
-    private static TypedDeserializer<JavaValue> wrapAsDeserializer(Operator operator) {
+    private static TypedDeserializer<Value> wrapAsDeserializer(Operator operator) {
         return Deserializers.wrap(Deserializers.wrap(new OperationDeserializer(operator)));
     }
 
-    public static CompileResult<JavaValue> deserializeJavaOrError(Node node) {
+    public static CompileResult<Value> deserializeJavaOrError(Node node) {
         return JavaDeserializers.deserializeValue(node).orElseGet(() -> CompileResults.NodeErr("Cannot deserialize value", node));
     }
 
@@ -237,13 +238,13 @@ public final class JavaDeserializers {
         ));
     }
 
-    public static CompileResult<JavaDefinition> deserializeDefinition(Node node) {
-        return deserialize0(Destructors.destruct(node)).mapValue(JavaDefinition::new);
+    public static CompileResult<Definition> deserializeDefinition(Node node) {
+        return deserialize0(Destructors.destruct(node)).mapValue(Definition::new);
     }
 
-    public static Option<CompileResult<JavaDefinition>> deserializeTypedDefinition(Node node) {
+    public static Option<CompileResult<Definition>> deserializeTypedDefinition(Node node) {
         return Destructors.destructWithType("definition", node)
-                .map(JavaDeserializers::deserialize0).map(value -> value.mapValue(JavaDefinition::new));
+                .map(JavaDeserializers::deserialize0).map(value -> value.mapValue(Definition::new));
     }
 
     public static Option<CompileResult<JavaLambdaHeader>> deserializeMultipleHeader(Node node) {
@@ -268,5 +269,12 @@ public final class JavaDeserializers {
                     .withNode("value", CaseValues::deserializeOrError)
                     .complete(tuple -> new Case(tuple.left(), tuple.right()));
         });
+    }
+
+    public static Option<CompileResult<Assignment>> deserializeAssignment(Node node) {
+        return Destructors.destructWithType("assignment", node).map(deserializer -> deserializer
+                .withNode("destination", Assignables::deserializeError)
+                .withNode("source", JavaDeserializers::deserializeJavaOrError)
+                .complete(tuple -> new Assignment(tuple.left(), tuple.right())));
     }
 }

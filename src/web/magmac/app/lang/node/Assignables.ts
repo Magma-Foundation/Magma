@@ -5,5 +5,5 @@ import { Deserializers } from "../../../../magmac/app/lang/Deserializers";
 import { JavaDeserializers } from "../../../../magmac/app/lang/java/JavaDeserializers";
 import { JavaLang } from "../../../../magmac/app/lang/java/JavaLang";
 export class Assignables {
-	deserializeError(node : Node) : CompileResult<JavaLang.JavaAssignable> {return Deserializers.orError( "assignable", node, Lists.of( Deserializers.wrap( JavaDeserializers.deserializeTypedDefinition), Deserializers.wrap( JavaDeserializers.deserializeValue)));;}
+	deserializeError(node : Node) : CompileResult<JavaLang.Assignable> {return Deserializers.orError( "assignable", node, Lists.of( Deserializers.wrap( JavaDeserializers.deserializeTypedDefinition), Deserializers.wrap( JavaDeserializers.deserializeValue)));;}
 }

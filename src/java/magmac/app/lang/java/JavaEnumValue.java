@@ -16,7 +16,7 @@ import magmac.app.lang.CommonRules;
 import magmac.app.lang.Destructors;
 import magmac.app.lang.node.Arguments;
 
-public record JavaEnumValue(String name, Option<List<JavaLang.JavaValue>> argumentsList) {
+public record JavaEnumValue(String name, Option<List<JavaLang.Value>> argumentsList) {
     public static CompileResult<JavaEnumValue> deserialize(Node node) {
         return Destructors.destruct(node)
                 .withString("name")

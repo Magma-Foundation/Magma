@@ -9,7 +9,7 @@ import magmac.app.lang.node.Post;
 import magmac.app.lang.node.PostVariant;
 
 public final class JavaPost extends Post implements JavaFunctionSegmentValue {
-    public JavaPost(PostVariant variant, JavaLang.JavaValue value) {
+    public JavaPost(PostVariant variant, JavaLang.Value value) {
         super(variant, value);
     }
 
@@ -21,7 +21,7 @@ public final class JavaPost extends Post implements JavaFunctionSegmentValue {
         return variant;
     }
 
-    public JavaLang.JavaValue value() {
+    public JavaLang.Value value() {
         return value;
     }
 }

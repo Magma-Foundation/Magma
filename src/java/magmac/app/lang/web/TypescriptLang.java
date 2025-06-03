@@ -174,7 +174,7 @@ public final class TypescriptLang {
         }
     }
 
-    public static final class TypeScriptDefinition implements TypeScriptParameter, JavaLang.JavaAssignable, TypeScriptMethodHeader {
+    public static final class TypeScriptDefinition implements TypeScriptParameter, JavaLang.Assignable, TypeScriptMethodHeader {
         private final CommonLang.Definition<TypeScriptType> definition;
 
         public TypeScriptDefinition(CommonLang.Definition<TypeScriptType> definition) {

@@ -30,7 +30,6 @@ import { CaseValue } from "../../../../magmac/app/lang/node/CaseValue";
 import { ConditionalType } from "../../../../magmac/app/lang/node/ConditionalType";
 import { Deserializer } from "../../../../magmac/app/lang/node/Deserializer";
 import { FunctionSegments } from "../../../../magmac/app/lang/node/FunctionSegments";
-import { Lambda } from "../../../../magmac/app/lang/node/Lambda";
 import { LambdaValueContent } from "../../../../magmac/app/lang/node/LambdaValueContent";
 import { Modifier } from "../../../../magmac/app/lang/node/Modifier";
 import { NumberNode } from "../../../../magmac/app/lang/node/NumberNode";
@@ -47,9 +46,9 @@ export interface JavaArgument {
 }
 export interface JavaCaller {
 }
-export interface JavaValue {
+export interface Value {
 }
-export interface JavaAssignable {
+export interface Assignable {
 }
 export interface BlockHeader {
 }
@@ -77,20 +76,20 @@ export class JavaArrayType {
 export class JavaRoot {
 	getChildren(node : Node, deserializer : Deserializer<JavaRootSegment>) : CompileResult<JavaRoot> {return Destructors.destruct( node).withNodeList( "children", deserializer).complete( JavaRoot.new);;}
 }
-export class JavaLambda {
-	JavaLambda(header : JavaLambdaHeader, content : JavaLambdaContent) : public {super( header, content);;}
+export class Lambda {
+	Lambda(header : JavaLambdaHeader, content : JavaLambdaContent) : public {super( header, content);;}
 }
 export class Access {
-	Access(type : JavaAccessType, receiver : JavaValue, property : String) : public {super( type, receiver, property);;}
+	Access(type : JavaAccessType, receiver : Value, property : String) : public {super( type, receiver, property);;}
 }
 export class JavaLambdaValueContent {
-	JavaLambdaValueContent(value : JavaValue) : public {super( value);;}
+	JavaLambdaValueContent(value : Value) : public {super( value);;}
 }
 export class JavaLambdaBlockContent {
 	deserialize(node : Node) : Option<CompileResult<JavaLambdaBlockContent>> {return Destructors.destructWithType( "block", node).map( 0);;}
 }
 export class Conditional {
-	Conditional(type : ConditionalType, condition : JavaValue) : public {super( type, condition);;}
+	Conditional(type : ConditionalType, condition : Value) : public {super( type, condition);;}
 }
 export class JavaTemplateType {
 	JavaTemplateType(base : JavaBase, typeArguments : TypeArguments<JavaType>) : public {break;break;;}
@@ -141,9 +140,9 @@ export class Not {
 }
 export class Index {
 }
-export class JavaSwitchNode {
+export class SwitchNode {
 }
-export class JavaDefinition {
+export class Definition {
 }
 export class JavaMultipleHeader {
 }
@@ -153,12 +152,14 @@ export class FunctionStatement {
 	FunctionStatement(child : JavaFunctionSegmentValue) : public {super( child);;}
 }
 export class Return {
-	Return(child : JavaValue) : public {super( child);;}
+	Return(child : Value) : public {super( child);;}
 }
 export class Case {
 }
 export class Block {
 	Block(header : BlockHeader, segments : List<JavaFunctionSegment>) : public {super( header, segments);;}
+}
+export class Assignment {
 }
 export class JavaLang {
 }

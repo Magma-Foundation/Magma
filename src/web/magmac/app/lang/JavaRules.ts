@@ -63,4 +63,5 @@ export class JavaRules {
 	createDefinitionRule() : Rule {break;break;break;break;break;break;break;break;break;return new TypeRule( "definition", stripRule);;}
 	attachTypeParams(beforeTypeParams : Rule) : Rule {break;return new OptionNodeListRule( "type-parameters", new StripRule( new SuffixRule( LocatingRule.First( beforeTypeParams, "<", typeParams), ">")), beforeTypeParams);;}
 	createCaseRule(value : Rule, segment : Rule) : Rule {break;break;break;break;break;break;break;return new TypeRule( "case", new StripRule( new PrefixRule( "case", childRule)));;}
+	createAssignmentRule(definition : Rule, value : Rule) : Rule {break;break;return new TypeRule( "assignment", LocatingRule.First( before, "=", source));;}
 }

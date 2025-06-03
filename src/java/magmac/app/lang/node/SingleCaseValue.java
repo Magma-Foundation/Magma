@@ -12,7 +12,7 @@ import magmac.app.lang.Destructors;
 import magmac.app.lang.java.JavaDeserializers;
 import magmac.app.lang.java.JavaLang;
 
-public record SingleCaseValue(JavaLang.JavaValue value) implements CaseValue {
+public record SingleCaseValue(JavaLang.Value value) implements CaseValue {
     public static Option<CompileResult<SingleCaseValue>> deserialize(Node node) {
         return Destructors.destructWithType("case-single", node).map(destructor -> {
             return destructor.withNode("value", JavaDeserializers::deserializeJavaOrError)

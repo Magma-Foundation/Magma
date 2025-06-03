@@ -12,7 +12,6 @@ import magmac.app.compile.error.CompileResults;
 import magmac.app.io.Location;
 import magmac.app.io.sources.UnitSetCollector;
 import magmac.app.lang.CommonLang;
-import magmac.app.lang.java.JavaAssignmentNode;
 import magmac.app.lang.java.JavaBreak;
 import magmac.app.lang.java.JavaConstruction;
 import magmac.app.lang.java.JavaConstructor;
@@ -182,7 +181,7 @@ class JavaTypescriptParser implements Parser<JavaLang.JavaRoot, TypescriptLang.T
                     new TypescriptLang.Post(javaPost.variant(), JavaTypescriptParser.parseValue(javaPost.value()));
             case JavaLang.Return aReturn -> new TypescriptLang.Return(JavaTypescriptParser.parseValue(aReturn.child()));
             case JavaLang.Invokable invokable -> JavaTypescriptParser.parseInvokable(invokable);
-            case JavaAssignmentNode javaAssignmentNode -> new TypescriptLang.Break();
+            case JavaLang.Assignment assignment -> new TypescriptLang.Break();
         };
     }
 
@@ -192,7 +191,7 @@ class JavaTypescriptParser implements Parser<JavaLang.JavaRoot, TypescriptLang.T
 
     private static TypescriptCaller parseCaller(JavaLang.JavaCaller caller) {
         return switch (caller) {
-            case JavaLang.JavaValue javaValue -> JavaTypescriptParser.parseValue(javaValue);
+            case JavaLang.Value javaValue -> JavaTypescriptParser.parseValue(javaValue);
             case JavaConstruction javaConstruction ->
                     new TypescriptLang.Construction(JavaTypescriptParser.parseType(javaConstruction.type()));
         };
@@ -207,11 +206,11 @@ class JavaTypescriptParser implements Parser<JavaLang.JavaRoot, TypescriptLang.T
     private static TypescriptLang.Argument parseArgument(JavaLang.JavaArgument argument) {
         return switch (argument) {
             case JavaLang.Whitespace whitespace -> new TypescriptLang.Whitespace();
-            case JavaLang.JavaValue value -> JavaTypescriptParser.parseValue(value);
+            case JavaLang.Value value -> JavaTypescriptParser.parseValue(value);
         };
     }
 
-    private static TypescriptLang.Value parseValue(JavaLang.JavaValue child) {
+    private static TypescriptLang.Value parseValue(JavaLang.Value child) {
         return switch (child) {
             case JavaLang.Access access -> JavaTypescriptParser.parseAccess(access);
             case JavaLang.Char aChar -> new TypescriptLang.Char(aChar.value());
@@ -222,8 +221,8 @@ class JavaTypescriptParser implements Parser<JavaLang.JavaRoot, TypescriptLang.T
             case JavaLang.operation operation -> JavaTypescriptParser.parseOperation(operation);
             case JavaLang.StringValue javaStringNode -> new TypescriptLang.StringValue(javaStringNode.value());
             case JavaLang.Symbol symbol -> new TypescriptLang.Symbol(symbol.value());
-            case JavaLang.JavaLambda javaLambda -> new TypescriptLang.Number("0");
-            case JavaLang.JavaSwitchNode javaSwitchNode -> new TypescriptLang.Number("0");
+            case JavaLang.Lambda javaLambda -> new TypescriptLang.Number("0");
+            case JavaLang.SwitchNode javaSwitchNode -> new TypescriptLang.Number("0");
         };
     }
 
@@ -250,18 +249,18 @@ class JavaTypescriptParser implements Parser<JavaLang.JavaRoot, TypescriptLang.T
     private static TypescriptLang.TypeScriptParameter parseParameter(JavaParameter parameter) {
         return switch (parameter) {
             case JavaLang.Whitespace whitespace -> new TypescriptLang.Whitespace();
-            case JavaLang.JavaDefinition javaDefinition -> JavaTypescriptParser.parseDefinition(javaDefinition);
+            case JavaLang.Definition javaDefinition -> JavaTypescriptParser.parseDefinition(javaDefinition);
         };
     }
 
     private static TypescriptLang.TypeScriptMethodHeader parseMethodHeader(JavaMethodHeader header) {
         return switch (header) {
             case JavaConstructor constructor -> new TypescriptLang.TypescriptConstructor();
-            case JavaLang.JavaDefinition javaDefinition -> JavaTypescriptParser.parseDefinition(javaDefinition);
+            case JavaLang.Definition javaDefinition -> JavaTypescriptParser.parseDefinition(javaDefinition);
         };
     }
 
-    private static TypescriptLang.TypeScriptDefinition parseDefinition(JavaLang.JavaDefinition javaDefinition) {
+    private static TypescriptLang.TypeScriptDefinition parseDefinition(JavaLang.Definition javaDefinition) {
         CommonLang.Definition<JavaLang.JavaType> definition = javaDefinition.definition();
         return switch (definition.type()) {
             case JavaLang.JavaArrayType javaArrayType ->

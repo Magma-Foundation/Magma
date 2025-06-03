@@ -6,8 +6,8 @@ import { TypeRule } from "../../../../magmac/app/compile/rule/TypeRule";
 import { Post } from "../../../../magmac/app/lang/node/Post";
 import { PostVariant } from "../../../../magmac/app/lang/node/PostVariant";
 export class JavaPost {
-	JavaPost(variant : PostVariant, value : JavaLang.JavaValue) : public {super( variant, value);;}
+	JavaPost(variant : PostVariant, value : JavaLang.Value) : public {super( variant, value);;}
 	createPostRule(type : String, suffix : String, value : Rule) : Rule {return new TypeRule( type, new StripRule( new SuffixRule( new NodeRule( "child", value), suffix)));;}
 	variant() : PostVariant {return variant;;}
-	value() : JavaLang.JavaValue {return value;;}
+	value() : JavaLang.Value {return value;;}
 }

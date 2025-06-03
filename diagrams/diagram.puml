@@ -377,6 +377,7 @@ JavaDeserializers --> Deserializers
 JavaDeserializers --> Destructors
 JavaDeserializers --> Annotation
 JavaDeserializers --> Arguments
+JavaDeserializers --> Assignables
 JavaDeserializers --> CaseDefinition
 JavaDeserializers --> CaseValues
 JavaDeserializers --> ConditionalType
@@ -779,24 +780,6 @@ TypeScriptTargetPlatform --> Path
 TypeScriptTargetPlatform --> Paths
 class TypeScriptTargetPlatform
 TargetPlatform <|-- TypeScriptTargetPlatform
-JavaAssignmentNode --> Option
-JavaAssignmentNode --> Lists
-JavaAssignmentNode --> CompileResult
-JavaAssignmentNode --> MapNode
-JavaAssignmentNode --> Node
-JavaAssignmentNode --> LocatingRule
-JavaAssignmentNode --> NodeRule
-JavaAssignmentNode --> OrRule
-JavaAssignmentNode --> Rule
-JavaAssignmentNode --> TypeRule
-JavaAssignmentNode --> Destructors
-JavaAssignmentNode --> Assignables
-JavaAssignmentNode --> StructureStatementValue
-JavaAssignmentNode --> TypescriptLang
-class JavaAssignmentNode
-JavaFunctionSegmentValue <|-- JavaAssignmentNode
-StructureStatementValue <|-- JavaAssignmentNode
-? <|-- JavaAssignmentNode
 Targets --> IOException
 Targets --> Option
 Targets --> UnitSet
@@ -892,7 +875,6 @@ JavaTypescriptParser --> CompileResults
 JavaTypescriptParser --> Location
 JavaTypescriptParser --> UnitSetCollector
 JavaTypescriptParser --> CommonLang
-JavaTypescriptParser --> JavaAssignmentNode
 JavaTypescriptParser --> JavaBreak
 JavaTypescriptParser --> JavaConstruction
 JavaTypescriptParser --> JavaConstructor
@@ -1127,6 +1109,7 @@ JavaStructureStatement --> StripRule
 JavaStructureStatement --> SuffixRule
 JavaStructureStatement --> TypeRule
 JavaStructureStatement --> Destructors
+JavaStructureStatement --> JavaRules
 JavaStructureStatement --> LazyRule
 JavaStructureStatement --> StructureStatementValue
 class JavaStructureStatement
@@ -1223,7 +1206,6 @@ FunctionSegmentValues --> TypeRule
 FunctionSegmentValues --> Deserializers
 FunctionSegmentValues --> JavaDeserializers
 FunctionSegmentValues --> JavaRules
-FunctionSegmentValues --> JavaAssignmentNode
 FunctionSegmentValues --> JavaFunctionSegmentValue
 FunctionSegmentValues --> JavaPost
 class FunctionSegmentValues
@@ -1369,7 +1351,6 @@ JavaLang --> CaseValue
 JavaLang --> ConditionalType
 JavaLang --> Deserializer
 JavaLang --> FunctionSegments
-JavaLang --> Lambda
 JavaLang --> LambdaValueContent
 JavaLang --> Modifier
 JavaLang --> NumberNode

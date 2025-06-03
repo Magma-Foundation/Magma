@@ -32,7 +32,6 @@ import magmac.app.lang.node.CaseValue;
 import magmac.app.lang.node.ConditionalType;
 import magmac.app.lang.node.Deserializer;
 import magmac.app.lang.node.FunctionSegments;
-import magmac.app.lang.node.Lambda;
 import magmac.app.lang.node.LambdaValueContent;
 import magmac.app.lang.node.Modifier;
 import magmac.app.lang.node.NumberNode;
@@ -47,16 +46,16 @@ import magmac.app.lang.node.TypedDeserializer;
 import magmac.app.lang.web.TypescriptLang;
 
 public class JavaLang {
-    public sealed interface JavaArgument permits JavaValue, Whitespace {
+    public sealed interface JavaArgument permits Value, Whitespace {
     }
 
-    public sealed interface JavaCaller permits JavaConstruction, JavaValue {
+    public sealed interface JavaCaller permits JavaConstruction, Value {
     }
 
-    public sealed interface JavaValue extends JavaCaller, JavaArgument, JavaAssignable permits Access, Char, Index, Invokable, JavaLambda, Not, Number, operation, StringValue, JavaSwitchNode, Symbol {
+    public sealed interface Value extends JavaCaller, JavaArgument, Assignable permits Access, Char, Index, Invokable, Lambda, Not, Number, operation, StringValue, SwitchNode, Symbol {
     }
 
-    public interface JavaAssignable {
+    public interface Assignable {
     }
 
     public sealed interface BlockHeader permits Catch, Conditional, Else, Try {
@@ -77,13 +76,13 @@ public class JavaLang {
     public interface JavaLambdaParameter {
     }
 
-    public static final class Invokable extends magmac.app.lang.java.Invokable<JavaCaller, JavaArgument> implements JavaValue, JavaFunctionSegmentValue {
+    public static final class Invokable extends magmac.app.lang.java.Invokable<JavaCaller, JavaArgument> implements Value, JavaFunctionSegmentValue {
         public Invokable(JavaCaller caller, List<JavaArgument> arguments) {
             super(caller, arguments);
         }
     }
 
-    public static final class Symbol extends magmac.app.lang.common.Symbol implements JavaType, JavaValue, JavaBase, JavaLambdaHeader, JavaLambdaParameter {
+    public static final class Symbol extends magmac.app.lang.common.Symbol implements JavaType, Value, JavaBase, JavaLambdaHeader, JavaLambdaParameter {
         public Symbol(String value) {
             super(value);
         }
@@ -116,20 +115,20 @@ public class JavaLang {
         }
     }
 
-    public static final class JavaLambda extends Lambda implements JavaValue {
-        public JavaLambda(JavaLambdaHeader header, JavaLambdaContent content) {
+    public static final class Lambda extends magmac.app.lang.node.Lambda implements Value {
+        public Lambda(JavaLambdaHeader header, JavaLambdaContent content) {
             super(header, content);
         }
     }
 
-    public static final class Access extends magmac.app.lang.common.Access<JavaAccessType, JavaValue> implements JavaValue {
-        public Access(JavaAccessType type, JavaValue receiver, String property) {
+    public static final class Access extends magmac.app.lang.common.Access<JavaAccessType, Value> implements Value {
+        public Access(JavaAccessType type, Value receiver, String property) {
             super(type, receiver, property);
         }
     }
 
     public static final class JavaLambdaValueContent extends LambdaValueContent implements JavaLambdaContent {
-        public JavaLambdaValueContent(JavaValue value) {
+        public JavaLambdaValueContent(Value value) {
             super(value);
         }
     }
@@ -143,8 +142,8 @@ public class JavaLang {
         }
     }
 
-    public static final class Conditional extends magmac.app.lang.node.Conditional<JavaValue> implements BlockHeader {
-        public Conditional(ConditionalType type, JavaValue condition) {
+    public static final class Conditional extends magmac.app.lang.node.Conditional<Value> implements BlockHeader {
+        public Conditional(ConditionalType type, Value condition) {
             super(type, condition);
         }
     }
@@ -248,7 +247,7 @@ public class JavaLang {
     public static final class Else implements BlockHeader {
     }
 
-    public record Catch(JavaDefinition definition) implements BlockHeader {
+    public record Catch(Definition definition) implements BlockHeader {
         public static Option<CompileResult<BlockHeader>> deserialize(Node node) {
             return Destructors.destructWithType("catch", node).map(deserializer -> deserializer.withNode("definition", JavaDeserializers::deserializeDefinition)
                     .complete(Catch::new));
@@ -288,43 +287,43 @@ public class JavaLang {
         }
     }
 
-    public static final class Number extends NumberNode implements JavaValue {
+    public static final class Number extends NumberNode implements Value {
         public Number(String value) {
             super(value);
         }
     }
 
-    public static final class StringValue extends magmac.app.lang.common.StringNode implements JavaValue {
+    public static final class StringValue extends magmac.app.lang.common.StringNode implements Value {
         public StringValue(String value) {
             super(value);
         }
     }
 
     public record operation(
-            JavaValue left,
+            Value left,
             Operator operator,
-            JavaValue right
-    ) implements JavaValue, TypescriptLang.Value {
+            Value right
+    ) implements Value, TypescriptLang.Value {
         @Override
         public Node serialize() {
             return new MapNode(this.operator.type());
         }
     }
 
-    public record Char(String value) implements JavaValue {
+    public record Char(String value) implements Value {
     }
 
-    public record Not(JavaValue value) implements JavaValue {
+    public record Not(Value value) implements Value {
     }
 
-    public record Index(JavaValue parent, JavaValue argument) implements JavaValue {
+    public record Index(Value parent, Value argument) implements Value {
     }
 
-    public record JavaSwitchNode(JavaValue value, List<JavaFunctionSegment> children) implements JavaValue {
+    public record SwitchNode(Value value, List<JavaFunctionSegment> children) implements Value {
     }
 
-    public record JavaDefinition(CommonLang.Definition<JavaType> definition)
-            implements JavaParameter, JavaAssignable, JavaMethodHeader, StructureStatementValue, JavaLambdaParameter {
+    public record Definition(CommonLang.Definition<JavaType> definition)
+            implements JavaParameter, Assignable, JavaMethodHeader, StructureStatementValue, JavaLambdaParameter {
     }
 
     public record JavaMultipleHeader(List<JavaLambdaParameter> parameters) implements JavaLambdaHeader {
@@ -366,8 +365,8 @@ public class JavaLang {
         }
     }
 
-    public static final class Return extends AbstractReturnNode<JavaValue> implements JavaFunctionSegmentValue, JavaFunctionSegment {
-        public Return(JavaValue child) {
+    public static final class Return extends AbstractReturnNode<Value> implements JavaFunctionSegmentValue, JavaFunctionSegment {
+        public Return(Value child) {
             super(child);
         }
     }
@@ -379,5 +378,10 @@ public class JavaLang {
         public Block(BlockHeader header, List<JavaFunctionSegment> segments) {
             super(header, segments);
         }
+    }
+
+    public static record Assignment(
+            Assignable assignable,
+                                     Value value) implements JavaFunctionSegmentValue, StructureStatementValue {
     }
 }

@@ -3,13 +3,13 @@ package magmac.app.lang.node;
 import magmac.app.lang.java.JavaLang;
 
 public class LambdaValueContent {
-    protected final JavaLang.JavaValue value;
+    protected final JavaLang.Value value;
 
-    public LambdaValueContent(JavaLang.JavaValue value) {
+    public LambdaValueContent(JavaLang.Value value) {
         this.value = value;
     }
 
-    public JavaLang.JavaValue value() {
+    public JavaLang.Value value() {
         return value;
     }
 }

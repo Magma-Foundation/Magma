@@ -280,4 +280,14 @@ public final class JavaRules {
         Rule childRule = LocatingRule.First(beforeArrow, "->", new NodeRule("value", children));
         return new TypeRule("case", new StripRule(new PrefixRule("case", childRule)));
     }
+
+    public static Rule createAssignmentRule(Rule definition, Rule value) {
+        Rule before = new NodeRule("destination", new OrRule(Lists.of(
+                definition,
+                value
+        )));
+
+        Rule source = new NodeRule("source", value);
+        return new TypeRule("assignment", LocatingRule.First(before, "=", source));
+    }
 }
