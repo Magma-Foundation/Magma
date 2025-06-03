@@ -195,12 +195,6 @@ AbstractFunctionStatement <|-- FunctionStatement
 Location --> List
 Location --> Joiner
 class Location
-JavaStructureNode --> Option
-JavaStructureNode --> List
-JavaStructureNode --> StructureValue
-class JavaStructureNode
-JavaRootSegment <|-- JavaStructureNode
-JavaStructureMember <|-- JavaStructureNode
 StripRule --> CompileResult
 StripRule --> Node
 class StripRule
@@ -671,7 +665,6 @@ JavaPlantUMLParser --> PlantUMLRootSegment
 JavaPlantUMLParser --> PlantUMLStructure
 JavaPlantUMLParser --> PlantUMLStructureType
 JavaPlantUMLParser --> Segment
-JavaPlantUMLParser --> JavaStructureNode
 JavaPlantUMLParser --> Parser
 JavaPlantUMLParser --> MapUnitSet
 JavaPlantUMLParser --> SimpleUnit
@@ -870,7 +863,6 @@ JavaTypescriptParser --> JavaParameter
 JavaTypescriptParser --> JavaPost
 JavaTypescriptParser --> JavaRootSegment
 JavaTypescriptParser --> JavaStructureMember
-JavaTypescriptParser --> JavaStructureNode
 JavaTypescriptParser --> JavaStructureStatement
 JavaTypescriptParser --> JavaYieldNode
 JavaTypescriptParser --> ConditionalType
@@ -879,9 +871,9 @@ JavaTypescriptParser --> ParameterizedMethodHeader
 JavaTypescriptParser --> Segment
 JavaTypescriptParser --> StructureValue
 JavaTypescriptParser --> TypeArguments
+JavaTypescriptParser --> Caller
 JavaTypescriptParser --> FunctionStatement
 JavaTypescriptParser --> Symbol
-JavaTypescriptParser --> Caller
 JavaTypescriptParser --> TypescriptLang
 JavaTypescriptParser --> Parser
 JavaTypescriptParser --> SimpleUnit

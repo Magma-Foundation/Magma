@@ -88,11 +88,11 @@ export class Conditional {
 export class JavaTemplateType {
 }
 export class JavaStructureNodeDeserializer {
-	deserializeHelper(type : JavaStructureType, deserializer : InitialDestructor) : CompileResult<JavaStructureNode> {return JavaStructureNodeDeserializer.attachOptionals( JavaStructureNodeDeserializer.attachRequired( deserializer)).complete( 0);;}
+	deserializeHelper(type : JavaStructureType, deserializer : InitialDestructor) : CompileResult<StructureNode> {return JavaStructureNodeDeserializer.attachOptionals( JavaStructureNodeDeserializer.attachRequired( deserializer)).complete( 0);;}
 	attachRequired(deserializer : InitialDestructor) : CompoundDestructor<Tuple2<Tuple2<String, List<Modifier>>, List<JavaStructureMember>>> {return deserializer.withString( "name").withNodeList( "modifiers", Modifier.deserialize).withNodeList( "children", StructureMembers.deserialize);;}
 	attachOptionals(attachRequired : CompoundDestructor<Tuple2<Tuple2<String, List<Modifier>>, List<JavaStructureMember>>>) : CompoundDestructor<Tuple2<Tuple2<Tuple2<Tuple2<Tuple2<Tuple2<Tuple2<String, List<Modifier>>, List<JavaStructureMember>>, Option<List<JavaType>>>, Option<List<TypescriptLang.TypeParam>>>, Option<List<JavaParameter>>>, Option<List<JavaType>>>, Option<List<JavaType>>>> {return attachRequired.withNodeListOptionally( "implemented", JavaDeserializers.deserializeType).withNodeListOptionally( "type-parameters", TypescriptLang.TypeParam.deserialize).withNodeListOptionally( "parameters", JavaDeserializers.deserializeParameter).withNodeListOptionally( "extended", JavaDeserializers.deserializeType).withNodeListOptionally( "variants", JavaDeserializers.deserializeType);;}
-	from(type : JavaStructureType, tuple : Tuple2<Tuple2<Tuple2<Tuple2<Tuple2<Tuple2<Tuple2<String, List<Modifier>>, List<JavaStructureMember>>, Option<List<JavaType>>>, Option<List<TypescriptLang.TypeParam>>>, Option<List<JavaParameter>>>, Option<List<JavaType>>>, Option<List<JavaType>>>) : JavaStructureNode {return new JavaStructureNode( type, new StructureValue<JavaType, JavaStructureMember>( tuple.left( ).left( ).left( ).left( ).left( ).left( ).left( ), tuple.left( ).left( ).left( ).left( ).left( ).left( ).right( ), tuple.left( ).left( ).left( ).left( ).left( ).right( ), tuple.left( ).left( ).left( ).right( ), tuple.left( ).right( ), tuple.left( ).left( ).left( ).left( ).right( )), tuple.left( ).left( ).right( ), tuple.right( ));;}
-	deserialize(node : Node) : Option<CompileResult<JavaStructureNode>> {return Destructors.destructWithType( this.type( ).name( ).toLowerCase( ), node).map( 0);;}
+	from(type : JavaStructureType, tuple : Tuple2<Tuple2<Tuple2<Tuple2<Tuple2<Tuple2<Tuple2<String, List<Modifier>>, List<JavaStructureMember>>, Option<List<JavaType>>>, Option<List<TypescriptLang.TypeParam>>>, Option<List<JavaParameter>>>, Option<List<JavaType>>>, Option<List<JavaType>>>) : StructureNode {return new StructureNode( type, new StructureValue<JavaType, JavaStructureMember>( tuple.left( ).left( ).left( ).left( ).left( ).left( ).left( ), tuple.left( ).left( ).left( ).left( ).left( ).left( ).right( ), tuple.left( ).left( ).left( ).left( ).left( ).right( ), tuple.left( ).left( ).left( ).right( ), tuple.left( ).right( ), tuple.left( ).left( ).left( ).left( ).right( )), tuple.left( ).left( ).right( ), tuple.right( ));;}
+	deserialize(node : Node) : Option<CompileResult<StructureNode>> {return Destructors.destructWithType( this.type( ).name( ).toLowerCase( ), node).map( 0);;}
 }
 export class Try {
 }
@@ -149,6 +149,13 @@ export class Block {
 export class Assignment {
 }
 export class InstanceOf {
+}
+export class StructureNode {
+	StructureNode(type : JavaStructureType, structureNode : StructureValue<JavaType, JavaStructureMember>, parameters : Option<List<JavaParameter>>, variants : Option<List<JavaType>>) : public {this.type=type;this.value=structureNode;this.parameters=parameters;this.variants=variants;;}
+	type() : JavaStructureType {return this.type;;}
+	name() : String {return this.value.name( );;}
+	implemented() : Option<List<JavaType>> {return this.value.maybeImplemented( );;}
+	extended() : Option<List<JavaType>> {return this.value.maybeExtended( );;}
 }
 export class JavaLang {
 }

@@ -26,7 +26,6 @@ import { JavaParameter } from "../../../magmac/app/lang/java/JavaParameter";
 import { JavaPost } from "../../../magmac/app/lang/java/JavaPost";
 import { JavaRootSegment } from "../../../magmac/app/lang/java/JavaRootSegment";
 import { JavaStructureMember } from "../../../magmac/app/lang/java/JavaStructureMember";
-import { JavaStructureNode } from "../../../magmac/app/lang/java/JavaStructureNode";
 import { JavaStructureStatement } from "../../../magmac/app/lang/java/JavaStructureStatement";
 import { JavaYieldNode } from "../../../magmac/app/lang/java/JavaYieldNode";
 import { ConditionalType } from "../../../magmac/app/lang/node/ConditionalType";
@@ -35,9 +34,9 @@ import { ParameterizedMethodHeader } from "../../../magmac/app/lang/node/Paramet
 import { Segment } from "../../../magmac/app/lang/node/Segment";
 import { StructureValue } from "../../../magmac/app/lang/node/StructureValue";
 import { TypeArguments } from "../../../magmac/app/lang/node/TypeArguments";
+import { Caller } from "../../../magmac/app/lang/web/Caller";
 import { FunctionStatement } from "../../../magmac/app/lang/web/FunctionStatement";
 import { Symbol } from "../../../magmac/app/lang/web/Symbol";
-import { Caller } from "../../../magmac/app/lang/web/Caller";
 import { TypescriptLang } from "../../../magmac/app/lang/web/TypescriptLang";
 import { Parser } from "../../../magmac/app/stage/parse/Parser";
 import { SimpleUnit } from "../../../magmac/app/stage/unit/SimpleUnit";
@@ -47,10 +46,10 @@ export class JavaTypescriptParser {
 	parseUnit(unit : Unit<JavaLang.JavaRoot>) : CompileResult<Unit<TypescriptLang.TypescriptRoot>> {return unit.destruct( JavaTypescriptParser.parseRoot);;}
 	parseRoot(location : Location, root : JavaLang.JavaRoot) : CompileResult<Unit<TypescriptLang.TypescriptRoot>> {rootSegments : List<TypescriptLang.TypeScriptRootSegment>=root.children( ).iter( ).map( 0).flatMap( List.iter).collect( new ListCollector<>( ));return CompileResults.Ok( new SimpleUnit<>( location, new TypescriptLang.TypescriptRoot( rootSegments)));;}
 	parseRootSegment(location : Location, rootSegment : JavaRootSegment) : List<TypescriptLang.TypeScriptRootSegment> {return 0;;}
-	getCollect(structureNode : JavaStructureNode) : List<TypescriptLang.TypeScriptRootSegment> {return JavaTypescriptParser.parseStructure( structureNode).iter( ).map( JavaTypescriptParser.wrap).collect( new ListCollector<>( ));;}
+	getCollect(structureNode : JavaLang.StructureNode) : List<TypescriptLang.TypeScriptRootSegment> {return JavaTypescriptParser.parseStructure( structureNode).iter( ).map( JavaTypescriptParser.wrap).collect( new ListCollector<>( ));;}
 	wrap(value : TypescriptLang.StructureNode) : TypescriptLang.TypeScriptRootSegment {return value;;}
-	parseStructure(structureNode : JavaStructureNode) : List<TypescriptLang.StructureNode> {return 0;;}
-	parseStructureWithType(type : TypescriptLang.StructureType, structureNode : JavaStructureNode) : List<TypescriptLang.StructureNode> {value : StructureValue<JavaLang.JavaType, JavaStructureMember>=structureNode.value;membersTuple : Tuple2<List<List<TypescriptLang.TypescriptStructureMember>>, List<List<TypescriptLang.StructureNode>>>=value.members( ).iter( ).map( JavaTypescriptParser.parseStructureMember).collect( new TupleCollector<>( new ListCollector<>( ), new ListCollector<>( )));members : List<TypescriptLang.TypescriptStructureMember>=membersTuple.left( ).iter( ).flatMap( List.iter).collect( new ListCollector<>( ));structures : List<TypescriptLang.StructureNode>=membersTuple.right( ).iter( ).flatMap( List.iter).collect( new ListCollector<>( ));structureNode1 : StructureValue<TypescriptLang.Type, TypescriptLang.TypescriptStructureMember>=new StructureValue<>( value.name( ), value.modifiers( ), members, value.maybeTypeParams( ), value.maybeExtended( ).map( JavaTypescriptParser.parseTypeList), value.maybeImplemented( ).map( JavaTypescriptParser.parseTypeList));return structures.addLast( new TypescriptLang.StructureNode( type, structureNode1));;}
+	parseStructure(structureNode : JavaLang.StructureNode) : List<TypescriptLang.StructureNode> {return 0;;}
+	parseStructureWithType(type : TypescriptLang.StructureType, structureNode : JavaLang.StructureNode) : List<TypescriptLang.StructureNode> {value : StructureValue<JavaLang.JavaType, JavaStructureMember>=structureNode.value;membersTuple : Tuple2<List<List<TypescriptLang.TypescriptStructureMember>>, List<List<TypescriptLang.StructureNode>>>=value.members( ).iter( ).map( JavaTypescriptParser.parseStructureMember).collect( new TupleCollector<>( new ListCollector<>( ), new ListCollector<>( )));members : List<TypescriptLang.TypescriptStructureMember>=membersTuple.left( ).iter( ).flatMap( List.iter).collect( new ListCollector<>( ));structures : List<TypescriptLang.StructureNode>=membersTuple.right( ).iter( ).flatMap( List.iter).collect( new ListCollector<>( ));structureNode1 : StructureValue<TypescriptLang.Type, TypescriptLang.TypescriptStructureMember>=new StructureValue<>( value.name( ), value.modifiers( ), members, value.maybeTypeParams( ), value.maybeExtended( ).map( JavaTypescriptParser.parseTypeList), value.maybeImplemented( ).map( JavaTypescriptParser.parseTypeList));return structures.addLast( new TypescriptLang.StructureNode( type, structureNode1));;}
 	parseTypeList(list : List<JavaLang.JavaType>) : List<TypescriptLang.Type> {return list.iter( ).map( JavaTypescriptParser.parseType).collect( new ListCollector<>( ));;}
 	parseStructureMember(structureNode : JavaStructureMember) : Tuple2<List<TypescriptLang.TypescriptStructureMember>, List<TypescriptLang.StructureNode>> {return 0;;}
 	getListListTuple2(typescriptStructureMember : TypescriptLang.TypescriptStructureMember) : Tuple2<List<TypescriptLang.TypescriptStructureMember>, List<TypescriptLang.StructureNode>> {return new Tuple2<>( Lists.of( typescriptStructureMember), Lists.empty( ));;}

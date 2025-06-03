@@ -20,7 +20,6 @@ import { PlantUMLRootSegment } from "../../../magmac/app/lang/node/PlantUMLRootS
 import { PlantUMLStructure } from "../../../magmac/app/lang/node/PlantUMLStructure";
 import { PlantUMLStructureType } from "../../../magmac/app/lang/node/PlantUMLStructureType";
 import { Segment } from "../../../magmac/app/lang/node/Segment";
-import { JavaStructureNode } from "../../../magmac/app/lang/java/JavaStructureNode";
 import { Parser } from "../../../magmac/app/stage/parse/Parser";
 import { MapUnitSet } from "../../../magmac/app/stage/unit/MapUnitSet";
 import { SimpleUnit } from "../../../magmac/app/stage/unit/SimpleUnit";
@@ -30,11 +29,11 @@ export class JavaPlantUMLParser {
 	parseNamespaced(child : String, namespaced : JavaNamespacedNode) : Iter<PlantUMLRootSegment> {return 0;;}
 	createSimpleName(base : JavaLang.Base) : String {return 0;;}
 	createSimpleNameFromQualifiedType(qualifiedType : JavaLang.Qualified) : String {return qualifiedType.segments( ).iter( ).map( Segment.value).collect( new Joiner( ".")).orElse( "");;}
-	createStructureSegment(structureNode : JavaStructureNode) : PlantUMLRootSegment {name : String=structureNode.name( );type : JavaLang.JavaStructureType=structureNode.type( );return 0;;}
+	createStructureSegment(structureNode : JavaLang.StructureNode) : PlantUMLRootSegment {name : String=structureNode.name( );type : JavaLang.JavaStructureType=structureNode.type( );return 0;;}
 	createSimpleNameFromType(type : JavaLang.JavaType) : String {return 0;;}
 	apply(initial : UnitSet<JavaLang.JavaRoot>) : CompileResult<UnitSet<PlantUMLRoot>> {roots : List<PlantUMLRootSegment>=initial.iter( ).flatMap( JavaPlantUMLParser.parseRoot).collect( new ListCollector<>( )).addFirst( new PlantUMLHeader( )).addLast( new PlantUMLFooter( ));defaultLocation : Location=new Location( Lists.empty( ), "diagram");mergedRoot : PlantUMLRoot=new PlantUMLRoot( roots);return CompileResults.Ok( new MapUnitSet<PlantUMLRoot>( ).add( new SimpleUnit<>( defaultLocation, mergedRoot)));;}
 	parseRoot(unit : Unit<JavaLang.JavaRoot>) : Iter<PlantUMLRootSegment> {return unit.destruct( 0);;}
 	parseRootSegment(fileName : String, rootSegment : JavaRootSegment) : Iter<PlantUMLRootSegment> {return 0;;}
-	parseStructure(structureNode : JavaStructureNode) : Iter<PlantUMLRootSegment> {segment : PlantUMLRootSegment=JavaPlantUMLParser.createStructureSegment( structureNode);child : String=structureNode.name( );return Lists.of( segment).addAllLast( JavaPlantUMLParser.toInherits( child, structureNode.extended( ))).addAllLast( JavaPlantUMLParser.toInherits( child, structureNode.implemented( ))).iter( );;}
+	parseStructure(structureNode : JavaLang.StructureNode) : Iter<PlantUMLRootSegment> {segment : PlantUMLRootSegment=JavaPlantUMLParser.createStructureSegment( structureNode);child : String=structureNode.name( );return Lists.of( segment).addAllLast( JavaPlantUMLParser.toInherits( child, structureNode.extended( ))).addAllLast( JavaPlantUMLParser.toInherits( child, structureNode.implemented( ))).iter( );;}
 	toInherits(child : String, maybeOption : Option<List<JavaLang.JavaType>>) : List<PlantUMLRootSegment> {return maybeOption.orElse( Lists.empty( )).iter( ).map( JavaPlantUMLParser.createSimpleNameFromType).<PlantUMLRootSegment>map( 0).collect( new ListCollector<>( ));;}
 }
