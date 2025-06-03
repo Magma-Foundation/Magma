@@ -167,12 +167,12 @@ class JavaTypescriptParser implements Parser<JavaLang.JavaRoot, TypescriptLang.T
 
     private static TypescriptLang.TypescriptFunctionSegment parseFunctionSegment(JavaFunctionSegment segment) {
         return switch (segment) {
+            case JavaLang.JavaWhitespace whitespace -> new TypescriptLang.TypescriptArgument.TypescriptWhitespace();
             case JavaBlock block -> JavaTypescriptParser.parseBlock(block);
             case JavaCaseNode caseNode -> new TypescriptLang.TypescriptArgument.TypescriptWhitespace();
             case JavaReturnNode javaReturnNode -> new TypescriptLang.TypescriptArgument.TypescriptWhitespace();
             case JavaFunctionStatement functionStatement ->
                     JavaTypescriptParser.parseFunctionStatement(functionStatement);
-            case JavaLang.JavaWhitespace whitespace -> new TypescriptLang.TypescriptArgument.TypescriptWhitespace();
         };
     }
 
@@ -217,7 +217,20 @@ class JavaTypescriptParser implements Parser<JavaLang.JavaRoot, TypescriptLang.T
     }
 
     private static TypescriptLang.TypescriptValue parseValue(JavaLang.JavaValue child) {
-        return new TypescriptLang.NumberNode("0");
+        return switch (child) {
+            case JavaLang.JavaAccess javaAccess ->
+                    new TypescriptLang.Access(JavaTypescriptParser.parseValue(javaAccess.receiver()), javaAccess.property());
+            case JavaLang.JavaCharNode javaCharNode -> new TypescriptLang.NumberNode("0");
+            case JavaLang.JavaIndexNode javaIndexNode -> new TypescriptLang.NumberNode("0");
+            case JavaLang.JavaInvokable javaInvokable -> new TypescriptLang.NumberNode("0");
+            case JavaLang.JavaLambda javaLambda -> new TypescriptLang.NumberNode("0");
+            case JavaLang.JavaNot javaNot -> new TypescriptLang.NumberNode("0");
+            case JavaLang.JavaNumberNode javaNumberNode -> new TypescriptLang.NumberNode("0");
+            case JavaLang.JavaOperation javaOperation -> new TypescriptLang.NumberNode("0");
+            case JavaLang.JavaStringNode javaStringNode -> new TypescriptLang.NumberNode("0");
+            case JavaLang.JavaSwitchNode javaSwitchNode -> new TypescriptLang.NumberNode("0");
+            case JavaLang.JavaSymbol javaSymbol -> new TypescriptLang.NumberNode("0");
+        };
     }
 
     private static TypescriptLang.TypescriptBlock parseBlock(JavaBlock block) {

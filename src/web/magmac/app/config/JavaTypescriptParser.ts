@@ -38,14 +38,10 @@ import { ParameterizedMethodHeader } from "../../../magmac/app/lang/node/Paramet
 import { Segment } from "../../../magmac/app/lang/node/Segment";
 import { StructureValue } from "../../../magmac/app/lang/node/StructureValue";
 import { TypeArguments } from "../../../magmac/app/lang/node/TypeArguments";
-import { TypescriptBreak } from "../../../magmac/app/lang/web/TypescriptBreak";
 import { TypescriptCaller } from "../../../magmac/app/lang/web/TypescriptCaller";
-import { TypescriptContinue } from "../../../magmac/app/lang/web/TypescriptContinue";
 import { TypescriptFunctionSegmentValue } from "../../../magmac/app/lang/web/TypescriptFunctionSegmentValue";
 import { TypescriptFunctionStatement } from "../../../magmac/app/lang/web/TypescriptFunctionStatement";
-import { TypescriptInvokable } from "../../../magmac/app/lang/web/TypescriptInvokable";
 import { TypescriptLang } from "../../../magmac/app/lang/web/TypescriptLang";
-import { TypescriptReturnNode } from "../../../magmac/app/lang/web/TypescriptReturnNode";
 import { TypescriptSymbol } from "../../../magmac/app/lang/web/TypescriptSymbol";
 import { Parser } from "../../../magmac/app/stage/parse/Parser";
 import { SimpleUnit } from "../../../magmac/app/stage/unit/SimpleUnit";
@@ -71,7 +67,7 @@ export class JavaTypescriptParser {
 	parseCaller(caller : JavaLang.JavaCaller) : TypescriptCaller {;;;}
 	parseArguments(arguments : List<JavaLang.JavaArgument>) : List<TypescriptLang.TypescriptArgument> {return 0;;}
 	parseArgument(argument : JavaLang.JavaArgument) : TypescriptLang.TypescriptArgument {;;;}
-	parseValue(child : JavaLang.JavaValue) : TypescriptLang.TypescriptValue {return 0;;}
+	parseValue(child : JavaLang.JavaValue) : TypescriptLang.TypescriptValue {;;;}
 	parseBlock(block : JavaBlock) : TypescriptLang.TypescriptBlock {return 0;;}
 	parseHeader(header : JavaLang.JavaBlockHeader) : TypescriptLang.TypescriptBlockHeader {return 0;;}
 	parseParameter(parameter : JavaParameter) : TypescriptLang.TypeScriptParameter {;;;}

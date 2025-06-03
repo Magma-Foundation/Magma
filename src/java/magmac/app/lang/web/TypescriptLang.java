@@ -276,14 +276,13 @@ public final class TypescriptLang {
         }
     }
 
-    public static TypeRule createArrayRule(LazyRule orRule) {
-        return new TypeRule("array", new SuffixRule(new NodeRule("child", orRule), "[]"));
-    }
-
-    public enum TypescriptStructureType {
-        Class,
-        Enum,
-        Interface
+    public record Access(TypescriptValue receiver, String property) implements TypescriptValue {
+        @Override
+        public Node serialize() {
+            return new MapNode("data-access")
+                    .withNodeSerialized("receiver", this.receiver)
+                    .withString("property", this.property);
+        }
     }
 
     public static final class TypescriptBreak implements TypescriptFunctionSegmentValue {
@@ -322,5 +321,15 @@ public final class TypescriptLang {
                     .withNodeSerialized("caller", this.caller)
                     .withNodeListSerialized("arguments", this.arguments);
         }
+    }
+
+    public static TypeRule createArrayRule(LazyRule orRule) {
+        return new TypeRule("array", new SuffixRule(new NodeRule("child", orRule), "[]"));
+    }
+
+    public enum TypescriptStructureType {
+        Class,
+        Enum,
+        Interface
     }
 }

@@ -18,12 +18,14 @@ import { Destructors } from "../../../../magmac/app/lang/Destructors";
 import { JavaRules } from "../../../../magmac/app/lang/JavaRules";
 import { LazyRule } from "../../../../magmac/app/lang/LazyRule";
 import { Serializable } from "../../../../magmac/app/lang/Serializable";
+import { Invokable } from "../../../../magmac/app/lang/java/Invokable";
 import { JavaLang } from "../../../../magmac/app/lang/java/JavaLang";
 import { Block } from "../../../../magmac/app/lang/node/Block";
 import { Conditional } from "../../../../magmac/app/lang/node/Conditional";
 import { ConditionalType } from "../../../../magmac/app/lang/node/ConditionalType";
 import { ParameterizedMethodHeader } from "../../../../magmac/app/lang/node/ParameterizedMethodHeader";
 import { PostVariant } from "../../../../magmac/app/lang/node/PostVariant";
+import { ReturnNode } from "../../../../magmac/app/lang/node/ReturnNode";
 import { Segment } from "../../../../magmac/app/lang/node/Segment";
 import { StructureValue } from "../../../../magmac/app/lang/node/StructureValue";
 import { TypeArguments } from "../../../../magmac/app/lang/node/TypeArguments";
@@ -105,6 +107,23 @@ export class Construction {
 	serialize() : Node {return 0;;}
 }
 export class Post {
+	serialize() : Node {return 0;;}
+}
+export class Access {
+	serialize() : Node {return 0;;}
+}
+export class TypescriptBreak {
+	serialize() : Node {return 0;;}
+}
+export class TypescriptContinue {
+	serialize() : Node {return 0;;}
+}
+export class TypescriptReturnNode {
+	TypescriptReturnNode(child : TypescriptValue) : public {0( 0);;}
+	serialize() : Node {return 0;;}
+}
+export class TypescriptInvokable {
+	TypescriptInvokable(caller : TypescriptCaller, arguments : List<TypescriptArgument>) : public {0( 0, 0);;}
 	serialize() : Node {return 0;;}
 }
 export class TypescriptLang {

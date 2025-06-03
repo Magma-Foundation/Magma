@@ -98,12 +98,14 @@ TypescriptLang --> Destructors
 TypescriptLang --> JavaRules
 TypescriptLang --> LazyRule
 TypescriptLang --> Serializable
+TypescriptLang --> Invokable
 TypescriptLang --> JavaLang
 TypescriptLang --> Block
 TypescriptLang --> Conditional
 TypescriptLang --> ConditionalType
 TypescriptLang --> ParameterizedMethodHeader
 TypescriptLang --> PostVariant
+TypescriptLang --> ReturnNode
 TypescriptLang --> Segment
 TypescriptLang --> StructureValue
 TypescriptLang --> TypeArguments
@@ -203,14 +205,6 @@ CompileApplication --> JavaLang
 CompileApplication --> UnitSet
 class CompileApplication
 Application <|-- CompileApplication
-TypescriptInvokable --> List
-TypescriptInvokable --> MapNode
-TypescriptInvokable --> Node
-TypescriptInvokable --> Invokable
-class TypescriptInvokable
-Invokable <|-- TypescriptInvokable
-? <|-- TypescriptInvokable
-TypescriptFunctionSegmentValue <|-- TypescriptInvokable
 Lambda --> JavaLang
 class Lambda
 Block --> List
@@ -274,10 +268,6 @@ CompileErrors --> StringContext
 CompileErrors --> Node
 CompileErrors --> ImmutableCompileError
 class CompileErrors
-TypescriptContinue --> MapNode
-TypescriptContinue --> Node
-class TypescriptContinue
-TypescriptFunctionSegmentValue <|-- TypescriptContinue
 Parser --> UnitSet
 Parser --> Stage
 interface Parser
@@ -572,13 +562,6 @@ InitialDestructor --> Function
 InitialDestructor --> Supplier
 interface InitialDestructor
 interface CaseValue
-TypescriptReturnNode --> MapNode
-TypescriptReturnNode --> Node
-TypescriptReturnNode --> ReturnNode
-class TypescriptReturnNode
-ReturnNode <|-- TypescriptReturnNode
-? <|-- TypescriptReturnNode
-? <|-- TypescriptReturnNode
 TypeRule --> Lists
 TypeRule --> CompileResult
 TypeRule --> CompileResults
@@ -981,14 +964,10 @@ JavaTypescriptParser --> ParameterizedMethodHeader
 JavaTypescriptParser --> Segment
 JavaTypescriptParser --> StructureValue
 JavaTypescriptParser --> TypeArguments
-JavaTypescriptParser --> TypescriptBreak
 JavaTypescriptParser --> TypescriptCaller
-JavaTypescriptParser --> TypescriptContinue
 JavaTypescriptParser --> TypescriptFunctionSegmentValue
 JavaTypescriptParser --> TypescriptFunctionStatement
-JavaTypescriptParser --> TypescriptInvokable
 JavaTypescriptParser --> TypescriptLang
-JavaTypescriptParser --> TypescriptReturnNode
 JavaTypescriptParser --> TypescriptSymbol
 JavaTypescriptParser --> Parser
 JavaTypescriptParser --> SimpleUnit
@@ -1476,10 +1455,6 @@ FirstLocator --> Option
 FirstLocator --> Some
 class FirstLocator
 Locator <|-- FirstLocator
-TypescriptBreak --> MapNode
-TypescriptBreak --> Node
-class TypescriptBreak
-TypescriptFunctionSegmentValue <|-- TypescriptBreak
 Node --> Option
 Node --> Tuple2
 Node --> List

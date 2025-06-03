@@ -7,6 +7,6 @@ export class ParseUnitImpl<T> {
 	toLocationUnit() : Unit<T> {return 0;;}
 	merge(merge : BiFunction<ParseState, T, R>) : R {return 0;;}
 	retainWithList() : ParseUnit<NodeList> {return 0;;}
-	left() : ParseState {return 0;;}
-	right() : T {return 0;;}
+	left() : ParseState {return 0.state;;}
+	right() : T {return 0.node;;}
 }

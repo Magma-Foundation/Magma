@@ -1,4 +1,4 @@
 export class FunctionStatement<V> {
 	FunctionStatement(child : V) : public {break;;}
-	child() : V {return 0;;}
+	child() : V {return 0.child;;}
 }

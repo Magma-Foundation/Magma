@@ -30,7 +30,7 @@ export class MapNode {
 	format(depth : int) : String {break;break;break;break;break;return 0;;}
 	withString(key : String, value : String) : Node {break;return 0;;}
 	findString(key : String) : Option<String> {if(true){ return 0;;}if(true){ return 0;;};}
-	strings() : Map<String, String> {return 0;;}
+	strings() : Map<String, String> {return 0.strings;;}
 	is(type : String) : boolean {return 0;;}
 	retype(type : String) : Node {return 0;;}
 	withNode(key : String, value : Node) : Node {break;return 0;;}
