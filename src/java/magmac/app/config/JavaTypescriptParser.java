@@ -1,5 +1,6 @@
 package magmac.app.config;
 
+import magmac.api.Option;
 import magmac.api.Tuple2;
 import magmac.api.collect.TupleCollector;
 import magmac.api.collect.list.List;
@@ -11,7 +12,7 @@ import magmac.app.compile.error.CompileResultCollector;
 import magmac.app.compile.error.CompileResults;
 import magmac.app.io.Location;
 import magmac.app.io.sources.UnitSetCollector;
-import magmac.app.lang.CommonLang;
+import magmac.app.lang.common.Annotation;
 import magmac.app.lang.java.JavaBreak;
 import magmac.app.lang.java.JavaConstruction;
 import magmac.app.lang.java.JavaConstructor;
@@ -31,10 +32,12 @@ import magmac.app.lang.java.JavaStructureNode;
 import magmac.app.lang.java.JavaStructureStatement;
 import magmac.app.lang.java.JavaYieldNode;
 import magmac.app.lang.node.ConditionalType;
+import magmac.app.lang.node.Modifier;
 import magmac.app.lang.node.ParameterizedMethodHeader;
 import magmac.app.lang.node.Segment;
 import magmac.app.lang.node.StructureValue;
 import magmac.app.lang.node.TypeArguments;
+import magmac.app.lang.web.FunctionStatement;
 import magmac.app.lang.web.Symbol;
 import magmac.app.lang.web.TypescriptCaller;
 import magmac.app.lang.web.TypescriptLang;
@@ -104,7 +107,7 @@ class JavaTypescriptParser implements Parser<JavaLang.JavaRoot, TypescriptLang.T
                 .flatMap(List::iter)
                 .collect(new ListCollector<>());
 
-        StructureValue<TypescriptLang.TypeScriptType, TypescriptLang.TypescriptStructureMember> structureNode1 = new StructureValue<>(
+        StructureValue<TypescriptLang.Type, TypescriptLang.TypescriptStructureMember> structureNode1 = new StructureValue<>(
                 value.name(),
                 value.modifiers(),
                 members,
@@ -116,7 +119,7 @@ class JavaTypescriptParser implements Parser<JavaLang.JavaRoot, TypescriptLang.T
         return structures.addLast(new TypescriptLang.TypescriptStructureNode(type, structureNode1));
     }
 
-    private static List<TypescriptLang.TypeScriptType> parseTypeList(List<JavaLang.JavaType> list) {
+    private static List<TypescriptLang.Type> parseTypeList(List<JavaLang.JavaType> list) {
         return list.iter().map(JavaTypescriptParser::parseType).collect(new ListCollector<>());
     }
 
@@ -169,7 +172,7 @@ class JavaTypescriptParser implements Parser<JavaLang.JavaRoot, TypescriptLang.T
     }
 
     private static TypescriptLang.FunctionSegment parseFunctionStatement(JavaLang.FunctionStatement functionStatement) {
-        return new magmac.app.lang.web.FunctionStatement(JavaTypescriptParser.parseFunctionStatementValue(functionStatement.child()));
+        return new FunctionStatement(JavaTypescriptParser.parseFunctionStatementValue(functionStatement.child()));
     }
 
     private static TypescriptLang.FunctionSegment.Value parseFunctionStatementValue(JavaFunctionSegmentValue child) {
@@ -181,7 +184,15 @@ class JavaTypescriptParser implements Parser<JavaLang.JavaRoot, TypescriptLang.T
                     new TypescriptLang.Post(javaPost.variant(), JavaTypescriptParser.parseValue(javaPost.value()));
             case JavaLang.Return aReturn -> new TypescriptLang.Return(JavaTypescriptParser.parseValue(aReturn.child()));
             case JavaLang.Invokable invokable -> JavaTypescriptParser.parseInvokable(invokable);
-            case JavaLang.Assignment assignment -> new TypescriptLang.Break();
+            case JavaLang.Assignment assignment ->
+                    new TypescriptLang.Assignment(JavaTypescriptParser.parseAssignable(assignment.assignable()), JavaTypescriptParser.parseValue(assignment.value()));
+        };
+    }
+
+    private static TypescriptLang.Assignable parseAssignable(JavaLang.Assignable assignable) {
+        return switch (assignable) {
+            case JavaLang.Definition definition -> JavaTypescriptParser.parseDefinition(definition);
+            case JavaLang.Value value -> null;
         };
     }
 
@@ -260,21 +271,21 @@ class JavaTypescriptParser implements Parser<JavaLang.JavaRoot, TypescriptLang.T
         };
     }
 
-    private static TypescriptLang.TypeScriptDefinition parseDefinition(JavaLang.Definition javaDefinition) {
-        CommonLang.Definition<JavaLang.JavaType> definition = javaDefinition.definition();
-        return switch (definition.type()) {
-            case JavaLang.JavaArrayType javaArrayType ->
-                    new TypescriptLang.TypeScriptDefinition(definition.withType(JavaTypescriptParser.parseArrayType(javaArrayType)));
-            case JavaLang.JavaTemplateType javaTemplateType ->
-                    new TypescriptLang.TypeScriptDefinition(definition.withType(JavaTypescriptParser.parseTemplateType(javaTemplateType)));
-            case JavaLang.JavaVariadicType variadicType -> new TypescriptLang.TypeScriptDefinition(definition
-                    .withName("..." + definition.name())
-                    .withType(new TypescriptLang.TypescriptArrayType(JavaTypescriptParser.parseType(variadicType.child()))));
-            case JavaLang.JavaQualified qualified ->
-                    new TypescriptLang.TypeScriptDefinition(definition.withType(JavaTypescriptParser.parseQualifiedType(qualified)));
-            case JavaLang.Symbol symbol ->
-                    new TypescriptLang.TypeScriptDefinition(definition.withType(JavaTypescriptParser.parseSymbol(symbol)));
-        };
+    private static TypescriptLang.Definition parseDefinition(JavaLang.Definition definition) {
+        Option<List<Annotation>> maybeAnnotations = definition.maybeAnnotations();
+        List<Modifier> maybeModifiers = definition.modifiers();
+        Option<List<TypescriptLang.TypeParam>> maybeTypeParameters = definition.maybeTypeParams();
+        JavaLang.JavaType type = definition.type();
+        String oldName = definition.name();
+
+        if (type instanceof JavaLang.JavaVariadicType(JavaLang.JavaType child)) {
+            TypescriptLang.ArrayType newType = new TypescriptLang.ArrayType(JavaTypescriptParser.parseType(child));
+            String name = "..." + oldName;
+            return new TypescriptLang.Definition(maybeAnnotations, maybeModifiers, name, maybeTypeParameters, newType);
+        }
+        else {
+            return new TypescriptLang.Definition(maybeAnnotations, maybeModifiers, oldName, maybeTypeParameters, JavaTypescriptParser.parseType(definition.type()));
+        }
     }
 
     private static Symbol parseSymbol(JavaLang.Symbol symbol) {
@@ -291,11 +302,11 @@ class JavaTypescriptParser implements Parser<JavaLang.JavaRoot, TypescriptLang.T
         return new Symbol(joined);
     }
 
-    private static TypescriptLang.TypeScriptType parseArrayType(JavaLang.JavaArrayType type) {
-        return new TypescriptLang.TypescriptArrayType(JavaTypescriptParser.parseType(type.inner));
+    private static TypescriptLang.Type parseArrayType(JavaLang.JavaArrayType type) {
+        return new TypescriptLang.ArrayType(JavaTypescriptParser.parseType(type.inner));
     }
 
-    private static TypescriptLang.TypeScriptType parseType(JavaLang.JavaType variadicType) {
+    private static TypescriptLang.Type parseType(JavaLang.JavaType variadicType) {
         return switch (variadicType) {
             case JavaLang.Symbol symbol -> JavaTypescriptParser.parseSymbol(symbol);
             case JavaLang.JavaArrayType type -> JavaTypescriptParser.parseArrayType(type);
@@ -305,10 +316,10 @@ class JavaTypescriptParser implements Parser<JavaLang.JavaRoot, TypescriptLang.T
         };
     }
 
-    private static TypescriptLang.TypeScriptTemplateType parseTemplateType(JavaLang.JavaTemplateType type) {
+    private static TypescriptLang.TemplateType parseTemplateType(JavaLang.JavaTemplateType type) {
         JavaLang.Symbol base = JavaTypescriptParser.parseBaseType(type.base);
-        List<TypescriptLang.TypeScriptType> collect = JavaTypescriptParser.parseTypeList(type.typeArguments.arguments());
-        return new TypescriptLang.TypeScriptTemplateType(base, new TypeArguments<>(collect));
+        List<TypescriptLang.Type> collect = JavaTypescriptParser.parseTypeList(type.typeArguments.arguments());
+        return new TypescriptLang.TemplateType(base, new TypeArguments<>(collect));
     }
 
     private static JavaLang.Symbol parseBaseType(JavaLang.JavaBase base) {

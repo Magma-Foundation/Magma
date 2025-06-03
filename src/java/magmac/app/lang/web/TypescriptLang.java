@@ -8,10 +8,12 @@ import magmac.app.compile.node.Node;
 import magmac.app.lang.CommonLang;
 import magmac.app.lang.Destructors;
 import magmac.app.lang.Serializable;
+import magmac.app.lang.common.Annotation;
 import magmac.app.lang.java.JavaLang;
 import magmac.app.lang.node.AbstractReturnNode;
 import magmac.app.lang.node.Conditional;
 import magmac.app.lang.node.ConditionalType;
+import magmac.app.lang.node.Modifier;
 import magmac.app.lang.node.Operator;
 import magmac.app.lang.node.ParameterizedMethodHeader;
 import magmac.app.lang.node.PostVariant;
@@ -35,7 +37,7 @@ public final class TypescriptLang {
     public interface TypeScriptMethodHeader extends Serializable {
     }
 
-    public interface TypeScriptType extends Serializable {
+    public interface Type extends Serializable {
     }
 
     public interface TypeScriptRootSegment extends Serializable {
@@ -49,6 +51,9 @@ public final class TypescriptLang {
     public interface Value extends TypescriptCaller, Argument {
     }
 
+    public interface Assignable extends Serializable {
+    }
+
     public record Number(String value) implements Value {
         @Override
         public Node serialize() {
@@ -58,9 +63,9 @@ public final class TypescriptLang {
 
     public static final class TypescriptStructureNode implements TypeScriptRootSegment {
         private final TypescriptStructureType type;
-        private final StructureValue<TypeScriptType, TypescriptStructureMember> value;
+        private final StructureValue<Type, TypescriptStructureMember> value;
 
-        public TypescriptStructureNode(TypescriptStructureType type, StructureValue<TypeScriptType, TypescriptStructureMember> structureNode) {
+        public TypescriptStructureNode(TypescriptStructureType type, StructureValue<Type, TypescriptStructureMember> structureNode) {
             this.type = type;
             this.value = structureNode;
         }
@@ -125,11 +130,11 @@ public final class TypescriptLang {
         }
     }
 
-    public static final class TypeScriptTemplateType implements TypeScriptType {
+    public static final class TemplateType implements Type {
         private final JavaLang.Symbol base;
-        private final TypeArguments<TypeScriptType> typeArguments;
+        private final TypeArguments<Type> typeArguments;
 
-        public TypeScriptTemplateType(JavaLang.Symbol base, TypeArguments<TypeScriptType> typeArguments) {
+        public TemplateType(JavaLang.Symbol base, TypeArguments<Type> typeArguments) {
             this.base = base;
             this.typeArguments = typeArguments;
         }
@@ -174,25 +179,23 @@ public final class TypescriptLang {
         }
     }
 
-    public static final class TypeScriptDefinition implements TypeScriptParameter, JavaLang.Assignable, TypeScriptMethodHeader {
-        private final CommonLang.Definition<TypeScriptType> definition;
-
-        public TypeScriptDefinition(CommonLang.Definition<TypeScriptType> definition) {
-            this.definition = definition;
+    public static final class Definition extends CommonLang.Definition<Type> implements TypeScriptParameter, Assignable, TypeScriptMethodHeader {
+        public Definition(Option<List<Annotation>> maybeAnnotations, List<Modifier> modifiers, String name, Option<List<TypeParam>> maybeTypeParams, Type type) {
+            super(maybeAnnotations, modifiers, name, maybeTypeParams, type);
         }
 
         @Override
         public Node serialize() {
             return new MapNode("definition")
-                    .withString("name", this.definition.name())
-                    .withNodeSerialized("type", this.definition.type());
+                    .withString("name", this.name)
+                    .withNodeSerialized("type", this.type);
         }
     }
 
-    public static final class TypescriptArrayType implements TypeScriptType {
-        private final TypeScriptType childType;
+    public static final class ArrayType implements Type {
+        private final Type childType;
 
-        public TypescriptArrayType(TypeScriptType arrayType) {
+        public ArrayType(Type arrayType) {
             this.childType = arrayType;
         }
 
@@ -215,7 +218,7 @@ public final class TypescriptLang {
         }
     }
 
-    public record Construction(TypeScriptType type) implements TypescriptCaller {
+    public record Construction(Type type) implements TypescriptCaller {
         @Override
         public Node serialize() {
             return new MapNode("construction").withNodeSerialized("type", this.type);
@@ -333,6 +336,15 @@ public final class TypescriptLang {
         @Override
         public Node serialize() {
             return new MapNode("whitespace");
+        }
+    }
+
+    public record Assignment(Assignable assignable, Value value) implements FunctionSegment.Value {
+        @Override
+        public Node serialize() {
+            return new MapNode("assignment")
+                    .withNodeSerialized("assignable", this.assignable)
+                    .withNodeSerialized("value", this.value);
         }
     }
 

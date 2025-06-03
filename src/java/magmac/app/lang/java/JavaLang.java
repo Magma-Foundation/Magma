@@ -26,6 +26,7 @@ import magmac.app.lang.LazyRule;
 import magmac.app.lang.MutableLazyRule;
 import magmac.app.lang.Serializable;
 import magmac.app.lang.common.AbstractFunctionStatement;
+import magmac.app.lang.common.Annotation;
 import magmac.app.lang.node.AbstractReturnNode;
 import magmac.app.lang.node.CaseDefinition;
 import magmac.app.lang.node.CaseValue;
@@ -52,10 +53,10 @@ public class JavaLang {
     public sealed interface JavaCaller permits JavaConstruction, Value {
     }
 
-    public sealed interface Value extends JavaCaller, JavaArgument, Assignable permits Access, Char, Index, Invokable, Lambda, Not, Number, operation, StringValue, SwitchNode, Symbol {
+    public sealed interface Assignable {
     }
 
-    public interface Assignable {
+    public sealed interface Value extends JavaCaller, JavaArgument, Assignable permits Access, Char, Index, Invokable, Lambda, Not, Number, operation, StringValue, SwitchNode, Symbol {
     }
 
     public sealed interface BlockHeader permits Catch, Conditional, Else, Try {
@@ -322,33 +323,14 @@ public class JavaLang {
     public record SwitchNode(Value value, List<JavaFunctionSegment> children) implements Value {
     }
 
-    public record Definition(CommonLang.Definition<JavaType> definition)
+    public static final class Definition extends CommonLang.Definition<JavaType>
             implements JavaParameter, Assignable, JavaMethodHeader, StructureStatementValue, JavaLambdaParameter {
+        public Definition(Option<List<Annotation>> maybeAnnotations, List<Modifier> modifiers, String name, Option<List<TypescriptLang.TypeParam>> maybeTypeParams, JavaType type) {
+            super(maybeAnnotations, modifiers, name, maybeTypeParams, type);
+        }
     }
 
     public record JavaMultipleHeader(List<JavaLambdaParameter> parameters) implements JavaLambdaHeader {
-    }
-
-    public enum JavaAccessType {
-        Data("data-access"),
-        Method("method-access");
-
-        private final String value;
-
-        JavaAccessType(String value) {
-            this.value = value;
-        }
-
-        public String type() {
-            return this.value;
-        }
-    }
-
-    public enum JavaStructureType {
-        Class,
-        Record,
-        Enum,
-        Interface
     }
 
     public static final class Whitespace implements
@@ -371,7 +353,7 @@ public class JavaLang {
         }
     }
 
-    public static record Case(List<CaseDefinition> definitions, CaseValue value) implements JavaFunctionSegment {
+    public record Case(List<CaseDefinition> definitions, CaseValue value) implements JavaFunctionSegment {
     }
 
     public static final class Block extends magmac.app.lang.node.Block<BlockHeader, JavaFunctionSegment> implements JavaFunctionSegment {
@@ -380,8 +362,30 @@ public class JavaLang {
         }
     }
 
-    public static record Assignment(
+    public record Assignment(
             Assignable assignable,
-                                     Value value) implements JavaFunctionSegmentValue, StructureStatementValue {
+            Value value) implements JavaFunctionSegmentValue, StructureStatementValue {
+    }
+
+    public enum JavaAccessType {
+        Data("data-access"),
+        Method("method-access");
+
+        private final String value;
+
+        JavaAccessType(String value) {
+            this.value = value;
+        }
+
+        public String type() {
+            return this.value;
+        }
+    }
+
+    public enum JavaStructureType {
+        Class,
+        Record,
+        Enum,
+        Interface
     }
 }

@@ -9,7 +9,6 @@ import magmac.app.compile.error.CompileResult;
 import magmac.app.compile.error.CompileResults;
 import magmac.app.compile.node.InitialDestructor;
 import magmac.app.compile.node.Node;
-import magmac.app.lang.CommonLang;
 import magmac.app.lang.Deserializers;
 import magmac.app.lang.Destructors;
 import magmac.app.lang.common.Annotation;
@@ -92,16 +91,16 @@ public final class JavaDeserializers {
         return node1 -> JavaDeserializers.deserializeAccess(type, node1);
     }
 
-    public static Option<CompileResult<JavaLang.FunctionStatement>> deserializeFunctionStatement(Node node) {
+    public static Option<CompileResult<FunctionStatement>> deserializeFunctionStatement(Node node) {
         return Destructors.destructWithType("statement", node)
                 .map(deserializer -> deserializer.withNode("child", FunctionSegmentValues::deserialize)
-                        .complete(JavaLang.FunctionStatement::new)
+                        .complete(FunctionStatement::new)
                         .mapValue(value -> value));
     }
 
-    public static Option<CompileResult<JavaLang.Return>> deserializeReturn(Node node) {
+    public static Option<CompileResult<Return>> deserializeReturn(Node node) {
         return Destructors.destructWithType("return", node)
-                .map(deserializer -> deserializer.withNode("child", JavaDeserializers::deserializeJavaOrError).complete(JavaLang.Return::new));
+                .map(deserializer -> deserializer.withNode("child", JavaDeserializers::deserializeJavaOrError).complete(Return::new));
     }
 
     public static CompileResult<BlockHeader> deserializeBlockHeader(Node node) {
@@ -239,12 +238,11 @@ public final class JavaDeserializers {
     }
 
     public static CompileResult<Definition> deserializeDefinition(Node node) {
-        return deserialize0(Destructors.destruct(node)).mapValue(Definition::new);
+        return JavaDeserializers.deserialize0(Destructors.destruct(node));
     }
 
     public static Option<CompileResult<Definition>> deserializeTypedDefinition(Node node) {
-        return Destructors.destructWithType("definition", node)
-                .map(JavaDeserializers::deserialize0).map(value -> value.mapValue(Definition::new));
+        return Destructors.destructWithType("definition", node).map(JavaDeserializers::deserialize0);
     }
 
     public static Option<CompileResult<JavaLambdaHeader>> deserializeMultipleHeader(Node node) {
@@ -253,13 +251,13 @@ public final class JavaDeserializers {
         });
     }
 
-    public static CompileResult<CommonLang.Definition<JavaType>> deserialize0(InitialDestructor deserialize) {
+    public static CompileResult<Definition> deserialize0(InitialDestructor deserialize) {
         return deserialize.withString("name")
                 .withNode("type", JavaTypes::deserialize)
                 .withNodeList("modifiers", Modifier::deserialize)
                 .withNodeListOptionally("annotations", Annotation::deserialize)
                 .withNodeListOptionally("type-parameters", TypescriptLang.TypeParam::deserialize)
-                .complete((result) -> new CommonLang.Definition<JavaType>(result.left().right(), result.left().left().right(), result.left().left().left().left(), result.right(), result.left().left().left().right()));
+                .complete((result) -> new Definition(result.left().right(), result.left().left().right(), result.left().left().left().left(), result.right(), result.left().left().left().right()));
     }
 
     public static Option<CompileResult<Case>> deserializeCase(Node node) {
