@@ -2,6 +2,12 @@
 
 This project contains an experimental compiler written in Java. The compiler parses a Java inspired language and can produce different targets such as TypeScript sources or PlantUML class diagrams.
 
+The compiler is designed to be bootstrapped. Initially the Java implementation
+generates TypeScript so that the compiler can run in a JavaScript environment.
+Once stable, the Java front end will be replaced with a parser for the Magma
+language itself. After the compiler is self-hosting in Magma, additional back
+ends will be added starting with C output via Clang and eventually LLVM.
+
 ## Getting Started
 
 The sources are located in `src/java`. A modern JDK (17 or newer) is required to build the project. A simple way to compile everything into the `out` directory is:
