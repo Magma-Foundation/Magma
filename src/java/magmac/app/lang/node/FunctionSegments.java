@@ -30,7 +30,7 @@ public final class FunctionSegments {
 
         Rule rule = new OrRule(Lists.of(
                 new TypeRule("whitespace", new StripRule(new ExactRule(";"))),
-                JavaRules.createWhitespaceRule(),
+                JavaRules.createTypedWhitespaceRule(),
                 JavaRules.createStatementRule(functionSegmentValueRule),
                 JavaRules.createBlockRule(functionSegmentRule, value, definition),
                 JavaRules.createReturnRule(value),

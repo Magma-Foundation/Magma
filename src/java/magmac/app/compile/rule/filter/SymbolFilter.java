@@ -8,6 +8,10 @@ public class SymbolFilter implements Filter {
     @Override
     public boolean test(String input) {
         var length = input.length();
+        if (0 == length) {
+            return false;
+        }
+
         var i = 0;
         while (i < length) {
             var c = input.charAt(i);

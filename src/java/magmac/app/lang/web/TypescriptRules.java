@@ -26,7 +26,7 @@ import magmac.app.lang.node.Modifier;
 public final class TypescriptRules {
     public static Rule createRule() {
         return new TypeRule("root", CommonLang.Statements("children", new OrRule(Lists.of(
-                JavaRules.createWhitespaceRule(),
+                JavaRules.createTypedWhitespaceRule(),
                 TypescriptRules.createImportRule(),
                 TypescriptRules.createStructureRule("class"),
                 TypescriptRules.createStructureRule("interface")
@@ -37,7 +37,7 @@ public final class TypescriptRules {
         var definitionRule = TypescriptRules.createDefinitionRule();
         LazyRule valueLazy = new MutableLazyRule();
         return new OrRule(Lists.of(
-                JavaRules.createWhitespaceRule(),
+                JavaRules.createTypedWhitespaceRule(),
                 TypescriptRules.createMethodRule(definitionRule, valueLazy),
                 JavaStructureStatement.createStructureStatementRule(definitionRule, valueLazy)
         ));

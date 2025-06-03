@@ -38,7 +38,7 @@ public final class StructureMembers {
         var value = JavaRules.initValueRule(functionSegmentRule, valueLazy, "->", JavaRules.createDefinitionRule());
         var functionSegment = FunctionSegments.initFunctionSegmentRule(functionSegmentRule, value, JavaRules.createDefinitionRule());
         return classMemberRule.set(new OrRule(Lists.of(
-                JavaRules.createWhitespaceRule(),
+                JavaRules.createTypedWhitespaceRule(),
                 JavaStructureStatement.createStructureStatementRule(new TypeRule("definition", JavaRules.createDefinitionRule()), value),
                 JavaMethod.createMethodRule(functionSegment),
                 JavaEnumValues.createEnumValuesRule(value),

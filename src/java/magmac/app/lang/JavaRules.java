@@ -49,7 +49,7 @@ public final class JavaRules {
     private static Rule createRootSegmentRule() {
         var classMemberRule = StructureMembers.createClassMemberRule();
         return new OrRule(Lists.of(
-                JavaRules.createWhitespaceRule(),
+                JavaRules.createTypedWhitespaceRule(),
                 JavaNamespacedNode.createNamespacedRule("package"),
                 JavaNamespacedNode.createNamespacedRule("import"),
                 JavaRules.createStructureRule("record", classMemberRule),
@@ -169,8 +169,12 @@ public final class JavaRules {
         return new TypeRule("return", new StripRule(new PrefixRule("return ", new NodeRule("child", value))));
     }
 
-    public static Rule createWhitespaceRule() {
-        return new TypeRule("whitespace", new StripRule(new ExactRule("")));
+    public static Rule createTypedWhitespaceRule() {
+        return new TypeRule("whitespace", JavaRules.createWhitespaceRule());
+    }
+
+    private static StripRule createWhitespaceRule() {
+        return new StripRule(new ExactRule(""));
     }
 
     private static Rule createStringRule() {
@@ -323,19 +327,25 @@ public final class JavaRules {
         Rule base = new NodeRule("base", JavaRules.createBaseRule());
 
         var arguments = NodeListRule.Values("arguments", type);
-        return new TypeRule("template", new StripRule(new SuffixRule(LocatingRule.First(base, "<", arguments), ">")));
+        return new TypeRule("template", new StripRule(new SuffixRule(LocatingRule.First(base, "<", new OrRule(Lists.of(
+                arguments,
+                JavaRules.createWhitespaceRule()
+        ))), ">")));
     }
 
     public static Rule createArgumentsRule(Rule value) {
-        return NodeListRule.Values("arguments", new OrRule(Lists.of(
-                JavaRules.createWhitespaceRule(),
-                value
-        )));
+        return new OptionNodeListRule("arguments",
+                NodeListRule.Values("arguments", new OrRule(Lists.of(
+                        JavaRules.createTypedWhitespaceRule(),
+                        value
+                ))),
+                JavaRules.createWhitespaceRule()
+        );
     }
 
     public static Rule createParametersRule(Rule definition) {
         return NodeListRule.createNodeListRule("parameters", new ValueFolder(), new OrRule(Lists.of(
-                JavaRules.createWhitespaceRule(),
+                JavaRules.createTypedWhitespaceRule(),
                 definition
         )));
     }
