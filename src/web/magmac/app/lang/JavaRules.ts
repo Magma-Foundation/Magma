@@ -36,7 +36,7 @@ export class JavaRules {
 	createInvokableRule(value : Rule) : Rule {break;break;break;break;return new TypeRule( "invokable", new StripRule( new SuffixRule( new LocatingRule( caller, splitter, arguments), ")")));;}
 	createRootSegmentRule() : Rule {break;return new OrRule( Lists.of( createWhitespaceRule( ), JavaNamespacedNode.createNamespacedRule( "package"), JavaNamespacedNode.createNamespacedRule( "import"), JavaRules.createStructureRule( "record", classMemberRule), JavaRules.createStructureRule( "interface", classMemberRule), JavaRules.createStructureRule( "class", classMemberRule), JavaRules.createStructureRule( "enum", classMemberRule)));;}
 	createRule() : Rule {return new TypeRule( "root", CommonLang.Statements( "children", JavaRules.createRootSegmentRule( )));;}
-	createStructureRule(keyword : String, structureMember : Rule) : Rule {break;break;break;break;break;break;break;break;break;break;return new TypeRule( keyword, LocatingRule.First( Modifier.createModifiersRule( ), 0, afterKeyword));;}
+	createStructureRule(keyword : String, structureMember : Rule) : Rule {break;break;break;break;break;break;break;break;break;break;return new TypeRule( keyword, LocatingRule.First( Modifier.createModifiersRule( ), keyword+" ", afterKeyword));;}
 	createAccessRule(type : String, infix : String, value : LazyRule) : Rule {break;return new TypeRule( type, LocatingRule.Last( new NodeRule( "receiver", value), infix, property));;}
 	deserializeLambdaValueContent(node : Node) : Option<CompileResult<JavaLang.JavaLambdaValueContent>> {return Destructors.destructWithType( "value", node).map( 0);;}
 	createYieldRule(value : Rule) : Rule {return new TypeRule( "yield", new StripRule( new PrefixRule( "yield ", new NodeRule( "value", value))));;}

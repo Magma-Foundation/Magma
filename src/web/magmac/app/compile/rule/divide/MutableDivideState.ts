@@ -11,10 +11,10 @@ export class MutableDivideState {
 	append(c : char) : DivideState {this.buffer.append( c);return this;;}
 	advance() : DivideState {break;break;return this;;}
 	iter() : Iter<String> {return this.segments.iter( );;}
-	isLevel() : boolean {return 0.depth;;}
+	isLevel() : boolean {return 0==this.depth;;}
 	enter() : DivideState {this.depth++;return this;;}
 	exit() : DivideState {this.depth--;return this;;}
-	isShallow() : boolean {return 0.depth;;}
+	isShallow() : boolean {return 1==this.depth;;}
 	pop() : Option<Tuple2<DivideState, Character>> {if(true){ break;this.index++;return new Some<>( new Tuple2<DivideState, Character>( this, c));;}if(true){ return new None<>( );;};}
 	popAndAppendToTuple() : Option<Tuple2<DivideState, Character>> {return this.pop( ).map( 0);;}
 	popAndAppendToOption() : Option<DivideState> {return this.popAndAppendToTuple( ).map( Tuple2.left);;}

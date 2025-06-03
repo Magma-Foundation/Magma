@@ -10,6 +10,7 @@ import { JavaLang } from "../../../../magmac/app/lang/java/JavaLang";
 import { Block } from "../../../../magmac/app/lang/node/Block";
 import { Conditional } from "../../../../magmac/app/lang/node/Conditional";
 import { ConditionalType } from "../../../../magmac/app/lang/node/ConditionalType";
+import { Operator } from "../../../../magmac/app/lang/node/Operator";
 import { ParameterizedMethodHeader } from "../../../../magmac/app/lang/node/ParameterizedMethodHeader";
 import { PostVariant } from "../../../../magmac/app/lang/node/PostVariant";
 import { ReturnNode } from "../../../../magmac/app/lang/node/ReturnNode";
@@ -37,7 +38,7 @@ export interface TypeScriptRootSegment {
 }
 export interface TypescriptFunctionSegment {
 }
-export interface TypescriptValue {
+export interface Value {
 }
 export class Number {
 	serialize() : Node {return new MapNode( "number").withString( "value", this.value);;}
@@ -63,7 +64,7 @@ export class TypeScriptTemplateType {
 	serialize() : Node {return new MapNode( "template").withNodeSerialized( "base", this.base).withNodeListSerialized( "arguments", this.typeArguments.arguments( ));;}
 }
 export class TypescriptConditional {
-	TypescriptConditional(type : ConditionalType, condition : TypescriptValue) : public {super( type, condition);;}
+	TypescriptConditional(type : ConditionalType, condition : Value) : public {super( type, condition);;}
 	serialize() : Node {return new MapNode( this.type.name( ).toLowerCase( )).withNodeSerialized( "condition", this.condition);;}
 }
 export class TypescriptBlock {
@@ -101,7 +102,7 @@ export class TypescriptContinue {
 	serialize() : Node {return new MapNode( "continue");;}
 }
 export class TypescriptReturnNode {
-	TypescriptReturnNode(child : TypescriptValue) : public {super( child);;}
+	TypescriptReturnNode(child : Value) : public {super( child);;}
 	serialize() : Node {return new MapNode( "return").withNodeSerialized( "child", this.child);;}
 }
 export class Invokable {
@@ -122,6 +123,9 @@ export class StringValue {
 }
 export class Symbol {
 	serialize() : Node {return new MapNode( "symbol").withString( "value", this.value);;}
+}
+export class Operation {
+	serialize() : Node {return new MapNode( this.operator.type( )).withNodeSerialized( "left", this.left).withNodeSerialized( "right", this.right);;}
 }
 export class TypescriptLang {
 }

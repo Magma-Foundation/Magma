@@ -40,11 +40,11 @@ import magmac.app.lang.node.ParameterizedMethodHeader;
 import magmac.app.lang.node.Segment;
 import magmac.app.lang.node.StructureValue;
 import magmac.app.lang.node.TypeArguments;
+import magmac.app.lang.web.Symbol;
 import magmac.app.lang.web.TypescriptCaller;
 import magmac.app.lang.web.TypescriptFunctionSegmentValue;
 import magmac.app.lang.web.TypescriptFunctionStatement;
 import magmac.app.lang.web.TypescriptLang;
-import magmac.app.lang.web.TypescriptSymbol;
 import magmac.app.stage.parse.Parser;
 import magmac.app.stage.unit.SimpleUnit;
 import magmac.app.stage.unit.Unit;
@@ -219,22 +219,32 @@ class JavaTypescriptParser implements Parser<JavaLang.JavaRoot, TypescriptLang.T
         };
     }
 
-    private static TypescriptLang.TypescriptValue parseValue(JavaLang.JavaValue child) {
+    private static TypescriptLang.Value parseValue(JavaLang.JavaValue child) {
         return switch (child) {
-            case JavaLang.Access access ->
-                    new TypescriptLang.Access(JavaTypescriptParser.parseValue(access.receiver()), access.property());
+            case JavaLang.Access access -> JavaTypescriptParser.parseAccess(access);
             case JavaLang.Char aChar -> new TypescriptLang.Char(aChar.value());
-            case JavaLang.Index index ->
-                    new TypescriptLang.Index(JavaTypescriptParser.parseValue(index.parent()), JavaTypescriptParser.parseValue(index.argument()));
+            case JavaLang.Index index -> JavaTypescriptParser.parseIndex(index);
             case JavaLang.Invokable invokable -> JavaTypescriptParser.parseInvokable(invokable);
             case JavaLang.JavaLambda javaLambda -> new TypescriptLang.Number("0");
             case JavaLang.Not not -> new TypescriptLang.Not(JavaTypescriptParser.parseValue(not.value()));
             case JavaLang.Number number -> new TypescriptLang.Number(number.value());
-            case JavaLang.JavaOperation javaOperation -> new TypescriptLang.Number("0");
+            case JavaLang.operation operation -> JavaTypescriptParser.parseOperation(operation);
             case JavaLang.StringValue javaStringNode -> new TypescriptLang.StringValue(javaStringNode.value());
             case JavaLang.JavaSwitchNode javaSwitchNode -> new TypescriptLang.Number("0");
             case JavaLang.Symbol symbol -> new TypescriptLang.Symbol(symbol.value());
         };
+    }
+
+    private static TypescriptLang.Access parseAccess(JavaLang.Access access) {
+        return new TypescriptLang.Access(JavaTypescriptParser.parseValue(access.receiver()), access.property());
+    }
+
+    private static TypescriptLang.Index parseIndex(JavaLang.Index index) {
+        return new TypescriptLang.Index(JavaTypescriptParser.parseValue(index.parent()), JavaTypescriptParser.parseValue(index.argument()));
+    }
+
+    private static TypescriptLang.Operation parseOperation(JavaLang.operation operation) {
+        return new TypescriptLang.Operation(JavaTypescriptParser.parseValue(operation.left()), operation.operator(), JavaTypescriptParser.parseValue(operation.right()));
     }
 
     private static TypescriptLang.TypescriptBlock parseBlock(JavaBlock block) {
@@ -242,7 +252,7 @@ class JavaTypescriptParser implements Parser<JavaLang.JavaRoot, TypescriptLang.T
     }
 
     private static TypescriptLang.TypescriptBlockHeader parseHeader(JavaLang.JavaBlockHeader header) {
-        return new TypescriptLang.TypescriptConditional(ConditionalType.If, new TypescriptSymbol("true"));
+        return new TypescriptLang.TypescriptConditional(ConditionalType.If, new Symbol("true"));
     }
 
     private static TypescriptLang.TypeScriptParameter parseParameter(JavaParameter parameter) {
@@ -276,18 +286,18 @@ class JavaTypescriptParser implements Parser<JavaLang.JavaRoot, TypescriptLang.T
         };
     }
 
-    private static TypescriptSymbol parseSymbol(JavaLang.Symbol symbol) {
-        return new TypescriptSymbol(symbol.value());
+    private static Symbol parseSymbol(JavaLang.Symbol symbol) {
+        return new Symbol(symbol.value());
     }
 
-    private static TypescriptSymbol parseQualifiedType(JavaLang.JavaQualified qualified) {
+    private static Symbol parseQualifiedType(JavaLang.JavaQualified qualified) {
         String joined = qualified.segments()
                 .iter()
                 .map(Segment::value)
                 .collect(new Joiner("."))
                 .orElse("");
 
-        return new TypescriptSymbol(joined);
+        return new Symbol(joined);
     }
 
     private static TypescriptLang.TypeScriptType parseArrayType(JavaLang.JavaArrayType type) {
@@ -299,7 +309,7 @@ class JavaTypescriptParser implements Parser<JavaLang.JavaRoot, TypescriptLang.T
             case JavaLang.Symbol symbol -> JavaTypescriptParser.parseSymbol(symbol);
             case JavaLang.JavaArrayType type -> JavaTypescriptParser.parseArrayType(type);
             case JavaLang.JavaTemplateType templateType -> JavaTypescriptParser.parseTemplateType(templateType);
-            case JavaLang.JavaVariadicType type -> new TypescriptSymbol("?");
+            case JavaLang.JavaVariadicType type -> new Symbol("?");
             case JavaLang.JavaQualified qualified -> JavaTypescriptParser.parseQualifiedType(qualified);
         };
     }

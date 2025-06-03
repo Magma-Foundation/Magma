@@ -129,7 +129,7 @@ export class Number {
 export class StringValue {
 	StringValue(value : String) : public {super( value);;}
 }
-export class JavaOperation {
+export class operation {
 	serialize() : Node {return new MapNode( this.operator.type( ));;}
 }
 export class Char {

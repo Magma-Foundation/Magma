@@ -50,7 +50,7 @@ public class JavaLang {
     public sealed interface JavaCaller permits JavaConstruction, JavaValue {
     }
 
-    public sealed interface JavaValue extends JavaCaller, JavaArgument, JavaAssignable permits Access, Char, Index, Invokable, JavaLambda, Not, Number, JavaOperation, StringValue, JavaSwitchNode, Symbol {
+    public sealed interface JavaValue extends JavaCaller, JavaArgument, JavaAssignable permits Access, Char, Index, Invokable, JavaLambda, Not, Number, operation, StringValue, JavaSwitchNode, Symbol {
     }
 
     public interface JavaAssignable {
@@ -297,11 +297,11 @@ public class JavaLang {
         }
     }
 
-    public record JavaOperation(
+    public record operation(
             JavaValue left,
             Operator operator,
             JavaValue right
-    ) implements JavaValue, TypescriptLang.TypescriptValue {
+    ) implements JavaValue, TypescriptLang.Value {
         @Override
         public Node serialize() {
             return new MapNode(this.operator.type());

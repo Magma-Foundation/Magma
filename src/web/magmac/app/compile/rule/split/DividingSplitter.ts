@@ -10,5 +10,5 @@ export class DividingSplitter {
 	First(divider : Divider, delimiter : String) : Splitter {return new DividingSplitter( divider, new FirstSelector( delimiter));;}
 	split(input : String) : Option<Tuple2<String, String>> {break;return this.selector.select( list);;}
 	createMessage() : String {return "Insufficient segments present";;}
-	merge(leftString : String, rightString : String) : String {return 0;;}
+	merge(leftString : String, rightString : String) : String {return leftString+" "+rightString;;}
 }

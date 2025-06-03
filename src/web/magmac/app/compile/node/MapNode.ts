@@ -21,13 +21,13 @@ export class MapNode {
 	fold(node : Node, iter : Iter<Tuple2<String, T>>, mapper : Function<Node, BiFunction<String, T, Node>>) : Node {return iter.fold( node, 0);;}
 	formatNodeList(depth : int, nodeList : NodeList) : String {return nodeList.iter( ).map( 0).collect( new Joiner( ", ")).orElse( "");;}
 	createIndent(depth : int) : String {return "\n" + "\t".repeat( depth);;}
-	formatEntry(depth : int, key : String, value : String) : String {break;return 0;;}
+	formatEntry(depth : int, key : String, value : String) : String {break;return indent+key+": "+value;;}
 	toStream(depth : int, map : Map<String, T>, mapper : Function<T, String>) : Iter<String> {if(true){ return Iters.empty( );;}return map.iter( ).map( 0);;}
 	withNodeAndSerializer(key : String, element : T, serializer : Function<T, Node>) : Node {return this.withNode( key, serializer.apply( element));;}
 	removeNode(key : String) : Option<Tuple2<Node, Node>> {return this.nodes.removeByKey( key).map( 0);;}
 	iterNodes() : Iter<Tuple2<String, Node>> {return this.nodes.iter( );;}
 	display() : String {return this.format( 0);;}
-	format(depth : int) : String {break;break;break;break;break;return 0;;}
+	format(depth : int) : String {break;break;break;break;break;return typeString+"{" + joined + MapNode.createIndent(depth) + "}";;}
 	withString(key : String, value : String) : Node {break;return this;;}
 	findString(key : String) : Option<String> {if(true){ return new Some<>( this.strings.get( key));;}if(true){ return new None<>( );;};}
 	strings() : Map<String, String> {return this.strings;;}
@@ -41,7 +41,7 @@ export class MapNode {
 	removeNodeListOrError(key : String) : CompileResult<Tuple2<Node, NodeList>> {return this.removeNodeList( key).map( CompileResults.Ok).orElseGet( 0);;}
 	removeNodeList(key : String) : Option<Tuple2<Node, NodeList>> {return this.nodeLists.removeByKey( key).map( 0);;}
 	withNodeLists(nodeLists : Map<String, NodeList>) : Node {return new MapNode( this.maybeType, this.strings, this.nodes, nodeLists);;}
-	isEmpty() : boolean {return 0.nodeLists.isEmpty( );;}
+	isEmpty() : boolean {return this.strings.isEmpty( )&&this.nodes.isEmpty( )&&this.nodeLists.isEmpty( );;}
 	withNodeListAndSerializer(key : String, list : List<T>, serializer : Function<T, Node>) : Node {break;return this.withNodeList( key, nodeList);;}
 	removeString(key : String) : CompileResult<Tuple2<Node, String>> {return this.strings.removeByKey( key).map( 0).orElseGet( 0);;}
 	removeNodeOrError(key : String) : CompileResult<Tuple2<Node, Node>> {return this.nodes.removeByKey( key).map( 0).orElseGet( 0);;}

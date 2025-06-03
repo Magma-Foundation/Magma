@@ -14,6 +14,6 @@ export class HeadedIter<T> {
 	collect(collector : Collector<T, C>) : C {return this.fold( collector.createInitial( ), collector.fold);;}
 	filter(predicate : Predicate<T>) : Iter<T> {return this.flatMap( 0);;}
 	next() : Option<T> {return this.head.next( );;}
-	flatMap(mapper : Function<T, Iter<R>>) : Iter<R> {return new HeadedIter<>( 0( 0).orElse( new EmptyHead<>( )));;}
+	flatMap(mapper : Function<T, Iter<R>>) : Iter<R> {return new HeadedIter<>( this.head.next( ).map( mapper).<Head<R>>map( 0).orElse( new EmptyHead<>( )));;}
 	concat(other : Iter<T>) : Iter<T> {return new HeadedIter<>( 0);;}
 }

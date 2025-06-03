@@ -3,7 +3,7 @@ import { CompileResult } from "../../../../magmac/app/compile/error/CompileResul
 import { Node } from "../../../../magmac/app/compile/node/Node";
 import { Destructors } from "../../../../magmac/app/lang/Destructors";
 import { JavaDeserializers } from "../../../../magmac/app/lang/java/JavaDeserializers";
-import { JavaOperation } from "../../../../magmac/app/lang/java/JavaLang/JavaOperation";
+import { operation } from "../../../../magmac/app/lang/java/JavaLang/operation";
 export class OperationDeserializer {
-	deserialize(node : Node) : Option<CompileResult<JavaOperation>> {return Destructors.destructWithType( this.operator( ).type( ), node).map( 0);;}
+	deserialize(node : Node) : Option<CompileResult<operation>> {return Destructors.destructWithType( this.operator( ).type( ), node).map( 0);;}
 }

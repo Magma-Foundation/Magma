@@ -5,13 +5,13 @@ import magmac.app.compile.error.CompileResult;
 import magmac.app.compile.node.Node;
 import magmac.app.lang.Destructors;
 import magmac.app.lang.java.JavaDeserializers;
-import magmac.app.lang.java.JavaLang.JavaOperation;
+import magmac.app.lang.java.JavaLang.operation;
 
-public record OperationDeserializer(Operator operator) implements TypedDeserializer<JavaOperation> {
+public record OperationDeserializer(Operator operator) implements TypedDeserializer<operation> {
     @Override
-    public Option<CompileResult<JavaOperation>> deserialize(Node node) {
+    public Option<CompileResult<operation>> deserialize(Node node) {
         return Destructors.destructWithType(this.operator().type(), node).map(deserializer -> deserializer.withNode("left", JavaDeserializers::deserializeJavaOrError)
                 .withNode("right", JavaDeserializers::deserializeJavaOrError)
-                .complete(tuple -> new JavaOperation(tuple.left(), this.operator(), tuple.right())));
+                .complete(tuple -> new operation(tuple.left(), this.operator(), tuple.right())));
     }
 }

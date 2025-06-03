@@ -90,6 +90,7 @@ TypescriptLang --> JavaLang
 TypescriptLang --> Block
 TypescriptLang --> Conditional
 TypescriptLang --> ConditionalType
+TypescriptLang --> Operator
 TypescriptLang --> ParameterizedMethodHeader
 TypescriptLang --> PostVariant
 TypescriptLang --> ReturnNode
@@ -120,14 +121,6 @@ MapCollector --> Tuple2
 MapCollector --> Collector
 class MapCollector
 Collector <|-- MapCollector
-TypescriptSymbol --> Symbol
-TypescriptSymbol --> JavaLang
-class TypescriptSymbol
-Symbol <|-- TypescriptSymbol
-? <|-- TypescriptSymbol
-? <|-- TypescriptSymbol
-? <|-- TypescriptSymbol
-? <|-- TypescriptSymbol
 Folder --> DivideState
 interface Folder
 Deserializers --> Option
@@ -527,6 +520,13 @@ ExactRule --> MapNode
 ExactRule --> Node
 class ExactRule
 Rule <|-- ExactRule
+Symbol --> JavaLang
+class Symbol
+? <|-- Symbol
+? <|-- Symbol
+? <|-- Symbol
+? <|-- Symbol
+? <|-- Symbol
 class StringContext
 Context <|-- StringContext
 InlinePassResult --> None
@@ -954,11 +954,11 @@ JavaTypescriptParser --> ParameterizedMethodHeader
 JavaTypescriptParser --> Segment
 JavaTypescriptParser --> StructureValue
 JavaTypescriptParser --> TypeArguments
+JavaTypescriptParser --> Symbol
 JavaTypescriptParser --> TypescriptCaller
 JavaTypescriptParser --> TypescriptFunctionSegmentValue
 JavaTypescriptParser --> TypescriptFunctionStatement
 JavaTypescriptParser --> TypescriptLang
-JavaTypescriptParser --> TypescriptSymbol
 JavaTypescriptParser --> Parser
 JavaTypescriptParser --> SimpleUnit
 JavaTypescriptParser --> Unit
@@ -1023,7 +1023,7 @@ OperationDeserializer --> CompileResult
 OperationDeserializer --> Node
 OperationDeserializer --> Destructors
 OperationDeserializer --> JavaDeserializers
-OperationDeserializer --> JavaOperation
+OperationDeserializer --> operation
 class OperationDeserializer
 TypedDeserializer <|-- OperationDeserializer
 PlantUMLHeader --> MapNode

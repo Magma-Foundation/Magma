@@ -12,6 +12,7 @@ import magmac.app.lang.java.JavaLang;
 import magmac.app.lang.node.Block;
 import magmac.app.lang.node.Conditional;
 import magmac.app.lang.node.ConditionalType;
+import magmac.app.lang.node.Operator;
 import magmac.app.lang.node.ParameterizedMethodHeader;
 import magmac.app.lang.node.PostVariant;
 import magmac.app.lang.node.ReturnNode;
@@ -58,10 +59,10 @@ public final class TypescriptLang {
     public interface TypescriptFunctionSegment extends Serializable {
     }
 
-    public interface TypescriptValue extends TypescriptCaller, TypescriptArgument {
+    public interface Value extends TypescriptCaller, TypescriptArgument {
     }
 
-    public record Number(String value) implements TypescriptValue {
+    public record Number(String value) implements Value {
         @Override
         public Node serialize() {
             return new MapNode("number").withString("value", this.value);
@@ -154,8 +155,8 @@ public final class TypescriptLang {
         }
     }
 
-    public static final class TypescriptConditional extends Conditional<TypescriptValue> implements TypescriptBlockHeader {
-        public TypescriptConditional(ConditionalType type, TypescriptValue condition) {
+    public static final class TypescriptConditional extends Conditional<Value> implements TypescriptBlockHeader {
+        public TypescriptConditional(ConditionalType type, Value condition) {
             super(type, condition);
         }
 
@@ -234,14 +235,14 @@ public final class TypescriptLang {
         }
     }
 
-    public record Post(PostVariant variant, TypescriptValue value) implements TypescriptFunctionSegmentValue {
+    public record Post(PostVariant variant, Value value) implements TypescriptFunctionSegmentValue {
         @Override
         public Node serialize() {
             return new MapNode(this.variant.type()).withNodeSerialized("child", this.value);
         }
     }
 
-    public record Access(TypescriptValue receiver, String property) implements TypescriptValue {
+    public record Access(Value receiver, String property) implements Value {
         @Override
         public Node serialize() {
             return new MapNode("data-access")
@@ -264,8 +265,8 @@ public final class TypescriptLang {
         }
     }
 
-    public static final class TypescriptReturnNode extends ReturnNode<TypescriptValue> implements TypescriptFunctionSegmentValue, TypescriptFunctionSegment {
-        public TypescriptReturnNode(TypescriptValue child) {
+    public static final class TypescriptReturnNode extends ReturnNode<Value> implements TypescriptFunctionSegmentValue, TypescriptFunctionSegment {
+        public TypescriptReturnNode(Value child) {
             super(child);
         }
 
@@ -275,7 +276,7 @@ public final class TypescriptLang {
         }
     }
 
-    public static class Invokable extends magmac.app.lang.java.Invokable<TypescriptCaller, TypescriptArgument> implements TypescriptValue, TypescriptFunctionSegmentValue {
+    public static class Invokable extends magmac.app.lang.java.Invokable<TypescriptCaller, TypescriptArgument> implements Value, TypescriptFunctionSegmentValue {
         public Invokable(TypescriptCaller caller, List<TypescriptArgument> arguments) {
             super(caller, arguments);
         }
@@ -288,38 +289,51 @@ public final class TypescriptLang {
         }
     }
 
-    public record Char(String value) implements TypescriptValue {
+    public record Char(String value) implements Value {
         @Override
         public Node serialize() {
             return new MapNode("char").withString("value", this.value);
         }
     }
 
-    public record Index(TypescriptValue parent, TypescriptValue argument) implements TypescriptValue {
+    public record Index(Value parent, Value argument) implements Value {
         @Override
         public Node serialize() {
             return new MapNode("index").withNodeSerialized("parent", this.parent).withNodeSerialized("argument", this.argument);
         }
     }
 
-    public record Not(TypescriptValue child) implements TypescriptValue {
+    public record Not(Value child) implements Value {
         @Override
         public Node serialize() {
             return new MapNode("not").withNodeSerialized("child", this.child);
         }
     }
 
-    public record StringValue(java.lang.String value) implements TypescriptValue {
+    public record StringValue(java.lang.String value) implements Value {
         @Override
         public Node serialize() {
             return new MapNode("string").withString("value", this.value);
         }
     }
 
-    public record Symbol(String value) implements TypescriptValue {
+    public record Symbol(String value) implements Value {
         @Override
         public Node serialize() {
             return new MapNode("symbol").withString("value", this.value);
+        }
+    }
+
+    public record Operation(
+            Value left,
+            Operator operator,
+            Value right
+    ) implements Value {
+        @Override
+        public Node serialize() {
+            return new MapNode(this.operator.type())
+                    .withNodeSerialized("left", this.left)
+                    .withNodeSerialized("right", this.right);
         }
     }
 

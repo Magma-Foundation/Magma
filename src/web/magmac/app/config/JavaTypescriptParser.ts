@@ -38,11 +38,11 @@ import { ParameterizedMethodHeader } from "../../../magmac/app/lang/node/Paramet
 import { Segment } from "../../../magmac/app/lang/node/Segment";
 import { StructureValue } from "../../../magmac/app/lang/node/StructureValue";
 import { TypeArguments } from "../../../magmac/app/lang/node/TypeArguments";
+import { Symbol } from "../../../magmac/app/lang/web/Symbol";
 import { TypescriptCaller } from "../../../magmac/app/lang/web/TypescriptCaller";
 import { TypescriptFunctionSegmentValue } from "../../../magmac/app/lang/web/TypescriptFunctionSegmentValue";
 import { TypescriptFunctionStatement } from "../../../magmac/app/lang/web/TypescriptFunctionStatement";
 import { TypescriptLang } from "../../../magmac/app/lang/web/TypescriptLang";
-import { TypescriptSymbol } from "../../../magmac/app/lang/web/TypescriptSymbol";
 import { Parser } from "../../../magmac/app/stage/parse/Parser";
 import { SimpleUnit } from "../../../magmac/app/stage/unit/SimpleUnit";
 import { Unit } from "../../../magmac/app/stage/unit/Unit";
@@ -68,14 +68,17 @@ export class JavaTypescriptParser {
 	parseCaller(caller : JavaLang.JavaCaller) : TypescriptCaller {;;;}
 	parseArguments(arguments : List<JavaLang.JavaArgument>) : List<TypescriptLang.TypescriptArgument> {return arguments.iter( ).map( JavaTypescriptParser.parseArgument).collect( new ListCollector<>( ));;}
 	parseArgument(argument : JavaLang.JavaArgument) : TypescriptLang.TypescriptArgument {;;;}
-	parseValue(child : JavaLang.JavaValue) : TypescriptLang.TypescriptValue {;;;}
+	parseValue(child : JavaLang.JavaValue) : TypescriptLang.Value {;;;}
+	parseAccess(access : JavaLang.Access) : TypescriptLang.Access {return new TypescriptLang.Access( JavaTypescriptParser.parseValue( access.receiver( )), access.property( ));;}
+	parseIndex(index : JavaLang.Index) : TypescriptLang.Index {return new TypescriptLang.Index( JavaTypescriptParser.parseValue( index.parent( )), JavaTypescriptParser.parseValue( index.argument( )));;}
+	parseOperation(operation : JavaLang.operation) : TypescriptLang.Operation {return new TypescriptLang.Operation( JavaTypescriptParser.parseValue( operation.left( )), operation.operator( ), JavaTypescriptParser.parseValue( operation.right( )));;}
 	parseBlock(block : JavaBlock) : TypescriptLang.TypescriptBlock {return new TypescriptLang.TypescriptBlock( JavaTypescriptParser.parseHeader( block.header( )), JavaTypescriptParser.parseFunctionSegments( block.segments( )));;}
-	parseHeader(header : JavaLang.JavaBlockHeader) : TypescriptLang.TypescriptBlockHeader {return new TypescriptLang.TypescriptConditional( ConditionalType.If, new TypescriptSymbol( "true"));;}
+	parseHeader(header : JavaLang.JavaBlockHeader) : TypescriptLang.TypescriptBlockHeader {return new TypescriptLang.TypescriptConditional( ConditionalType.If, new Symbol( "true"));;}
 	parseParameter(parameter : JavaParameter) : TypescriptLang.TypeScriptParameter {;;;}
 	parseMethodHeader(header : JavaMethodHeader) : TypescriptLang.TypeScriptMethodHeader {;;;}
 	parseDefinition(javaDefinition : JavaLang.JavaDefinition) : TypescriptLang.TypeScriptDefinition {break;;;;}
-	parseSymbol(symbol : JavaLang.Symbol) : TypescriptSymbol {return new TypescriptSymbol( symbol.value( ));;}
-	parseQualifiedType(qualified : JavaLang.JavaQualified) : TypescriptSymbol {break;return new TypescriptSymbol( joined);;}
+	parseSymbol(symbol : JavaLang.Symbol) : Symbol {return new Symbol( symbol.value( ));;}
+	parseQualifiedType(qualified : JavaLang.JavaQualified) : Symbol {break;return new Symbol( joined);;}
 	parseArrayType(type : JavaLang.JavaArrayType) : TypescriptLang.TypeScriptType {return new TypescriptLang.TypescriptArrayType( JavaTypescriptParser.parseType( type.inner));;}
 	parseType(variadicType : JavaLang.JavaType) : TypescriptLang.TypeScriptType {;;;}
 	parseTemplateType(type : JavaLang.JavaTemplateType) : TypescriptLang.TypeScriptTemplateType {break;break;return new TypescriptLang.TypeScriptTemplateType( base, new TypeArguments<>( collect));;}
