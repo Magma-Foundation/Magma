@@ -10,18 +10,6 @@ JavaPost --> Objects
 class JavaPost
 Post <|-- JavaPost
 JavaFunctionSegmentValue <|-- JavaPost
-BlockHeader --> Lists
-BlockHeader --> CompileResult
-BlockHeader --> Node
-BlockHeader --> ExactRule
-BlockHeader --> NodeRule
-BlockHeader --> OrRule
-BlockHeader --> PrefixRule
-BlockHeader --> Rule
-BlockHeader --> StripRule
-BlockHeader --> SuffixRule
-BlockHeader --> TypeRule
-BlockHeader --> Deserializers
 interface BlockHeader
 StructureValue --> Option
 StructureValue --> List
@@ -256,6 +244,8 @@ Block --> DividingSplitter
 Block --> BlockFolder
 Block --> CommonLang
 Block --> Destructors
+Block --> JavaDeserializers
+Block --> JavaRules
 Block --> LazyRule
 class Block
 JavaFunctionSegment <|-- Block
@@ -547,6 +537,11 @@ JavaDeserializers --> JavaConstruction
 JavaDeserializers --> JavaInvokable
 JavaDeserializers --> Lang
 JavaDeserializers --> Arguments
+JavaDeserializers --> BlockHeader
+JavaDeserializers --> Catch
+JavaDeserializers --> Conditional
+JavaDeserializers --> ConditionalType
+JavaDeserializers --> Else
 JavaDeserializers --> FunctionSegmentValues
 JavaDeserializers --> FunctionStatement
 JavaDeserializers --> JavaAccess
@@ -563,6 +558,7 @@ JavaDeserializers --> JavaYieldNode
 JavaDeserializers --> LambdaContents
 JavaDeserializers --> LambdaHeaders
 JavaDeserializers --> PostVariant
+JavaDeserializers --> Try
 JavaDeserializers --> TypedDeserializer
 JavaDeserializers --> Values
 JavaDeserializers --> Whitespace
@@ -1554,6 +1550,7 @@ JavaRules --> Lists
 JavaRules --> CompileResult
 JavaRules --> Node
 JavaRules --> ContextRule
+JavaRules --> ExactRule
 JavaRules --> FilterRule
 JavaRules --> LocatingRule
 JavaRules --> NodeListRule
@@ -1569,6 +1566,7 @@ JavaRules --> TypeRule
 JavaRules --> FoldingDivider
 JavaRules --> DividingSplitter
 JavaRules --> Arguments
+JavaRules --> Conditional
 JavaRules --> JavaDefinition
 JavaRules --> JavaLambdaValueContent
 JavaRules --> JavaNamespacedNode

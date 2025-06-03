@@ -5,6 +5,7 @@ import magmac.api.collect.list.Lists;
 import magmac.app.compile.error.CompileResult;
 import magmac.app.compile.node.Node;
 import magmac.app.compile.rule.ContextRule;
+import magmac.app.compile.rule.ExactRule;
 import magmac.app.compile.rule.FilterRule;
 import magmac.app.compile.rule.LocatingRule;
 import magmac.app.compile.rule.NodeListRule;
@@ -20,6 +21,7 @@ import magmac.app.compile.rule.TypeRule;
 import magmac.app.compile.rule.divide.FoldingDivider;
 import magmac.app.compile.rule.split.DividingSplitter;
 import magmac.app.lang.node.Arguments;
+import magmac.app.lang.node.Conditional;
 import magmac.app.lang.node.JavaDefinition;
 import magmac.app.lang.node.JavaLambdaValueContent;
 import magmac.app.lang.node.JavaNamespacedNode;
@@ -135,5 +137,15 @@ public final class JavaRules {
                 definition,
                 Symbols.createSymbolRule()
         )));
+    }
+
+    public static Rule createBlockHeaderRule(Rule value, Rule definition) {
+        return new OrRule(Lists.of(
+                new TypeRule("else", new StripRule(new ExactRule("else"))),
+                new TypeRule("try", new StripRule(new ExactRule("try"))),
+                Conditional.createConditionalRule("if", value),
+                Conditional.createConditionalRule("while", value),
+                new TypeRule("catch", new StripRule(new PrefixRule("catch", new StripRule(new PrefixRule("(", new SuffixRule(new NodeRule("definition", definition), ")"))))))
+        ));
     }
 }

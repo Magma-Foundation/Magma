@@ -17,18 +17,20 @@ import magmac.app.compile.rule.split.DividingSplitter;
 import magmac.app.lang.BlockFolder;
 import magmac.app.lang.CommonLang;
 import magmac.app.lang.Destructors;
+import magmac.app.lang.JavaDeserializers;
+import magmac.app.lang.JavaRules;
 import magmac.app.lang.LazyRule;
 
-public record Block(List<JavaFunctionSegment> segments, BlockHeader header) implements JavaFunctionSegment, TypescriptFunctionSegment {
+public record Block(JavaBlockHeader header, List<JavaFunctionSegment> segments) implements JavaFunctionSegment, TypescriptFunctionSegment {
     public static Option<CompileResult<Block>> deserialize(Node node) {
         return Destructors.destructWithType("block", node).map(deserializer -> deserializer
                 .withNodeList("children", FunctionSegments::deserialize)
-                .withNode("header", BlockHeader::deserialize)
-                .complete(tuple -> new Block(tuple.left(), tuple.right())));
+                .withNode("header", JavaDeserializers::deserializeBlockHeader)
+                .complete(tuple -> new Block(tuple.right(), tuple.left())));
     }
 
     public static Rule createBlockRule(LazyRule functionSegmentRule, Rule value, Rule definition) {
-        Rule header = new NodeRule("header", BlockHeader.createBlockHeaderRule(value, definition));
+        Rule header = new NodeRule("header", JavaRules.createBlockHeaderRule(value, definition));
         return createBlockRule0(header, functionSegmentRule);
     }
 

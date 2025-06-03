@@ -8,6 +8,11 @@ import magmac.app.lang.java.JavaConstruction;
 import magmac.app.lang.java.JavaInvokable;
 import magmac.app.lang.java.Lang;
 import magmac.app.lang.node.Arguments;
+import magmac.app.lang.node.JavaBlockHeader;
+import magmac.app.lang.node.Catch;
+import magmac.app.lang.node.Conditional;
+import magmac.app.lang.node.ConditionalType;
+import magmac.app.lang.node.Else;
 import magmac.app.lang.node.FunctionSegmentValues;
 import magmac.app.lang.node.FunctionStatement;
 import magmac.app.lang.node.JavaAccess;
@@ -24,6 +29,7 @@ import magmac.app.lang.node.JavaYieldNode;
 import magmac.app.lang.node.LambdaContents;
 import magmac.app.lang.node.LambdaHeaders;
 import magmac.app.lang.node.PostVariant;
+import magmac.app.lang.node.Try;
 import magmac.app.lang.node.TypedDeserializer;
 import magmac.app.lang.node.Values;
 import magmac.app.lang.node.Whitespace;
@@ -99,5 +105,15 @@ public final class JavaDeserializers {
     public static Option<CompileResult<JavaReturnNode>> deserializeReturn(Node node) {
         return Destructors.destructWithType("return", node)
                 .map(deserializer -> deserializer.withNode("child", Values::deserializeOrError).complete(JavaReturnNode::new));
+    }
+
+    public static CompileResult<JavaBlockHeader> deserializeBlockHeader(Node node) {
+        return Deserializers.orError("header", node, Lists.of(
+                Deserializers.wrap(node1 -> Conditional.deserialize(ConditionalType.If, node1)),
+                Deserializers.wrap(node1 -> Conditional.deserialize(ConditionalType.While, node1)),
+                Deserializers.wrap(Else::deserialize),
+                Deserializers.wrap(Try::deserialize),
+                Deserializers.wrap(Catch::deserialize)
+        ));
     }
 }

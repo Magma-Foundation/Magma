@@ -5,8 +5,8 @@ import magmac.app.compile.error.CompileResult;
 import magmac.app.compile.node.Node;
 import magmac.app.lang.Destructors;
 
-record Catch(JavaDefinition definition) implements BlockHeader {
-    public static Option<CompileResult<BlockHeader>> deserialize(Node node) {
+public record Catch(JavaDefinition definition) implements JavaBlockHeader {
+    public static Option<CompileResult<JavaBlockHeader>> deserialize(Node node) {
         return Destructors.destructWithType("catch", node).map(deserializer -> deserializer.withNode("definition", JavaDefinition::deserialize)
                 .complete(Catch::new));
     }

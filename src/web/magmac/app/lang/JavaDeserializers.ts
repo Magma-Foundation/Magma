@@ -1,0 +1,47 @@
+import { Option } from "../../../magmac/api/Option";
+import { Lists } from "../../../magmac/api/collect/list/Lists";
+import { CompileResult } from "../../../magmac/app/compile/error/CompileResult";
+import { Node } from "../../../magmac/app/compile/node/Node";
+import { JavaConstruction } from "../../../magmac/app/lang/java/JavaConstruction";
+import { JavaInvokable } from "../../../magmac/app/lang/java/JavaInvokable";
+import { Lang } from "../../../magmac/app/lang/java/Lang";
+import { Arguments } from "../../../magmac/app/lang/node/Arguments";
+import { BlockHeader } from "../../../magmac/app/lang/node/BlockHeader";
+import { Catch } from "../../../magmac/app/lang/node/Catch";
+import { Conditional } from "../../../magmac/app/lang/node/Conditional";
+import { ConditionalType } from "../../../magmac/app/lang/node/ConditionalType";
+import { Else } from "../../../magmac/app/lang/node/Else";
+import { FunctionSegmentValues } from "../../../magmac/app/lang/node/FunctionSegmentValues";
+import { FunctionStatement } from "../../../magmac/app/lang/node/FunctionStatement";
+import { JavaAccess } from "../../../magmac/app/lang/node/JavaAccess";
+import { JavaAccessType } from "../../../magmac/app/lang/node/JavaAccessType";
+import { JavaLambda } from "../../../magmac/app/lang/node/JavaLambda";
+import { JavaNamespacedNode } from "../../../magmac/app/lang/node/JavaNamespacedNode";
+import { JavaPost } from "../../../magmac/app/lang/node/JavaPost";
+import { JavaReturnNode } from "../../../magmac/app/lang/node/JavaReturnNode";
+import { JavaRootSegment } from "../../../magmac/app/lang/node/JavaRootSegment";
+import { JavaStructureNodeDeserializer } from "../../../magmac/app/lang/node/JavaStructureNodeDeserializer";
+import { JavaStructureType } from "../../../magmac/app/lang/node/JavaStructureType";
+import { JavaTypes } from "../../../magmac/app/lang/node/JavaTypes";
+import { JavaYieldNode } from "../../../magmac/app/lang/node/JavaYieldNode";
+import { LambdaContents } from "../../../magmac/app/lang/node/LambdaContents";
+import { LambdaHeaders } from "../../../magmac/app/lang/node/LambdaHeaders";
+import { PostVariant } from "../../../magmac/app/lang/node/PostVariant";
+import { Try } from "../../../magmac/app/lang/node/Try";
+import { TypedDeserializer } from "../../../magmac/app/lang/node/TypedDeserializer";
+import { Values } from "../../../magmac/app/lang/node/Values";
+import { Whitespace } from "../../../magmac/app/lang/node/Whitespace";
+export class JavaDeserializers {
+	deserialize(node : Node) : CompileResult<Lang.JavaCaller> {;;}
+	deserializeConstruction(node : Node) : Option<CompileResult<Lang.JavaCaller>> {;;}
+	deserializeInvocation(node : Node) : Option<CompileResult<JavaInvokable>> {;;}
+	deserializeRootSegment(node : Node) : CompileResult<JavaRootSegment> {;;}
+	deserializeAccess(type : JavaAccessType, node : Node) : Option<CompileResult<JavaAccess>> {;;}
+	deserializeYield(node : Node) : Option<CompileResult<JavaYieldNode>> {;;}
+	deserializePost(variant : PostVariant, node : Node) : Option<CompileResult<JavaPost>> {;;}
+	deserializeLambda(node : Node) : Option<CompileResult<JavaLambda>> {;;}
+	deserializeAccessWithType(type : JavaAccessType) : TypedDeserializer<JavaAccess> {;;}
+	deserializeFunctionStatement(node : Node) : Option<CompileResult<FunctionStatement>> {;;}
+	deserializeReturn(node : Node) : Option<CompileResult<JavaReturnNode>> {;;}
+	deserializeBlockHeader(node : Node) : CompileResult<BlockHeader> {;;}
+}
