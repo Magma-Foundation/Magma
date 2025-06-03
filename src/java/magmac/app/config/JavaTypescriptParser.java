@@ -40,14 +40,10 @@ import magmac.app.lang.node.ParameterizedMethodHeader;
 import magmac.app.lang.node.Segment;
 import magmac.app.lang.node.StructureValue;
 import magmac.app.lang.node.TypeArguments;
-import magmac.app.lang.web.TypescriptBreak;
 import magmac.app.lang.web.TypescriptCaller;
-import magmac.app.lang.web.TypescriptContinue;
 import magmac.app.lang.web.TypescriptFunctionSegmentValue;
 import magmac.app.lang.web.TypescriptFunctionStatement;
-import magmac.app.lang.web.TypescriptInvokable;
 import magmac.app.lang.web.TypescriptLang;
-import magmac.app.lang.web.TypescriptReturnNode;
 import magmac.app.lang.web.TypescriptSymbol;
 import magmac.app.stage.parse.Parser;
 import magmac.app.stage.unit.SimpleUnit;
@@ -186,15 +182,16 @@ class JavaTypescriptParser implements Parser<JavaLang.JavaRoot, TypescriptLang.T
 
     private static TypescriptFunctionSegmentValue parseFunctionStatementValue(JavaFunctionSegmentValue child) {
         return switch (child) {
-            case JavaBreak javaBreak -> new TypescriptBreak();
-            case JavaContinue javaContinue -> new TypescriptContinue();
-            case JavaYieldNode javaYieldNode -> new TypescriptBreak();
-            case JavaPost javaPost -> new TypescriptLang.Post(javaPost.variant(), JavaTypescriptParser.parseValue(javaPost.value()));
+            case JavaBreak javaBreak -> new TypescriptLang.TypescriptBreak();
+            case JavaContinue javaContinue -> new TypescriptLang.TypescriptContinue();
+            case JavaYieldNode javaYieldNode -> new TypescriptLang.TypescriptBreak();
+            case JavaPost javaPost ->
+                    new TypescriptLang.Post(javaPost.variant(), JavaTypescriptParser.parseValue(javaPost.value()));
             case JavaReturnNode javaReturnNode ->
-                    new TypescriptReturnNode(JavaTypescriptParser.parseValue(javaReturnNode.child()));
+                    new TypescriptLang.TypescriptReturnNode(JavaTypescriptParser.parseValue(javaReturnNode.child()));
             case JavaLang.JavaInvokable javaInvokable ->
-                    new TypescriptInvokable(JavaTypescriptParser.parseCaller(javaInvokable.caller()), JavaTypescriptParser.parseArguments(javaInvokable.arguments()));
-            case JavaAssignmentNode javaAssignmentNode -> new TypescriptBreak();
+                    new TypescriptLang.TypescriptInvokable(JavaTypescriptParser.parseCaller(javaInvokable.caller()), JavaTypescriptParser.parseArguments(javaInvokable.arguments()));
+            case JavaAssignmentNode javaAssignmentNode -> new TypescriptLang.TypescriptBreak();
         };
     }
 

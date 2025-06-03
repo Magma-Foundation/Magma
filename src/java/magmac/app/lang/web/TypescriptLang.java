@@ -20,12 +20,14 @@ import magmac.app.lang.Destructors;
 import magmac.app.lang.JavaRules;
 import magmac.app.lang.LazyRule;
 import magmac.app.lang.Serializable;
+import magmac.app.lang.java.Invokable;
 import magmac.app.lang.java.JavaLang;
 import magmac.app.lang.node.Block;
 import magmac.app.lang.node.Conditional;
 import magmac.app.lang.node.ConditionalType;
 import magmac.app.lang.node.ParameterizedMethodHeader;
 import magmac.app.lang.node.PostVariant;
+import magmac.app.lang.node.ReturnNode;
 import magmac.app.lang.node.Segment;
 import magmac.app.lang.node.StructureValue;
 import magmac.app.lang.node.TypeArguments;
@@ -282,5 +284,43 @@ public final class TypescriptLang {
         Class,
         Enum,
         Interface
+    }
+
+    public static final class TypescriptBreak implements TypescriptFunctionSegmentValue {
+        @Override
+        public Node serialize() {
+            return new MapNode("break");
+        }
+    }
+
+    public static final class TypescriptContinue implements TypescriptFunctionSegmentValue {
+        @Override
+        public Node serialize() {
+            return new MapNode("continue");
+        }
+    }
+
+    public static final class TypescriptReturnNode extends ReturnNode<TypescriptValue> implements TypescriptFunctionSegmentValue, TypescriptFunctionSegment {
+        public TypescriptReturnNode(TypescriptValue child) {
+            super(child);
+        }
+
+        @Override
+        public Node serialize() {
+            return new MapNode("return").withNodeSerialized("child", this.child);
+        }
+    }
+
+    public static class TypescriptInvokable extends Invokable<TypescriptCaller, TypescriptArgument> implements TypescriptValue, TypescriptFunctionSegmentValue {
+        public TypescriptInvokable(TypescriptCaller caller, List<TypescriptArgument> arguments) {
+            super(caller, arguments);
+        }
+
+        @Override
+        public Node serialize() {
+            return new MapNode("invokable")
+                    .withNodeSerialized("caller", this.caller)
+                    .withNodeListSerialized("arguments", this.arguments);
+        }
     }
 }
