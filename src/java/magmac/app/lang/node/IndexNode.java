@@ -2,6 +2,7 @@ package magmac.app.lang.node;
 
 import magmac.api.Option;
 import magmac.app.compile.error.CompileResult;
+import magmac.app.compile.node.MapNode;
 import magmac.app.compile.node.Node;
 import magmac.app.compile.rule.LocatingRule;
 import magmac.app.compile.rule.NodeRule;
@@ -25,5 +26,10 @@ public record IndexNode(Value parent, Value argument) implements Value {
                     .withNode("argument", Values::deserializeOrError)
                     .complete(tuple -> new IndexNode(tuple.left(), tuple.right()));
         });
+    }
+
+    @Override
+    public Node serialize() {
+        return new MapNode(this.getClass().getName());
     }
 }
