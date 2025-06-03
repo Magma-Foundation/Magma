@@ -23,7 +23,6 @@ import { Destructors } from "../../../../magmac/app/lang/Destructors";
 import { LazyRule } from "../../../../magmac/app/lang/LazyRule";
 import { MutableLazyRule } from "../../../../magmac/app/lang/MutableLazyRule";
 import { Serializable } from "../../../../magmac/app/lang/Serializable";
-import { Access } from "../../../../magmac/app/lang/common/Access";
 import { Symbol } from "../../../../magmac/app/lang/common/Symbol";
 import { Conditional } from "../../../../magmac/app/lang/node/Conditional";
 import { ConditionalType } from "../../../../magmac/app/lang/node/ConditionalType";
@@ -79,8 +78,8 @@ export class JavaRoot {
 export class JavaLambda {
 	JavaLambda(header : JavaLambdaHeader, content : JavaLambdaContent) : public {0( 0, 0);;}
 }
-export class JavaAccess {
-	JavaAccess(type : JavaAccessType, receiver : JavaValue, property : String) : public {0( 0, 0, 0);;}
+export class Access {
+	Access(type : JavaAccessType, receiver : JavaValue, property : String) : public {0( 0, 0, 0);;}
 }
 export class JavaLambdaValueContent {
 	JavaLambdaValueContent(value : JavaValue) : public {0( 0);;}
@@ -134,11 +133,11 @@ export class JavaStringNode {
 export class JavaOperation {
 	serialize() : Node {return new MapNode( 0.operator.type( ));;}
 }
-export class JavaCharNode {
+export class Char {
 }
 export class JavaNot {
 }
-export class JavaIndexNode {
+export class Index {
 }
 export class JavaSwitchNode {
 }

@@ -29,11 +29,11 @@ export class JavaDeserializers {
 	deserializeConstruction(node : Node) : Option<CompileResult<JavaCaller>> {return 0.destructWithType( 0, 0).map( 0);;}
 	deserializeInvocation(node : Node) : Option<CompileResult<JavaLang.Invokable>> {return 0.destructWithType( 0, 0).map( 0);;}
 	deserializeRootSegment(node : Node) : CompileResult<JavaRootSegment> {return 0.orError( 0, 0, 0.of( 0.wrap( 0.deserializeWhitespace), 0.deserialize, 0.wrap( new JavaStructureNodeDeserializer( 0.Class)), 0.wrap( new JavaStructureNodeDeserializer( 0.Interface)), 0.wrap( new JavaStructureNodeDeserializer( 0.Record)), 0.wrap( new JavaStructureNodeDeserializer( 0.Enum))));;}
-	deserializeAccess(type : JavaAccessType, node : Node) : Option<CompileResult<JavaAccess>> {return 0.destructWithType( 0.type( ), 0).map( 0);;}
+	deserializeAccess(type : JavaAccessType, node : Node) : Option<CompileResult<Access>> {return 0.destructWithType( 0.type( ), 0).map( 0);;}
 	deserializeYield(node : Node) : Option<CompileResult<JavaYieldNode>> {return 0.destructWithType( 0, 0).map( 0);;}
 	deserializePost(variant : PostVariant, node : Node) : Option<CompileResult<JavaPost>> {return 0.destructWithType( 0.type( ), 0).map( 0);;}
 	deserializeLambda(node : Node) : Option<CompileResult<JavaLambda>> {return 0.destructWithType( 0, 0).map( 0);;}
-	deserializeAccessWithType(type : JavaAccessType) : TypedDeserializer<JavaAccess> {return 0;;}
+	deserializeAccessWithType(type : JavaAccessType) : TypedDeserializer<Access> {return 0;;}
 	deserializeFunctionStatement(node : Node) : Option<CompileResult<JavaFunctionStatement>> {return 0.destructWithType( 0, 0).map( 0);;}
 	deserializeReturn(node : Node) : Option<CompileResult<JavaReturnNode>> {return 0.destructWithType( 0, 0).map( 0);;}
 	deserializeBlockHeader(node : Node) : CompileResult<JavaBlockHeader> {return 0.orError( 0, 0, 0.of( 0.wrap( 0), 0.wrap( 0), 0.wrap( 0.deserializeElse), 0.wrap( 0.deserializeTry), 0.wrap( 0.deserialize)));;}
@@ -46,11 +46,11 @@ export class JavaDeserializers {
 	deserializeTry(node : Node) : Option<CompileResult<JavaTry>> {return 0.destructWithType( 0, 0).map( 0);;}
 	deserializeElse(node : Node) : Option<CompileResult<JavaElse>> {return 0.destructWithType( 0, 0).map( 0);;}
 	deserializeString(node : Node) : Option<CompileResult<JavaStringNode>> {return 0.destructWithType( 0, 0).map( 0);;}
-	deserializeChar(node : Node) : Option<CompileResult<JavaCharNode>> {return 0.destructWithType( 0, 0).map( 0);;}
+	deserializeChar(node : Node) : Option<CompileResult<Char>> {return 0.destructWithType( 0, 0).map( 0);;}
 	deserializeLambdaHeader(node : Node) : CompileResult<JavaLambdaHeader> {return 0.orError( 0, 0, 0.of( 0.wrap( 0.deserializeSymbol), 0.wrap( 0.deserializeMultipleHeader)));;}
 	deserializeNumber(node : Node) : Option<CompileResult<JavaNumberNode>> {return 0.destructWithType( 0, 0).map( 0);;}
 	deserializeNot(node : Node) : Option<CompileResult<JavaNot>> {return 0.destructWithType( 0, 0).map( 0);;}
-	deserializeIndex(value : Node) : Option<CompileResult<JavaIndexNode>> {return 0.destructWithType( 0, 0).map( 0);;}
+	deserializeIndex(value : Node) : Option<CompileResult<Index>> {return 0.destructWithType( 0, 0).map( 0);;}
 	deserializeSwitch(node : Node) : Option<CompileResult<JavaSwitchNode>> {return 0.destructWithType( 0, 0).map( 0);;}
 	deserializeValue(node : Node) : Option<CompileResult<JavaValue>> {break;break;return 0.or( 0, 0.addAllLast( 0));;}
 	wrapAsDeserializer(operator : Operator) : TypedDeserializer<JavaValue> {return 0.wrap( 0.wrap( new OperationDeserializer( 0)));;}

@@ -59,11 +59,11 @@ public final class JavaDeserializers {
         ));
     }
 
-    public static Option<CompileResult<JavaAccess>> deserializeAccess(JavaAccessType type, Node node) {
+    public static Option<CompileResult<Access>> deserializeAccess(JavaAccessType type, Node node) {
         return Destructors.destructWithType(type.type(), node)
                 .map(deserializer -> deserializer.withString("property")
                         .withNode("receiver", JavaDeserializers::deserializeJavaOrError)
-                        .complete(tuple -> new JavaAccess(type, tuple.right(), tuple.left())));
+                        .complete(tuple -> new Access(type, tuple.right(), tuple.left())));
     }
 
     public static Option<CompileResult<JavaYieldNode>> deserializeYield(Node node) {
@@ -85,7 +85,7 @@ public final class JavaDeserializers {
                 .complete(tuple -> new JavaLambda(tuple.left(), tuple.right())));
     }
 
-    public static TypedDeserializer<JavaAccess> deserializeAccessWithType(JavaAccessType type) {
+    public static TypedDeserializer<Access> deserializeAccessWithType(JavaAccessType type) {
         return node1 -> JavaDeserializers.deserializeAccess(type, node1);
     }
 
@@ -155,8 +155,8 @@ public final class JavaDeserializers {
         return Destructors.destructWithType("string", node).map(deserializer -> deserializer.withString("value").complete(JavaStringNode::new));
     }
 
-    public static Option<CompileResult<JavaCharNode>> deserializeChar(Node node) {
-        return Destructors.destructWithType("char", node).map(deserializer -> deserializer.withString("value").complete(JavaCharNode::new));
+    public static Option<CompileResult<Char>> deserializeChar(Node node) {
+        return Destructors.destructWithType("char", node).map(deserializer -> deserializer.withString("value").complete(Char::new));
     }
 
     public static CompileResult<JavaLambdaHeader> deserializeLambdaHeader(Node node) {
@@ -175,11 +175,11 @@ public final class JavaDeserializers {
                 .complete(JavaNot::new));
     }
 
-    public static Option<CompileResult<JavaIndexNode>> deserializeIndex(Node value) {
+    public static Option<CompileResult<Index>> deserializeIndex(Node value) {
         return Destructors.destructWithType("index", value).map(destructor -> {
             return destructor.withNode("parent", JavaDeserializers::deserializeJavaOrError)
                     .withNode("argument", JavaDeserializers::deserializeJavaOrError)
-                    .complete(tuple -> new JavaIndexNode(tuple.left(), tuple.right()));
+                    .complete(tuple -> new Index(tuple.left(), tuple.right()));
         });
     }
 

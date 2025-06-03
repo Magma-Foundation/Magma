@@ -25,7 +25,6 @@ import magmac.app.lang.Destructors;
 import magmac.app.lang.LazyRule;
 import magmac.app.lang.MutableLazyRule;
 import magmac.app.lang.Serializable;
-import magmac.app.lang.common.Access;
 import magmac.app.lang.common.Symbol;
 import magmac.app.lang.node.Conditional;
 import magmac.app.lang.node.ConditionalType;
@@ -52,7 +51,7 @@ public class JavaLang {
     public sealed interface JavaCaller permits JavaConstruction, JavaValue {
     }
 
-    public sealed interface JavaValue extends JavaCaller, JavaArgument, JavaAssignable permits JavaAccess, JavaCharNode, JavaIndexNode, Invokable, JavaLambda, JavaNot, JavaNumberNode, JavaOperation, JavaStringNode, JavaSwitchNode, JavaSymbol {
+    public sealed interface JavaValue extends JavaCaller, JavaArgument, JavaAssignable permits Access, Char, Index, Invokable, JavaLambda, JavaNot, JavaNumberNode, JavaOperation, JavaStringNode, JavaSwitchNode, JavaSymbol {
     }
 
     public interface JavaAssignable {
@@ -121,8 +120,8 @@ public class JavaLang {
         }
     }
 
-    public static final class JavaAccess extends Access<JavaAccessType, JavaValue> implements JavaValue {
-        public JavaAccess(JavaAccessType type, JavaValue receiver, String property) {
+    public static final class Access extends magmac.app.lang.common.Access<JavaAccessType, JavaValue> implements JavaValue {
+        public Access(JavaAccessType type, JavaValue receiver, String property) {
             super(type, receiver, property);
         }
     }
@@ -310,13 +309,13 @@ public class JavaLang {
         }
     }
 
-    public record JavaCharNode(String value) implements JavaValue {
+    public record Char(String value) implements JavaValue {
     }
 
     public record JavaNot(JavaValue value) implements JavaValue {
     }
 
-    public record JavaIndexNode(JavaValue parent, JavaValue argument) implements JavaValue {
+    public record Index(JavaValue parent, JavaValue argument) implements JavaValue {
     }
 
     public record JavaSwitchNode(JavaValue value, List<JavaFunctionSegment> children) implements JavaValue {

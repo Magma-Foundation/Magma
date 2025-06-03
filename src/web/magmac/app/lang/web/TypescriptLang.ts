@@ -111,5 +111,8 @@ export class Invokable {
 export class Char {
 	serialize() : Node {return new MapNode( 0).withString( 0, 0.value);;}
 }
+export class Index {
+	serialize() : Node {return new MapNode( 0).withNodeSerialized( 0, 0.parent).withNodeSerialized( 0, 0.argument);;}
+}
 export class TypescriptLang {
 }

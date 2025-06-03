@@ -1407,7 +1407,6 @@ JavaLang --> Destructors
 JavaLang --> LazyRule
 JavaLang --> MutableLazyRule
 JavaLang --> Serializable
-JavaLang --> Access
 JavaLang --> Symbol
 JavaLang --> Conditional
 JavaLang --> ConditionalType

@@ -295,6 +295,13 @@ public final class TypescriptLang {
         }
     }
 
+    public record Index(TypescriptValue parent, TypescriptValue argument) implements TypescriptValue {
+        @Override
+        public Node serialize() {
+            return new MapNode("index").withNodeSerialized("parent", this.parent).withNodeSerialized("argument", this.argument);
+        }
+    }
+
     public enum TypescriptStructureType {
         Class,
         Enum,
