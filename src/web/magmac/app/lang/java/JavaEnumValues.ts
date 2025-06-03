@@ -12,6 +12,6 @@ import { TypeRule } from "../../../../magmac/app/compile/rule/TypeRule";
 import { Destructors } from "../../../../magmac/app/lang/Destructors";
 import { ValueFolder } from "../../../../magmac/app/lang/ValueFolder";
 export class JavaEnumValues {
-	createEnumValuesRule(value : Rule) : TypeRule {break;break;break;return new TypeRule( "enum-values", new OrRule( 0.of( 0, 0)));;}
-	deserialize(node : Node) : Option<CompileResult<JavaStructureMember>> {return 0.destructWithType( "enum-values", 0).map( 0);;}
+	createEnumValuesRule(value : Rule) : TypeRule {break;break;break;return new TypeRule( "enum-values", new OrRule( Lists.of( withEnd, enumValues)));;}
+	deserialize(node : Node) : Option<CompileResult<JavaStructureMember>> {return Destructors.destructWithType( "enum-values", node).map( 0);;}
 }

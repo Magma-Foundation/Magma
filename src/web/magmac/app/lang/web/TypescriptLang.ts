@@ -40,59 +40,59 @@ export interface TypescriptFunctionSegment {
 export interface TypescriptValue {
 }
 export class Number {
-	serialize() : Node {return new MapNode( "number").withString( "value", 0.value);;}
+	serialize() : Node {return new MapNode( "number").withString( "value", this.value);;}
 }
 export class TypescriptStructureNode {
 	TypescriptStructureNode(type : TypescriptStructureType, structureNode : StructureValue<TypeScriptType, TypescriptStructureMember>) : public {break;break;;}
-	serializeImplementsParams() : Node {return 0.value.maybeImplemented( ).map( 0).orElse( new MapNode( ));;}
-	serializeExtendedParams() : Node {return 0.value.maybeExtended( ).map( 0).orElse( new MapNode( ));;}
-	serializeTypeParams() : Node {return 0.value.maybeTypeParams( ).map( 0).orElse( new MapNode( ));;}
-	serialize() : Node {return new MapNode( 0.type.name( ).toLowerCase( )).withString( "name", 0.value.name( )).withNodeListAndSerializer( "modifiers", 0.value.modifiers( ), 0.serialize).withNodeListAndSerializer( "members", 0.value.members( ), 0.serialize).merge( 0.serializeTypeParams( )).merge( 0.serializeExtendedParams( )).merge( 0.serializeImplementsParams( ));;}
+	serializeImplementsParams() : Node {return this.value.maybeImplemented( ).map( 0).orElse( new MapNode( ));;}
+	serializeExtendedParams() : Node {return this.value.maybeExtended( ).map( 0).orElse( new MapNode( ));;}
+	serializeTypeParams() : Node {return this.value.maybeTypeParams( ).map( 0).orElse( new MapNode( ));;}
+	serialize() : Node {return new MapNode( this.type.name( ).toLowerCase( )).withString( "name", this.value.name( )).withNodeListAndSerializer( "modifiers", this.value.modifiers( ), Serializable.serialize).withNodeListAndSerializer( "members", this.value.members( ), Serializable.serialize).merge( this.serializeTypeParams( )).merge( this.serializeExtendedParams( )).merge( this.serializeImplementsParams( ));;}
 }
 export class TypeScriptImport {
-	serialize() : Node {return new MapNode( "import").withNodeListAndSerializer( "values", 0.values, 0.serialize).withNodeListAndSerializer( "segments", 0.segments, 0.serialize);;}
+	serialize() : Node {return new MapNode( "import").withNodeListAndSerializer( "values", this.values, Segment.serialize).withNodeListAndSerializer( "segments", this.segments, Segment.serialize);;}
 }
 export class TypescriptRoot {
-	serialize() : Node {return new MapNode( "root").withNodeListAndSerializer( "children", 0.children, 0.serialize);;}
+	serialize() : Node {return new MapNode( "root").withNodeListAndSerializer( "children", this.children, TypeScriptRootSegment.serialize);;}
 }
 export class TypescriptMethod {
-	serialize() : Node {break;return 0.maybeChildren.map( 0).orElse( 0);;}
+	serialize() : Node {break;return this.maybeChildren.map( 0).orElse( node);;}
 }
 export class TypeScriptTemplateType {
-	TypeScriptTemplateType(base : JavaLang.JavaSymbol, typeArguments : TypeArguments<TypeScriptType>) : public {break;break;;}
-	serialize() : Node {return new MapNode( "template").withNodeSerialized( "base", 0.base).withNodeListSerialized( "arguments", 0.typeArguments.arguments( ));;}
+	TypeScriptTemplateType(base : JavaLang.Symbol, typeArguments : TypeArguments<TypeScriptType>) : public {break;break;;}
+	serialize() : Node {return new MapNode( "template").withNodeSerialized( "base", this.base).withNodeListSerialized( "arguments", this.typeArguments.arguments( ));;}
 }
 export class TypescriptConditional {
-	TypescriptConditional(type : ConditionalType, condition : TypescriptValue) : public {0( 0, 0);;}
-	serialize() : Node {return new MapNode( 0.type.name( ).toLowerCase( )).withNodeSerialized( "condition", 0.condition);;}
+	TypescriptConditional(type : ConditionalType, condition : TypescriptValue) : public {super( type, condition);;}
+	serialize() : Node {return new MapNode( this.type.name( ).toLowerCase( )).withNodeSerialized( "condition", this.condition);;}
 }
 export class TypescriptBlock {
-	TypescriptBlock(header : TypescriptBlockHeader, segments : List<TypescriptFunctionSegment>) : public {0( 0, 0);;}
-	serialize() : Node {return new MapNode( "block").withNodeSerialized( "header", 0.header).withNodeListSerialized( "children", 0.children);;}
+	TypescriptBlock(header : TypescriptBlockHeader, segments : List<TypescriptFunctionSegment>) : public {super( header, segments);;}
+	serialize() : Node {return new MapNode( "block").withNodeSerialized( "header", this.header).withNodeListSerialized( "children", this.children);;}
 }
 export class TypescriptConstructor {
 	serialize() : Node {return new MapNode( "constructor");;}
 }
 export class TypeScriptDefinition {
 	TypeScriptDefinition(definition : CommonLang.Definition<TypeScriptType>) : public {break;;}
-	serialize() : Node {return new MapNode( "definition").withString( "name", 0.definition.name( )).withNodeSerialized( "type", 0.definition.type( ));;}
+	serialize() : Node {return new MapNode( "definition").withString( "name", this.definition.name( )).withNodeSerialized( "type", this.definition.type( ));;}
 }
 export class TypescriptArrayType {
 	TypescriptArrayType(arrayType : TypeScriptType) : public {break;;}
-	serialize() : Node {return new MapNode( "array").withNodeSerialized( "child", 0.childType);;}
+	serialize() : Node {return new MapNode( "array").withNodeSerialized( "child", this.childType);;}
 }
 export class TypeParam {
-	deserialize(node : Node) : CompileResult<TypeParam> {return 0.destruct( 0).withString( "value").complete( 0.new);;}
-	serialize() : Node {return new MapNode( ).withString( "value", 0.value);;}
+	deserialize(node : Node) : CompileResult<TypeParam> {return Destructors.destruct( node).withString( "value").complete( TypeParam.new);;}
+	serialize() : Node {return new MapNode( ).withString( "value", this.value);;}
 }
 export class Construction {
-	serialize() : Node {return new MapNode( "construction").withNodeSerialized( "type", 0.type);;}
+	serialize() : Node {return new MapNode( "construction").withNodeSerialized( "type", this.type);;}
 }
 export class Post {
-	serialize() : Node {return new MapNode( 0.variant.type( )).withNodeSerialized( "child", 0.value);;}
+	serialize() : Node {return new MapNode( this.variant.type( )).withNodeSerialized( "child", this.value);;}
 }
 export class Access {
-	serialize() : Node {return new MapNode( "data-access").withNodeSerialized( "receiver", 0.receiver).withString( "property", 0.property);;}
+	serialize() : Node {return new MapNode( "data-access").withNodeSerialized( "receiver", this.receiver).withString( "property", this.property);;}
 }
 export class TypescriptBreak {
 	serialize() : Node {return new MapNode( "break");;}
@@ -101,24 +101,27 @@ export class TypescriptContinue {
 	serialize() : Node {return new MapNode( "continue");;}
 }
 export class TypescriptReturnNode {
-	TypescriptReturnNode(child : TypescriptValue) : public {0( 0);;}
-	serialize() : Node {return new MapNode( "return").withNodeSerialized( "child", 0.child);;}
+	TypescriptReturnNode(child : TypescriptValue) : public {super( child);;}
+	serialize() : Node {return new MapNode( "return").withNodeSerialized( "child", this.child);;}
 }
 export class Invokable {
-	Invokable(caller : TypescriptCaller, arguments : List<TypescriptArgument>) : public {0( 0, 0);;}
-	serialize() : Node {return new MapNode( "invokable").withNodeSerialized( "caller", 0.caller).withNodeListSerialized( "arguments", 0.arguments);;}
+	Invokable(caller : TypescriptCaller, arguments : List<TypescriptArgument>) : public {super( caller, arguments);;}
+	serialize() : Node {return new MapNode( "invokable").withNodeSerialized( "caller", this.caller).withNodeListSerialized( "arguments", this.arguments);;}
 }
 export class Char {
-	serialize() : Node {return new MapNode( "char").withString( "value", 0.value);;}
+	serialize() : Node {return new MapNode( "char").withString( "value", this.value);;}
 }
 export class Index {
-	serialize() : Node {return new MapNode( "index").withNodeSerialized( "parent", 0.parent).withNodeSerialized( "argument", 0.argument);;}
+	serialize() : Node {return new MapNode( "index").withNodeSerialized( "parent", this.parent).withNodeSerialized( "argument", this.argument);;}
 }
 export class Not {
-	serialize() : Node {return new MapNode( "not").withNodeSerialized( "child", 0.child);;}
+	serialize() : Node {return new MapNode( "not").withNodeSerialized( "child", this.child);;}
 }
-export class StringNode {
-	serialize() : Node {return new MapNode( "string").withString( "value", 0.value);;}
+export class StringValue {
+	serialize() : Node {return new MapNode( "string").withString( "value", this.value);;}
+}
+export class Symbol {
+	serialize() : Node {return new MapNode( "symbol").withString( "value", this.value);;}
 }
 export class TypescriptLang {
 }

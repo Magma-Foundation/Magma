@@ -12,10 +12,10 @@ import { RuleGenerator } from "../../../magmac/app/stage/generate/RuleGenerator"
 import { Path } from "../../../java/nio/file/Path";
 import { Paths } from "../../../java/nio/file/Paths";
 export class PlantUMLTargetPlatform {
-	createTargetPath() : Path {return 0.get( ".", "diagrams");;}
+	createTargetPath() : Path {return Paths.get( ".", "diagrams");;}
 	createExtension() : String {return "puml";;}
-	createRule() : Rule {return 0.createRule( );;}
-	createCompiler() : Compiler {break;return new StagedCompiler<PlantUMLRoot>( new JavaPlantUMLParser( ), 0);;}
-	createApplication0(targets : Targets) : Application {return new CompileApplication<>( 0( ), 0);;}
-	createApplication() : Application {break;break;break;return 0.createApplication0( 0);;}
+	createRule() : Rule {return PlantUMLRoot.createRule( );;}
+	createCompiler() : Compiler {break;return new StagedCompiler<PlantUMLRoot>( new JavaPlantUMLParser( ), generator);;}
+	createApplication0(targets : Targets) : Application {return new CompileApplication<>( createCompiler( ), targets);;}
+	createApplication() : Application {break;break;break;return this.createApplication0( targets);;}
 }

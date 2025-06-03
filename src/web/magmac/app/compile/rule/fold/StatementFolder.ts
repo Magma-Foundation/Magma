@@ -1,5 +1,5 @@
 import { DivideState } from "../../../../../magmac/app/compile/rule/divide/DivideState";
 export class StatementFolder {
-	fold(state : DivideState, c : char) : DivideState {break;if(true){ return 0.advance( );;}if(true){ return 0.advance( ).exit( );;}if(true){ return 0.enter( );;}if(true){ return 0.exit( );;}return 0;;}
+	fold(state : DivideState, c : char) : DivideState {break;if(true){ return appended.advance( );;}if(true){ return appended.advance( ).exit( );;}if(true){ return appended.enter( );;}if(true){ return appended.exit( );;}return appended;;}
 	createDelimiter() : String {return "";;}
 }

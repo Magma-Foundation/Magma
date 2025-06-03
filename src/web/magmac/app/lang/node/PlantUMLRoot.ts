@@ -6,6 +6,6 @@ import { Rule } from "../../../../magmac/app/compile/rule/Rule";
 import { StatementFolder } from "../../../../magmac/app/compile/rule/fold/StatementFolder";
 import { Serializable } from "../../../../magmac/app/lang/Serializable";
 export class PlantUMLRoot {
-	createRule() : Rule {return 0.createNodeListRule( "segments", new StatementFolder( ), 0.createRootSegmentRule( ));;}
-	serialize() : Node {return new MapNode( "root").withNodeListAndSerializer( "segments", 0.segments, 0.serialize);;}
+	createRule() : Rule {return NodeListRule.createNodeListRule( "segments", new StatementFolder( ), PlantUMLRootSegments.createRootSegmentRule( ));;}
+	serialize() : Node {return new MapNode( "root").withNodeListAndSerializer( "segments", this.segments, PlantUMLRootSegment.serialize);;}
 }

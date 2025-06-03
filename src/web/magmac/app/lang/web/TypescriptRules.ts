@@ -23,13 +23,13 @@ import { FunctionSegments } from "../../../../magmac/app/lang/node/FunctionSegme
 import { Modifier } from "../../../../magmac/app/lang/node/Modifier";
 import { Parameters } from "../../../../magmac/app/lang/node/Parameters";
 export class TypescriptRules {
-	createRule() : Rule {return new TypeRule( "root", 0.Statements( "children", new OrRule( 0.of( 0.createWhitespaceRule( ), 0( ), 0( "class"), 0( "interface")))));;}
-	createStructureMemberRule() : Rule {break;break;return new OrRule( 0.of( 0.createWhitespaceRule( ), 0( 0, 0), 0.createStructureStatementRule( 0, 0)));;}
-	createMethodRule(definition : Rule, valueLazy : LazyRule) : Rule {break;break;break;break;break;return new TypeRule( "method", new OptionNodeListRule( "children", 0, new SuffixRule( 0, ";")));;}
-	createConstructorRule(definition : Rule) : Rule {break;return new TypeRule( "constructor", new PrefixRule( "constructor(", new SuffixRule( 0, ")")));;}
-	createDefinitionRule() : Rule {break;break;break;break;break;break;return 0.set( new OptionNodeListRule( "modifiers", 0.Last( 0, " ", 0), 0));;}
-	createTypeRule() : Rule {break;return 0.set( new OrRule( 0.of( 0.JavaTemplateType.createTemplateRule( 0), 0( 0), 0.createSymbolRule( ))));;}
-	createStructureRule(type : String) : Rule {break;break;break;return new TypeRule( 0, new PrefixRule( "export " + type + " ", 0));;}
-	createImportRule() : Rule {break;break;break;return new TypeRule( "import", new PrefixRule( "import { ", 0));;}
-	createArrayRule(orRule : LazyRule) : TypeRule {return new TypeRule( "array", new SuffixRule( new NodeRule( "child", 0), "[]"));;}
+	createRule() : Rule {return new TypeRule( "root", CommonLang.Statements( "children", new OrRule( Lists.of( JavaRules.createWhitespaceRule( ), createImportRule( ), createStructureRule( "class"), createStructureRule( "interface")))));;}
+	createStructureMemberRule() : Rule {break;break;return new OrRule( Lists.of( JavaRules.createWhitespaceRule( ), createMethodRule( definitionRule, valueLazy), JavaStructureStatement.createStructureStatementRule( definitionRule, valueLazy)));;}
+	createMethodRule(definition : Rule, valueLazy : LazyRule) : Rule {break;break;break;break;break;return new TypeRule( "method", new OptionNodeListRule( "children", childRule, new SuffixRule( header, ";")));;}
+	createConstructorRule(definition : Rule) : Rule {break;return new TypeRule( "constructor", new PrefixRule( "constructor(", new SuffixRule( parametersRule, ")")));;}
+	createDefinitionRule() : Rule {break;break;break;break;break;break;return definition.set( new OptionNodeListRule( "modifiers", LocatingRule.Last( modifiers, " ", first), first));;}
+	createTypeRule() : Rule {break;return type.set( new OrRule( Lists.of( JavaLang.JavaTemplateType.createTemplateRule( type), createArrayRule( type), CommonRules.createSymbolRule( ))));;}
+	createStructureRule(type : String) : Rule {break;break;break;return new TypeRule( type, new PrefixRule( "export " + type + " ", afterKeyword));;}
+	createImportRule() : Rule {break;break;break;return new TypeRule( "import", new PrefixRule( "import { ", first));;}
+	createArrayRule(orRule : LazyRule) : TypeRule {return new TypeRule( "array", new SuffixRule( new NodeRule( "child", orRule), "[]"));;}
 }

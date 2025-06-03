@@ -5,7 +5,7 @@ import { CompileErrors } from "../../../../magmac/app/compile/error/error/Compil
 import { MapNode } from "../../../../magmac/app/compile/node/MapNode";
 import { Node } from "../../../../magmac/app/compile/node/Node";
 export class StringRule {
-	findString(node : Node, key : String) : CompileResult<String> {return 0.findString( 0).map( 0).orElseGet( 0);;}
-	lex(input : String) : CompileResult<Node> {return 0.fromResult( new Ok<>( new MapNode( ).withString( 0.key, 0)));;}
-	generate(node : Node) : CompileResult<String> {return 0.findString( 0, 0.key);;}
+	findString(node : Node, key : String) : CompileResult<String> {return node.findString( key).map( 0).orElseGet( 0);;}
+	lex(input : String) : CompileResult<Node> {return CompileResults.fromResult( new Ok<>( new MapNode( ).withString( this.key, input)));;}
+	generate(node : Node) : CompileResult<String> {return StringRule.findString( node, this.key);;}
 }

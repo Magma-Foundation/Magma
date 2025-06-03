@@ -29,12 +29,12 @@ import { UnitSet } from "../../../magmac/app/stage/unit/UnitSet";
 export class JavaPlantUMLParser {
 	parseNamespaced(child : String, namespaced : JavaNamespacedNode) : Iter<PlantUMLRootSegment> {;;;}
 	createSimpleName(base : JavaLang.JavaBase) : String {;;;}
-	createSimpleNameFromQualifiedType(qualifiedType : JavaLang.JavaQualified) : String {return 0.segments( ).iter( ).map( 0.value).collect( new Joiner( ".")).orElse( "");;}
+	createSimpleNameFromQualifiedType(qualifiedType : JavaLang.JavaQualified) : String {return qualifiedType.segments( ).iter( ).map( Segment.value).collect( new Joiner( ".")).orElse( "");;}
 	createStructureSegment(structureNode : JavaStructureNode) : PlantUMLRootSegment {break;break;;;;}
 	createSimpleNameFromType(type : JavaLang.JavaType) : String {;;;}
-	apply(initial : UnitSet<JavaLang.JavaRoot>) : CompileResult<UnitSet<PlantUMLRoot>> {break;break;break;return 0.Ok( new MapUnitSet<PlantUMLRoot>( ).add( new SimpleUnit<>( 0, 0)));;}
-	parseRoot(unit : Unit<JavaLang.JavaRoot>) : Iter<PlantUMLRootSegment> {return 0.destruct( 0);;}
+	apply(initial : UnitSet<JavaLang.JavaRoot>) : CompileResult<UnitSet<PlantUMLRoot>> {break;break;break;return CompileResults.Ok( new MapUnitSet<PlantUMLRoot>( ).add( new SimpleUnit<>( defaultLocation, mergedRoot)));;}
+	parseRoot(unit : Unit<JavaLang.JavaRoot>) : Iter<PlantUMLRootSegment> {return unit.destruct( 0);;}
 	parseRootSegment(fileName : String, rootSegment : JavaRootSegment) : Iter<PlantUMLRootSegment> {;;;}
-	parseStructure(structureNode : JavaStructureNode) : Iter<PlantUMLRootSegment> {break;break;return 0.of( 0).addAllLast( 0.toInherits( 0, 0.extended( ))).addAllLast( 0.toInherits( 0, 0.implemented( ))).iter( );;}
+	parseStructure(structureNode : JavaStructureNode) : Iter<PlantUMLRootSegment> {break;break;return Lists.of( segment).addAllLast( JavaPlantUMLParser.toInherits( child, structureNode.extended( ))).addAllLast( JavaPlantUMLParser.toInherits( child, structureNode.implemented( ))).iter( );;}
 	toInherits(child : String, maybeOption : Option<List<JavaLang.JavaType>>) : List<PlantUMLRootSegment> {return 0( 0).collect( new ListCollector<>( ));;}
 }

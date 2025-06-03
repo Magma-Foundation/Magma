@@ -25,7 +25,6 @@ import magmac.app.lang.Destructors;
 import magmac.app.lang.LazyRule;
 import magmac.app.lang.MutableLazyRule;
 import magmac.app.lang.Serializable;
-import magmac.app.lang.common.Symbol;
 import magmac.app.lang.node.Conditional;
 import magmac.app.lang.node.ConditionalType;
 import magmac.app.lang.node.Deserializer;
@@ -51,7 +50,7 @@ public class JavaLang {
     public sealed interface JavaCaller permits JavaConstruction, JavaValue {
     }
 
-    public sealed interface JavaValue extends JavaCaller, JavaArgument, JavaAssignable permits Access, Char, Index, Invokable, JavaLambda, Not, Number, JavaOperation, JavaString, JavaSwitchNode, JavaSymbol {
+    public sealed interface JavaValue extends JavaCaller, JavaArgument, JavaAssignable permits Access, Char, Index, Invokable, JavaLambda, Not, Number, JavaOperation, StringValue, JavaSwitchNode, Symbol {
     }
 
     public interface JavaAssignable {
@@ -60,13 +59,13 @@ public class JavaLang {
     public sealed interface JavaBlockHeader permits JavaCatch, JavaConditional, JavaElse, JavaTry {
     }
 
-    public sealed interface JavaBase extends Serializable permits JavaQualified, JavaSymbol {
+    public sealed interface JavaBase extends Serializable permits JavaQualified, Symbol {
     }
 
     public interface JavaLambdaContent {
     }
 
-    public sealed interface JavaType permits JavaArrayType, JavaSymbol, JavaTemplateType, JavaQualified, JavaVariadicType {
+    public sealed interface JavaType permits JavaArrayType, Symbol, JavaTemplateType, JavaQualified, JavaVariadicType {
     }
 
     public interface JavaLambdaHeader {
@@ -81,8 +80,8 @@ public class JavaLang {
         }
     }
 
-    public static final class JavaSymbol extends Symbol implements JavaType, JavaValue, JavaBase, JavaLambdaHeader, JavaLambdaParameter {
-        public JavaSymbol(String value) {
+    public static final class Symbol extends magmac.app.lang.common.Symbol implements JavaType, JavaValue, JavaBase, JavaLambdaHeader, JavaLambdaParameter {
+        public Symbol(String value) {
             super(value);
         }
     }
@@ -292,8 +291,8 @@ public class JavaLang {
         }
     }
 
-    public static final class JavaString extends magmac.app.lang.common.StringNode implements JavaValue {
-        public JavaString(String value) {
+    public static final class StringValue extends magmac.app.lang.common.StringNode implements JavaValue {
+        public StringValue(String value) {
             super(value);
         }
     }

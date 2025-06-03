@@ -10,6 +10,6 @@ import { Destructors } from "../../../../magmac/app/lang/Destructors";
 import { JavaDeserializers } from "../../../../magmac/app/lang/java/JavaDeserializers";
 import { JavaLang } from "../../../../magmac/app/lang/java/JavaLang";
 export class SingleCaseValue {
-	deserialize(node : Node) : Option<CompileResult<SingleCaseValue>> {return 0.destructWithType( "case-single", 0).map( 0);;}
-	createRule(value : Rule) : TypeRule {return new TypeRule( "case-single", new NodeRule( "value", new StripRule( new SuffixRule( 0, ";"))));;}
+	deserialize(node : Node) : Option<CompileResult<SingleCaseValue>> {return Destructors.destructWithType( "case-single", node).map( 0);;}
+	createRule(value : Rule) : TypeRule {return new TypeRule( "case-single", new NodeRule( "value", new StripRule( new SuffixRule( value, ";"))));;}
 }

@@ -138,10 +138,10 @@ public final class TypescriptLang {
     }
 
     public static final class TypeScriptTemplateType implements TypeScriptType {
-        private final JavaLang.JavaSymbol base;
+        private final JavaLang.Symbol base;
         private final TypeArguments<TypeScriptType> typeArguments;
 
-        public TypeScriptTemplateType(JavaLang.JavaSymbol base, TypeArguments<TypeScriptType> typeArguments) {
+        public TypeScriptTemplateType(JavaLang.Symbol base, TypeArguments<TypeScriptType> typeArguments) {
             this.base = base;
             this.typeArguments = typeArguments;
         }
@@ -313,6 +313,13 @@ public final class TypescriptLang {
         @Override
         public Node serialize() {
             return new MapNode("string").withString("value", this.value);
+        }
+    }
+
+    public record Symbol(String value) implements TypescriptValue {
+        @Override
+        public Node serialize() {
+            return new MapNode("symbol").withString("value", this.value);
         }
     }
 

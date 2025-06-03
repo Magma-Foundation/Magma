@@ -10,8 +10,8 @@ import { Node } from "../../../magmac/app/compile/node/Node";
 import { ImmutableCompileError } from "../../../magmac/app/error/ImmutableCompileError";
 import { TypedDeserializer } from "../../../magmac/app/lang/node/TypedDeserializer";
 export class Deserializers {
-	orError(type : String, node : Node, deserializers : List<TypedDeserializer<T>>) : CompileResult<T> {return 0.or( 0, 0).map( 0).orElseGet( 0);;}
-	wrap(type : String, node : Node, err : CompileError) : CompileError {return new ImmutableCompileError( "Invalid type '" + type + "'", new NodeContext( 0), 0.of( 0));;}
-	or(node : Node, deserializers : List<TypedDeserializer<T>>) : Option<CompileResult<T>> {return 0.iter( ).map( 0).flatMap( 0.fromOption).next( );;}
+	orError(type : String, node : Node, deserializers : List<TypedDeserializer<T>>) : CompileResult<T> {return Deserializers.or( node, deserializers).map( 0).orElseGet( 0);;}
+	wrap(type : String, node : Node, err : CompileError) : CompileError {return new ImmutableCompileError( "Invalid type '" + type + "'", new NodeContext( node), Lists.of( err));;}
+	or(node : Node, deserializers : List<TypedDeserializer<T>>) : Option<CompileResult<T>> {return deserializers.iter( ).map( 0).flatMap( Iters.fromOption).next( );;}
 	wrap(deserializer : TypedDeserializer<T>) : TypedDeserializer<R> {return 0;;}
 }

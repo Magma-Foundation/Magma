@@ -9,6 +9,6 @@ import { JavaDeserializers } from "../../../../magmac/app/lang/java/JavaDeserial
 import { JavaRules } from "../../../../magmac/app/lang/JavaRules";
 import { JavaLang } from "../../../../magmac/app/lang/java/JavaLang";
 export class Arguments {
-	deserialize(node : Node) : CompileResult<JavaLang.JavaArgument> {return 0.orError( "argument", 0, 0.of( 0.wrap( 0.deserializeWhitespace), 0.wrap( 0.deserializeValue)));;}
-	createArgumentsRule(value : Rule) : Rule {return 0.Values( "arguments", new OrRule( 0.of( 0.createWhitespaceRule( ), 0)));;}
+	deserialize(node : Node) : CompileResult<JavaLang.JavaArgument> {return Deserializers.orError( "argument", node, Lists.of( Deserializers.wrap( JavaDeserializers.deserializeWhitespace), Deserializers.wrap( JavaDeserializers.deserializeValue)));;}
+	createArgumentsRule(value : Rule) : Rule {return NodeListRule.Values( "arguments", new OrRule( Lists.of( JavaRules.createWhitespaceRule( ), value)));;}
 }

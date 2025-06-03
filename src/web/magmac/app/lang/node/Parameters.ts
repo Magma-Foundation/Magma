@@ -10,6 +10,6 @@ import { ValueFolder } from "../../../../magmac/app/lang/ValueFolder";
 import { Deserializers } from "../../../../magmac/app/lang/Deserializers";
 import { JavaParameter } from "../../../../magmac/app/lang/java/JavaParameter";
 export class Parameters {
-	deserialize(node : Node) : CompileResult<JavaParameter> {return 0.orError( "parameter", 0, 0.of( 0.wrap( 0.deserializeWhitespace), 0.wrap( 0.deserializeTypedDefinition)));;}
-	createParametersRule(definition : Rule) : Rule {return 0.createNodeListRule( "parameters", new ValueFolder( ), new OrRule( 0.of( 0.createWhitespaceRule( ), 0)));;}
+	deserialize(node : Node) : CompileResult<JavaParameter> {return Deserializers.orError( "parameter", node, Lists.of( Deserializers.wrap( JavaDeserializers.deserializeWhitespace), Deserializers.wrap( JavaDeserializers.deserializeTypedDefinition)));;}
+	createParametersRule(definition : Rule) : Rule {return NodeListRule.createNodeListRule( "parameters", new ValueFolder( ), new OrRule( Lists.of( JavaRules.createWhitespaceRule( ), definition)));;}
 }

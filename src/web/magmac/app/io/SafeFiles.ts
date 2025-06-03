@@ -11,8 +11,8 @@ import { Path } from "../../../java/nio/file/Path";
 import { Collectors } from "../../../java/util/stream/Collectors";
 import { Stream } from "../../../java/util/stream/Stream";
 export class SafeFiles {
-	writeString(target : Path, output : String) : Option<IOException> {if(true){ 0.writeString( 0, 0);return new None<>( );;}if(true){ return new Some<>( 0);;};}
-	walk(sourceDirectory : Path) : IOResult<Iter<Path>> {if(true){ break;return new InlineIOResult<>( new Ok<>( new JVMList<>( 0.collect( 0.toList( ))).iter( )));;}if(true){ return new InlineIOResult<>( new Err<>( 0));;};}
-	readString(source : Path) : IOResult<String> {if(true){ return new InlineIOResult<>( new Ok<>( 0.readString( 0)));;}if(true){ return new InlineIOResult<>( new Err<>( 0));;};}
-	createDirectories(targetParent : Path) : Option<IOException> {if(true){ 0.createDirectories( 0);return new None<>( );;}if(true){ return new Some<>( 0);;};}
+	writeString(target : Path, output : String) : Option<IOException> {if(true){ Files.writeString( target, output);return new None<>( );;}if(true){ return new Some<>( e);;};}
+	walk(sourceDirectory : Path) : IOResult<Iter<Path>> {if(true){ break;return new InlineIOResult<>( new Ok<>( new JVMList<>( stream.collect( Collectors.toList( ))).iter( )));;}if(true){ return new InlineIOResult<>( new Err<>( e));;};}
+	readString(source : Path) : IOResult<String> {if(true){ return new InlineIOResult<>( new Ok<>( Files.readString( source)));;}if(true){ return new InlineIOResult<>( new Err<>( e));;};}
+	createDirectories(targetParent : Path) : Option<IOException> {if(true){ Files.createDirectories( targetParent);return new None<>( );;}if(true){ return new Some<>( e);;};}
 }

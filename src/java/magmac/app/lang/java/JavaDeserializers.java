@@ -151,8 +151,8 @@ public final class JavaDeserializers {
         return Destructors.destructWithType("else", node).map(deserializer -> deserializer.complete(JavaElse::new));
     }
 
-    public static Option<CompileResult<JavaString>> deserializeString(Node node) {
-        return Destructors.destructWithType("string", node).map(deserializer -> deserializer.withString("value").complete(JavaString::new));
+    public static Option<CompileResult<StringValue>> deserializeString(Node node) {
+        return Destructors.destructWithType("string", node).map(deserializer -> deserializer.withString("value").complete(StringValue::new));
     }
 
     public static Option<CompileResult<Char>> deserializeChar(Node node) {
@@ -222,9 +222,9 @@ public final class JavaDeserializers {
         return JavaDeserializers.deserializeValue(node).orElseGet(() -> CompileResults.NodeErr("Cannot deserialize value", node));
     }
 
-    public static Option<CompileResult<JavaSymbol>> deserializeSymbol(Node node) {
+    public static Option<CompileResult<Symbol>> deserializeSymbol(Node node) {
         return Destructors.destructWithType("symbol", node).map(deserializer -> deserializer.withString("value")
-                .complete(JavaSymbol::new)
+                .complete(Symbol::new)
                 .mapValue(type -> type));
     }
 

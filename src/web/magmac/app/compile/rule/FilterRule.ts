@@ -6,8 +6,8 @@ import { NumberFilter } from "../../../../magmac/app/compile/rule/filter/NumberF
 import { SymbolFilter } from "../../../../magmac/app/compile/rule/filter/SymbolFilter";
 export class FilterRule {
 	FilterRule(filter : Filter, childRule : Rule) : private {break;break;;}
-	Symbol(childRule : Rule) : Rule {return new FilterRule( new SymbolFilter( ), 0);;}
-	Number(childRule : Rule) : Rule {return new FilterRule( new NumberFilter( ), 0);;}
-	lex(input : String) : CompileResult<Node> {if(true){ return 0.childRule.lex( 0);;}if(true){ return 0.createStringError( 0.filter.createMessage( ), 0);;};}
-	generate(node : Node) : CompileResult<String> {return 0.childRule.generate( 0);;}
+	Symbol(childRule : Rule) : Rule {return new FilterRule( new SymbolFilter( ), childRule);;}
+	Number(childRule : Rule) : Rule {return new FilterRule( new NumberFilter( ), childRule);;}
+	lex(input : String) : CompileResult<Node> {if(true){ return this.childRule.lex( input);;}if(true){ return CompileErrors.createStringError( this.filter.createMessage( ), input);;};}
+	generate(node : Node) : CompileResult<String> {return this.childRule.generate( node);;}
 }

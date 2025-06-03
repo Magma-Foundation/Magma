@@ -3,5 +3,5 @@ import { OrRule } from "../../../../magmac/app/compile/rule/OrRule";
 import { Rule } from "../../../../magmac/app/compile/rule/Rule";
 import { SuffixRule } from "../../../../magmac/app/compile/rule/SuffixRule";
 export class PlantUMLRootSegments {
-	createRootSegmentRule() : Rule {return new SuffixRule( new OrRule( 0.of( 0.createRule( ), 0.createRule( ), 0.createStructureRule( "class"), 0.createStructureRule( "interface"), 0.createStructureRule( "enum"), 0.createInheritsRule( ), 0.createDependencyRule( ))), "\n");;}
+	createRootSegmentRule() : Rule {return new SuffixRule( new OrRule( Lists.of( PlantUMLHeader.createRule( ), PlantUMLFooter.createRule( ), PlantUMLStructure.createStructureRule( "class"), PlantUMLStructure.createStructureRule( "interface"), PlantUMLStructure.createStructureRule( "enum"), PlantUMLInherits.createInheritsRule( ), PlantUMLDependency.createDependencyRule( ))), "\n");;}
 }

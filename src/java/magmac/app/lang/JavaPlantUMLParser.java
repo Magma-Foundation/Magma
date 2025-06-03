@@ -45,7 +45,7 @@ public class JavaPlantUMLParser implements Parser<JavaLang.JavaRoot, PlantUMLRoo
     private static String createSimpleName(JavaLang.JavaBase base) {
         return switch (base) {
             case JavaLang.JavaQualified qualifiedType -> JavaPlantUMLParser.createSimpleNameFromQualifiedType(qualifiedType);
-            case JavaLang.JavaSymbol symbol -> symbol.value();
+            case JavaLang.Symbol symbol -> symbol.value();
         };
     }
 
@@ -71,7 +71,7 @@ public class JavaPlantUMLParser implements Parser<JavaLang.JavaRoot, PlantUMLRoo
     private static String createSimpleNameFromType(JavaLang.JavaType type) {
         return switch (type) {
             case JavaLang.JavaArrayType _, JavaLang.JavaVariadicType _ -> "?";
-            case JavaLang.JavaSymbol symbol -> symbol.value();
+            case JavaLang.Symbol symbol -> symbol.value();
             case JavaLang.JavaTemplateType templateType -> JavaPlantUMLParser.createSimpleName(templateType.base);
             case JavaLang.JavaQualified qualified -> "?";
         };

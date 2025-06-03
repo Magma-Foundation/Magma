@@ -1,3 +1,3 @@
 export class StringContext {
-	display() : String {return 0.value;;}
+	display() : String {return this.value;;}
 }

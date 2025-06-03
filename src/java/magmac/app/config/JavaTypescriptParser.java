@@ -231,9 +231,9 @@ class JavaTypescriptParser implements Parser<JavaLang.JavaRoot, TypescriptLang.T
             case JavaLang.Not not -> new TypescriptLang.Not(JavaTypescriptParser.parseValue(not.value()));
             case JavaLang.Number number -> new TypescriptLang.Number(number.value());
             case JavaLang.JavaOperation javaOperation -> new TypescriptLang.Number("0");
-            case JavaLang.JavaString javaStringNode -> new TypescriptLang.StringValue(javaStringNode.value());
+            case JavaLang.StringValue javaStringNode -> new TypescriptLang.StringValue(javaStringNode.value());
             case JavaLang.JavaSwitchNode javaSwitchNode -> new TypescriptLang.Number("0");
-            case JavaLang.JavaSymbol javaSymbol -> new TypescriptLang.Number("0");
+            case JavaLang.Symbol symbol -> new TypescriptLang.Symbol(symbol.value());
         };
     }
 
@@ -271,13 +271,13 @@ class JavaTypescriptParser implements Parser<JavaLang.JavaRoot, TypescriptLang.T
                     .withType(new TypescriptLang.TypescriptArrayType(JavaTypescriptParser.parseType(variadicType.child()))));
             case JavaLang.JavaQualified qualified ->
                     new TypescriptLang.TypeScriptDefinition(definition.withType(JavaTypescriptParser.parseQualifiedType(qualified)));
-            case JavaLang.JavaSymbol javaSymbol ->
-                    new TypescriptLang.TypeScriptDefinition(definition.withType(JavaTypescriptParser.parseSymbol(javaSymbol)));
+            case JavaLang.Symbol symbol ->
+                    new TypescriptLang.TypeScriptDefinition(definition.withType(JavaTypescriptParser.parseSymbol(symbol)));
         };
     }
 
-    private static TypescriptSymbol parseSymbol(JavaLang.JavaSymbol javaSymbol) {
-        return new TypescriptSymbol(javaSymbol.value());
+    private static TypescriptSymbol parseSymbol(JavaLang.Symbol symbol) {
+        return new TypescriptSymbol(symbol.value());
     }
 
     private static TypescriptSymbol parseQualifiedType(JavaLang.JavaQualified qualified) {
@@ -296,7 +296,7 @@ class JavaTypescriptParser implements Parser<JavaLang.JavaRoot, TypescriptLang.T
 
     private static TypescriptLang.TypeScriptType parseType(JavaLang.JavaType variadicType) {
         return switch (variadicType) {
-            case JavaLang.JavaSymbol symbol -> JavaTypescriptParser.parseSymbol(symbol);
+            case JavaLang.Symbol symbol -> JavaTypescriptParser.parseSymbol(symbol);
             case JavaLang.JavaArrayType type -> JavaTypescriptParser.parseArrayType(type);
             case JavaLang.JavaTemplateType templateType -> JavaTypescriptParser.parseTemplateType(templateType);
             case JavaLang.JavaVariadicType type -> new TypescriptSymbol("?");
@@ -305,12 +305,12 @@ class JavaTypescriptParser implements Parser<JavaLang.JavaRoot, TypescriptLang.T
     }
 
     private static TypescriptLang.TypeScriptTemplateType parseTemplateType(JavaLang.JavaTemplateType type) {
-        JavaLang.JavaSymbol base = JavaTypescriptParser.parseBaseType(type.base);
+        JavaLang.Symbol base = JavaTypescriptParser.parseBaseType(type.base);
         List<TypescriptLang.TypeScriptType> collect = JavaTypescriptParser.parseTypeList(type.typeArguments.arguments());
         return new TypescriptLang.TypeScriptTemplateType(base, new TypeArguments<>(collect));
     }
 
-    private static JavaLang.JavaSymbol parseBaseType(JavaLang.JavaBase base) {
+    private static JavaLang.Symbol parseBaseType(JavaLang.JavaBase base) {
         return switch (base) {
             case JavaLang.JavaQualified qualifiedType -> {
                 String joined = qualifiedType.segments()
@@ -319,9 +319,9 @@ class JavaTypescriptParser implements Parser<JavaLang.JavaRoot, TypescriptLang.T
                         .collect(new Joiner("."))
                         .orElse("");
 
-                yield new JavaLang.JavaSymbol(joined);
+                yield new JavaLang.Symbol(joined);
             }
-            case JavaLang.JavaSymbol symbol -> symbol;
+            case JavaLang.Symbol symbol -> symbol;
         };
     }
 

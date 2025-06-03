@@ -4,5 +4,5 @@ import { Unit } from "../../../../magmac/app/stage/unit/Unit";
 import { UnitSet } from "../../../../magmac/app/stage/unit/UnitSet";
 export class UnitSetCollector<T> {
 	createInitial() : UnitSet<T> {return new MapUnitSet<>( );;}
-	fold(current : UnitSet<T>, element : Unit<T>) : UnitSet<T> {return 0.add( 0);;}
+	fold(current : UnitSet<T>, element : Unit<T>) : UnitSet<T> {return current.add( element);;}
 }

@@ -12,6 +12,6 @@ import { StatementFolder } from "../../../../magmac/app/compile/rule/fold/Statem
 import { Destructors } from "../../../../magmac/app/lang/Destructors";
 import { JavaFunctionSegment } from "../../../../magmac/app/lang/java/JavaFunctionSegment";
 export class MultipleCaseValue {
-	deserialize(node : Node) : Option<CompileResult<CaseValue>> {return 0.destructWithType( "case-multiple", 0).map( 0);;}
-	createRule(segment : Rule) : TypeRule {return new TypeRule( "case-multiple", new StripRule( new PrefixRule( "{", new SuffixRule( 0.createNodeListRule( "children", new StatementFolder( ), 0), "}"))));;}
+	deserialize(node : Node) : Option<CompileResult<CaseValue>> {return Destructors.destructWithType( "case-multiple", node).map( 0);;}
+	createRule(segment : Rule) : TypeRule {return new TypeRule( "case-multiple", new StripRule( new PrefixRule( "{", new SuffixRule( NodeListRule.createNodeListRule( "children", new StatementFolder( ), segment), "}"))));;}
 }

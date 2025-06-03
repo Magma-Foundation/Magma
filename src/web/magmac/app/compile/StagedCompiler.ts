@@ -6,5 +6,5 @@ import { Parser } from "../../../magmac/app/stage/parse/Parser";
 import { UnitSet } from "../../../magmac/app/stage/unit/UnitSet";
 export class StagedCompiler<R extends Serializable> {
 	StagedCompiler(parser : Parser<JavaLang.JavaRoot, R>, generator : Generator) : public {break;break;;}
-	parseAndGenerate(units : UnitSet<JavaLang.JavaRoot>) : CompileResult<UnitSet<String>> {return 0.parser.apply( 0).mapValue( 0).flatMapValue( 0.generator.apply);;}
+	parseAndGenerate(units : UnitSet<JavaLang.JavaRoot>) : CompileResult<UnitSet<String>> {return this.parser.apply( units).mapValue( 0).flatMapValue( this.generator.apply);;}
 }

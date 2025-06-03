@@ -11,6 +11,6 @@ import { ParseUnitImpl } from "../../../../magmac/app/stage/unit/ParseUnitImpl";
 import { Supplier } from "../../../../java/util/function/Supplier";
 export class InlinePassResult {
 	empty() : ParseResult {return new InlinePassResult( new None<>( ));;}
-	from(state : ParseState, node : Node) : ParseResult {return new InlinePassResult( new Some<>( 0.Ok( new ParseUnitImpl<Node>( 0, 0))));;}
-	orElseGet(other : Supplier<ParseUnit<Node>>) : CompileResult<ParseUnit<Node>> {return 0.option.orElseGet( 0);;}
+	from(state : ParseState, node : Node) : ParseResult {return new InlinePassResult( new Some<>( CompileResults.Ok( new ParseUnitImpl<Node>( state, node))));;}
+	orElseGet(other : Supplier<ParseUnit<Node>>) : CompileResult<ParseUnit<Node>> {return this.option.orElseGet( 0);;}
 }

@@ -13,9 +13,9 @@ import { IOException } from "../../../../java/io/IOException";
 import { Files } from "../../../../java/nio/file/Files";
 import { Path } from "../../../../java/nio/file/Path";
 export class PathSources {
-	getTuple2IOResult(source : PathSource) : IOResult<Unit<String>> {return 0.read( ).mapValue( 0);;}
-	readAll() : IOResult<UnitSet<String>> {return 0.walk( 0.root).flatMapValue( 0.apply);;}
-	apply(sources : Iter<Path>) : IOResult<UnitSet<String>> {return new InlineIOResult<>( 0.getCollect( 0));;}
-	getCollect(sources : Iter<Path>) : Result<UnitSet<String>, IOException> {return 0.getCollected( 0).iter( ).map( 0.getTuple2IOResult).map( 0.result).collect( new ResultCollector<>( new UnitSetCollector<>( )));;}
-	getCollected(sources : Iter<Path>) : List<PathSource> {return 0.filter( 0.isRegularFile).filter( 0).map( 0).collect( new ListCollector<>( ));;}
+	getTuple2IOResult(source : PathSource) : IOResult<Unit<String>> {return source.read( ).mapValue( 0);;}
+	readAll() : IOResult<UnitSet<String>> {return SafeFiles.walk( this.root).flatMapValue( this.apply);;}
+	apply(sources : Iter<Path>) : IOResult<UnitSet<String>> {return new InlineIOResult<>( this.getCollect( sources));;}
+	getCollect(sources : Iter<Path>) : Result<UnitSet<String>, IOException> {return this.getCollected( sources).iter( ).map( PathSources.getTuple2IOResult).map( IOResult.result).collect( new ResultCollector<>( new UnitSetCollector<>( )));;}
+	getCollected(sources : Iter<Path>) : List<PathSource> {return sources.filter( Files.isRegularFile).filter( 0).map( 0).collect( new ListCollector<>( ));;}
 }

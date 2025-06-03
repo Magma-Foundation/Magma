@@ -6,6 +6,6 @@ import { StringContext } from "../../../../../magmac/app/compile/error/context/S
 import { Node } from "../../../../../magmac/app/compile/node/Node";
 import { ImmutableCompileError } from "../../../../../magmac/app/error/ImmutableCompileError";
 export class CompileErrors {
-	createNodeError(message : String, node : Node) : CompileResult<T> {return 0.fromResult( new Err<>( new ImmutableCompileError( 0, new NodeContext( 0))));;}
-	createStringError(message : String, context : String) : CompileResult<T> {return 0.fromResult( new Err<>( new ImmutableCompileError( 0, new StringContext( 0))));;}
+	createNodeError(message : String, node : Node) : CompileResult<T> {return CompileResults.fromResult( new Err<>( new ImmutableCompileError( message, new NodeContext( node))));;}
+	createStringError(message : String, context : String) : CompileResult<T> {return CompileResults.fromResult( new Err<>( new ImmutableCompileError( message, new StringContext( context))));;}
 }

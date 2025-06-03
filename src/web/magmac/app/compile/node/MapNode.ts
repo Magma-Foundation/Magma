@@ -15,43 +15,43 @@ import { CompileErrors } from "../../../../magmac/app/compile/error/error/Compil
 import { BiFunction } from "../../../../java/util/function/BiFunction";
 import { Function } from "../../../../java/util/function/Function";
 export class MapNode {
-	MapNode() : public {0( new None<String>( ), 0.empty( ), 0.empty( ), 0.empty( ));;}
+	MapNode() : public {this( new None<String>( ), Maps.empty( ), Maps.empty( ), Maps.empty( ));;}
 	MapNode(maybeType : Option<String>, strings : Map<String, String>, nodes : Map<String, Node>, nodeLists : Map<String, NodeList>) : private {break;break;break;break;;}
-	MapNode(type : String) : public {0( new Some<String>( 0), 0.empty( ), 0.empty( ), 0.empty( ));;}
-	fold(node : Node, iter : Iter<Tuple2<String, T>>, mapper : Function<Node, BiFunction<String, T, Node>>) : Node {return 0.fold( 0, 0);;}
-	formatNodeList(depth : int, nodeList : NodeList) : String {return 0.iter( ).map( 0).collect( new Joiner( ", ")).orElse( "");;}
-	createIndent(depth : int) : String {return "\n" + "\t".repeat( 0);;}
+	MapNode(type : String) : public {this( new Some<String>( type), Maps.empty( ), Maps.empty( ), Maps.empty( ));;}
+	fold(node : Node, iter : Iter<Tuple2<String, T>>, mapper : Function<Node, BiFunction<String, T, Node>>) : Node {return iter.fold( node, 0);;}
+	formatNodeList(depth : int, nodeList : NodeList) : String {return nodeList.iter( ).map( 0).collect( new Joiner( ", ")).orElse( "");;}
+	createIndent(depth : int) : String {return "\n" + "\t".repeat( depth);;}
 	formatEntry(depth : int, key : String, value : String) : String {break;return 0;;}
-	toStream(depth : int, map : Map<String, T>, mapper : Function<T, String>) : Iter<String> {if(true){ return 0.empty( );;}return 0.iter( ).map( 0);;}
-	withNodeAndSerializer(key : String, element : T, serializer : Function<T, Node>) : Node {return 0.withNode( 0, 0.apply( 0));;}
-	removeNode(key : String) : Option<Tuple2<Node, Node>> {return 0.nodes.removeByKey( 0).map( 0);;}
-	iterNodes() : Iter<Tuple2<String, Node>> {return 0.nodes.iter( );;}
-	display() : String {return 0.format( 0);;}
+	toStream(depth : int, map : Map<String, T>, mapper : Function<T, String>) : Iter<String> {if(true){ return Iters.empty( );;}return map.iter( ).map( 0);;}
+	withNodeAndSerializer(key : String, element : T, serializer : Function<T, Node>) : Node {return this.withNode( key, serializer.apply( element));;}
+	removeNode(key : String) : Option<Tuple2<Node, Node>> {return this.nodes.removeByKey( key).map( 0);;}
+	iterNodes() : Iter<Tuple2<String, Node>> {return this.nodes.iter( );;}
+	display() : String {return this.format( 0);;}
 	format(depth : int) : String {break;break;break;break;break;return 0;;}
-	withString(key : String, value : String) : Node {break;return 0;;}
-	findString(key : String) : Option<String> {if(true){ return new Some<>( 0.strings.get( 0));;}if(true){ return new None<>( );;};}
-	strings() : Map<String, String> {return 0.strings;;}
-	is(type : String) : boolean {return 0.maybeType.filter( 0).isPresent( );;}
-	retype(type : String) : Node {return new MapNode( new Some<String>( 0), 0.strings, 0.nodes, 0.nodeLists);;}
-	withNode(key : String, value : Node) : Node {break;return 0;;}
-	findNode(key : String) : Option<Node> {if(true){ return new Some<>( 0.nodes.get( 0));;}if(true){ return new None<>( );;};}
-	merge(other : Node) : Node {break;break;return 0.fold( 0, 0.iterNodeLists( ), 0);;}
-	iterStrings() : Iter<Tuple2<String, String>> {return 0.strings( ).iter( );;}
-	hasNodeList(key : String) : boolean {return 0.nodeLists.containsKey( 0);;}
-	removeNodeListOrError(key : String) : CompileResult<Tuple2<Node, NodeList>> {return 0.removeNodeList( 0).map( 0.Ok).orElseGet( 0);;}
-	removeNodeList(key : String) : Option<Tuple2<Node, NodeList>> {return 0.nodeLists.removeByKey( 0).map( 0);;}
-	withNodeLists(nodeLists : Map<String, NodeList>) : Node {return new MapNode( 0.maybeType, 0.strings, 0.nodes, 0);;}
+	withString(key : String, value : String) : Node {break;return this;;}
+	findString(key : String) : Option<String> {if(true){ return new Some<>( this.strings.get( key));;}if(true){ return new None<>( );;};}
+	strings() : Map<String, String> {return this.strings;;}
+	is(type : String) : boolean {return this.maybeType.filter( 0).isPresent( );;}
+	retype(type : String) : Node {return new MapNode( new Some<String>( type), this.strings, this.nodes, this.nodeLists);;}
+	withNode(key : String, value : Node) : Node {break;return this;;}
+	findNode(key : String) : Option<Node> {if(true){ return new Some<>( this.nodes.get( key));;}if(true){ return new None<>( );;};}
+	merge(other : Node) : Node {break;break;return MapNode.fold( withNodes, other.iterNodeLists( ), 0);;}
+	iterStrings() : Iter<Tuple2<String, String>> {return this.strings( ).iter( );;}
+	hasNodeList(key : String) : boolean {return this.nodeLists.containsKey( key);;}
+	removeNodeListOrError(key : String) : CompileResult<Tuple2<Node, NodeList>> {return this.removeNodeList( key).map( CompileResults.Ok).orElseGet( 0);;}
+	removeNodeList(key : String) : Option<Tuple2<Node, NodeList>> {return this.nodeLists.removeByKey( key).map( 0);;}
+	withNodeLists(nodeLists : Map<String, NodeList>) : Node {return new MapNode( this.maybeType, this.strings, this.nodes, nodeLists);;}
 	isEmpty() : boolean {return 0.nodeLists.isEmpty( );;}
-	withNodeListAndSerializer(key : String, list : List<T>, serializer : Function<T, Node>) : Node {break;return 0.withNodeList( 0, 0);;}
-	removeString(key : String) : CompileResult<Tuple2<Node, String>> {return 0.strings.removeByKey( 0).map( 0).orElseGet( 0);;}
-	removeNodeOrError(key : String) : CompileResult<Tuple2<Node, Node>> {return 0.nodes.removeByKey( 0).map( 0).orElseGet( 0);;}
-	createNotPresent(key : String) : CompileResult<Tuple2<Node, T>> {return 0.NodeErr( "Key '" + key + "' not present", 0);;}
-	withNodes(nodes : Map<String, Node>) : Node {return new MapNode( 0.maybeType, 0.strings, 0, 0.nodeLists);;}
-	withStrings(strings : Map<String, String>) : Node {return new MapNode( 0.maybeType, 0, 0.nodes, 0.nodeLists);;}
-	iterNodeLists() : Iter<Tuple2<String, NodeList>> {return 0.nodeLists.iter( );;}
-	withNodeList(key : String, values : NodeList) : Node {break;return 0;;}
-	toString() : String {return 0.display( );;}
-	findNodeList(key : String) : Option<NodeList> {if(true){ return new Some<>( 0.nodeLists.get( 0));;}if(true){ return new None<>( );;};}
-	findNodeOrError(key : String) : CompileResult<Node> {return 0.findNode( 0).map( 0).orElseGet( 0);;}
-	findNodeListOrError(key : String) : CompileResult<NodeList> {return 0.findNodeList( 0).map( 0.Ok).orElseGet( 0);;}
+	withNodeListAndSerializer(key : String, list : List<T>, serializer : Function<T, Node>) : Node {break;return this.withNodeList( key, nodeList);;}
+	removeString(key : String) : CompileResult<Tuple2<Node, String>> {return this.strings.removeByKey( key).map( 0).orElseGet( 0);;}
+	removeNodeOrError(key : String) : CompileResult<Tuple2<Node, Node>> {return this.nodes.removeByKey( key).map( 0).orElseGet( 0);;}
+	createNotPresent(key : String) : CompileResult<Tuple2<Node, T>> {return CompileResults.NodeErr( "Key '" + key + "' not present", this);;}
+	withNodes(nodes : Map<String, Node>) : Node {return new MapNode( this.maybeType, this.strings, nodes, this.nodeLists);;}
+	withStrings(strings : Map<String, String>) : Node {return new MapNode( this.maybeType, strings, this.nodes, this.nodeLists);;}
+	iterNodeLists() : Iter<Tuple2<String, NodeList>> {return this.nodeLists.iter( );;}
+	withNodeList(key : String, values : NodeList) : Node {break;return this;;}
+	toString() : String {return this.display( );;}
+	findNodeList(key : String) : Option<NodeList> {if(true){ return new Some<>( this.nodeLists.get( key));;}if(true){ return new None<>( );;};}
+	findNodeOrError(key : String) : CompileResult<Node> {return this.findNode( key).map( 0).orElseGet( 0);;}
+	findNodeListOrError(key : String) : CompileResult<NodeList> {return this.findNodeList( key).map( CompileResults.Ok).orElseGet( 0);;}
 }

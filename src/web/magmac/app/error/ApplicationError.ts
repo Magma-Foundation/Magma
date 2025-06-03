@@ -1,4 +1,4 @@
 import { Error } from "../../../magmac/api/error/Error";
 export class ApplicationError {
-	display() : String {return 0.error.display( );;}
+	display() : String {return this.error.display( );;}
 }

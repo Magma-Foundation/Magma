@@ -21,6 +21,6 @@ import { OptionNodeListRule } from "../../../../magmac/app/lang/OptionNodeListRu
 import { FunctionSegments } from "../../../../magmac/app/lang/node/FunctionSegments";
 import { Parameters } from "../../../../magmac/app/lang/node/Parameters";
 export class JavaMethod {
-	deserialize(node : Node) : Option<CompileResult<JavaStructureMember>> {return 0.destructWithType( "method", 0).map( 0);;}
-	createMethodRule(childRule : Rule) : Rule {break;break;break;break;break;return new TypeRule( "method", 0.First( 0, "(", 0));;}
+	deserialize(node : Node) : Option<CompileResult<JavaStructureMember>> {return Destructors.destructWithType( "method", node).map( 0);;}
+	createMethodRule(childRule : Rule) : Rule {break;break;break;break;break;return new TypeRule( "method", LocatingRule.First( header, "(", withParams));;}
 }

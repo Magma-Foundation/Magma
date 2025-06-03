@@ -10,11 +10,11 @@ import { CompileResults } from "../../../../magmac/app/compile/error/CompileResu
 import { Function } from "../../../../java/util/function/Function";
 export class CompoundDestructorImpl<T> {
 	CompoundDestructorImpl(result : CompileResult<Tuple2<Node, T>>) : public {break;;}
-	complete(mapper : Function<T, R>) : CompileResult<R> {return 0.current.flatMapValue( 0);;}
-	withNodeList(key : String, deserializer : Function<Node, CompileResult<R>>) : CompoundDestructor<Tuple2<T, List<R>>> {return new CompoundDestructorImpl<>( 0.current.flatMapValue( 0));;}
-	withNode(key : String, deserializer : Function<Node, CompileResult<R>>) : CompoundDestructor<Tuple2<T, R>> {return new CompoundDestructorImpl<Tuple2<T, R>>( 0.current.flatMapValue( 0));;}
-	withNodeOptionally(key : String, deserializer : Function<Node, CompileResult<R>>) : CompoundDestructor<Tuple2<T, Option<R>>> {return new CompoundDestructorImpl<>( 0.current.flatMapValue( ( 0)));;}
-	withNodeListOptionally(key : String, deserializer : Function<Node, CompileResult<R>>) : CompoundDestructor<Tuple2<T, Option<List<R>>>> {return new CompoundDestructorImpl<>( 0.current.flatMapValue( ( 0)));;}
-	getTuple2CompileResult(deserializer : Function<Node, CompileResult<R>>, inner : Tuple2<Node, T>, tuple : Tuple2<Node, Node>) : CompileResult<Tuple2<Node, Tuple2<T, Option<R>>>> {return 0.apply( 0.right( )).flatMapValue( 0);;}
-	mapElements(current : Node, elements : NodeList, deserializer : Function<Node, CompileResult<R>>, more : T) : CompileResult<Tuple2<Node, Tuple2<T, Option<List<R>>>>> {return 0.iter( ).map( 0).collect( new CompileResultCollector<>( new ListCollector<>( ))).mapValue( 0);;}
+	complete(mapper : Function<T, R>) : CompileResult<R> {return this.current.flatMapValue( 0);;}
+	withNodeList(key : String, deserializer : Function<Node, CompileResult<R>>) : CompoundDestructor<Tuple2<T, List<R>>> {return new CompoundDestructorImpl<>( this.current.flatMapValue( 0));;}
+	withNode(key : String, deserializer : Function<Node, CompileResult<R>>) : CompoundDestructor<Tuple2<T, R>> {return new CompoundDestructorImpl<Tuple2<T, R>>( this.current.flatMapValue( 0));;}
+	withNodeOptionally(key : String, deserializer : Function<Node, CompileResult<R>>) : CompoundDestructor<Tuple2<T, Option<R>>> {return new CompoundDestructorImpl<>( this.current.flatMapValue( ( 0)));;}
+	withNodeListOptionally(key : String, deserializer : Function<Node, CompileResult<R>>) : CompoundDestructor<Tuple2<T, Option<List<R>>>> {return new CompoundDestructorImpl<>( this.current.flatMapValue( ( 0)));;}
+	getTuple2CompileResult(deserializer : Function<Node, CompileResult<R>>, inner : Tuple2<Node, T>, tuple : Tuple2<Node, Node>) : CompileResult<Tuple2<Node, Tuple2<T, Option<R>>>> {return deserializer.apply( tuple.right( )).flatMapValue( 0);;}
+	mapElements(current : Node, elements : NodeList, deserializer : Function<Node, CompileResult<R>>, more : T) : CompileResult<Tuple2<Node, Tuple2<T, Option<List<R>>>>> {return elements.iter( ).map( deserializer).collect( new CompileResultCollector<>( new ListCollector<>( ))).mapValue( 0);;}
 }

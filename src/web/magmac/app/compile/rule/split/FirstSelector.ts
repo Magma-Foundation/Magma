@@ -4,5 +4,5 @@ import { List } from "../../../../../magmac/api/collect/list/List";
 import { Joiner } from "../../../../../magmac/api/iter/collect/Joiner";
 export class FirstSelector {
 	FirstSelector(delimiter : String) : public {break;;}
-	select(list : List<String>) : Option<Tuple2<String, String>> {return 0.popFirst( ).map( 0);;}
+	select(list : List<String>) : Option<Tuple2<String, String>> {return list.popFirst( ).map( 0);;}
 }
