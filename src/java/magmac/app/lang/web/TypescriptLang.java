@@ -309,6 +309,13 @@ public final class TypescriptLang {
         }
     }
 
+    public record StringValue(java.lang.String value) implements TypescriptValue {
+        @Override
+        public Node serialize() {
+            return new MapNode("string").withString("value", this.value);
+        }
+    }
+
     public enum TypescriptStructureType {
         Class,
         Enum,

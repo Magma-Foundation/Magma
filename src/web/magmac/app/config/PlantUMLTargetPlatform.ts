@@ -12,8 +12,8 @@ import { RuleGenerator } from "../../../magmac/app/stage/generate/RuleGenerator"
 import { Path } from "../../../java/nio/file/Path";
 import { Paths } from "../../../java/nio/file/Paths";
 export class PlantUMLTargetPlatform {
-	createTargetPath() : Path {return 0.get( 0, 0);;}
-	createExtension() : String {return 0;;}
+	createTargetPath() : Path {return 0.get( ".", "diagrams");;}
+	createExtension() : String {return "puml";;}
 	createRule() : Rule {return 0.createRule( );;}
 	createCompiler() : Compiler {break;return new StagedCompiler<PlantUMLRoot>( new JavaPlantUMLParser( ), 0);;}
 	createApplication0(targets : Targets) : Application {return new CompileApplication<>( 0( ), 0);;}

@@ -3,6 +3,6 @@ import { Tuple2 } from "../../../../magmac/api/Tuple2";
 import { Locator } from "../../../../magmac/app/compile/rule/locate/Locator";
 export class LocatingSplitter {
 	split(input : String) : Option<Tuple2<String, String>> {return 0.locator.locate( 0, 0.infix).map( 0);;}
-	createMessage() : String {return 0;;}
+	createMessage() : String {return "Infix '" + this.infix + "' not present";;}
 	merge(leftString : String, rightString : String) : String {return 0;;}
 }

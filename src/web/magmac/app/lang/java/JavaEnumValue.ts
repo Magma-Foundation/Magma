@@ -14,6 +14,6 @@ import { CommonRules } from "../../../../magmac/app/lang/CommonRules";
 import { Destructors } from "../../../../magmac/app/lang/Destructors";
 import { Arguments } from "../../../../magmac/app/lang/node/Arguments";
 export class JavaEnumValue {
-	deserialize(node : Node) : CompileResult<JavaEnumValue> {return 0.destruct( 0).withString( 0).withNodeListOptionally( 0, 0.deserializeJavaOrError).complete( 0);;}
-	createEnumValueRule(value : Rule) : Rule {break;break;return new StripRule( new OrRule( 0.of( 0.createSymbolRule( 0), 0)));;}
+	deserialize(node : Node) : CompileResult<JavaEnumValue> {return 0.destruct( 0).withString( "name").withNodeListOptionally( "arguments", 0.deserializeJavaOrError).complete( 0);;}
+	createEnumValueRule(value : Rule) : Rule {break;break;return new StripRule( new OrRule( 0.of( 0.createSymbolRule( "name"), 0)));;}
 }

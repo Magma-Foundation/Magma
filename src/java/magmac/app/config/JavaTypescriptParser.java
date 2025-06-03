@@ -231,7 +231,7 @@ class JavaTypescriptParser implements Parser<JavaLang.JavaRoot, TypescriptLang.T
             case JavaLang.Not not -> new TypescriptLang.Not(JavaTypescriptParser.parseValue(not.value()));
             case JavaLang.Number number -> new TypescriptLang.Number(number.value());
             case JavaLang.JavaOperation javaOperation -> new TypescriptLang.Number("0");
-            case JavaLang.JavaStringNode javaStringNode -> new TypescriptLang.Number("0");
+            case JavaLang.JavaString javaStringNode -> new TypescriptLang.StringValue(javaStringNode.value());
             case JavaLang.JavaSwitchNode javaSwitchNode -> new TypescriptLang.Number("0");
             case JavaLang.JavaSymbol javaSymbol -> new TypescriptLang.Number("0");
         };

@@ -151,8 +151,8 @@ public final class JavaDeserializers {
         return Destructors.destructWithType("else", node).map(deserializer -> deserializer.complete(JavaElse::new));
     }
 
-    public static Option<CompileResult<JavaStringNode>> deserializeString(Node node) {
-        return Destructors.destructWithType("string", node).map(deserializer -> deserializer.withString("value").complete(JavaStringNode::new));
+    public static Option<CompileResult<JavaString>> deserializeString(Node node) {
+        return Destructors.destructWithType("string", node).map(deserializer -> deserializer.withString("value").complete(JavaString::new));
     }
 
     public static Option<CompileResult<Char>> deserializeChar(Node node) {

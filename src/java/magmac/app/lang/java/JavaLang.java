@@ -51,7 +51,7 @@ public class JavaLang {
     public sealed interface JavaCaller permits JavaConstruction, JavaValue {
     }
 
-    public sealed interface JavaValue extends JavaCaller, JavaArgument, JavaAssignable permits Access, Char, Index, Invokable, JavaLambda, Not, Number, JavaOperation, JavaStringNode, JavaSwitchNode, JavaSymbol {
+    public sealed interface JavaValue extends JavaCaller, JavaArgument, JavaAssignable permits Access, Char, Index, Invokable, JavaLambda, Not, Number, JavaOperation, JavaString, JavaSwitchNode, JavaSymbol {
     }
 
     public interface JavaAssignable {
@@ -292,8 +292,8 @@ public class JavaLang {
         }
     }
 
-    public static final class JavaStringNode extends magmac.app.lang.common.StringNode implements JavaValue {
-        public JavaStringNode(String value) {
+    public static final class JavaString extends magmac.app.lang.common.StringNode implements JavaValue {
+        public JavaString(String value) {
             super(value);
         }
     }

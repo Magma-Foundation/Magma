@@ -32,32 +32,32 @@ import { Operator } from "../../../magmac/app/lang/node/Operator";
 import { Parameters } from "../../../magmac/app/lang/node/Parameters";
 import { StructureMembers } from "../../../magmac/app/lang/node/StructureMembers";
 export class JavaRules {
-	createConstructionRule() : Rule {return new TypeRule( 0, new StripRule( new PrefixRule( 0, new NodeRule( 0, 0.JavaTypes.createTypeRule( )))));;}
-	createInvokableRule(value : Rule) : Rule {break;break;break;break;return new TypeRule( 0, new StripRule( new SuffixRule( new LocatingRule( 0, 0, 0), 0)));;}
-	createRootSegmentRule() : Rule {break;return new OrRule( 0.of( 0( ), 0.createNamespacedRule( 0), 0.createNamespacedRule( 0), 0.createStructureRule( 0, 0), 0.createStructureRule( 0, 0), 0.createStructureRule( 0, 0), 0.createStructureRule( 0, 0)));;}
-	createRule() : Rule {return new TypeRule( 0, 0.Statements( 0, 0.createRootSegmentRule( )));;}
+	createConstructionRule() : Rule {return new TypeRule( "construction", new StripRule( new PrefixRule( "new ", new NodeRule( "type", 0.JavaTypes.createTypeRule( )))));;}
+	createInvokableRule(value : Rule) : Rule {break;break;break;break;return new TypeRule( "invokable", new StripRule( new SuffixRule( new LocatingRule( 0, 0, 0), ")")));;}
+	createRootSegmentRule() : Rule {break;return new OrRule( 0.of( 0( ), 0.createNamespacedRule( "package"), 0.createNamespacedRule( "import"), 0.createStructureRule( "record", 0), 0.createStructureRule( "interface", 0), 0.createStructureRule( "class", 0), 0.createStructureRule( "enum", 0)));;}
+	createRule() : Rule {return new TypeRule( "root", 0.Statements( "children", 0.createRootSegmentRule( )));;}
 	createStructureRule(keyword : String, structureMember : Rule) : Rule {break;break;break;break;break;break;break;break;break;break;return new TypeRule( 0, 0.First( 0.createModifiersRule( ), 0, 0));;}
-	createAccessRule(type : String, infix : String, value : LazyRule) : Rule {break;return new TypeRule( 0, 0.Last( new NodeRule( 0, 0), 0, 0));;}
-	deserializeLambdaValueContent(node : Node) : Option<CompileResult<JavaLang.JavaLambdaValueContent>> {return 0.destructWithType( 0, 0).map( 0);;}
-	createYieldRule(value : Rule) : Rule {return new TypeRule( 0, new StripRule( new PrefixRule( 0, new NodeRule( 0, 0))));;}
-	createLambdaRule(value : LazyRule, functionSegment : Rule, infix : String, definition : Rule) : Rule {break;break;break;break;break;return new TypeRule( 0, 0.First( 0, 0, new NodeRule( 0, 0)));;}
-	createStatementRule(rule : Rule) : Rule {break;return new TypeRule( 0, new StripRule( new SuffixRule( 0, 0)));;}
-	createLambdaParameterRule(definition : Rule) : Rule {return 0.createNodeListRule( 0, new ValueFolder( ), new OrRule( 0.of( 0, 0.createSymbolRule( ))));;}
-	createBlockHeaderRule(value : Rule, definition : Rule) : Rule {return new OrRule( 0.of( new TypeRule( 0, new StripRule( new ExactRule( 0))), new TypeRule( 0, new StripRule( new ExactRule( 0))), 0( 0, 0), 0( 0, 0), new TypeRule( 0, new StripRule( new PrefixRule( 0, new StripRule( new PrefixRule( 0, new SuffixRule( new NodeRule( 0, 0), 0))))))));;}
+	createAccessRule(type : String, infix : String, value : LazyRule) : Rule {break;return new TypeRule( 0, 0.Last( new NodeRule( "receiver", 0), 0, 0));;}
+	deserializeLambdaValueContent(node : Node) : Option<CompileResult<JavaLang.JavaLambdaValueContent>> {return 0.destructWithType( "value", 0).map( 0);;}
+	createYieldRule(value : Rule) : Rule {return new TypeRule( "yield", new StripRule( new PrefixRule( "yield ", new NodeRule( "value", 0))));;}
+	createLambdaRule(value : LazyRule, functionSegment : Rule, infix : String, definition : Rule) : Rule {break;break;break;break;break;return new TypeRule( "lambda", 0.First( 0, 0, new NodeRule( "content", 0)));;}
+	createStatementRule(rule : Rule) : Rule {break;return new TypeRule( "statement", new StripRule( new SuffixRule( 0, ";")));;}
+	createLambdaParameterRule(definition : Rule) : Rule {return 0.createNodeListRule( "parameters", new ValueFolder( ), new OrRule( 0.of( 0, 0.createSymbolRule( ))));;}
+	createBlockHeaderRule(value : Rule, definition : Rule) : Rule {return new OrRule( 0.of( new TypeRule( "else", new StripRule( new ExactRule( "else"))), new TypeRule( "try", new StripRule( new ExactRule( "try"))), 0( "if", 0), 0( "while", 0), new TypeRule( "catch", new StripRule( new PrefixRule( "catch", new StripRule( new PrefixRule( "(", new SuffixRule( new NodeRule( "definition", 0), ")"))))))));;}
 	createBlockRule(functionSegmentRule : LazyRule, value : Rule, definition : Rule) : Rule {break;return 0( 0, 0);;}
-	createBlockRule0(header : Rule, functionSegmentRule : Rule) : TypeRule {break;break;break;return new TypeRule( 0, new StripRule( new SuffixRule( 0, 0)));;}
+	createBlockRule0(header : Rule, functionSegmentRule : Rule) : TypeRule {break;break;break;return new TypeRule( "block", new StripRule( new SuffixRule( 0, "}")));;}
 	createConditionalRule(type : String, value : Rule) : Rule {break;break;return new TypeRule( 0, new StripRule( new PrefixRule( 0, 0)));;}
-	createReturnRule(value : Rule) : Rule {return new TypeRule( 0, new StripRule( new PrefixRule( 0, new NodeRule( 0, 0))));;}
-	createWhitespaceRule() : Rule {return new TypeRule( 0, new StripRule( new ExactRule( 0)));;}
-	createStringRule() : Rule {return new TypeRule( 0, new StripRule( new PrefixRule( 0, new SuffixRule( new StringRule( 0), 0))));;}
-	createOperationRule(operator : Operator, value : LazyRule) : Rule {return new TypeRule( 0.type( ), 0.First( new NodeRule( 0, 0), 0.text( ), new NodeRule( 0, 0)));;}
-	createCharRule() : Rule {return new TypeRule( 0, new StripRule( new PrefixRule( 0, new SuffixRule( new StringRule( 0), 0))));;}
-	createNumberRule() : Rule {return new TypeRule( 0, new StripRule( 0.Number( new StringRule( 0))));;}
-	createNotRule(value : LazyRule) : TypeRule {return new TypeRule( 0, new StripRule( new PrefixRule( 0, new NodeRule( 0, 0))));;}
-	createIndexRule(value : LazyRule) : Rule {break;break;return new TypeRule( 0, new StripRule( new SuffixRule( 0.First( 0, 0, 0), 0)));;}
+	createReturnRule(value : Rule) : Rule {return new TypeRule( "return", new StripRule( new PrefixRule( "return ", new NodeRule( "child", 0))));;}
+	createWhitespaceRule() : Rule {return new TypeRule( "whitespace", new StripRule( new ExactRule( "")));;}
+	createStringRule() : Rule {return new TypeRule( "string", new StripRule( new PrefixRule( "\"", new SuffixRule( new StringRule( "value"), "\""))));;}
+	createOperationRule(operator : Operator, value : LazyRule) : Rule {return new TypeRule( 0.type( ), 0.First( new NodeRule( "left", 0), 0.text( ), new NodeRule( "right", 0)));;}
+	createCharRule() : Rule {return new TypeRule( "char", new StripRule( new PrefixRule( "'", new SuffixRule( new StringRule( "value"), "'"))));;}
+	createNumberRule() : Rule {return new TypeRule( "number", new StripRule( 0.Number( new StringRule( "value"))));;}
+	createNotRule(value : LazyRule) : TypeRule {return new TypeRule( "not", new StripRule( new PrefixRule( "!", new NodeRule( "child", 0))));;}
+	createIndexRule(value : LazyRule) : Rule {break;break;return new TypeRule( "index", new StripRule( new SuffixRule( 0.First( 0, "[", 0), "]")));;}
 	initValueRule(segment : Rule, value : LazyRule, lambdaInfix : String, definition : Rule) : LazyRule {return 0.set( new OrRule( 0( 0, 0, 0, 0)));;}
 	getValueRules(functionSegment : Rule, value : LazyRule, lambdaInfix : String, definition : Rule) : List<Rule> {break;break;return 0.addAllLast( 0);;}
-	createSwitchRule(functionSegmentRule : Rule, value : Rule) : TypeRule {break;break;return new TypeRule( 0, 0( new StripRule( 0), 0));;}
-	createDefinitionRule() : Rule {break;break;break;break;break;break;break;break;break;return new TypeRule( 0, 0);;}
-	attachTypeParams(beforeTypeParams : Rule) : Rule {break;return new OptionNodeListRule( 0, new StripRule( new SuffixRule( 0.First( 0, 0, 0), 0)), 0);;}
+	createSwitchRule(functionSegmentRule : Rule, value : Rule) : TypeRule {break;break;return new TypeRule( "switch", 0( new StripRule( 0), 0));;}
+	createDefinitionRule() : Rule {break;break;break;break;break;break;break;break;break;return new TypeRule( "definition", 0);;}
+	attachTypeParams(beforeTypeParams : Rule) : Rule {break;return new OptionNodeListRule( "type-parameters", new StripRule( new SuffixRule( 0.First( 0, "<", 0), ">")), 0);;}
 }

@@ -13,7 +13,7 @@ import { Assignables } from "../../../../magmac/app/lang/node/Assignables";
 import { StructureStatementValue } from "../../../../magmac/app/lang/node/StructureStatementValue";
 import { TypescriptFunctionSegmentValue } from "../../../../magmac/app/lang/web/TypescriptFunctionSegmentValue";
 export class JavaAssignmentNode {
-	deserialize(node : Node) : Option<CompileResult<JavaAssignmentNode>> {return 0.destructWithType( 0, 0).map( 0);;}
-	createAssignmentRule(definition : Rule, value : Rule) : Rule {break;break;return new TypeRule( 0, 0.First( 0, 0, 0));;}
-	serialize() : Node {return new MapNode( 0);;}
+	deserialize(node : Node) : Option<CompileResult<JavaAssignmentNode>> {return 0.destructWithType( "assignment", 0).map( 0);;}
+	createAssignmentRule(definition : Rule, value : Rule) : Rule {break;break;return new TypeRule( "assignment", 0.First( 0, "=", 0));;}
+	serialize() : Node {return new MapNode( "assignment");;}
 }

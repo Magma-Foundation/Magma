@@ -18,5 +18,5 @@ import { Segment } from "../../../../magmac/app/lang/node/Segment";
 export class JavaNamespacedNode {
 	deserialize(type : NamespacedType, node : Node) : Option<CompileResult<JavaRootSegment>> {return 0.destructWithType( 0.type( ), 0).map( 0);;}
 	deserialize(node : Node) : Option<CompileResult<JavaRootSegment>> {return 0.fromValues( 0.values( )).map( 0).flatMap( 0.fromOption).next( );;}
-	createNamespacedRule(type : String) : Rule {break;return new TypeRule( 0, new StripRule( new SuffixRule( new PrefixRule( 0, 0), 0)));;}
+	createNamespacedRule(type : String) : Rule {break;return new TypeRule( 0, new StripRule( new SuffixRule( new PrefixRule( 0, 0), ";")));;}
 }

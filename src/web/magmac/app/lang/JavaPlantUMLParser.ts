@@ -29,7 +29,7 @@ import { UnitSet } from "../../../magmac/app/stage/unit/UnitSet";
 export class JavaPlantUMLParser {
 	parseNamespaced(child : String, namespaced : JavaNamespacedNode) : Iter<PlantUMLRootSegment> {;;;}
 	createSimpleName(base : JavaLang.JavaBase) : String {;;;}
-	createSimpleNameFromQualifiedType(qualifiedType : JavaLang.JavaQualified) : String {return 0.segments( ).iter( ).map( 0.value).collect( new Joiner( 0)).orElse( 0);;}
+	createSimpleNameFromQualifiedType(qualifiedType : JavaLang.JavaQualified) : String {return 0.segments( ).iter( ).map( 0.value).collect( new Joiner( ".")).orElse( "");;}
 	createStructureSegment(structureNode : JavaStructureNode) : PlantUMLRootSegment {break;break;;;;}
 	createSimpleNameFromType(type : JavaLang.JavaType) : String {;;;}
 	apply(initial : UnitSet<JavaLang.JavaRoot>) : CompileResult<UnitSet<PlantUMLRoot>> {break;break;break;return 0.Ok( new MapUnitSet<PlantUMLRoot>( ).add( new SimpleUnit<>( 0, 0)));;}

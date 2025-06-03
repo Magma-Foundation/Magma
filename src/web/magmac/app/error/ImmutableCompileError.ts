@@ -10,6 +10,6 @@ export class ImmutableCompileError {
 	formatEntry(depth : int, display : String) : String {break;return 0;;}
 	display() : String {return 0.format( 0);;}
 	format(depth : int) : String {break;break;return 0;;}
-	joinSorted(depth : int, copy : List<CompileError>) : String {return 0.iter( ).map( 0).map( 0).collect( new Joiner( )).orElse( 0);;}
+	joinSorted(depth : int, copy : List<CompileError>) : String {return 0.iter( ).map( 0).map( 0).collect( new Joiner( )).orElse( "");;}
 	computeMaxDepth() : int {break;return 0.map( 0.computeMaxDepth).collect( new Max( )).orElse( 0);;}
 }

@@ -19,8 +19,8 @@ export class MapNode {
 	MapNode(maybeType : Option<String>, strings : Map<String, String>, nodes : Map<String, Node>, nodeLists : Map<String, NodeList>) : private {break;break;break;break;;}
 	MapNode(type : String) : public {0( new Some<String>( 0), 0.empty( ), 0.empty( ), 0.empty( ));;}
 	fold(node : Node, iter : Iter<Tuple2<String, T>>, mapper : Function<Node, BiFunction<String, T, Node>>) : Node {return 0.fold( 0, 0);;}
-	formatNodeList(depth : int, nodeList : NodeList) : String {return 0.iter( ).map( 0).collect( new Joiner( 0)).orElse( 0);;}
-	createIndent(depth : int) : String {return 0.repeat( 0);;}
+	formatNodeList(depth : int, nodeList : NodeList) : String {return 0.iter( ).map( 0).collect( new Joiner( ", ")).orElse( "");;}
+	createIndent(depth : int) : String {return "\n" + "\t".repeat( 0);;}
 	formatEntry(depth : int, key : String, value : String) : String {break;return 0;;}
 	toStream(depth : int, map : Map<String, T>, mapper : Function<T, String>) : Iter<String> {if(true){ return 0.empty( );;}return 0.iter( ).map( 0);;}
 	withNodeAndSerializer(key : String, element : T, serializer : Function<T, Node>) : Node {return 0.withNode( 0, 0.apply( 0));;}
@@ -45,7 +45,7 @@ export class MapNode {
 	withNodeListAndSerializer(key : String, list : List<T>, serializer : Function<T, Node>) : Node {break;return 0.withNodeList( 0, 0);;}
 	removeString(key : String) : CompileResult<Tuple2<Node, String>> {return 0.strings.removeByKey( 0).map( 0).orElseGet( 0);;}
 	removeNodeOrError(key : String) : CompileResult<Tuple2<Node, Node>> {return 0.nodes.removeByKey( 0).map( 0).orElseGet( 0);;}
-	createNotPresent(key : String) : CompileResult<Tuple2<Node, T>> {return 0.NodeErr( 0, 0);;}
+	createNotPresent(key : String) : CompileResult<Tuple2<Node, T>> {return 0.NodeErr( "Key '" + key + "' not present", 0);;}
 	withNodes(nodes : Map<String, Node>) : Node {return new MapNode( 0.maybeType, 0.strings, 0, 0.nodeLists);;}
 	withStrings(strings : Map<String, String>) : Node {return new MapNode( 0.maybeType, 0, 0.nodes, 0.nodeLists);;}
 	iterNodeLists() : Iter<Tuple2<String, NodeList>> {return 0.nodeLists.iter( );;}

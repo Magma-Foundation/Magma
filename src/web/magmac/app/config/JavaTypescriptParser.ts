@@ -70,7 +70,7 @@ export class JavaTypescriptParser {
 	parseArgument(argument : JavaLang.JavaArgument) : TypescriptLang.TypescriptArgument {;;;}
 	parseValue(child : JavaLang.JavaValue) : TypescriptLang.TypescriptValue {;;;}
 	parseBlock(block : JavaBlock) : TypescriptLang.TypescriptBlock {return new TypescriptLang.TypescriptBlock( 0.parseHeader( 0.header( )), 0.parseFunctionSegments( 0.segments( )));;}
-	parseHeader(header : JavaLang.JavaBlockHeader) : TypescriptLang.TypescriptBlockHeader {return new TypescriptLang.TypescriptConditional( 0.If, new TypescriptSymbol( 0));;}
+	parseHeader(header : JavaLang.JavaBlockHeader) : TypescriptLang.TypescriptBlockHeader {return new TypescriptLang.TypescriptConditional( 0.If, new TypescriptSymbol( "true"));;}
 	parseParameter(parameter : JavaParameter) : TypescriptLang.TypeScriptParameter {;;;}
 	parseMethodHeader(header : JavaMethodHeader) : TypescriptLang.TypeScriptMethodHeader {;;;}
 	parseDefinition(javaDefinition : JavaLang.JavaDefinition) : TypescriptLang.TypeScriptDefinition {break;;;;}

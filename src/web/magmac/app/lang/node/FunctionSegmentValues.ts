@@ -12,6 +12,6 @@ import { JavaAssignmentNode } from "../../../../magmac/app/lang/java/JavaAssignm
 import { JavaFunctionSegmentValue } from "../../../../magmac/app/lang/java/JavaFunctionSegmentValue";
 import { JavaPost } from "../../../../magmac/app/lang/java/JavaPost";
 export class FunctionSegmentValues {
-	deserialize(node : Node) : CompileResult<JavaFunctionSegmentValue> {return 0.orError( 0, 0, 0.of( 0.wrap( 0.deserializeReturn), 0.wrap( 0.deserialize), 0.wrap( 0.deserializeInvocation), 0.wrap( 0), 0.wrap( 0), 0.wrap( 0.deserializeBreak), 0.wrap( 0.deserializeContinue), 0.wrap( 0.deserializeYield)));;}
-	createFunctionSegmentValueRule(value : Rule, definition : Rule) : Rule {return new OrRule( 0.of( 0.createInvokableRule( 0), 0.createAssignmentRule( 0, 0), 0.createReturnRule( 0), 0.createYieldRule( 0), 0.createPostRule( 0, 0, 0), 0.createPostRule( 0, 0, 0), new TypeRule( 0, new ExactRule( 0)), new TypeRule( 0, new ExactRule( 0))));;}
+	deserialize(node : Node) : CompileResult<JavaFunctionSegmentValue> {return 0.orError( "function-segment-value", 0, 0.of( 0.wrap( 0.deserializeReturn), 0.wrap( 0.deserialize), 0.wrap( 0.deserializeInvocation), 0.wrap( 0), 0.wrap( 0), 0.wrap( 0.deserializeBreak), 0.wrap( 0.deserializeContinue), 0.wrap( 0.deserializeYield)));;}
+	createFunctionSegmentValueRule(value : Rule, definition : Rule) : Rule {return new OrRule( 0.of( 0.createInvokableRule( 0), 0.createAssignmentRule( 0, 0), 0.createReturnRule( 0), 0.createYieldRule( 0), 0.createPostRule( "post-increment", "++", 0), 0.createPostRule( "post-decrement", "--", 0), new TypeRule( "break", new ExactRule( "break")), new TypeRule( "continue", new ExactRule( "continue"))));;}
 }

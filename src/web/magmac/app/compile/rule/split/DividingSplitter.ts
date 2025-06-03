@@ -9,6 +9,6 @@ export class DividingSplitter {
 	Last(divider : Divider, delimiter : String) : Splitter {return new DividingSplitter( 0, new LastSelector( 0));;}
 	First(divider : Divider, delimiter : String) : Splitter {return new DividingSplitter( 0, new FirstSelector( 0));;}
 	split(input : String) : Option<Tuple2<String, String>> {break;return 0.selector.select( 0);;}
-	createMessage() : String {return 0;;}
+	createMessage() : String {return "Insufficient segments present";;}
 	merge(leftString : String, rightString : String) : String {return 0;;}
 }

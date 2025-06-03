@@ -9,7 +9,7 @@ import { DelimitedFolder } from "../../../../magmac/app/compile/rule/fold/Delimi
 import { Destructors } from "../../../../magmac/app/lang/Destructors";
 import { Serializable } from "../../../../magmac/app/lang/Serializable";
 export class Modifier {
-	deserialize(node : Node) : CompileResult<Modifier> {return 0.destruct( 0).withString( 0).complete( 0.new);;}
-	createModifiersRule() : Rule {return new StripRule( 0.createNodeListRule( 0, new DelimitedFolder( ' '), new StringRule( 0)));;}
-	serialize() : Node {return new MapNode( 0).withString( 0, 0.value);;}
+	deserialize(node : Node) : CompileResult<Modifier> {return 0.destruct( 0).withString( "value").complete( 0.new);;}
+	createModifiersRule() : Rule {return new StripRule( 0.createNodeListRule( "modifiers", new DelimitedFolder( ' '), new StringRule( "value")));;}
+	serialize() : Node {return new MapNode( "modifier").withString( "value", 0.value);;}
 }

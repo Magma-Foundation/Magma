@@ -21,7 +21,7 @@ import { CaseValues } from "../../../../magmac/app/lang/node/CaseValues";
 import { MultipleCaseValue } from "../../../../magmac/app/lang/node/MultipleCaseValue";
 import { SingleCaseValue } from "../../../../magmac/app/lang/node/SingleCaseValue";
 export class JavaCaseNode {
-	deserialize(node : Node) : Option<CompileResult<JavaCaseNode>> {return 0.destructWithType( 0, 0).map( 0);;}
-	createCaseRule(value : Rule, segment : Rule) : Rule {break;break;break;break;break;break;break;return new TypeRule( 0, new StripRule( new PrefixRule( 0, 0)));;}
+	deserialize(node : Node) : Option<CompileResult<JavaCaseNode>> {return 0.destructWithType( "case", 0).map( 0);;}
+	createCaseRule(value : Rule, segment : Rule) : Rule {break;break;break;break;break;break;break;return new TypeRule( "case", new StripRule( new PrefixRule( "case", 0)));;}
 	serialize() : Node {return new MapNode( );;}
 }
