@@ -2,7 +2,6 @@ package magmac.app.compile.rule;
 
 import magmac.api.collect.list.Lists;
 import magmac.app.compile.error.CompileResult;
-import magmac.app.compile.error.CompileResults;
 import magmac.app.compile.error.context.Context;
 import magmac.app.compile.error.context.NodeContext;
 import magmac.app.compile.error.context.StringContext;
@@ -18,15 +17,16 @@ public record TypeRule(String type, Rule childRule) implements Rule {
 
     @Override
     public CompileResult<Node> lex(String input) {
-        return CompileResults.fromResult(this.childRule.lex(input).toResult()
+        return this.childRule.lex(input)
                 .mapValue((Node node) -> node.retype(this.type))
-                .mapErr((CompileError err) -> this.createError(new StringContext(input), err)));
+                .mapErr((CompileError err) -> this.createError(new StringContext(input), err));
     }
 
     @Override
     public CompileResult<String> generate(Node node) {
         if (node.is(this.type)) {
-            return CompileResults.fromResult(this.childRule.generate(node).toResult().mapErr((CompileError err) -> this.createError(new NodeContext(node), err)));
+            return this.childRule.generate(node)
+                    .mapErr((CompileError err) -> this.createError(new NodeContext(node), err));
         }
 
         return CompileErrors.createNodeError("Type '" + this.type + "' not present", node);
