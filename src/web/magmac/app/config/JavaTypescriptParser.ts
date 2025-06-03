@@ -67,6 +67,7 @@ import { TypescriptStructureNode } from "../../../magmac/app/lang/node/Typescrip
 import { TypescriptStructureType } from "../../../magmac/app/lang/node/TypescriptStructureType";
 import { VariadicType } from "../../../magmac/app/lang/node/VariadicType";
 import { TypescriptBreak } from "../../../magmac/app/lang/web/TypescriptBreak";
+import { TypescriptContinue } from "../../../magmac/app/lang/web/TypescriptContinue";
 import { TypescriptFunctionSegmentValue } from "../../../magmac/app/lang/web/TypescriptFunctionSegmentValue";
 import { TypescriptFunctionStatement } from "../../../magmac/app/lang/web/TypescriptFunctionStatement";
 import { TypescriptWhitespace } from "../../../magmac/app/lang/web/TypescriptWhitespace";

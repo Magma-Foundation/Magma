@@ -362,6 +362,10 @@ Assignable <|-- JavaDefinition
 JavaMethodHeader <|-- JavaDefinition
 StructureStatementValue <|-- JavaDefinition
 LambdaParameter <|-- JavaDefinition
+TypescriptContinue --> MapNode
+TypescriptContinue --> Node
+class TypescriptContinue
+TypescriptFunctionSegmentValue <|-- TypescriptContinue
 Else --> Option
 Else --> CompileResult
 Else --> Node
@@ -1217,6 +1221,7 @@ JavaTypescriptParser --> TypescriptStructureNode
 JavaTypescriptParser --> TypescriptStructureType
 JavaTypescriptParser --> VariadicType
 JavaTypescriptParser --> TypescriptBreak
+JavaTypescriptParser --> TypescriptContinue
 JavaTypescriptParser --> TypescriptFunctionSegmentValue
 JavaTypescriptParser --> TypescriptFunctionStatement
 JavaTypescriptParser --> TypescriptWhitespace

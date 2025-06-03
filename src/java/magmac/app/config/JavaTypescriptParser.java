@@ -69,6 +69,7 @@ import magmac.app.lang.node.TypescriptStructureNode;
 import magmac.app.lang.node.TypescriptStructureType;
 import magmac.app.lang.node.VariadicType;
 import magmac.app.lang.web.TypescriptBreak;
+import magmac.app.lang.web.TypescriptContinue;
 import magmac.app.lang.web.TypescriptFunctionSegmentValue;
 import magmac.app.lang.web.TypescriptFunctionStatement;
 import magmac.app.lang.web.TypescriptWhitespace;
@@ -209,7 +210,7 @@ class JavaTypescriptParser implements Parser<JavaRoot, TypescriptRoot> {
     private static TypescriptFunctionSegmentValue parseFunctionStatementValue(JavaFunctionSegmentValue child) {
         return switch (child) {
             case JavaBreak javaBreak -> new TypescriptBreak();
-            case JavaContinue javaContinue -> new TypescriptBreak();
+            case JavaContinue javaContinue -> new TypescriptContinue();
             case JavaReturnNode javaReturnNode -> new TypescriptBreak();
             case JavaYieldNode javaYieldNode -> new TypescriptBreak();
             case JavaInvokable javaInvokable -> new TypescriptBreak();
