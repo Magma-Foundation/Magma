@@ -32,4 +32,6 @@ public interface List<T> {
     List<T> addFirst(T element);
 
     boolean isEmpty();
+
+    Iter<Tuple2<Integer, T>> iterWithIndices();
 }

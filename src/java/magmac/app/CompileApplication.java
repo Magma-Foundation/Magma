@@ -21,7 +21,7 @@ public final class CompileApplication<R extends Serializable> implements Applica
     }
 
     @Override
-    public Option<Error> parseAndStore(UnitSet<JavaLang.JavaRoot> units) {
+    public Option<Error> parseAndStore(UnitSet<JavaLang.Root> units) {
         return this.compiler.parseAndGenerate(units)
                 .toResult()
                 .mapErr(ApplicationError::new)

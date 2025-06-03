@@ -1,6 +1,0 @@
-import { CompileResult } from "../../../../magmac/app/compile/error/CompileResult";
-import { Node } from "../../../../magmac/app/compile/node/Node";
-import { Destructors } from "../../../../magmac/app/lang/Destructors";
-export class Annotation {
-	public static deserialize( node : Node) : CompileResult<Annotation> {return Destructors.destruct( node).withString( "value").complete( Annotation.new);;}
-}

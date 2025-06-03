@@ -28,7 +28,7 @@ import magmac.app.stage.unit.SimpleUnit;
 import magmac.app.stage.unit.Unit;
 import magmac.app.stage.unit.UnitSet;
 
-public class JavaPlantUMLParser implements Parser<JavaLang.JavaRoot, PlantUMLRoot> {
+public class JavaPlantUMLParser implements Parser<JavaLang.Root, PlantUMLRoot> {
     private static Iter<PlantUMLRootSegment> parseNamespaced(String child, JavaNamespacedNode namespaced) {
         return switch (namespaced.type()) {
             case Package -> Iters.empty();
@@ -54,9 +54,9 @@ public class JavaPlantUMLParser implements Parser<JavaLang.JavaRoot, PlantUMLRoo
         };
     }
 
-    private static PlantUMLRootSegment createStructureSegment(JavaLang.StructureNode structureNode) {
-        var name = structureNode.name();
-        var type = structureNode.type();
+    private static PlantUMLRootSegment createStructureSegment(JavaLang.Structure structure) {
+        var name = structure.name();
+        var type = structure.type();
 
         return switch (type) {
             case Class, Record -> new PlantUMLStructure(PlantUMLStructureType.Class, name);
@@ -82,7 +82,7 @@ public class JavaPlantUMLParser implements Parser<JavaLang.JavaRoot, PlantUMLRoo
                 .orElse("");
     }
 
-    private static Iter<PlantUMLRootSegment> parseRoot(Unit<JavaLang.JavaRoot> unit) {
+    private static Iter<PlantUMLRootSegment> parseRoot(Unit<JavaLang.Root> unit) {
         return unit.destruct((location, root) -> root.children()
                 .iter()
                 .flatMap(segment -> JavaPlantUMLParser.parseRootSegment(location.name(), segment)));
@@ -92,17 +92,17 @@ public class JavaPlantUMLParser implements Parser<JavaLang.JavaRoot, PlantUMLRoo
         return switch (rootSegment) {
             case JavaLang.Whitespace _ -> Iters.empty();
             case JavaNamespacedNode namespaced -> JavaPlantUMLParser.parseNamespaced(fileName, namespaced);
-            case JavaLang.StructureNode structureNode -> JavaPlantUMLParser.parseStructure(structureNode);
+            case JavaLang.Structure structure -> JavaPlantUMLParser.parseStructure(structure);
         };
     }
 
-    private static Iter<PlantUMLRootSegment> parseStructure(JavaLang.StructureNode structureNode) {
-        var segment = JavaPlantUMLParser.createStructureSegment(structureNode);
-        var child = structureNode.name();
+    private static Iter<PlantUMLRootSegment> parseStructure(JavaLang.Structure structure) {
+        var segment = JavaPlantUMLParser.createStructureSegment(structure);
+        var child = structure.name();
 
         return Lists.of(segment)
-                .addAllLast(JavaPlantUMLParser.toInherits(child, structureNode.extended()))
-                .addAllLast(JavaPlantUMLParser.toInherits(child, structureNode.implemented()))
+                .addAllLast(JavaPlantUMLParser.toInherits(child, structure.extended()))
+                .addAllLast(JavaPlantUMLParser.toInherits(child, structure.implemented()))
                 .iter();
     }
 
@@ -110,12 +110,16 @@ public class JavaPlantUMLParser implements Parser<JavaLang.JavaRoot, PlantUMLRoo
         return maybeOption.orElse(Lists.empty())
                 .iter()
                 .map(JavaPlantUMLParser::createSimpleNameFromType)
-                .<PlantUMLRootSegment>map(parent -> new PlantUMLInherits(child, parent))
+                .map(parent -> JavaPlantUMLParser.getPlantUMLInherits(child, parent))
                 .collect(new ListCollector<>());
     }
 
+    private static PlantUMLRootSegment getPlantUMLInherits(String child, String parent) {
+        return new PlantUMLInherits(child, parent);
+    }
+
     @Override
-    public CompileResult<UnitSet<PlantUMLRoot>> apply(UnitSet<JavaLang.JavaRoot> initial) {
+    public CompileResult<UnitSet<PlantUMLRoot>> apply(UnitSet<JavaLang.Root> initial) {
         var roots = initial.iter()
                 .flatMap(JavaPlantUMLParser::parseRoot)
                 .collect(new ListCollector<>())

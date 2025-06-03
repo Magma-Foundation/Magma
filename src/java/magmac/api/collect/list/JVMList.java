@@ -101,6 +101,12 @@ public record JVMList<T>(java.util.List<T> elements) implements List<T> {
     }
 
     @Override
+    public Iter<Tuple2<Integer, T>> iterWithIndices() {
+        return new HeadedIter<>(new RangeHead(this.elements.size()))
+                .map(index -> new Tuple2<>(index, this.elements.get(index)));
+    }
+
+    @Override
     public Option<T> findLast() {
         if (this.elements.isEmpty()) {
             return new None<>();

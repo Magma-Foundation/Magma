@@ -19,7 +19,6 @@ import magmac.app.lang.node.ParameterizedMethodHeader;
 import magmac.app.lang.node.PostVariant;
 import magmac.app.lang.node.Segment;
 import magmac.app.lang.node.StructureValue;
-import magmac.app.lang.node.TypeArguments;
 
 public final class TypescriptLang {
     public interface Argument extends Serializable {
@@ -132,18 +131,21 @@ public final class TypescriptLang {
 
     public static final class TemplateType implements Type {
         private final JavaLang.Symbol base;
-        private final TypeArguments<Type> typeArguments;
+        private final Option<List<Type>> maybeTypeArguments;
 
-        public TemplateType(JavaLang.Symbol base, TypeArguments<Type> typeArguments) {
+        public TemplateType(JavaLang.Symbol base, Option<List<Type>> maybeTypeArguments) {
             this.base = base;
-            this.typeArguments = typeArguments;
+            this.maybeTypeArguments = maybeTypeArguments;
         }
 
         @Override
         public Node serialize() {
-            return new MapNode("template")
-                    .withNodeSerialized("base", this.base)
-                    .withNodeListSerialized("arguments", this.typeArguments.arguments());
+            var node = new MapNode("template")
+                    .withNodeSerialized("base", this.base);
+
+            return this.maybeTypeArguments.map(typeArguments -> {
+                return node.withNodeListSerialized("arguments", typeArguments);
+            }).orElse(node);
         }
     }
 

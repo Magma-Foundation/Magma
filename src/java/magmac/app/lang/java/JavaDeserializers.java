@@ -24,7 +24,6 @@ import magmac.app.lang.node.OperationDeserializer;
 import magmac.app.lang.node.Operator;
 import magmac.app.lang.node.PostVariant;
 import magmac.app.lang.node.StructureStatementValue;
-import magmac.app.lang.node.TypeArguments;
 import magmac.app.lang.node.TypedDeserializer;
 import magmac.app.lang.web.TypescriptLang;
 
@@ -41,7 +40,7 @@ public final class JavaDeserializers {
     private static Option<CompileResult<JavaCaller>> deserializeConstruction(Node node) {
         return Destructors.destructWithType("construction", node)
                 .map(deserializer -> deserializer.withNode("type", JavaDeserializers::deserializeType)
-                        .complete(JavaConstruction::new));
+                        .complete(Construction::new));
     }
 
     public static Option<CompileResult<JavaLang.Invokable>> deserializeInvocation(Node node) {
@@ -65,7 +64,8 @@ public final class JavaDeserializers {
         return Destructors.destructWithType(type.type(), node)
                 .map(deserializer -> deserializer.withString("property")
                         .withNode("receiver", JavaDeserializers::deserializeValueOrError)
-                        .complete(tuple -> new Access(type, tuple.right(), tuple.left())));
+                        .withNodeListOptionally("type-arguments", JavaDeserializers::deserializeType)
+                        .complete(tuple -> new Access(type, tuple.left().right(), tuple.right(), tuple.left().left())));
     }
 
     public static Option<CompileResult<JavaYieldNode>> deserializeYield(Node node) {
@@ -321,8 +321,8 @@ public final class JavaDeserializers {
     private static Option<CompileResult<JavaTemplateType>> deserializeTemplate(Node node) {
         return Destructors.destructWithType("template", node).map(deserializer -> deserializer
                 .withNode("base", JavaDeserializers::deserializeBase)
-                .withNodeList("arguments", JavaDeserializers::deserializeType)
-                .complete(tuple -> new JavaTemplateType(tuple.left(), new TypeArguments<JavaType>(tuple.right()))));
+                .withNodeListOptionally("arguments", JavaDeserializers::deserializeType)
+                .complete(tuple -> new JavaTemplateType(tuple.left(), tuple.right())));
     }
 
     private static CompileResult<JavaArgument> deserializeArguments(Node node) {

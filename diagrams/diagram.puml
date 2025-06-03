@@ -66,7 +66,6 @@ TypescriptLang --> ParameterizedMethodHeader
 TypescriptLang --> PostVariant
 TypescriptLang --> Segment
 TypescriptLang --> StructureValue
-TypescriptLang --> TypeArguments
 class TypescriptLang
 AfterAll --> Node
 AfterAll --> UnitSet
@@ -298,8 +297,6 @@ Head <|-- RangeHead
 Source --> IOResult
 Source --> Location
 interface Source
-class JavaConstruction
-JavaLang.JavaCaller <|-- JavaConstruction
 SimpleUnit --> CompileResult
 SimpleUnit --> Location
 SimpleUnit --> BiFunction
@@ -375,7 +372,6 @@ JavaDeserializers --> OperationDeserializer
 JavaDeserializers --> Operator
 JavaDeserializers --> PostVariant
 JavaDeserializers --> StructureStatementValue
-JavaDeserializers --> TypeArguments
 JavaDeserializers --> TypedDeserializer
 JavaDeserializers --> TypescriptLang
 class JavaDeserializers
@@ -513,7 +509,6 @@ interface InitialDestructor
 interface CaseValue
 TypeRule --> Lists
 TypeRule --> CompileResult
-TypeRule --> CompileResults
 TypeRule --> Context
 TypeRule --> NodeContext
 TypeRule --> StringContext
@@ -775,6 +770,8 @@ CommonRules --> TypeRule
 class CommonRules
 class JavaYieldNode
 JavaFunctionSegmentValue <|-- JavaYieldNode
+Access --> Option
+Access --> List
 class Access
 Unit --> CompileResult
 Unit --> Location
@@ -838,6 +835,7 @@ JavaTypescriptParser --> Tuple2
 JavaTypescriptParser --> TupleCollector
 JavaTypescriptParser --> List
 JavaTypescriptParser --> Lists
+JavaTypescriptParser --> Iter
 JavaTypescriptParser --> Joiner
 JavaTypescriptParser --> ListCollector
 JavaTypescriptParser --> CompileResult
@@ -846,7 +844,6 @@ JavaTypescriptParser --> CompileResults
 JavaTypescriptParser --> Location
 JavaTypescriptParser --> UnitSetCollector
 JavaTypescriptParser --> JavaBreak
-JavaTypescriptParser --> JavaConstruction
 JavaTypescriptParser --> JavaConstructor
 JavaTypescriptParser --> JavaContinue
 JavaTypescriptParser --> JavaEnumValues
@@ -867,7 +864,6 @@ JavaTypescriptParser --> Modifier
 JavaTypescriptParser --> ParameterizedMethodHeader
 JavaTypescriptParser --> Segment
 JavaTypescriptParser --> StructureValue
-JavaTypescriptParser --> TypeArguments
 JavaTypescriptParser --> Caller
 JavaTypescriptParser --> FunctionStatement
 JavaTypescriptParser --> Symbol
@@ -878,9 +874,9 @@ JavaTypescriptParser --> Unit
 JavaTypescriptParser --> UnitSet
 class JavaTypescriptParser
 Parser <|-- JavaTypescriptParser
+ImmutableCompileError --> Tuple2
 ImmutableCompileError --> List
 ImmutableCompileError --> Lists
-ImmutableCompileError --> Iter
 ImmutableCompileError --> Joiner
 ImmutableCompileError --> Max
 ImmutableCompileError --> Context
@@ -1011,8 +1007,6 @@ SingleHead --> Some
 class SingleHead
 Head <|-- SingleHead
 class NumberNode
-TypeArguments --> List
-class TypeArguments
 Option --> Consumer
 Option --> Function
 Option --> Predicate
@@ -1082,6 +1076,7 @@ JavaStructureStatement --> LazyRule
 JavaStructureStatement --> StructureStatementValue
 class JavaStructureStatement
 JavaStructureMember <|-- JavaStructureStatement
+CompileError --> List
 CompileError --> Error
 interface CompileError
 Error <|-- CompileError
@@ -1225,6 +1220,7 @@ JavaRules --> MultipleCaseValue
 JavaRules --> Operator
 JavaRules --> SingleCaseValue
 JavaRules --> StructureMembers
+JavaRules --> Values
 class JavaRules
 NodeContext --> Node
 class NodeContext
@@ -1319,7 +1315,6 @@ JavaLang --> Segment
 JavaLang --> StructureMembers
 JavaLang --> StructureStatementValue
 JavaLang --> StructureValue
-JavaLang --> TypeArguments
 JavaLang --> TypedDeserializer
 JavaLang --> TypescriptLang
 class JavaLang

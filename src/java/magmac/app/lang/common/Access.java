@@ -1,25 +1,30 @@
 package magmac.app.lang.common;
 
-public class Access<T, V> {
-    private final T type;
-    private final V receiver;
-    private final String property;
+import magmac.api.Option;
+import magmac.api.collect.list.List;
 
-    public Access(T type, V receiver, String property) {
-        this.type = type;
+public class Access<V, R, T> {
+    private final V variant;
+    private final R receiver;
+    private final String property;
+    private final Option<List<T>> maybeArguments;
+
+    public Access(V variant, R receiver, String property, Option<List<T>> maybeArguments) {
+        this.variant = variant;
         this.receiver = receiver;
         this.property = property;
+        this.maybeArguments = maybeArguments;
     }
 
-    public T type() {
-        return type;
+    public V type() {
+        return this.variant;
     }
 
-    public V receiver() {
-        return receiver;
+    public R receiver() {
+        return this.receiver;
     }
 
     public String property() {
-        return property;
+        return this.property;
     }
 }
