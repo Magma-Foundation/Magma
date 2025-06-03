@@ -4,5 +4,5 @@ import { Serializable } from "../../../../magmac/app/lang/Serializable";
 export class Symbol {
 	Symbol(value : String) : public {break;;}
 	value() : String {return 0.value;;}
-	serialize() : Node {return 0;;}
+	serialize() : Node {return new MapNode( 0).withString( 0, 0.value);;}
 }

@@ -2,5 +2,5 @@ import { None } from "../../../../../magmac/api/None";
 import { Option } from "../../../../../magmac/api/Option";
 import { Some } from "../../../../../magmac/api/Some";
 export class LastLocator {
-	locate(input : String, infix : String) : Option<Integer> {break;if(true){ return 0;;}return 0;;}
+	locate(input : String, infix : String) : Option<Integer> {break;if(true){ return new None<Integer>( );;}return new Some<>( 0);;}
 }

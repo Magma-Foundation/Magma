@@ -5,6 +5,6 @@ import { Rule } from "../../../../magmac/app/compile/rule/Rule";
 import { StringRule } from "../../../../magmac/app/compile/rule/StringRule";
 import { TypeRule } from "../../../../magmac/app/compile/rule/TypeRule";
 export class PlantUMLStructure {
-	createStructureRule(type : String) : Rule {return 0;;}
-	serialize() : Node {return 0;;}
+	createStructureRule(type : String) : Rule {return new TypeRule( 0, new PrefixRule( 0, new StringRule( 0)));;}
+	serialize() : Node {return new MapNode( 0.type.name( ).toLowerCase( )).withString( 0, 0.name);;}
 }

@@ -6,7 +6,7 @@ import { CompileErrors } from "../../../magmac/app/compile/error/error/CompileEr
 import { Node } from "../../../magmac/app/compile/node/Node";
 import { Rule } from "../../../magmac/app/compile/rule/Rule";
 export class MutableLazyRule {
-	lex(input : String) : CompileResult<Node> {return 0;;}
-	generate(node : Node) : CompileResult<String> {return 0;;}
+	lex(input : String) : CompileResult<Node> {return 0.maybeRule.map( 0).orElseGet( 0);;}
+	generate(node : Node) : CompileResult<String> {return 0.maybeRule.map( 0).orElseGet( 0);;}
 	set(rule : Rule) : LazyRule {break;return 0;;}
 }

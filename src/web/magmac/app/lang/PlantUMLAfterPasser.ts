@@ -18,13 +18,13 @@ import { ParseUnitImpl } from "../../../magmac/app/stage/unit/ParseUnitImpl";
 import { Passer } from "../../../magmac/app/stage/Passer";
 import { ParseState } from "../../../magmac/app/stage/parse/ParseState";
 export class PlantUMLAfterPasser {
-	createInherits(child : Node, key : String) : CompileResult<NodeList> {return 0;;}
-	getNodeListCompileResult(child : Node, implemented : Node) : CompileResult<NodeList> {return 0;;}
-	createInherits0(type : Node, child : String) : CompileResult<NodeList> {return 0;;}
-	stringifyType(type : Node) : CompileResult<String> {if(true){ return 0;;}if(true){ return 0;;}return 0;;}
-	replaceRootChild(child : Node) : CompileResult<NodeList> {break;break;return 0;;}
-	replaceRootChildren(node : Node) : CompileResult<NodeList> {return 0;;}
-	replaceChildrenToList(node : Node) : CompileResult<List<NodeList>> {return 0;;}
-	pass(state : ParseState, node : Node) : ParseResult {if(true){ break;return 0;;}if(true){ break;break;break;return 0;;}return 0;;}
-	getTuple2CompileResult(state : ParseState, node : Node, values : NodeList) : CompileResult<ParseUnit<Node>> {return 0;;}
+	createInherits(child : Node, key : String) : CompileResult<NodeList> {return 0.findNode( 0).map( 0).orElseGet( 0);;}
+	getNodeListCompileResult(child : Node, implemented : Node) : CompileResult<NodeList> {return 0.findString( 0, 0).flatMapValue( 0);;}
+	createInherits0(type : Node, child : String) : CompileResult<NodeList> {return 0.stringifyType( 0).mapValue( 0);;}
+	stringifyType(type : Node) : CompileResult<String> {if(true){ return 0.findString( 0, 0);;}if(true){ return 0.findString( 0, 0);;}return 0.createNodeError( 0, 0);;}
+	replaceRootChild(child : Node) : CompileResult<NodeList> {break;break;return 0.flatMapValue( 0);;}
+	replaceRootChildren(node : Node) : CompileResult<NodeList> {return 0.replaceChildrenToList( 0).mapValue( 0);;}
+	replaceChildrenToList(node : Node) : CompileResult<List<NodeList>> {return 0.findNodeList( 0).orElse( 0.empty( )).iter( ).map( 0.replaceRootChild).collect( new CompileResultCollector<>( new ListCollector<>( )));;}
+	pass(state : ParseState, node : Node) : ParseResult {if(true){ break;return new InlinePassResult( new Some<>( 0));;}if(true){ break;break;break;return new InlinePassResult( new Some<>( 0.Ok( 0)));;}return 0.empty( );;}
+	getTuple2CompileResult(state : ParseState, node : Node, values : NodeList) : CompileResult<ParseUnit<Node>> {return 0.Ok( new ParseUnitImpl<Node>( 0, 0.withNodeList( 0, 0)));;}
 }

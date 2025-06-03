@@ -189,10 +189,13 @@ class JavaTypescriptParser implements Parser<JavaLang.JavaRoot, TypescriptLang.T
                     new TypescriptLang.Post(javaPost.variant(), JavaTypescriptParser.parseValue(javaPost.value()));
             case JavaReturnNode javaReturnNode ->
                     new TypescriptLang.TypescriptReturnNode(JavaTypescriptParser.parseValue(javaReturnNode.child()));
-            case JavaLang.JavaInvokable javaInvokable ->
-                    new TypescriptLang.TypescriptInvokable(JavaTypescriptParser.parseCaller(javaInvokable.caller()), JavaTypescriptParser.parseArguments(javaInvokable.arguments()));
+            case JavaLang.Invokable invokable -> JavaTypescriptParser.parseInvokable(invokable);
             case JavaAssignmentNode javaAssignmentNode -> new TypescriptLang.TypescriptBreak();
         };
+    }
+
+    private static TypescriptLang.Invokable parseInvokable(JavaLang.Invokable invokable) {
+        return new TypescriptLang.Invokable(JavaTypescriptParser.parseCaller(invokable.caller()), JavaTypescriptParser.parseArguments(invokable.arguments()));
     }
 
     private static TypescriptCaller parseCaller(JavaLang.JavaCaller caller) {
@@ -222,7 +225,7 @@ class JavaTypescriptParser implements Parser<JavaLang.JavaRoot, TypescriptLang.T
                     new TypescriptLang.Access(JavaTypescriptParser.parseValue(javaAccess.receiver()), javaAccess.property());
             case JavaLang.JavaCharNode javaCharNode -> new TypescriptLang.Char(javaCharNode.value());
             case JavaLang.JavaIndexNode javaIndexNode -> new TypescriptLang.NumberNode("0");
-            case JavaLang.JavaInvokable javaInvokable -> new TypescriptLang.NumberNode("0");
+            case JavaLang.Invokable invokable -> JavaTypescriptParser.parseInvokable(invokable);
             case JavaLang.JavaLambda javaLambda -> new TypescriptLang.NumberNode("0");
             case JavaLang.JavaNot javaNot -> new TypescriptLang.NumberNode("0");
             case JavaLang.JavaNumberNode javaNumberNode -> new TypescriptLang.NumberNode("0");

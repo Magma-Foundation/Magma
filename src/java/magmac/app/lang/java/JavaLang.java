@@ -52,7 +52,7 @@ public class JavaLang {
     public sealed interface JavaCaller permits JavaConstruction, JavaValue {
     }
 
-    public sealed interface JavaValue extends JavaCaller, JavaArgument, JavaAssignable permits JavaAccess, JavaCharNode, JavaIndexNode, JavaInvokable, JavaLambda, JavaNot, JavaNumberNode, JavaOperation, JavaStringNode, JavaSwitchNode, JavaSymbol {
+    public sealed interface JavaValue extends JavaCaller, JavaArgument, JavaAssignable permits JavaAccess, JavaCharNode, JavaIndexNode, Invokable, JavaLambda, JavaNot, JavaNumberNode, JavaOperation, JavaStringNode, JavaSwitchNode, JavaSymbol {
     }
 
     public interface JavaAssignable {
@@ -76,8 +76,8 @@ public class JavaLang {
     public interface JavaLambdaParameter {
     }
 
-    public static final class JavaInvokable extends Invokable<JavaCaller, JavaArgument> implements JavaValue, JavaFunctionSegmentValue {
-        public JavaInvokable(JavaCaller caller, List<JavaArgument> arguments) {
+    public static final class Invokable extends magmac.app.lang.java.Invokable<JavaCaller, JavaArgument> implements JavaValue, JavaFunctionSegmentValue {
+        public Invokable(JavaCaller caller, List<JavaArgument> arguments) {
             super(caller, arguments);
         }
     }

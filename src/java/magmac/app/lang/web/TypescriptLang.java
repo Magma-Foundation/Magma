@@ -8,7 +8,6 @@ import magmac.app.compile.node.Node;
 import magmac.app.lang.CommonLang;
 import magmac.app.lang.Destructors;
 import magmac.app.lang.Serializable;
-import magmac.app.lang.java.Invokable;
 import magmac.app.lang.java.JavaLang;
 import magmac.app.lang.node.Block;
 import magmac.app.lang.node.Conditional;
@@ -276,8 +275,8 @@ public final class TypescriptLang {
         }
     }
 
-    public static class TypescriptInvokable extends Invokable<TypescriptCaller, TypescriptArgument> implements TypescriptValue, TypescriptFunctionSegmentValue {
-        public TypescriptInvokable(TypescriptCaller caller, List<TypescriptArgument> arguments) {
+    public static class Invokable extends magmac.app.lang.java.Invokable<TypescriptCaller, TypescriptArgument> implements TypescriptValue, TypescriptFunctionSegmentValue {
+        public Invokable(TypescriptCaller caller, List<TypescriptArgument> arguments) {
             super(caller, arguments);
         }
 

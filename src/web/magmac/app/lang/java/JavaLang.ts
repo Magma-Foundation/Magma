@@ -62,19 +62,19 @@ export interface JavaLambdaHeader {
 }
 export interface JavaLambdaParameter {
 }
-export class JavaInvokable {
-	JavaInvokable(caller : JavaCaller, arguments : List<JavaArgument>) : public {0( 0, 0);;}
+export class Invokable {
+	Invokable(caller : JavaCaller, arguments : List<JavaArgument>) : public {0( 0, 0);;}
 }
 export class JavaSymbol {
 	JavaSymbol(value : String) : public {0( 0);;}
 }
 export class JavaArrayType {
 	JavaArrayType(arrayType : JavaType) : public {break;;}
-	createArrayRule(rule : Rule) : Rule {break;return 0;;}
-	deserialize(node : Node) : Option<CompileResult<JavaType>> {return 0;;}
+	createArrayRule(rule : Rule) : Rule {break;return new TypeRule( 0, new StripRule( new SuffixRule( 0, 0)));;}
+	deserialize(node : Node) : Option<CompileResult<JavaType>> {return 0.destructWithType( 0, 0).map( 0);;}
 }
 export class JavaRoot {
-	getChildren(node : Node, deserializer : Deserializer<JavaRootSegment>) : CompileResult<JavaRoot> {return 0;;}
+	getChildren(node : Node, deserializer : Deserializer<JavaRootSegment>) : CompileResult<JavaRoot> {return 0.destruct( 0).withNodeList( 0, 0).complete( 0.new);;}
 }
 export class JavaLambda {
 	JavaLambda(header : JavaLambdaHeader, content : JavaLambdaContent) : public {0( 0, 0);;}
@@ -86,44 +86,44 @@ export class JavaLambdaValueContent {
 	JavaLambdaValueContent(value : JavaValue) : public {0( 0);;}
 }
 export class JavaLambdaBlockContent {
-	deserialize(node : Node) : Option<CompileResult<JavaLambdaBlockContent>> {return 0;;}
+	deserialize(node : Node) : Option<CompileResult<JavaLambdaBlockContent>> {return 0.destructWithType( 0, 0).map( 0);;}
 }
 export class JavaConditional {
 	JavaConditional(type : ConditionalType, condition : JavaValue) : public {0( 0, 0);;}
 }
 export class JavaTemplateType {
 	JavaTemplateType(base : JavaBase, typeArguments : TypeArguments<JavaType>) : public {break;break;;}
-	deserialize(node : Node) : Option<CompileResult<JavaTemplateType>> {return 0;;}
-	deserializeBase(node : Node) : CompileResult<JavaBase> {return 0;;}
-	createTemplateRule(type : Rule) : Rule {break;break;return 0;;}
+	deserialize(node : Node) : Option<CompileResult<JavaTemplateType>> {return 0.destructWithType( 0, 0).map( 0);;}
+	deserializeBase(node : Node) : CompileResult<JavaBase> {return 0.orError( 0, 0, 0.of( 0.wrap( 0.deserializeSymbol), 0.wrap( 0.deserializeQualified)));;}
+	createTemplateRule(type : Rule) : Rule {break;break;return new TypeRule( 0, new StripRule( new SuffixRule( 0.First( 0, 0, 0), 0)));;}
 }
 export class JavaStructureNodeDeserializer {
-	deserializeHelper(type : JavaStructureType, deserializer : InitialDestructor) : CompileResult<JavaStructureNode> {return 0;;}
-	attachRequired(deserializer : InitialDestructor) : CompoundDestructor<Tuple2<Tuple2<String, List<Modifier>>, List<JavaStructureMember>>> {return 0;;}
-	attachOptionals(attachRequired : CompoundDestructor<Tuple2<Tuple2<String, List<Modifier>>, List<JavaStructureMember>>>) : CompoundDestructor<Tuple2<Tuple2<Tuple2<Tuple2<Tuple2<Tuple2<Tuple2<String, List<Modifier>>, List<JavaStructureMember>>, Option<List<JavaType>>>, Option<List<TypescriptLang.TypeParam>>>, Option<List<JavaParameter>>>, Option<List<JavaType>>>, Option<List<JavaType>>>> {return 0;;}
-	from(type : JavaStructureType, tuple : Tuple2<Tuple2<Tuple2<Tuple2<Tuple2<Tuple2<Tuple2<String, List<Modifier>>, List<JavaStructureMember>>, Option<List<JavaType>>>, Option<List<TypescriptLang.TypeParam>>>, Option<List<JavaParameter>>>, Option<List<JavaType>>>, Option<List<JavaType>>>) : JavaStructureNode {return 0;;}
-	deserialize(node : Node) : Option<CompileResult<JavaStructureNode>> {return 0;;}
+	deserializeHelper(type : JavaStructureType, deserializer : InitialDestructor) : CompileResult<JavaStructureNode> {return 0.attachOptionals( 0.attachRequired( 0)).complete( 0);;}
+	attachRequired(deserializer : InitialDestructor) : CompoundDestructor<Tuple2<Tuple2<String, List<Modifier>>, List<JavaStructureMember>>> {return 0.withString( 0).withNodeList( 0, 0.deserialize).withNodeList( 0, 0.deserialize);;}
+	attachOptionals(attachRequired : CompoundDestructor<Tuple2<Tuple2<String, List<Modifier>>, List<JavaStructureMember>>>) : CompoundDestructor<Tuple2<Tuple2<Tuple2<Tuple2<Tuple2<Tuple2<Tuple2<String, List<Modifier>>, List<JavaStructureMember>>, Option<List<JavaType>>>, Option<List<TypescriptLang.TypeParam>>>, Option<List<JavaParameter>>>, Option<List<JavaType>>>, Option<List<JavaType>>>> {return 0.withNodeListOptionally( 0, 0.deserialize).withNodeListOptionally( 0, 0.TypeParam.deserialize).withNodeListOptionally( 0, 0.deserialize).withNodeListOptionally( 0, 0.deserialize).withNodeListOptionally( 0, 0.deserialize);;}
+	from(type : JavaStructureType, tuple : Tuple2<Tuple2<Tuple2<Tuple2<Tuple2<Tuple2<Tuple2<String, List<Modifier>>, List<JavaStructureMember>>, Option<List<JavaType>>>, Option<List<TypescriptLang.TypeParam>>>, Option<List<JavaParameter>>>, Option<List<JavaType>>>, Option<List<JavaType>>>) : JavaStructureNode {return new JavaStructureNode( 0, new StructureValue<JavaType, JavaStructureMember>( 0.left( ).left( ).left( ).left( ).left( ).left( ).left( ), 0.left( ).left( ).left( ).left( ).left( ).left( ).right( ), 0.left( ).left( ).left( ).left( ).left( ).right( ), 0.left( ).left( ).left( ).right( ), 0.left( ).right( ), 0.left( ).left( ).left( ).left( ).right( )), 0.left( ).left( ).right( ), 0.right( ));;}
+	deserialize(node : Node) : Option<CompileResult<JavaStructureNode>> {return 0.destructWithType( 0.type( ).name( ).toLowerCase( ), 0).map( 0);;}
 }
 export class JavaTypes {
-	deserialize(node : Node) : CompileResult<JavaType> {return 0;;}
-	createTypeRule() : Rule {break;return 0;;}
+	deserialize(node : Node) : CompileResult<JavaType> {return 0.orError( 0, 0, 0.of( 0.wrap( 0.deserializeSymbol), 0.wrap( 0.deserialize), 0.wrap( 0.deserialize), 0.wrap( 0.deserialize), 0.wrap( 0.deserializeQualified)));;}
+	createTypeRule() : Rule {break;return 0.set( new OrRule( 0.of( 0.createVariadicRule( 0), 0.createArrayRule( 0), 0.createTemplateRule( 0), 0.createSymbolRule( ), 0.createQualifiedRule( ))));;}
 }
 export class JavaTry {
 }
 export class JavaElse {
 }
 export class JavaCatch {
-	deserialize(node : Node) : Option<CompileResult<JavaBlockHeader>> {return 0;;}
+	deserialize(node : Node) : Option<CompileResult<JavaBlockHeader>> {return 0.destructWithType( 0, 0).map( 0);;}
 }
 export class JavaQualified {
-	deserializeQualified(node : Node) : Option<CompileResult<JavaQualified>> {return 0;;}
-	createQualifiedRule() : TypeRule {return 0;;}
-	createSegmentsRule(key : String) : Rule {return 0;;}
-	serialize() : Node {return 0;;}
+	deserializeQualified(node : Node) : Option<CompileResult<JavaQualified>> {return 0.destructWithType( 0, 0).map( 0);;}
+	createQualifiedRule() : TypeRule {return new TypeRule( 0, 0.createSegmentsRule( 0));;}
+	createSegmentsRule(key : String) : Rule {return 0.createNodeListRule( 0, new DelimitedFolder( '.'), 0.createSymbolRule( 0));;}
+	serialize() : Node {return new MapNode( 0).withNodeListAndSerializer( 0, 0.segments, 0.serialize);;}
 }
 export class JavaVariadicType {
-	deserialize(node : Node) : Option<CompileResult<JavaType>> {return 0;;}
-	createVariadicRule(rule : Rule) : Rule {break;return 0;;}
+	deserialize(node : Node) : Option<CompileResult<JavaType>> {return 0.destructWithType( 0, 0).map( 0);;}
+	createVariadicRule(rule : Rule) : Rule {break;return new TypeRule( 0, new StripRule( new SuffixRule( 0, 0)));;}
 }
 export class JavaNumberNode {
 	JavaNumberNode(value : String) : public {0( 0);;}
@@ -132,7 +132,7 @@ export class JavaStringNode {
 	JavaStringNode(value : String) : public {0( 0);;}
 }
 export class JavaOperation {
-	serialize() : Node {return 0;;}
+	serialize() : Node {return new MapNode( 0.operator.type( ));;}
 }
 export class JavaCharNode {
 }

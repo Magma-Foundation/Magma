@@ -5,5 +5,5 @@ import { Destructors } from "../../../../magmac/app/lang/Destructors";
 import { JavaDeserializers } from "../../../../magmac/app/lang/java/JavaDeserializers";
 import { JavaOperation } from "../../../../magmac/app/lang/java/JavaLang/JavaOperation";
 export class OperationDeserializer {
-	deserialize(node : Node) : Option<CompileResult<JavaOperation>> {return 0;;}
+	deserialize(node : Node) : Option<CompileResult<JavaOperation>> {return 0.destructWithType( 0.operator( ).type( ), 0).map( 0);;}
 }

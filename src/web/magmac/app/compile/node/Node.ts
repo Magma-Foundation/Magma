@@ -30,7 +30,7 @@ export interface Node {
 	removeNodeOrError(key : String) : CompileResult<Tuple2<Node, Node>>;
 	withNodeListAndSerializer(key : String, list : List<T>, serializer : Function<T, Node>) : Node;
 	withNodeAndSerializer(key : String, element : T, serializer : Function<T, Node>) : Node;
-	withNodeListSerialized(key : String, list : List<T>) : Node {return 0;;}
-	withNodeSerialized(key : String, element : T) : Node {return 0;;}
+	withNodeListSerialized(key : String, list : List<T>) : Node {return 0.withNodeListAndSerializer( 0, 0, 0.serialize);;}
+	withNodeSerialized(key : String, element : T) : Node {return 0.withNodeAndSerializer( 0, 0, 0.serialize);;}
 	removeNode(key : String) : Option<Tuple2<Node, Node>>;
 }

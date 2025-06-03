@@ -48,38 +48,39 @@ import { SimpleUnit } from "../../../magmac/app/stage/unit/SimpleUnit";
 import { Unit } from "../../../magmac/app/stage/unit/Unit";
 import { UnitSet } from "../../../magmac/app/stage/unit/UnitSet";
 export class JavaTypescriptParser {
-	parseUnit(unit : Unit<JavaLang.JavaRoot>) : CompileResult<Unit<TypescriptLang.TypescriptRoot>> {return 0;;}
-	parseRoot(location : Location, root : JavaLang.JavaRoot) : CompileResult<Unit<TypescriptLang.TypescriptRoot>> {break;return 0;;}
+	parseUnit(unit : Unit<JavaLang.JavaRoot>) : CompileResult<Unit<TypescriptLang.TypescriptRoot>> {return 0.destruct( 0.parseRoot);;}
+	parseRoot(location : Location, root : JavaLang.JavaRoot) : CompileResult<Unit<TypescriptLang.TypescriptRoot>> {break;return 0.Ok( new SimpleUnit<>( 0, new TypescriptLang.TypescriptRoot( 0)));;}
 	parseRootSegment(location : Location, rootSegment : JavaRootSegment) : List<TypescriptLang.TypeScriptRootSegment> {;;;}
-	getCollect(structureNode : JavaStructureNode) : List<TypescriptLang.TypeScriptRootSegment> {return 0;;}
+	getCollect(structureNode : JavaStructureNode) : List<TypescriptLang.TypeScriptRootSegment> {return 0.parseStructure( 0).iter( ).map( 0.wrap).collect( new ListCollector<>( ));;}
 	wrap(value : TypescriptLang.TypescriptStructureNode) : TypescriptLang.TypeScriptRootSegment {return 0;;}
 	parseStructure(structureNode : JavaStructureNode) : List<TypescriptLang.TypescriptStructureNode> {;;;}
-	parseStructureWithType(type : TypescriptLang.TypescriptStructureType, structureNode : JavaStructureNode) : List<TypescriptLang.TypescriptStructureNode> {break;break;break;break;break;return 0;;}
-	parseTypeList(list : List<JavaLang.JavaType>) : List<TypescriptLang.TypeScriptType> {return 0;;}
+	parseStructureWithType(type : TypescriptLang.TypescriptStructureType, structureNode : JavaStructureNode) : List<TypescriptLang.TypescriptStructureNode> {break;break;break;break;break;return 0.addLast( new TypescriptLang.TypescriptStructureNode( 0, 0));;}
+	parseTypeList(list : List<JavaLang.JavaType>) : List<TypescriptLang.TypeScriptType> {return 0.iter( ).map( 0.parseType).collect( new ListCollector<>( ));;}
 	parseStructureMember(structureNode : JavaStructureMember) : Tuple2<List<TypescriptLang.TypescriptStructureMember>, List<TypescriptLang.TypescriptStructureNode>> {;;;}
-	getListListTuple2(typescriptStructureMember : TypescriptLang.TypescriptStructureMember) : Tuple2<List<TypescriptLang.TypescriptStructureMember>, List<TypescriptLang.TypescriptStructureNode>> {return 0;;}
-	getList() : Tuple2<List<TypescriptLang.TypescriptStructureMember>, List<TypescriptLang.TypescriptStructureNode>> {return 0;;}
-	parseMethod(methodNode : JavaMethod) : TypescriptLang.TypescriptStructureMember {break;break;break;return 0;;}
-	parseFunctionSegments(segments : List<JavaFunctionSegment>) : List<TypescriptLang.TypescriptFunctionSegment> {return 0;;}
+	getListListTuple2(typescriptStructureMember : TypescriptLang.TypescriptStructureMember) : Tuple2<List<TypescriptLang.TypescriptStructureMember>, List<TypescriptLang.TypescriptStructureNode>> {return new Tuple2<>( 0.of( 0), 0.empty( ));;}
+	getList() : Tuple2<List<TypescriptLang.TypescriptStructureMember>, List<TypescriptLang.TypescriptStructureNode>> {return 0.getListListTuple2( new TypescriptLang.TypescriptArgument.TypescriptWhitespace( ));;}
+	parseMethod(methodNode : JavaMethod) : TypescriptLang.TypescriptStructureMember {break;break;break;return new TypescriptLang.TypescriptMethod( 0, 0.maybeChildren( ).map( 0.parseFunctionSegments));;}
+	parseFunctionSegments(segments : List<JavaFunctionSegment>) : List<TypescriptLang.TypescriptFunctionSegment> {return 0.iter( ).map( 0.parseFunctionSegment).collect( new ListCollector<>( ));;}
 	parseFunctionSegment(segment : JavaFunctionSegment) : TypescriptLang.TypescriptFunctionSegment {;;;}
-	parseFunctionStatement(functionStatement : JavaFunctionStatement) : TypescriptLang.TypescriptFunctionSegment {return 0;;}
+	parseFunctionStatement(functionStatement : JavaFunctionStatement) : TypescriptLang.TypescriptFunctionSegment {return new TypescriptFunctionStatement( 0.parseFunctionStatementValue( 0.child( )));;}
 	parseFunctionStatementValue(child : JavaFunctionSegmentValue) : TypescriptFunctionSegmentValue {;;;}
+	parseInvokable(invokable : JavaLang.Invokable) : TypescriptLang.Invokable {return new TypescriptLang.Invokable( 0.parseCaller( 0.caller( )), 0.parseArguments( 0.arguments( )));;}
 	parseCaller(caller : JavaLang.JavaCaller) : TypescriptCaller {;;;}
-	parseArguments(arguments : List<JavaLang.JavaArgument>) : List<TypescriptLang.TypescriptArgument> {return 0;;}
+	parseArguments(arguments : List<JavaLang.JavaArgument>) : List<TypescriptLang.TypescriptArgument> {return 0.iter( ).map( 0.parseArgument).collect( new ListCollector<>( ));;}
 	parseArgument(argument : JavaLang.JavaArgument) : TypescriptLang.TypescriptArgument {;;;}
 	parseValue(child : JavaLang.JavaValue) : TypescriptLang.TypescriptValue {;;;}
-	parseBlock(block : JavaBlock) : TypescriptLang.TypescriptBlock {return 0;;}
-	parseHeader(header : JavaLang.JavaBlockHeader) : TypescriptLang.TypescriptBlockHeader {return 0;;}
+	parseBlock(block : JavaBlock) : TypescriptLang.TypescriptBlock {return new TypescriptLang.TypescriptBlock( 0.parseHeader( 0.header( )), 0.parseFunctionSegments( 0.segments( )));;}
+	parseHeader(header : JavaLang.JavaBlockHeader) : TypescriptLang.TypescriptBlockHeader {return new TypescriptLang.TypescriptConditional( 0.If, new TypescriptSymbol( 0));;}
 	parseParameter(parameter : JavaParameter) : TypescriptLang.TypeScriptParameter {;;;}
 	parseMethodHeader(header : JavaMethodHeader) : TypescriptLang.TypeScriptMethodHeader {;;;}
 	parseDefinition(javaDefinition : JavaLang.JavaDefinition) : TypescriptLang.TypeScriptDefinition {break;;;;}
-	parseSymbol(javaSymbol : JavaLang.JavaSymbol) : TypescriptSymbol {return 0;;}
-	parseQualifiedType(qualified : JavaLang.JavaQualified) : TypescriptSymbol {break;return 0;;}
-	parseArrayType(type : JavaLang.JavaArrayType) : TypescriptLang.TypeScriptType {return 0;;}
+	parseSymbol(javaSymbol : JavaLang.JavaSymbol) : TypescriptSymbol {return new TypescriptSymbol( 0.value( ));;}
+	parseQualifiedType(qualified : JavaLang.JavaQualified) : TypescriptSymbol {break;return new TypescriptSymbol( 0);;}
+	parseArrayType(type : JavaLang.JavaArrayType) : TypescriptLang.TypeScriptType {return new TypescriptLang.TypescriptArrayType( 0.parseType( 0.inner));;}
 	parseType(variadicType : JavaLang.JavaType) : TypescriptLang.TypeScriptType {;;;}
-	parseTemplateType(type : JavaLang.JavaTemplateType) : TypescriptLang.TypeScriptTemplateType {break;break;return 0;;}
+	parseTemplateType(type : JavaLang.JavaTemplateType) : TypescriptLang.TypeScriptTemplateType {break;break;return new TypescriptLang.TypeScriptTemplateType( 0, new TypeArguments<>( 0));;}
 	parseBaseType(base : JavaLang.JavaBase) : JavaLang.JavaSymbol {;;;}
 	parseNamespaced(location : Location, namespaced : JavaNamespacedNode) : TypescriptLang.TypeScriptRootSegment {;;;}
-	parseImport(location : Location, segments : List<Segment>) : TypescriptLang.TypeScriptImport {break;break;break;return 0;;}
-	apply(initial : UnitSet<JavaLang.JavaRoot>) : CompileResult<UnitSet<TypescriptLang.TypescriptRoot>> {return 0;;}
+	parseImport(location : Location, segments : List<Segment>) : TypescriptLang.TypeScriptImport {break;break;break;return new TypescriptLang.TypeScriptImport( 0.of( 0), 0.addAllLast( 0));;}
+	apply(initial : UnitSet<JavaLang.JavaRoot>) : CompileResult<UnitSet<TypescriptLang.TypescriptRoot>> {return 0.iter( ).map( 0.parseUnit).collect( new CompileResultCollector<>( new UnitSetCollector<>( )));;}
 }

@@ -42,10 +42,10 @@ public final class JavaDeserializers {
                         .complete(JavaConstruction::new));
     }
 
-    public static Option<CompileResult<JavaInvokable>> deserializeInvocation(Node node) {
+    public static Option<CompileResult<JavaLang.Invokable>> deserializeInvocation(Node node) {
         return Destructors.destructWithType("invokable", node).map(deserializer -> deserializer.withNode("caller", JavaDeserializers::deserialize)
                 .withNodeList("arguments", Arguments::deserialize)
-                .complete(tuple -> new JavaInvokable(tuple.left(), tuple.right())));
+                .complete(tuple -> new JavaLang.Invokable(tuple.left(), tuple.right())));
     }
 
     public static CompileResult<JavaRootSegment> deserializeRootSegment(Node node) {

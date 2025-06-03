@@ -15,9 +15,9 @@ import { MapUnitSet } from "../../../magmac/app/stage/unit/MapUnitSet";
 import { SimpleUnit } from "../../../magmac/app/stage/unit/SimpleUnit";
 import { UnitSet } from "../../../magmac/app/stage/unit/UnitSet";
 export class MergeDiagram {
-	findParentDependencies(child : String, childToParents : Map<String, List<String>>, dependencyMap : Map<String, List<String>>) : List<String> {return 0;;}
-	findChildrenWithDependencies(rootSegments : NodeList) : Map<String, List<String>> {return 0;;}
-	findChildrenWithInheritedTypes(rootSegments : NodeList) : Map<String, List<String>> {return 0;;}
-	createInitial() : MapUnitSet<Node> {return 0;;}
-	afterAll(roots : UnitSet<Node>) : UnitSet<Node> {break;break;break;break;break;break;break;break;break;return 0;;}
+	findParentDependencies(child : String, childToParents : Map<String, List<String>>, dependencyMap : Map<String, List<String>>) : List<String> {return 0.getOrDefault( 0, 0.empty( )).iter( ).map( 0).flatMap( 0.iter).collect( new ListCollector<>( ));;}
+	findChildrenWithDependencies(rootSegments : NodeList) : Map<String, List<String>> {return 0.iter( ).fold( 0.empty( ), 0);;}
+	findChildrenWithInheritedTypes(rootSegments : NodeList) : Map<String, List<String>> {return 0.iter( ).fold( 0.empty( ), 0);;}
+	createInitial() : MapUnitSet<Node> {return new MapUnitSet<>( );;}
+	afterAll(roots : UnitSet<Node>) : UnitSet<Node> {break;break;break;break;break;break;break;break;break;return 0.createInitial( ).add( new SimpleUnit<>( 0, 0));;}
 }

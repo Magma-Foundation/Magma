@@ -10,8 +10,8 @@ import { Folder } from "../../../../magmac/app/compile/rule/fold/Folder";
 import { ValueFolder } from "../../../../magmac/app/lang/ValueFolder";
 export class NodeListRule {
 	NodeListRule(key : String, childRule : Rule, divider : Divider) : public {break;break;break;;}
-	Values(key : String, childRule : Rule) : Rule {return 0;;}
-	createNodeListRule(key : String, folder : Folder, childRule : Rule) : Rule {return 0;;}
-	lex(input : String) : CompileResult<Node> {return 0;;}
-	generate(node : Node) : CompileResult<String> {return 0;;}
+	Values(key : String, childRule : Rule) : Rule {return 0.createNodeListRule( 0, new ValueFolder( ), 0);;}
+	createNodeListRule(key : String, folder : Folder, childRule : Rule) : Rule {return new NodeListRule( 0, 0, new FoldingDivider( 0));;}
+	lex(input : String) : CompileResult<Node> {return 0.divider.divide( 0).map( 0.childRule.lex).collect( new CompileResultCollector<>( new NodeListCollector( ))).mapValue( 0);;}
+	generate(node : Node) : CompileResult<String> {return 0.findNodeListOrError( 0.key).flatMapValue( 0);;}
 }

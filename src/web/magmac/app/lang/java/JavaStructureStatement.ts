@@ -12,6 +12,6 @@ import { Destructors } from "../../../../magmac/app/lang/Destructors";
 import { LazyRule } from "../../../../magmac/app/lang/LazyRule";
 import { StructureStatementValue } from "../../../../magmac/app/lang/node/StructureStatementValue";
 export class JavaStructureStatement {
-	deserialize(node : Node) : Option<CompileResult<JavaStructureMember>> {return 0;;}
-	createStructureStatementRule(definitionRule : Rule, valueRule : LazyRule) : Rule {break;return 0;;}
+	deserialize(node : Node) : Option<CompileResult<JavaStructureMember>> {return 0.destructWithType( 0, 0).map( 0);;}
+	createStructureStatementRule(definitionRule : Rule, valueRule : LazyRule) : Rule {break;return new TypeRule( 0, new StripRule( new SuffixRule( 0, 0)));;}
 }

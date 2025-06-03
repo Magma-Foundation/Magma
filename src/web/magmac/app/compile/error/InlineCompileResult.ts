@@ -5,11 +5,11 @@ import { BiFunction } from "../../../../java/util/function/BiFunction";
 import { Function } from "../../../../java/util/function/Function";
 import { Supplier } from "../../../../java/util/function/Supplier";
 export class InlineCompileResult<T> {
-	mapValue(mapper : Function<T, R>) : CompileResult<R> {return 0;;}
-	match(whenOk : Function<T, R>, whenErr : Function<CompileError, R>) : R {return 0;;}
-	mapErr(mapper : Function<CompileError, CompileError>) : CompileResult<T> {return 0;;}
-	flatMapValue(mapper : Function<T, CompileResult<R>>) : CompileResult<R> {return 0;;}
-	and(supplier : Supplier<CompileResult<R>>) : CompileResult<Tuple2<T, R>> {return 0;;}
-	merge(other : Supplier<CompileResult<T>>, merger : BiFunction<T, T, T>) : CompileResult<T> {return 0;;}
-	merge(merger : BiFunction<T, T, T>, tuple : Tuple2<T, T>) : T {break;break;return 0;;}
+	mapValue(mapper : Function<T, R>) : CompileResult<R> {return 0.fromResult( 0.toResult.mapValue( 0));;}
+	match(whenOk : Function<T, R>, whenErr : Function<CompileError, R>) : R {return 0.toResult.match( 0, 0);;}
+	mapErr(mapper : Function<CompileError, CompileError>) : CompileResult<T> {return 0.fromResult( 0.toResult.mapErr( 0));;}
+	flatMapValue(mapper : Function<T, CompileResult<R>>) : CompileResult<R> {return 0.fromResult( 0.toResult.flatMapValue( 0));;}
+	and(supplier : Supplier<CompileResult<R>>) : CompileResult<Tuple2<T, R>> {return 0.fromResult( 0.toResult.and( 0));;}
+	merge(other : Supplier<CompileResult<T>>, merger : BiFunction<T, T, T>) : CompileResult<T> {return 0.and( 0).mapValue( 0);;}
+	merge(merger : BiFunction<T, T, T>, tuple : Tuple2<T, T>) : T {break;break;return 0.apply( 0, 0);;}
 }

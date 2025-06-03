@@ -86,7 +86,6 @@ TypescriptLang --> Node
 TypescriptLang --> CommonLang
 TypescriptLang --> Destructors
 TypescriptLang --> Serializable
-TypescriptLang --> Invokable
 TypescriptLang --> JavaLang
 TypescriptLang --> Block
 TypescriptLang --> Conditional

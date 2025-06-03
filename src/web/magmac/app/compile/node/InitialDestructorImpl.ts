@@ -9,8 +9,8 @@ import { Function } from "../../../../java/util/function/Function";
 import { Supplier } from "../../../../java/util/function/Supplier";
 export class InitialDestructorImpl {
 	InitialDestructorImpl(node : Node) : public {break;;}
-	withNodeList(key : String, deserializer : Deserializer<T>) : CompoundDestructor<List<T>> {return 0;;}
-	withString(key : String) : CompoundDestructor<String> {return 0;;}
-	withNode(key : String, deserializer : Function<Node, CompileResult<T>>) : CompoundDestructor<T> {return 0;;}
-	complete(supplier : Supplier<T>) : CompileResult<T> {if(true){ return 0;;}return 0;;}
+	withNodeList(key : String, deserializer : Deserializer<T>) : CompoundDestructor<List<T>> {return new CompoundDestructorImpl<>( 0.node.removeNodeListOrError( 0).flatMapValue( 0));;}
+	withString(key : String) : CompoundDestructor<String> {return new CompoundDestructorImpl<>( 0.node.removeString( 0));;}
+	withNode(key : String, deserializer : Function<Node, CompileResult<T>>) : CompoundDestructor<T> {return new CompoundDestructorImpl<>( 0.node.removeNodeOrError( 0).flatMapValue( 0));;}
+	complete(supplier : Supplier<T>) : CompileResult<T> {if(true){ return 0.NodeErr( 0, 0.node);;}return 0.Ok( 0.get( ));;}
 }

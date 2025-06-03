@@ -14,9 +14,9 @@ import { Parser } from "../../../magmac/app/stage/parse/Parser";
 import { Path } from "../../../java/nio/file/Path";
 import { Paths } from "../../../java/nio/file/Paths";
 export class TypeScriptTargetPlatform {
-	createTargetPath() : Path {return 0;;}
+	createTargetPath() : Path {return 0.get( 0, 0, 0);;}
 	createExtension() : String {return 0;;}
-	createRule() : Rule {return 0;;}
-	createCompiler() : Compiler {break;break;return 0;;}
-	createApplication() : Application {break;break;break;return 0;;}
+	createRule() : Rule {return 0.createRule( );;}
+	createCompiler() : Compiler {break;break;return new StagedCompiler<TypescriptLang.TypescriptRoot>( 0, 0);;}
+	createApplication() : Application {break;break;break;return new CompileApplication<>( 0.createCompiler( ), 0);;}
 }

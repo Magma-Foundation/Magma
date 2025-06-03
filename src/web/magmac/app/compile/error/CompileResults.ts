@@ -8,9 +8,9 @@ import { CompileError } from "../../../../magmac/app/compile/error/error/Compile
 import { Node } from "../../../../magmac/app/compile/node/Node";
 import { ImmutableCompileError } from "../../../../magmac/app/error/ImmutableCompileError";
 export class CompileResults {
-	fromResult(result : Result<T, CompileError>) : CompileResult<T> {return 0;;}
-	Ok(value : T) : CompileResult<T> {return 0;;}
-	NodeErr(message : String, context : Node) : CompileResult<T> {return 0;;}
-	fromErrWithString(message : String, context : String) : CompileResult<T> {return 0;;}
-	fromWithContext(message : String, context : Context) : CompileResult<T> {return 0;;}
+	fromResult(result : Result<T, CompileError>) : CompileResult<T> {return new InlineCompileResult<T>( 0);;}
+	Ok(value : T) : CompileResult<T> {return new InlineCompileResult<T>( new Ok<T, CompileError>( 0));;}
+	NodeErr(message : String, context : Node) : CompileResult<T> {return new InlineCompileResult<>( new Err<>( new ImmutableCompileError( 0, new NodeContext( 0))));;}
+	fromErrWithString(message : String, context : String) : CompileResult<T> {return 0.fromWithContext( 0, new StringContext( 0));;}
+	fromWithContext(message : String, context : Context) : CompileResult<T> {return new InlineCompileResult<>( new Err<>( new ImmutableCompileError( 0, 0)));;}
 }

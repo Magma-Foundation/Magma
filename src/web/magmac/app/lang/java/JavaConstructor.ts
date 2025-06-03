@@ -3,5 +3,5 @@ import { CompileResult } from "../../../../magmac/app/compile/error/CompileResul
 import { Node } from "../../../../magmac/app/compile/node/Node";
 import { Destructors } from "../../../../magmac/app/lang/Destructors";
 export class JavaConstructor {
-	deserialize(node : Node) : Option<CompileResult<JavaMethodHeader>> {return 0;;}
+	deserialize(node : Node) : Option<CompileResult<JavaMethodHeader>> {return 0.destructWithType( 0, 0).map( 0);;}
 }
