@@ -8,7 +8,7 @@ import { CompileResult } from "../../../../magmac/app/compile/error/CompileResul
 import { CompileResultCollector } from "../../../../magmac/app/compile/error/CompileResultCollector";
 import { Function } from "../../../../java/util/function/Function";
 export class InlineNodeList {
-	InlineNodeList(elements : List<Node>) : public {break;;}
+	InlineNodeList(elements : List<Node>) : public {this.elements=elements;;}
 	empty() : NodeList {return new InlineNodeList( Lists.empty( ));;}
 	of(...elements : Node[]) : NodeList {return new InlineNodeList( Lists.of( elements));;}
 	iter() : Iter<Node> {return this.elements.iter( );;}

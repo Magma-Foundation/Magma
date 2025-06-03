@@ -6,7 +6,7 @@ import { FirstLocator } from "../../../../magmac/app/compile/rule/locate/FirstLo
 import { LastLocator } from "../../../../magmac/app/compile/rule/locate/LastLocator";
 import { Locator } from "../../../../magmac/app/compile/rule/locate/Locator";
 export class LocatingRule {
-	LocatingRule(leftRule : Rule, splitter : Splitter, rightRule : Rule) : public {break;break;break;;}
+	LocatingRule(leftRule : Rule, splitter : Splitter, rightRule : Rule) : public {this.leftRule=leftRule;this.rightRule=rightRule;this.splitter=splitter;;}
 	First(leftRule : Rule, infix : String, rightRule : Rule) : Rule {return LocatingRule.createLocatingRule( leftRule, infix, rightRule, new FirstLocator( ));;}
 	Last(leftRule : Rule, infix : String, rightRule : Rule) : Rule {return LocatingRule.createLocatingRule( leftRule, infix, rightRule, new LastLocator( ));;}
 	createLocatingRule(leftRule : Rule, infix : String, rightRule : Rule, locator : Locator) : Rule {return new LocatingRule( leftRule, new LocatingSplitter( infix, locator), rightRule);;}

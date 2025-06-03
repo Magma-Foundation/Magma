@@ -39,7 +39,7 @@ import magmac.app.lang.node.StructureValue;
 import magmac.app.lang.node.TypeArguments;
 import magmac.app.lang.web.FunctionStatement;
 import magmac.app.lang.web.Symbol;
-import magmac.app.lang.web.TypescriptCaller;
+import magmac.app.lang.web.Caller;
 import magmac.app.lang.web.TypescriptLang;
 import magmac.app.stage.parse.Parser;
 import magmac.app.stage.unit.SimpleUnit;
@@ -76,23 +76,23 @@ class JavaTypescriptParser implements Parser<JavaLang.JavaRoot, TypescriptLang.T
                 .collect(new ListCollector<>());
     }
 
-    private static TypescriptLang.TypeScriptRootSegment wrap(TypescriptLang.TypescriptStructureNode value) {
+    private static TypescriptLang.TypeScriptRootSegment wrap(TypescriptLang.StructureNode value) {
         return value;
     }
 
-    private static List<TypescriptLang.TypescriptStructureNode> parseStructure(JavaStructureNode structureNode) {
+    private static List<TypescriptLang.StructureNode> parseStructure(JavaStructureNode structureNode) {
         return switch (structureNode.type()) {
             case Class, Record ->
-                    JavaTypescriptParser.parseStructureWithType(TypescriptLang.TypescriptStructureType.Class, structureNode);
+                    JavaTypescriptParser.parseStructureWithType(TypescriptLang.StructureType.Class, structureNode);
             case Interface ->
-                    JavaTypescriptParser.parseStructureWithType(TypescriptLang.TypescriptStructureType.Interface, structureNode);
+                    JavaTypescriptParser.parseStructureWithType(TypescriptLang.StructureType.Interface, structureNode);
             case Enum -> Lists.empty();
         };
     }
 
-    private static List<TypescriptLang.TypescriptStructureNode> parseStructureWithType(TypescriptLang.TypescriptStructureType type, JavaStructureNode structureNode) {
+    private static List<TypescriptLang.StructureNode> parseStructureWithType(TypescriptLang.StructureType type, JavaStructureNode structureNode) {
         StructureValue<JavaLang.JavaType, JavaStructureMember> value = structureNode.value;
-        Tuple2<List<List<TypescriptLang.TypescriptStructureMember>>, List<List<TypescriptLang.TypescriptStructureNode>>> membersTuple = value.members()
+        Tuple2<List<List<TypescriptLang.TypescriptStructureMember>>, List<List<TypescriptLang.StructureNode>>> membersTuple = value.members()
                 .iter()
                 .map(JavaTypescriptParser::parseStructureMember)
                 .collect(new TupleCollector<>(new ListCollector<>(), new ListCollector<>()));
@@ -102,7 +102,7 @@ class JavaTypescriptParser implements Parser<JavaLang.JavaRoot, TypescriptLang.T
                 .flatMap(List::iter)
                 .collect(new ListCollector<>());
 
-        List<TypescriptLang.TypescriptStructureNode> structures = membersTuple.right()
+        List<TypescriptLang.StructureNode> structures = membersTuple.right()
                 .iter()
                 .flatMap(List::iter)
                 .collect(new ListCollector<>());
@@ -116,14 +116,14 @@ class JavaTypescriptParser implements Parser<JavaLang.JavaRoot, TypescriptLang.T
                 value.maybeImplemented().map(JavaTypescriptParser::parseTypeList)
         );
 
-        return structures.addLast(new TypescriptLang.TypescriptStructureNode(type, structureNode1));
+        return structures.addLast(new TypescriptLang.StructureNode(type, structureNode1));
     }
 
     private static List<TypescriptLang.Type> parseTypeList(List<JavaLang.JavaType> list) {
         return list.iter().map(JavaTypescriptParser::parseType).collect(new ListCollector<>());
     }
 
-    private static Tuple2<List<TypescriptLang.TypescriptStructureMember>, List<TypescriptLang.TypescriptStructureNode>> parseStructureMember(JavaStructureMember structureNode) {
+    private static Tuple2<List<TypescriptLang.TypescriptStructureMember>, List<TypescriptLang.StructureNode>> parseStructureMember(JavaStructureMember structureNode) {
         return switch (structureNode) {
             case JavaLang.Whitespace whitespace -> JavaTypescriptParser.getList();
             case JavaEnumValues enumValues -> JavaTypescriptParser.getList();
@@ -135,11 +135,11 @@ class JavaTypescriptParser implements Parser<JavaLang.JavaRoot, TypescriptLang.T
         };
     }
 
-    private static Tuple2<List<TypescriptLang.TypescriptStructureMember>, List<TypescriptLang.TypescriptStructureNode>> getListListTuple2(TypescriptLang.TypescriptStructureMember typescriptStructureMember) {
+    private static Tuple2<List<TypescriptLang.TypescriptStructureMember>, List<TypescriptLang.StructureNode>> getListListTuple2(TypescriptLang.TypescriptStructureMember typescriptStructureMember) {
         return new Tuple2<>(Lists.of(typescriptStructureMember), Lists.empty());
     }
 
-    private static Tuple2<List<TypescriptLang.TypescriptStructureMember>, List<TypescriptLang.TypescriptStructureNode>> getList() {
+    private static Tuple2<List<TypescriptLang.TypescriptStructureMember>, List<TypescriptLang.StructureNode>> getList() {
         return JavaTypescriptParser.getListListTuple2(new TypescriptLang.Whitespace());
     }
 
@@ -192,7 +192,7 @@ class JavaTypescriptParser implements Parser<JavaLang.JavaRoot, TypescriptLang.T
     private static TypescriptLang.Assignable parseAssignable(JavaLang.Assignable assignable) {
         return switch (assignable) {
             case JavaLang.Definition definition -> JavaTypescriptParser.parseDefinition(definition);
-            case JavaLang.Value value -> null;
+            case JavaLang.Value value -> JavaTypescriptParser.parseValue(value);
         };
     }
 
@@ -200,7 +200,7 @@ class JavaTypescriptParser implements Parser<JavaLang.JavaRoot, TypescriptLang.T
         return new TypescriptLang.Invokable(JavaTypescriptParser.parseCaller(invokable.caller()), JavaTypescriptParser.parseArguments(invokable.arguments()));
     }
 
-    private static TypescriptCaller parseCaller(JavaLang.JavaCaller caller) {
+    private static Caller parseCaller(JavaLang.JavaCaller caller) {
         return switch (caller) {
             case JavaLang.Value javaValue -> JavaTypescriptParser.parseValue(javaValue);
             case JavaConstruction javaConstruction ->
@@ -234,6 +234,7 @@ class JavaTypescriptParser implements Parser<JavaLang.JavaRoot, TypescriptLang.T
             case JavaLang.Symbol symbol -> new TypescriptLang.Symbol(symbol.value());
             case JavaLang.Lambda javaLambda -> new TypescriptLang.Number("0");
             case JavaLang.SwitchNode javaSwitchNode -> new TypescriptLang.Number("0");
+            case JavaLang.InstanceOf instanceOf -> new TypescriptLang.Number("0");
         };
     }
 
@@ -292,7 +293,7 @@ class JavaTypescriptParser implements Parser<JavaLang.JavaRoot, TypescriptLang.T
         return new Symbol(symbol.value());
     }
 
-    private static Symbol parseQualifiedType(JavaLang.JavaQualified qualified) {
+    private static Symbol parseQualifiedType(JavaLang.Qualified qualified) {
         String joined = qualified.segments()
                 .iter()
                 .map(Segment::value)
@@ -312,7 +313,7 @@ class JavaTypescriptParser implements Parser<JavaLang.JavaRoot, TypescriptLang.T
             case JavaLang.JavaArrayType type -> JavaTypescriptParser.parseArrayType(type);
             case JavaLang.JavaTemplateType templateType -> JavaTypescriptParser.parseTemplateType(templateType);
             case JavaLang.JavaVariadicType type -> new Symbol("?");
-            case JavaLang.JavaQualified qualified -> JavaTypescriptParser.parseQualifiedType(qualified);
+            case JavaLang.Qualified qualified -> JavaTypescriptParser.parseQualifiedType(qualified);
         };
     }
 
@@ -322,9 +323,9 @@ class JavaTypescriptParser implements Parser<JavaLang.JavaRoot, TypescriptLang.T
         return new TypescriptLang.TemplateType(base, new TypeArguments<>(collect));
     }
 
-    private static JavaLang.Symbol parseBaseType(JavaLang.JavaBase base) {
+    private static JavaLang.Symbol parseBaseType(JavaLang.Base base) {
         return switch (base) {
-            case JavaLang.JavaQualified qualifiedType -> {
+            case JavaLang.Qualified qualifiedType -> {
                 String joined = qualifiedType.segments()
                         .iter()
                         .map(Segment::value)

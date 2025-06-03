@@ -8,5 +8,5 @@ import { Rule } from "../../../magmac/app/compile/rule/Rule";
 export class MutableLazyRule {
 	lex(input : String) : CompileResult<Node> {return this.maybeRule.map( 0).orElseGet( 0);;}
 	generate(node : Node) : CompileResult<String> {return this.maybeRule.map( 0).orElseGet( 0);;}
-	set(rule : Rule) : LazyRule {break;return this;;}
+	set(rule : Rule) : LazyRule {this.maybeRule=new Some<>( rule);return this;;}
 }

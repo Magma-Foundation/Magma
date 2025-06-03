@@ -102,7 +102,7 @@ public final class JavaRules {
 
     public static Option<CompileResult<JavaLang.JavaLambdaValueContent>> deserializeLambdaValueContent(Node node) {
         return Destructors.destructWithType("value", node).map(destructor -> {
-            return destructor.withNode("value", JavaDeserializers::deserializeJavaOrError).complete(JavaLang.JavaLambdaValueContent::new);
+            return destructor.withNode("value", JavaDeserializers::deserializeValueOrError).complete(JavaLang.JavaLambdaValueContent::new);
         });
     }
 
@@ -232,7 +232,7 @@ public final class JavaRules {
     private static Rule createInstanceOfRule(LazyRule value) {
         Rule base = new NodeRule("base", JavaRules.createBaseRule());
         Rule right = new StripRule(new SuffixRule(LocatingRule.First(base, "(", JavaRules.createParametersRule(JavaRules.createDefinitionRule())), ")"));
-        return new TypeRule("instanceof", LocatingRule.Last(new NodeRule("child", value), " instanceof ", right));
+        return new TypeRule("instance-of", LocatingRule.Last(new NodeRule("child", value), " instanceof ", right));
     }
 
     private static TypeRule createSwitchRule(Rule functionSegmentRule, Rule value) {
@@ -303,14 +303,14 @@ public final class JavaRules {
                 JavaLang.JavaArrayType.createArrayRule(type),
                 JavaRules.createTemplateRule(type),
                 CommonRules.createSymbolRule(),
-                JavaLang.JavaQualified.createQualifiedRule()
+                JavaLang.Qualified.createQualifiedRule()
         )));
     }
 
     public static OrRule createBaseRule() {
         return new OrRule(Lists.of(
                 CommonRules.createSymbolRule(),
-                JavaLang.JavaQualified.createQualifiedRule()
+                JavaLang.Qualified.createQualifiedRule()
         ));
     }
 

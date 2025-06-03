@@ -6,10 +6,12 @@ import { Node } from "../../../../magmac/app/compile/node/Node";
 import { CommonLang } from "../../../../magmac/app/lang/CommonLang";
 import { Destructors } from "../../../../magmac/app/lang/Destructors";
 import { Serializable } from "../../../../magmac/app/lang/Serializable";
+import { Annotation } from "../../../../magmac/app/lang/common/Annotation";
 import { JavaLang } from "../../../../magmac/app/lang/java/JavaLang";
 import { AbstractReturnNode } from "../../../../magmac/app/lang/node/AbstractReturnNode";
 import { Conditional } from "../../../../magmac/app/lang/node/Conditional";
 import { ConditionalType } from "../../../../magmac/app/lang/node/ConditionalType";
+import { Modifier } from "../../../../magmac/app/lang/node/Modifier";
 import { Operator } from "../../../../magmac/app/lang/node/Operator";
 import { ParameterizedMethodHeader } from "../../../../magmac/app/lang/node/ParameterizedMethodHeader";
 import { PostVariant } from "../../../../magmac/app/lang/node/PostVariant";
@@ -26,7 +28,7 @@ export interface TypescriptStructureMember {
 }
 export interface TypeScriptMethodHeader {
 }
-export interface TypeScriptType {
+export interface Type {
 }
 export interface TypeScriptRootSegment {
 }
@@ -36,11 +38,13 @@ export interface FunctionSegment {
 }
 export interface Value {
 }
+export interface Assignable {
+}
 export class Number {
 	serialize() : Node {return new MapNode( "number").withString( "value", this.value);;}
 }
-export class TypescriptStructureNode {
-	TypescriptStructureNode(type : TypescriptStructureType, structureNode : StructureValue<TypeScriptType, TypescriptStructureMember>) : public {break;break;;}
+export class StructureNode {
+	StructureNode(type : StructureType, structureNode : StructureValue<Type, TypescriptStructureMember>) : public {this.type=type;this.value=structureNode;;}
 	serializeImplementsParams() : Node {return this.value.maybeImplemented( ).map( 0).orElse( new MapNode( ));;}
 	serializeExtendedParams() : Node {return this.value.maybeExtended( ).map( 0).orElse( new MapNode( ));;}
 	serializeTypeParams() : Node {return this.value.maybeTypeParams( ).map( 0).orElse( new MapNode( ));;}
@@ -53,10 +57,10 @@ export class TypescriptRoot {
 	serialize() : Node {return new MapNode( "root").withNodeListAndSerializer( "children", this.children, TypeScriptRootSegment.serialize);;}
 }
 export class TypescriptMethod {
-	serialize() : Node {break;return this.maybeChildren.map( 0).orElse( node);;}
+	serialize() : Node {node : Node=new MapNode( "method").withNodeSerialized( "header", this.header);return this.maybeChildren.map( 0).orElse( node);;}
 }
-export class TypeScriptTemplateType {
-	TypeScriptTemplateType(base : JavaLang.Symbol, typeArguments : TypeArguments<TypeScriptType>) : public {break;break;;}
+export class TemplateType {
+	TemplateType(base : JavaLang.Symbol, typeArguments : TypeArguments<Type>) : public {this.base=base;this.typeArguments=typeArguments;;}
 	serialize() : Node {return new MapNode( "template").withNodeSerialized( "base", this.base).withNodeListSerialized( "arguments", this.typeArguments.arguments( ));;}
 }
 export class TypescriptConditional {
@@ -70,12 +74,12 @@ export class Block {
 export class TypescriptConstructor {
 	serialize() : Node {return new MapNode( "constructor");;}
 }
-export class TypeScriptDefinition {
-	TypeScriptDefinition(definition : CommonLang.Definition<TypeScriptType>) : public {break;;}
-	serialize() : Node {return new MapNode( "definition").withString( "name", this.definition.name( )).withNodeSerialized( "type", this.definition.type( ));;}
+export class Definition {
+	Definition(maybeAnnotations : Option<List<Annotation>>, modifiers : List<Modifier>, name : String, maybeTypeParams : Option<List<TypeParam>>, type : Type) : public {super( maybeAnnotations, modifiers, name, maybeTypeParams, type);;}
+	serialize() : Node {return new MapNode( "definition").withString( "name", this.name).withNodeSerialized( "type", this.type);;}
 }
-export class TypescriptArrayType {
-	TypescriptArrayType(arrayType : TypeScriptType) : public {break;;}
+export class ArrayType {
+	ArrayType(arrayType : Type) : public {this.childType=arrayType;;}
 	serialize() : Node {return new MapNode( "array").withNodeSerialized( "child", this.childType);;}
 }
 export class TypeParam {
@@ -102,7 +106,7 @@ export class Return {
 	serialize() : Node {return new MapNode( "return").withNodeSerialized( "child", this.child);;}
 }
 export class Invokable {
-	Invokable(caller : TypescriptCaller, arguments : List<Argument>) : public {super( caller, arguments);;}
+	Invokable(caller : Caller, arguments : List<Argument>) : public {super( caller, arguments);;}
 	serialize() : Node {return new MapNode( "invokable").withNodeSerialized( "caller", this.caller).withNodeListSerialized( "arguments", this.arguments);;}
 }
 export class Char {
@@ -125,6 +129,9 @@ export class Operation {
 }
 export class Whitespace {
 	serialize() : Node {return new MapNode( "whitespace");;}
+}
+export class Assignment {
+	serialize() : Node {return new MapNode( "assignment").withNodeSerialized( "destination", this.assignable).withNodeSerialized( "source", this.value);;}
 }
 export class TypescriptLang {
 }

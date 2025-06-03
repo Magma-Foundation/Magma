@@ -19,8 +19,7 @@ import { Destructors } from "../../../../magmac/app/lang/Destructors";
 import { JavaRules } from "../../../../magmac/app/lang/JavaRules";
 import { OptionNodeListRule } from "../../../../magmac/app/lang/OptionNodeListRule";
 import { FunctionSegments } from "../../../../magmac/app/lang/node/FunctionSegments";
-import { Parameters } from "../../../../magmac/app/lang/node/Parameters";
 export class JavaMethod {
 	deserialize(node : Node) : Option<CompileResult<JavaStructureMember>> {return Destructors.destructWithType( "method", node).map( 0);;}
-	createMethodRule(childRule : Rule) : Rule {break;break;break;break;break;return new TypeRule( "method", LocatingRule.First( header, "(", withParams));;}
+	createMethodRule(childRule : Rule) : Rule {header : NodeRule=new NodeRule( "header", new OrRule( Lists.of( JavaRules.createDefinitionRule( ), new TypeRule( "constructor", new StripRule( FilterRule.Symbol( new StringRule( "name")))))));parameters : Rule=JavaRules.createParametersRule( JavaRules.createDefinitionRule( ));content : Rule=CommonLang.Statements( "children", childRule);rightRule : Rule=new StripRule( new PrefixRule( "{", new SuffixRule( new StripRule( "", content, "after-children"), "}")));withParams : Rule=new OptionNodeListRule( "parameters", new SuffixRule( parameters, ");"), LocatingRule.First( parameters, ")", rightRule));return new TypeRule( "method", LocatingRule.First( header, "(", withParams));;}
 }

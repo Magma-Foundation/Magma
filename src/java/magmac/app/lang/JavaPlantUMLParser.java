@@ -42,14 +42,14 @@ public class JavaPlantUMLParser implements Parser<JavaLang.JavaRoot, PlantUMLRoo
         };
     }
 
-    private static String createSimpleName(JavaLang.JavaBase base) {
+    private static String createSimpleName(JavaLang.Base base) {
         return switch (base) {
-            case JavaLang.JavaQualified qualifiedType -> JavaPlantUMLParser.createSimpleNameFromQualifiedType(qualifiedType);
+            case JavaLang.Qualified qualifiedType -> JavaPlantUMLParser.createSimpleNameFromQualifiedType(qualifiedType);
             case JavaLang.Symbol symbol -> symbol.value();
         };
     }
 
-    private static String createSimpleNameFromQualifiedType(JavaLang.JavaQualified qualifiedType) {
+    private static String createSimpleNameFromQualifiedType(JavaLang.Qualified qualifiedType) {
         return qualifiedType.segments()
                 .iter()
                 .map(Segment::value)
@@ -73,7 +73,7 @@ public class JavaPlantUMLParser implements Parser<JavaLang.JavaRoot, PlantUMLRoo
             case JavaLang.JavaArrayType _, JavaLang.JavaVariadicType _ -> "?";
             case JavaLang.Symbol symbol -> symbol.value();
             case JavaLang.JavaTemplateType templateType -> JavaPlantUMLParser.createSimpleName(templateType.base());
-            case JavaLang.JavaQualified qualified -> "?";
+            case JavaLang.Qualified qualified -> "?";
         };
     }
 

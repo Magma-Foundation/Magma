@@ -49,19 +49,19 @@ public class JavaLang {
     public sealed interface Assignable {
     }
 
-    public sealed interface Value extends JavaCaller, JavaArgument, Assignable permits Access, Char, Index, Invokable, Lambda, Not, Number, operation, StringValue, SwitchNode, Symbol {
+    public sealed interface Value extends JavaCaller, JavaArgument, Assignable permits Access, Char, Index, InstanceOf, Invokable, Lambda, Not, Number, StringValue, SwitchNode, Symbol, operation {
     }
 
     public sealed interface BlockHeader permits Catch, Conditional, Else, Try {
     }
 
-    public sealed interface JavaBase extends Serializable permits JavaQualified, Symbol {
+    public sealed interface Base extends Serializable permits Qualified, Symbol {
     }
 
     public interface JavaLambdaContent {
     }
 
-    public sealed interface JavaType permits JavaArrayType, Symbol, JavaTemplateType, JavaQualified, JavaVariadicType {
+    public sealed interface JavaType permits JavaArrayType, Symbol, JavaTemplateType, Qualified, JavaVariadicType {
     }
 
     public interface JavaLambdaHeader {
@@ -76,7 +76,7 @@ public class JavaLang {
         }
     }
 
-    public static final class Symbol extends magmac.app.lang.common.Symbol implements JavaType, Value, JavaBase, JavaLambdaHeader, JavaLambdaParameter {
+    public static final class Symbol extends magmac.app.lang.common.Symbol implements JavaType, Value, Base, JavaLambdaHeader, JavaLambdaParameter {
         public Symbol(String value) {
             super(value);
         }
@@ -142,7 +142,7 @@ public class JavaLang {
         }
     }
 
-    public record JavaTemplateType(JavaBase base, TypeArguments<JavaType> typeArguments) implements JavaType {
+    public record JavaTemplateType(Base base, TypeArguments<JavaType> typeArguments) implements JavaType {
     }
 
     public record JavaStructureNodeDeserializer(
@@ -194,15 +194,15 @@ public class JavaLang {
         }
     }
 
-    public record JavaQualified(List<Segment> segments) implements JavaBase, JavaType {
-        public static Option<CompileResult<JavaQualified>> deserializeQualified(Node node) {
+    public record Qualified(List<Segment> segments) implements Base, JavaType {
+        public static Option<CompileResult<Qualified>> deserializeQualified(Node node) {
             return Destructors.destructWithType("qualified", node)
                     .map(deserializer -> deserializer.withNodeList("segments", Segment::deserialize)
-                            .complete(JavaQualified::new));
+                            .complete(Qualified::new));
         }
 
         public static TypeRule createQualifiedRule() {
-            return new TypeRule("qualified", JavaQualified.createSegmentsRule("segments"));
+            return new TypeRule("qualified", Qualified.createSegmentsRule("segments"));
         }
 
         private static Rule createSegmentsRule(String key) {
@@ -304,6 +304,9 @@ public class JavaLang {
     public record Assignment(
             Assignable assignable,
             Value value) implements JavaFunctionSegmentValue, StructureStatementValue {
+    }
+
+    public record InstanceOf(Base base, Value value, List<JavaParameter> parameters) implements Value {
     }
 
     public enum JavaAccessType {

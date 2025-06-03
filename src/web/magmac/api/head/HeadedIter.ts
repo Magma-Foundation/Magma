@@ -10,7 +10,7 @@ export class HeadedIter<T> {
 	foldToResult(initial : R, folder : BiFunction<R, T, Result<R, X>>) : Result<R, X> {return this.fold( HeadedIter.createInitial( initial), 0);;}
 	createInitial(initial : R) : Result<R, X> {return new Ok<>( initial);;}
 	map(mapper : Function<T, R>) : Iter<R> {return new HeadedIter<>( 0);;}
-	fold(initial : R, folder : BiFunction<R, T, R>) : R {break;if(true){ break;break;if(true){ break;;}if(true){ return current;;};};}
+	fold(initial : R, folder : BiFunction<R, T, R>) : R {current : R=initial;if(true){ finalCurrent : R=current;option : Option<R>=this.head.next( ).map( 0);if(true){ current=option.orElse( null);;}if(true){ return current;;};};}
 	collect(collector : Collector<T, C>) : C {return this.fold( collector.createInitial( ), collector.fold);;}
 	filter(predicate : Predicate<T>) : Iter<T> {return this.flatMap( 0);;}
 	next() : Option<T> {return this.head.next( );;}

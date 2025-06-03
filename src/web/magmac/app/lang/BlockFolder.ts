@@ -1,6 +1,6 @@
 import { DivideState } from "../../../magmac/app/compile/rule/divide/DivideState";
 import { Folder } from "../../../magmac/app/compile/rule/fold/Folder";
 export class BlockFolder {
-	fold(state : DivideState, c : char) : DivideState {break;if(true){ return appended.advance( );;}return appended;;}
+	fold(state : DivideState, c : char) : DivideState {appended : DivideState=state.append( c);if(true){ return appended.advance( );;}return appended;;}
 	createDelimiter() : String {return "";;}
 }

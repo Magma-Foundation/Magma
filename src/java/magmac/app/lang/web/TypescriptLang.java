@@ -48,7 +48,7 @@ public final class TypescriptLang {
         }
     }
 
-    public interface Value extends TypescriptCaller, Argument {
+    public interface Value extends Caller, Argument, Assignable {
     }
 
     public interface Assignable extends Serializable {
@@ -61,11 +61,11 @@ public final class TypescriptLang {
         }
     }
 
-    public static final class TypescriptStructureNode implements TypeScriptRootSegment {
-        private final TypescriptStructureType type;
+    public static final class StructureNode implements TypeScriptRootSegment {
+        private final StructureType type;
         private final StructureValue<Type, TypescriptStructureMember> value;
 
-        public TypescriptStructureNode(TypescriptStructureType type, StructureValue<Type, TypescriptStructureMember> structureNode) {
+        public StructureNode(StructureType type, StructureValue<Type, TypescriptStructureMember> structureNode) {
             this.type = type;
             this.value = structureNode;
         }
@@ -218,7 +218,7 @@ public final class TypescriptLang {
         }
     }
 
-    public record Construction(Type type) implements TypescriptCaller {
+    public record Construction(Type type) implements Caller {
         @Override
         public Node serialize() {
             return new MapNode("construction").withNodeSerialized("type", this.type);
@@ -266,8 +266,8 @@ public final class TypescriptLang {
         }
     }
 
-    public static class Invokable extends magmac.app.lang.java.Invokable<TypescriptCaller, Argument> implements Value, FunctionSegment.Value {
-        public Invokable(TypescriptCaller caller, List<Argument> arguments) {
+    public static class Invokable extends magmac.app.lang.java.Invokable<Caller, Argument> implements Value, FunctionSegment.Value {
+        public Invokable(Caller caller, List<Argument> arguments) {
             super(caller, arguments);
         }
 
@@ -343,12 +343,12 @@ public final class TypescriptLang {
         @Override
         public Node serialize() {
             return new MapNode("assignment")
-                    .withNodeSerialized("assignable", this.assignable)
-                    .withNodeSerialized("value", this.value);
+                    .withNodeSerialized("destination", this.assignable)
+                    .withNodeSerialized("source", this.value);
         }
     }
 
-    public enum TypescriptStructureType {
+    public enum StructureType {
         Class,
         Enum,
         Interface

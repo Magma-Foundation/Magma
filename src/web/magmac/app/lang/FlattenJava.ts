@@ -11,6 +11,6 @@ import { ParseUnitImpl } from "../../../magmac/app/stage/unit/ParseUnitImpl";
 import { Passer } from "../../../magmac/app/stage/Passer";
 import { ParseState } from "../../../magmac/app/stage/parse/ParseState";
 export class FlattenJava {
-	getChildren(state : ParseState, node : Node) : InlinePassResult {break;return new InlinePassResult( new Some<>( CompileResults.Ok( parseStateNodeTuple2)));;}
-	pass(state : ParseState, node : Node) : ParseResult {if(true){ break;return FlattenJava.getChildren( state, node.withNodeList( "children", values));;}if(true){ return FlattenJava.getChildren( state, node.retype( "class"));;}return InlinePassResult.empty( );;}
+	getChildren(state : ParseState, node : Node) : InlinePassResult {parseStateNodeTuple2 : ParseUnit<Node>=new ParseUnitImpl<Node>( state, node);return new InlinePassResult( new Some<>( CompileResults.Ok( parseStateNodeTuple2)));;}
+	pass(state : ParseState, node : Node) : ParseResult {if(true){ values : NodeList=new InlineNodeList( node.findNodeList( "children").orElse( InlineNodeList.empty( )).iter( ).filter( 0).collect( new ListCollector<>( )));return FlattenJava.getChildren( state, node.withNodeList( "children", values));;}if(true){ return FlattenJava.getChildren( state, node.retype( "class"));;}return InlinePassResult.empty( );;}
 }

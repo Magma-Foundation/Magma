@@ -9,6 +9,6 @@ import { Serializable } from "../../magmac/app/lang/Serializable";
 import { JavaLang } from "../../magmac/app/lang/java/JavaLang";
 import { UnitSet } from "../../magmac/app/stage/unit/UnitSet";
 export class CompileApplication<R extends Serializable> {
-	CompileApplication(compiler : Compiler, targets : Targets) : public {break;break;;}
+	CompileApplication(compiler : Compiler, targets : Targets) : public {this.targets=targets;this.compiler=compiler;;}
 	parseAndStore(units : UnitSet<JavaLang.JavaRoot>) : Option<Error> {return this.compiler.parseAndGenerate( units).toResult( ).mapErr( ApplicationError.new).match( 0, Some.new);;}
 }

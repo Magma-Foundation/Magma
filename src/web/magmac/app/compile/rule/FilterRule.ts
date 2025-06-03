@@ -5,7 +5,7 @@ import { Filter } from "../../../../magmac/app/compile/rule/filter/Filter";
 import { NumberFilter } from "../../../../magmac/app/compile/rule/filter/NumberFilter";
 import { SymbolFilter } from "../../../../magmac/app/compile/rule/filter/SymbolFilter";
 export class FilterRule {
-	FilterRule(filter : Filter, childRule : Rule) : private {break;break;;}
+	FilterRule(filter : Filter, childRule : Rule) : private {this.childRule=childRule;this.filter=filter;;}
 	Symbol(childRule : Rule) : Rule {return new FilterRule( new SymbolFilter( ), childRule);;}
 	Number(childRule : Rule) : Rule {return new FilterRule( new NumberFilter( ), childRule);;}
 	lex(input : String) : CompileResult<Node> {if(true){ return this.childRule.lex( input);;}if(true){ return CompileErrors.createStringError( this.filter.createMessage( ), input);;};}

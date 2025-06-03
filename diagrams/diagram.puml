@@ -55,10 +55,12 @@ TypescriptLang --> Node
 TypescriptLang --> CommonLang
 TypescriptLang --> Destructors
 TypescriptLang --> Serializable
+TypescriptLang --> Annotation
 TypescriptLang --> JavaLang
 TypescriptLang --> AbstractReturnNode
 TypescriptLang --> Conditional
 TypescriptLang --> ConditionalType
+TypescriptLang --> Modifier
 TypescriptLang --> Operator
 TypescriptLang --> ParameterizedMethodHeader
 TypescriptLang --> PostVariant
@@ -171,17 +173,6 @@ OrState --> Context
 OrState --> CompileError
 OrState --> ImmutableCompileError
 class OrState
-Arguments --> Lists
-Arguments --> CompileResult
-Arguments --> Node
-Arguments --> NodeListRule
-Arguments --> OrRule
-Arguments --> Rule
-Arguments --> Deserializers
-Arguments --> JavaDeserializers
-Arguments --> JavaRules
-Arguments --> JavaLang
-class Arguments
 ParseState --> Location
 interface ParseState
 MapUnitSet --> Tuple2
@@ -278,6 +269,9 @@ Main --> UnitSet
 Main --> Paths
 class Main
 class Console
+Caller --> Serializable
+interface Caller
+Serializable <|-- Caller
 UnitSetCollector --> Collector
 UnitSetCollector --> MapUnitSet
 UnitSetCollector --> Unit
@@ -372,11 +366,9 @@ JavaDeserializers --> CompileResult
 JavaDeserializers --> CompileResults
 JavaDeserializers --> InitialDestructor
 JavaDeserializers --> Node
-JavaDeserializers --> CommonLang
 JavaDeserializers --> Deserializers
 JavaDeserializers --> Destructors
 JavaDeserializers --> Annotation
-JavaDeserializers --> Arguments
 JavaDeserializers --> Assignables
 JavaDeserializers --> CaseDefinition
 JavaDeserializers --> CaseValues
@@ -389,6 +381,7 @@ JavaDeserializers --> OperationDeserializer
 JavaDeserializers --> Operator
 JavaDeserializers --> PostVariant
 JavaDeserializers --> StructureStatementValue
+JavaDeserializers --> TypeArguments
 JavaDeserializers --> TypedDeserializer
 JavaDeserializers --> TypescriptLang
 JavaDeserializers --> *
@@ -589,7 +582,6 @@ JavaMethod --> Destructors
 JavaMethod --> JavaRules
 JavaMethod --> OptionNodeListRule
 JavaMethod --> FunctionSegments
-JavaMethod --> Parameters
 class JavaMethod
 JavaStructureMember <|-- JavaMethod
 CaseValues --> Lists
@@ -706,11 +698,9 @@ TypescriptRules --> JavaRules
 TypescriptRules --> LazyRule
 TypescriptRules --> MutableLazyRule
 TypescriptRules --> OptionNodeListRule
-TypescriptRules --> JavaLang
 TypescriptRules --> JavaStructureStatement
 TypescriptRules --> FunctionSegments
 TypescriptRules --> Modifier
-TypescriptRules --> Parameters
 class TypescriptRules
 enum Operator
 ValueFolder --> DivideState
@@ -753,6 +743,7 @@ CaseDefinition --> Option
 CaseDefinition --> CompileResult
 CaseDefinition --> Node
 CaseDefinition --> Destructors
+CaseDefinition --> JavaDeserializers
 CaseDefinition --> JavaLang
 class CaseDefinition
 FilterRule --> CompileResult
@@ -835,18 +826,6 @@ LambdaContents --> Deserializers
 LambdaContents --> JavaRules
 LambdaContents --> JavaLang
 class LambdaContents
-Parameters --> Lists
-Parameters --> CompileResult
-Parameters --> Node
-Parameters --> NodeListRule
-Parameters --> OrRule
-Parameters --> Rule
-Parameters --> JavaDeserializers
-Parameters --> JavaRules
-Parameters --> ValueFolder
-Parameters --> Deserializers
-Parameters --> JavaParameter
-class Parameters
 Maps --> HashMap
 class Maps
 class Tuple2
@@ -863,6 +842,7 @@ Compiler <|-- StagedCompiler
 LazyRule --> Rule
 interface LazyRule
 Rule <|-- LazyRule
+JavaTypescriptParser --> Option
 JavaTypescriptParser --> Tuple2
 JavaTypescriptParser --> TupleCollector
 JavaTypescriptParser --> List
@@ -874,7 +854,7 @@ JavaTypescriptParser --> CompileResultCollector
 JavaTypescriptParser --> CompileResults
 JavaTypescriptParser --> Location
 JavaTypescriptParser --> UnitSetCollector
-JavaTypescriptParser --> CommonLang
+JavaTypescriptParser --> Annotation
 JavaTypescriptParser --> JavaBreak
 JavaTypescriptParser --> JavaConstruction
 JavaTypescriptParser --> JavaConstructor
@@ -894,12 +874,14 @@ JavaTypescriptParser --> JavaStructureNode
 JavaTypescriptParser --> JavaStructureStatement
 JavaTypescriptParser --> JavaYieldNode
 JavaTypescriptParser --> ConditionalType
+JavaTypescriptParser --> Modifier
 JavaTypescriptParser --> ParameterizedMethodHeader
 JavaTypescriptParser --> Segment
 JavaTypescriptParser --> StructureValue
 JavaTypescriptParser --> TypeArguments
+JavaTypescriptParser --> FunctionStatement
 JavaTypescriptParser --> Symbol
-JavaTypescriptParser --> TypescriptCaller
+JavaTypescriptParser --> Caller
 JavaTypescriptParser --> TypescriptLang
 JavaTypescriptParser --> Parser
 JavaTypescriptParser --> SimpleUnit
@@ -1001,9 +983,6 @@ MultipleCaseValue --> Destructors
 MultipleCaseValue --> JavaFunctionSegment
 class MultipleCaseValue
 CaseValue <|-- MultipleCaseValue
-TypescriptCaller --> Serializable
-interface TypescriptCaller
-Serializable <|-- TypescriptCaller
 PathTargets --> Option
 PathTargets --> Iters
 PathTargets --> Location
@@ -1035,7 +1014,7 @@ JavaEnumValue --> StripRule
 JavaEnumValue --> SuffixRule
 JavaEnumValue --> CommonRules
 JavaEnumValue --> Destructors
-JavaEnumValue --> Arguments
+JavaEnumValue --> JavaRules
 class JavaEnumValue
 SingleHead --> None
 SingleHead --> Option
@@ -1252,12 +1231,10 @@ JavaRules --> DelimitedFolder
 JavaRules --> DividingSplitter
 JavaRules --> JavaDeserializers
 JavaRules --> JavaLang
-JavaRules --> Arguments
 JavaRules --> JavaNamespacedNode
 JavaRules --> Modifier
 JavaRules --> MultipleCaseValue
 JavaRules --> Operator
-JavaRules --> Parameters
 JavaRules --> SingleCaseValue
 JavaRules --> StructureMembers
 class JavaRules
@@ -1322,29 +1299,24 @@ Source <|-- PathSource
 JavaLang --> Option
 JavaLang --> Tuple2
 JavaLang --> List
-JavaLang --> Lists
 JavaLang --> CompileResult
 JavaLang --> CompoundDestructor
 JavaLang --> InitialDestructor
 JavaLang --> MapNode
 JavaLang --> Node
-JavaLang --> LocatingRule
 JavaLang --> NodeListRule
 JavaLang --> NodeRule
-JavaLang --> OrRule
 JavaLang --> Rule
 JavaLang --> StripRule
 JavaLang --> SuffixRule
 JavaLang --> TypeRule
 JavaLang --> DelimitedFolder
-JavaLang --> CommonLang
+JavaLang --> AbstractDefinition
 JavaLang --> CommonRules
-JavaLang --> Deserializers
 JavaLang --> Destructors
-JavaLang --> LazyRule
-JavaLang --> MutableLazyRule
 JavaLang --> Serializable
 JavaLang --> AbstractFunctionStatement
+JavaLang --> Annotation
 JavaLang --> AbstractReturnNode
 JavaLang --> CaseDefinition
 JavaLang --> CaseValue
@@ -1355,7 +1327,6 @@ JavaLang --> LambdaValueContent
 JavaLang --> Modifier
 JavaLang --> NumberNode
 JavaLang --> Operator
-JavaLang --> Parameters
 JavaLang --> Segment
 JavaLang --> StructureMembers
 JavaLang --> StructureStatementValue

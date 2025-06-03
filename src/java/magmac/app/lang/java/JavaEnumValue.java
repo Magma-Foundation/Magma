@@ -20,7 +20,7 @@ public record JavaEnumValue(String name, Option<List<JavaLang.Value>> argumentsL
     public static CompileResult<JavaEnumValue> deserialize(Node node) {
         return Destructors.destruct(node)
                 .withString("name")
-                .withNodeListOptionally("arguments", JavaDeserializers::deserializeJavaOrError)
+                .withNodeListOptionally("arguments", JavaDeserializers::deserializeValueOrError)
                 .complete(tuple -> new JavaEnumValue(tuple.left(), tuple.right()));
     }
 

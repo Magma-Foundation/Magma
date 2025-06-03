@@ -9,7 +9,7 @@ import { CompileResultCollector } from "../../../../magmac/app/compile/error/Com
 import { CompileResults } from "../../../../magmac/app/compile/error/CompileResults";
 import { Function } from "../../../../java/util/function/Function";
 export class CompoundDestructorImpl<T> {
-	CompoundDestructorImpl(result : CompileResult<Tuple2<Node, T>>) : public {break;;}
+	CompoundDestructorImpl(result : CompileResult<Tuple2<Node, T>>) : public {this.current=result;;}
 	complete(mapper : Function<T, R>) : CompileResult<R> {return this.current.flatMapValue( 0);;}
 	withNodeList(key : String, deserializer : Function<Node, CompileResult<R>>) : CompoundDestructor<Tuple2<T, List<R>>> {return new CompoundDestructorImpl<>( this.current.flatMapValue( 0));;}
 	withNode(key : String, deserializer : Function<Node, CompileResult<R>>) : CompoundDestructor<Tuple2<T, R>> {return new CompoundDestructorImpl<Tuple2<T, R>>( this.current.flatMapValue( 0));;}

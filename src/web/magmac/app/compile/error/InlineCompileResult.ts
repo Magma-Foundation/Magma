@@ -11,5 +11,5 @@ export class InlineCompileResult<T> {
 	flatMapValue(mapper : Function<T, CompileResult<R>>) : CompileResult<R> {return CompileResults.fromResult( this.toResult.flatMapValue( 0));;}
 	and(supplier : Supplier<CompileResult<R>>) : CompileResult<Tuple2<T, R>> {return CompileResults.fromResult( this.toResult.and( 0));;}
 	merge(other : Supplier<CompileResult<T>>, merger : BiFunction<T, T, T>) : CompileResult<T> {return this.and( other).mapValue( 0);;}
-	merge(merger : BiFunction<T, T, T>, tuple : Tuple2<T, T>) : T {break;break;return merger.apply( left0, right0);;}
+	merge(merger : BiFunction<T, T, T>, tuple : Tuple2<T, T>) : T {left0 : T=tuple.left( );right0 : T=tuple.right( );return merger.apply( left0, right0);;}
 }
