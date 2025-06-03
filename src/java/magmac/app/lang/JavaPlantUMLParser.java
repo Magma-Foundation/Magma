@@ -10,9 +10,7 @@ import magmac.api.iter.collect.ListCollector;
 import magmac.app.compile.error.CompileResult;
 import magmac.app.compile.error.CompileResults;
 import magmac.app.io.Location;
-import magmac.app.lang.node.JavaArrayType;
-import magmac.app.lang.node.JavaBase;
-import magmac.app.lang.node.JavaRoot;
+import magmac.app.lang.java.JavaLang;
 import magmac.app.lang.java.JavaRootSegment;
 import magmac.app.lang.java.JavaNamespacedNode;
 import magmac.app.lang.node.PlantUMLDependency;
@@ -23,22 +21,15 @@ import magmac.app.lang.node.PlantUMLRoot;
 import magmac.app.lang.node.PlantUMLRootSegment;
 import magmac.app.lang.node.PlantUMLStructure;
 import magmac.app.lang.node.PlantUMLStructureType;
-import magmac.app.lang.node.Qualified;
 import magmac.app.lang.node.Segment;
 import magmac.app.lang.java.JavaStructureNode;
-import magmac.app.lang.node.JavaStructureType;
-import magmac.app.lang.node.Symbol;
-import magmac.app.lang.node.JavaTemplateType;
-import magmac.app.lang.node.JavaType;
-import magmac.app.lang.node.VariadicType;
-import magmac.app.lang.java.JavaWhitespace;
 import magmac.app.stage.parse.Parser;
 import magmac.app.stage.unit.MapUnitSet;
 import magmac.app.stage.unit.SimpleUnit;
 import magmac.app.stage.unit.Unit;
 import magmac.app.stage.unit.UnitSet;
 
-public class JavaPlantUMLParser implements Parser<JavaRoot, PlantUMLRoot> {
+public class JavaPlantUMLParser implements Parser<JavaLang.JavaRoot, PlantUMLRoot> {
     private static Iter<PlantUMLRootSegment> parseNamespaced(String child, JavaNamespacedNode namespaced) {
         return switch (namespaced.type()) {
             case Package -> Iters.empty();
@@ -51,14 +42,14 @@ public class JavaPlantUMLParser implements Parser<JavaRoot, PlantUMLRoot> {
         };
     }
 
-    private static String createSimpleName(JavaBase base) {
+    private static String createSimpleName(JavaLang.JavaBase base) {
         return switch (base) {
-            case Qualified qualifiedType -> JavaPlantUMLParser.createSimpleNameFromQualifiedType(qualifiedType);
-            case Symbol symbol -> symbol.value();
+            case JavaLang.JavaQualified qualifiedType -> JavaPlantUMLParser.createSimpleNameFromQualifiedType(qualifiedType);
+            case JavaLang.JavaSymbol symbol -> symbol.value();
         };
     }
 
-    private static String createSimpleNameFromQualifiedType(Qualified qualifiedType) {
+    private static String createSimpleNameFromQualifiedType(JavaLang.JavaQualified qualifiedType) {
         return qualifiedType.segments()
                 .iter()
                 .map(Segment::value)
@@ -68,7 +59,7 @@ public class JavaPlantUMLParser implements Parser<JavaRoot, PlantUMLRoot> {
 
     private static PlantUMLRootSegment createStructureSegment(JavaStructureNode structureNode) {
         String name = structureNode.name();
-        JavaStructureType type = structureNode.type();
+        JavaLang.JavaStructureType type = structureNode.type();
 
         return switch (type) {
             case Class, Record -> new PlantUMLStructure(PlantUMLStructureType.Class, name);
@@ -77,17 +68,17 @@ public class JavaPlantUMLParser implements Parser<JavaRoot, PlantUMLRoot> {
         };
     }
 
-    private static String createSimpleNameFromType(JavaType type) {
+    private static String createSimpleNameFromType(JavaLang.JavaType type) {
         return switch (type) {
-            case JavaArrayType _, VariadicType _ -> "?";
-            case Symbol symbol -> symbol.value();
-            case JavaTemplateType templateType -> JavaPlantUMLParser.createSimpleName(templateType.base);
-            case Qualified qualified -> "?";
+            case JavaLang.JavaArrayType _, JavaLang.JavaVariadicType _ -> "?";
+            case JavaLang.JavaSymbol symbol -> symbol.value();
+            case JavaLang.JavaTemplateType templateType -> JavaPlantUMLParser.createSimpleName(templateType.base);
+            case JavaLang.JavaQualified qualified -> "?";
         };
     }
 
     @Override
-    public CompileResult<UnitSet<PlantUMLRoot>> apply(UnitSet<JavaRoot> initial) {
+    public CompileResult<UnitSet<PlantUMLRoot>> apply(UnitSet<JavaLang.JavaRoot> initial) {
         List<PlantUMLRootSegment> roots = initial.iter()
                 .flatMap(JavaPlantUMLParser::parseRoot)
                 .collect(new ListCollector<>())
@@ -101,7 +92,7 @@ public class JavaPlantUMLParser implements Parser<JavaRoot, PlantUMLRoot> {
                 .add(new SimpleUnit<>(defaultLocation, mergedRoot)));
     }
 
-    private static Iter<PlantUMLRootSegment> parseRoot(Unit<JavaRoot> unit) {
+    private static Iter<PlantUMLRootSegment> parseRoot(Unit<JavaLang.JavaRoot> unit) {
         return unit.destruct((location, root) -> root.children()
                 .iter()
                 .flatMap(segment -> JavaPlantUMLParser.parseRootSegment(location.name(), segment)));
@@ -109,7 +100,7 @@ public class JavaPlantUMLParser implements Parser<JavaRoot, PlantUMLRoot> {
 
     private static Iter<PlantUMLRootSegment> parseRootSegment(String fileName, JavaRootSegment rootSegment) {
         return switch (rootSegment) {
-            case JavaWhitespace _ -> Iters.empty();
+            case JavaLang.JavaWhitespace _ -> Iters.empty();
             case JavaNamespacedNode namespaced -> JavaPlantUMLParser.parseNamespaced(fileName, namespaced);
             case JavaStructureNode structureNode -> JavaPlantUMLParser.parseStructure(structureNode);
         };
@@ -125,7 +116,7 @@ public class JavaPlantUMLParser implements Parser<JavaRoot, PlantUMLRoot> {
                 .iter();
     }
 
-    private static List<PlantUMLRootSegment> toInherits(String child, Option<List<JavaType>> maybeOption) {
+    private static List<PlantUMLRootSegment> toInherits(String child, Option<List<JavaLang.JavaType>> maybeOption) {
         return maybeOption.orElse(Lists.empty())
                 .iter()
                 .map(JavaPlantUMLParser::createSimpleNameFromType)

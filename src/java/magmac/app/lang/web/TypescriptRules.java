@@ -1,4 +1,4 @@
-package magmac.app.lang;
+package magmac.app.lang.web;
 
 import magmac.api.collect.list.Lists;
 import magmac.app.compile.rule.LocatingRule;
@@ -10,32 +10,34 @@ import magmac.app.compile.rule.StringRule;
 import magmac.app.compile.rule.StripRule;
 import magmac.app.compile.rule.SuffixRule;
 import magmac.app.compile.rule.TypeRule;
+import magmac.app.lang.CommonLang;
+import magmac.app.lang.CommonRules;
+import magmac.app.lang.JavaRules;
+import magmac.app.lang.LazyRule;
+import magmac.app.lang.MutableLazyRule;
+import magmac.app.lang.OptionNodeListRule;
+import magmac.app.lang.java.JavaLang;
+import magmac.app.lang.java.JavaStructureStatement;
 import magmac.app.lang.node.FunctionSegments;
 import magmac.app.lang.node.Modifier;
 import magmac.app.lang.node.Parameters;
-import magmac.app.lang.java.JavaStructureStatement;
-import magmac.app.lang.node.Symbols;
-import magmac.app.lang.node.JavaTemplateType;
-import magmac.app.lang.node.TypeScriptImport;
-import magmac.app.lang.node.TypescriptStructureNode;
-import magmac.app.lang.node.Values;
 
-public final class TypescriptLang {
+public class TypescriptRules {
     public static Rule createRule() {
         return new TypeRule("root", CommonLang.Statements("children", new OrRule(Lists.of(
                 JavaRules.createWhitespaceRule(),
-                TypeScriptImport.createImportRule(),
-                TypescriptStructureNode.createStructureRule("class"),
-                TypescriptStructureNode.createStructureRule("interface")
+                TypescriptLang.TypeScriptImport.createImportRule(),
+                TypescriptLang.TypescriptStructureNode.createStructureRule("class"),
+                TypescriptLang.TypescriptStructureNode.createStructureRule("interface")
         ))));
     }
 
     public static Rule createStructureMemberRule() {
-        Rule definitionRule = TypescriptLang.createDefinitionRule();
+        Rule definitionRule = createDefinitionRule();
         LazyRule valueLazy = new MutableLazyRule();
         return new OrRule(Lists.of(
                 JavaRules.createWhitespaceRule(),
-                TypescriptLang.createMethodRule(definitionRule, valueLazy),
+                createMethodRule(definitionRule, valueLazy),
                 JavaStructureStatement.createStructureStatementRule(definitionRule, valueLazy)
         ));
     }
@@ -43,11 +45,11 @@ public final class TypescriptLang {
     private static Rule createMethodRule(Rule definition, LazyRule valueLazy) {
         Rule header = new PrefixRule("\n\t", new NodeRule("header", new OrRule(Lists.of(
                 definition,
-                TypescriptLang.createConstructorRule(definition)
+                createConstructorRule(definition)
         ))));
 
         LazyRule functionSegmentRule = new MutableLazyRule();
-        LazyRule value = Values.initValueRule(functionSegmentRule, valueLazy, " => ", definition);
+        LazyRule value = JavaRules.initValueRule(functionSegmentRule, valueLazy, " => ", definition);
         Rule children = CommonLang.Statements("children", FunctionSegments.initFunctionSegmentRule(functionSegmentRule, value, definition));
         Rule childRule = new SuffixRule(LocatingRule.First(header, " {", new StripRule("", children, "after-children")), "}");
         return new TypeRule("method", new OptionNodeListRule("children",
@@ -72,20 +74,16 @@ public final class TypescriptLang {
                 name
         );
 
-        Rule first = LocatingRule.First(leftRule, " : ", new NodeRule("type", TypescriptLang.createTypeRule()));
+        Rule first = LocatingRule.First(leftRule, " : ", new NodeRule("type", createTypeRule()));
         return definition.set(new OptionNodeListRule("modifiers", LocatingRule.Last(modifiers, " ", first), first));
     }
 
     private static Rule createTypeRule() {
         LazyRule type = new MutableLazyRule();
         return type.set(new OrRule(Lists.of(
-                JavaTemplateType.createTemplateRule(type),
+                JavaLang.JavaTemplateType.createTemplateRule(type),
                 TypescriptLang.createArrayRule(type),
-                Symbols.createSymbolRule()
+                CommonRules.createSymbolRule()
         )));
-    }
-
-    private static TypeRule createArrayRule(LazyRule orRule) {
-        return new TypeRule("array", new SuffixRule(new NodeRule("child", orRule), "[]"));
     }
 }

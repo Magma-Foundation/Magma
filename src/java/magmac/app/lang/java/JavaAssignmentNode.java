@@ -11,18 +11,15 @@ import magmac.app.compile.rule.OrRule;
 import magmac.app.compile.rule.Rule;
 import magmac.app.compile.rule.TypeRule;
 import magmac.app.lang.Destructors;
-import magmac.app.lang.node.Assignable;
 import magmac.app.lang.node.Assignables;
-import magmac.app.lang.node.JavaValue;
 import magmac.app.lang.node.StructureStatementValue;
-import magmac.app.lang.node.Values;
 import magmac.app.lang.web.TypescriptFunctionSegmentValue;
 
-public record JavaAssignmentNode(Assignable assignable, JavaValue value) implements JavaFunctionSegmentValue, StructureStatementValue, TypescriptFunctionSegmentValue {
+public record JavaAssignmentNode(JavaLang.JavaAssignable assignable, JavaLang.JavaValue value) implements JavaFunctionSegmentValue, StructureStatementValue, TypescriptFunctionSegmentValue {
     public static Option<CompileResult<JavaAssignmentNode>> deserialize(Node node) {
         return Destructors.destructWithType("assignment", node).map(deserializer -> deserializer
                 .withNode("destination", Assignables::deserializeError)
-                .withNode("source", Values::deserializeOrError)
+                .withNode("source", JavaDeserializers::deserializeJavaOrError)
                 .complete(tuple -> new JavaAssignmentNode(tuple.left(), tuple.right())));
     }
 

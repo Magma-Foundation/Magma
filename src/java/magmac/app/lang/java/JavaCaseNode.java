@@ -16,15 +16,14 @@ import magmac.app.compile.rule.StringRule;
 import magmac.app.compile.rule.StripRule;
 import magmac.app.compile.rule.TypeRule;
 import magmac.app.lang.Destructors;
+import magmac.app.lang.web.TypescriptLang;
 import magmac.app.lang.node.CaseDefinition;
 import magmac.app.lang.node.CaseValue;
 import magmac.app.lang.node.CaseValues;
-import magmac.app.lang.node.JavaTypes;
 import magmac.app.lang.node.MultipleCaseValue;
 import magmac.app.lang.node.SingleCaseValue;
-import magmac.app.lang.node.TypescriptFunctionSegment;
 
-public record JavaCaseNode(List<CaseDefinition> definitions, CaseValue value) implements JavaFunctionSegment, TypescriptFunctionSegment {
+public record JavaCaseNode(List<CaseDefinition> definitions, CaseValue value) implements JavaFunctionSegment, TypescriptLang.TypescriptFunctionSegment {
     public static Option<CompileResult<JavaCaseNode>> deserialize(Node node) {
         return Destructors.destructWithType("case", node).map(destructor -> {
             return destructor
@@ -35,7 +34,7 @@ public record JavaCaseNode(List<CaseDefinition> definitions, CaseValue value) im
     }
 
     public static Rule createCaseRule(Rule value, Rule segment) {
-        Rule typeRule = JavaTypes.createTypeRule();
+        Rule typeRule = JavaLang.JavaTypes.createTypeRule();
         Rule name = new StripRule(new StringRule("name"));
         Rule last = LocatingRule.Last(new NodeRule("type", typeRule), " ", name);
         Rule definitions = new TypeRule("case-definition", new OrRule(Lists.of(

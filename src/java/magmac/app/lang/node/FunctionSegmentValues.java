@@ -8,7 +8,7 @@ import magmac.app.compile.rule.OrRule;
 import magmac.app.compile.rule.Rule;
 import magmac.app.compile.rule.TypeRule;
 import magmac.app.lang.Deserializers;
-import magmac.app.lang.JavaDeserializers;
+import magmac.app.lang.java.JavaDeserializers;
 import magmac.app.lang.JavaRules;
 import magmac.app.lang.java.JavaAssignmentNode;
 import magmac.app.lang.java.JavaFunctionSegmentValue;

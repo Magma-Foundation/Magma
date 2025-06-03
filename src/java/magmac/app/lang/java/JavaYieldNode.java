@@ -1,6 +1,4 @@
 package magmac.app.lang.java;
 
-import magmac.app.lang.node.JavaValue;
-
-public record JavaYieldNode(JavaValue value) implements JavaFunctionSegmentValue {
+public record JavaYieldNode(JavaLang.JavaValue value) implements JavaFunctionSegmentValue {
 }

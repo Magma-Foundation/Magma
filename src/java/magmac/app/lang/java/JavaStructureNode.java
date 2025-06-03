@@ -2,21 +2,19 @@ package magmac.app.lang.java;
 
 import magmac.api.Option;
 import magmac.api.collect.list.List;
-import magmac.app.lang.node.JavaStructureType;
-import magmac.app.lang.node.JavaType;
 import magmac.app.lang.node.StructureValue;
 
 public final class JavaStructureNode implements JavaRootSegment, JavaStructureMember {
-    private final JavaStructureType type;
-    public final StructureValue<JavaType, JavaStructureMember> value;
+    private final JavaLang.JavaStructureType type;
+    public final StructureValue<JavaLang.JavaType, JavaStructureMember> value;
     private final Option<List<JavaParameter>> parameters;
-    private final Option<List<JavaType>> variants;
+    private final Option<List<JavaLang.JavaType>> variants;
 
     public JavaStructureNode(
-            JavaStructureType type,
-            StructureValue<JavaType, JavaStructureMember> structureNode,
+            JavaLang.JavaStructureType type,
+            StructureValue<JavaLang.JavaType, JavaStructureMember> structureNode,
             Option<List<JavaParameter>> parameters,
-            Option<List<JavaType>> variants
+            Option<List<JavaLang.JavaType>> variants
     ) {
         this.type = type;
         this.value = structureNode;
@@ -24,7 +22,7 @@ public final class JavaStructureNode implements JavaRootSegment, JavaStructureMe
         this.variants = variants;
     }
 
-    public JavaStructureType type() {
+    public JavaLang.JavaStructureType type() {
         return this.type;
     }
 
@@ -32,11 +30,11 @@ public final class JavaStructureNode implements JavaRootSegment, JavaStructureMe
         return this.value.name();
     }
 
-    public Option<List<JavaType>> implemented() {
+    public Option<List<JavaLang.JavaType>> implemented() {
         return this.value.maybeImplemented();
     }
 
-    public Option<List<JavaType>> extended() {
+    public Option<List<JavaLang.JavaType>> extended() {
         return this.value.maybeExtended();
     }
 }

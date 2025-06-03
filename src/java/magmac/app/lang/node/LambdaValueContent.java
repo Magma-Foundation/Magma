@@ -1,13 +1,15 @@
 package magmac.app.lang.node;
 
-public class LambdaValueContent {
-    protected final JavaValue value;
+import magmac.app.lang.java.JavaLang;
 
-    public LambdaValueContent(JavaValue value) {
+public class LambdaValueContent {
+    protected final JavaLang.JavaValue value;
+
+    public LambdaValueContent(JavaLang.JavaValue value) {
         this.value = value;
     }
 
-    public JavaValue value() {
+    public JavaLang.JavaValue value() {
         return value;
     }
 }

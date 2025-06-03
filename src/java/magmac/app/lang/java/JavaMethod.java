@@ -18,6 +18,7 @@ import magmac.app.compile.rule.SuffixRule;
 import magmac.app.compile.rule.TypeRule;
 import magmac.app.lang.CommonLang;
 import magmac.app.lang.Destructors;
+import magmac.app.lang.JavaRules;
 import magmac.app.lang.OptionNodeListRule;
 import magmac.app.lang.node.FunctionSegments;
 import magmac.app.lang.node.Parameters;
@@ -38,11 +39,11 @@ public record JavaMethod(
 
     public static Rule createMethodRule(Rule childRule) {
         NodeRule header = new NodeRule("header", new OrRule(Lists.of(
-                JavaDefinition.createRule(),
+                JavaRules.createDefinitionRule(),
                 new TypeRule("constructor", new StripRule(FilterRule.Symbol(new StringRule("name"))))
         )));
 
-        Rule parameters = Parameters.createParametersRule(JavaDefinition.createRule());
+        Rule parameters = Parameters.createParametersRule(JavaRules.createDefinitionRule());
         Rule content = CommonLang.Statements("children", childRule);
         Rule rightRule = new StripRule(new PrefixRule("{", new SuffixRule(new StripRule("", content, "after-children"), "}")));
         Rule withParams = new OptionNodeListRule("parameters",

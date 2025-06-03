@@ -8,9 +8,14 @@ import magmac.app.compile.error.CompileResult;
 import magmac.app.compile.error.CompileResults;
 import magmac.app.compile.error.context.NodeContext;
 import magmac.app.compile.error.error.CompileError;
+import magmac.app.compile.node.InitialDestructor;
 import magmac.app.compile.node.Node;
 import magmac.app.error.ImmutableCompileError;
+import magmac.app.lang.common.Annotation;
+import magmac.app.lang.java.JavaLang;
+import magmac.app.lang.node.Modifier;
 import magmac.app.lang.node.TypedDeserializer;
+import magmac.app.lang.web.TypescriptLang;
 
 public final class Deserializers {
     public static <T> CompileResult<T> orError(String type, Node node, List<TypedDeserializer<T>> deserializers) {
@@ -34,4 +39,12 @@ public final class Deserializers {
         return node -> deserializer.deserialize(node).map(result -> result.mapValue(value -> value));
     }
 
+    public static CompileResult<CommonLang.Definition<JavaLang.JavaType>> deserialize0(InitialDestructor deserialize) {
+        return deserialize.withString("name")
+                .withNode("type", JavaLang.JavaTypes::deserialize)
+                .withNodeList("modifiers", Modifier::deserialize)
+                .withNodeListOptionally("annotations", Annotation::deserialize)
+                .withNodeListOptionally("type-parameters", TypescriptLang.TypeParam::deserialize)
+                .complete((result) -> new CommonLang.Definition<JavaLang.JavaType>(result.left().right(), result.left().left().right(), result.left().left().left().left(), result.right(), result.left().left().left().right()));
+    }
 }

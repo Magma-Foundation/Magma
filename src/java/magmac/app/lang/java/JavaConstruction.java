@@ -1,6 +1,4 @@
 package magmac.app.lang.java;
 
-import magmac.app.lang.node.JavaType;
-
-public record JavaConstruction(JavaType type) implements Lang.JavaCaller {
+public record JavaConstruction(JavaLang.JavaType type) implements JavaLang.JavaCaller {
 }

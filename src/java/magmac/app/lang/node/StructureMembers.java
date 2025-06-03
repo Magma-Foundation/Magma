@@ -7,12 +7,12 @@ import magmac.app.compile.rule.OrRule;
 import magmac.app.compile.rule.Rule;
 import magmac.app.compile.rule.TypeRule;
 import magmac.app.lang.Deserializers;
-import magmac.app.lang.JavaDeserializers;
+import magmac.app.lang.java.JavaDeserializers;
 import magmac.app.lang.JavaRules;
 import magmac.app.lang.LazyRule;
 import magmac.app.lang.MutableLazyRule;
-import magmac.app.lang.java.JavaDefinition;
 import magmac.app.lang.java.JavaEnumValues;
+import magmac.app.lang.java.JavaLang;
 import magmac.app.lang.java.JavaMethod;
 import magmac.app.lang.java.JavaStructureMember;
 import magmac.app.lang.java.JavaStructureStatement;
@@ -24,10 +24,10 @@ public final class StructureMembers {
                 Deserializers.wrap(JavaMethod::deserialize),
                 Deserializers.wrap(JavaStructureStatement::deserialize),
                 Deserializers.wrap(JavaEnumValues::deserialize),
-                Deserializers.wrap(new JavaStructureNodeDeserializer(JavaStructureType.Class)),
-                Deserializers.wrap(new JavaStructureNodeDeserializer(JavaStructureType.Interface)),
-                Deserializers.wrap(new JavaStructureNodeDeserializer(JavaStructureType.Record)),
-                Deserializers.wrap(new JavaStructureNodeDeserializer(JavaStructureType.Enum))
+                Deserializers.wrap(new JavaLang.JavaStructureNodeDeserializer(JavaLang.JavaStructureType.Class)),
+                Deserializers.wrap(new JavaLang.JavaStructureNodeDeserializer(JavaLang.JavaStructureType.Interface)),
+                Deserializers.wrap(new JavaLang.JavaStructureNodeDeserializer(JavaLang.JavaStructureType.Record)),
+                Deserializers.wrap(new JavaLang.JavaStructureNodeDeserializer(JavaLang.JavaStructureType.Enum))
         ));
     }
 
@@ -35,11 +35,11 @@ public final class StructureMembers {
         LazyRule classMemberRule = new MutableLazyRule();
         LazyRule functionSegmentRule = new MutableLazyRule();
         LazyRule valueLazy = new MutableLazyRule();
-        LazyRule value = Values.initValueRule(functionSegmentRule, valueLazy, "->", JavaDefinition.createRule());
-        Rule functionSegment = FunctionSegments.initFunctionSegmentRule(functionSegmentRule, value, JavaDefinition.createRule());
+        LazyRule value = JavaRules.initValueRule(functionSegmentRule, valueLazy, "->", JavaRules.createDefinitionRule());
+        Rule functionSegment = FunctionSegments.initFunctionSegmentRule(functionSegmentRule, value, JavaRules.createDefinitionRule());
         return classMemberRule.set(new OrRule(Lists.of(
                 JavaRules.createWhitespaceRule(),
-                JavaStructureStatement.createStructureStatementRule(new TypeRule("definition", JavaDefinition.createRule()), value),
+                JavaStructureStatement.createStructureStatementRule(new TypeRule("definition", JavaRules.createDefinitionRule()), value),
                 JavaMethod.createMethodRule(functionSegment),
                 JavaEnumValues.createEnumValuesRule(value),
                 JavaRules.createStructureRule("record", classMemberRule),

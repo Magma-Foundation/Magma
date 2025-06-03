@@ -7,9 +7,9 @@ import magmac.app.compile.StagedCompiler;
 import magmac.app.compile.rule.Rule;
 import magmac.app.io.targets.PathTargets;
 import magmac.app.io.targets.Targets;
-import magmac.app.lang.TypescriptLang;
-import magmac.app.lang.node.JavaRoot;
-import magmac.app.lang.node.TypescriptRoot;
+import magmac.app.lang.web.TypescriptLang;
+import magmac.app.lang.java.JavaLang;
+import magmac.app.lang.web.TypescriptRules;
 import magmac.app.stage.generate.Generator;
 import magmac.app.stage.generate.RuleGenerator;
 import magmac.app.stage.parse.Parser;
@@ -31,14 +31,14 @@ public final class TypeScriptTargetPlatform implements TargetPlatform {
 
     @Override
     public Rule createRule() {
-        return TypescriptLang.createRule();
+        return TypescriptRules.createRule();
     }
 
     @Override
     public Compiler createCompiler() {
-        Parser<JavaRoot, TypescriptRoot> parser = new JavaTypescriptParser();
+        Parser<JavaLang.JavaRoot, TypescriptLang.TypescriptRoot> parser = new JavaTypescriptParser();
         Generator generator = new RuleGenerator(this.createRule());
-        return new StagedCompiler<TypescriptRoot>(parser, generator);
+        return new StagedCompiler<TypescriptLang.TypescriptRoot>(parser, generator);
     }
 
     @Override

@@ -9,11 +9,13 @@ import magmac.app.compile.rule.StripRule;
 import magmac.app.compile.rule.SuffixRule;
 import magmac.app.compile.rule.TypeRule;
 import magmac.app.lang.Destructors;
+import magmac.app.lang.java.JavaDeserializers;
+import magmac.app.lang.java.JavaLang;
 
-public record SingleCaseValue(JavaValue value) implements CaseValue {
+public record SingleCaseValue(JavaLang.JavaValue value) implements CaseValue {
     public static Option<CompileResult<SingleCaseValue>> deserialize(Node node) {
         return Destructors.destructWithType("case-single", node).map(destructor -> {
-            return destructor.withNode("value", Values::deserializeOrError)
+            return destructor.withNode("value", JavaDeserializers::deserializeJavaOrError)
                     .complete(SingleCaseValue::new);
         });
     }

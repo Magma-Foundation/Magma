@@ -5,10 +5,10 @@ import magmac.app.compile.error.CompileResult;
 import magmac.app.compile.node.Node;
 import magmac.app.lang.Deserializers;
 
-public sealed interface JavaMethodHeader permits JavaConstructor, JavaDefinition {
+public sealed interface JavaMethodHeader permits JavaConstructor, JavaLang.JavaDefinition {
     static CompileResult<JavaMethodHeader> deserializeError(Node node) {
         return Deserializers.orError("header", node, Lists.of(
-                Deserializers.wrap(JavaDefinition::deserializeTyped),
+                Deserializers.wrap(JavaDeserializers::deserializeTypedDefinition),
                 Deserializers.wrap(JavaConstructor::deserialize)
         ));
     }

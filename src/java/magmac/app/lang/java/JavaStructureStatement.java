@@ -11,7 +11,6 @@ import magmac.app.compile.rule.StripRule;
 import magmac.app.compile.rule.SuffixRule;
 import magmac.app.compile.rule.TypeRule;
 import magmac.app.lang.Destructors;
-import magmac.app.lang.JavaDeserializers;
 import magmac.app.lang.LazyRule;
 import magmac.app.lang.node.StructureStatementValue;
 

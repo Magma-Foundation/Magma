@@ -1,9 +1,9 @@
-package magmac.app.lang.node;
+package magmac.app.lang.common;
 
-public class NumberNode {
+public class StringNode {
     protected final String value;
 
-    public NumberNode(String value) {
+    public StringNode(String value) {
         this.value = value;
     }
 
