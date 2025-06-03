@@ -22,8 +22,6 @@ import magmac.app.lang.CommonLang;
 import magmac.app.lang.CommonRules;
 import magmac.app.lang.Deserializers;
 import magmac.app.lang.Destructors;
-import magmac.app.lang.LazyRule;
-import magmac.app.lang.MutableLazyRule;
 import magmac.app.lang.Serializable;
 import magmac.app.lang.common.AbstractFunctionStatement;
 import magmac.app.lang.common.Annotation;
@@ -103,7 +101,7 @@ public class JavaLang {
 
         public static Option<CompileResult<JavaType>> deserialize(Node node) {
             return Destructors.destructWithType("array", node)
-                    .map(deserializer -> deserializer.withNode("child", JavaTypes::deserialize)
+                    .map(deserializer -> deserializer.withNode("child", JavaDeserializers::deserializeType)
                             .complete(JavaArrayType::new));
         }
     }
@@ -161,7 +159,7 @@ public class JavaLang {
         public static Option<CompileResult<JavaTemplateType>> deserialize(Node node) {
             return Destructors.destructWithType("template", node).map(deserializer -> deserializer
                     .withNode("base", JavaTemplateType::deserializeBase)
-                    .withNodeList("arguments", JavaTypes::deserialize)
+                    .withNodeList("arguments", JavaDeserializers::deserializeType)
                     .complete(tuple -> new JavaTemplateType(tuple.left(), new TypeArguments<JavaType>(tuple.right()))));
         }
 
@@ -197,11 +195,11 @@ public class JavaLang {
         }
 
         private static CompoundDestructor<Tuple2<Tuple2<Tuple2<Tuple2<Tuple2<Tuple2<Tuple2<String, List<Modifier>>, List<JavaStructureMember>>, Option<List<JavaType>>>, Option<List<TypescriptLang.TypeParam>>>, Option<List<JavaParameter>>>, Option<List<JavaType>>>, Option<List<JavaType>>>> attachOptionals(CompoundDestructor<Tuple2<Tuple2<String, List<Modifier>>, List<JavaStructureMember>>> attachRequired) {
-            return attachRequired.withNodeListOptionally("implemented", JavaTypes::deserialize)
+            return attachRequired.withNodeListOptionally("implemented", JavaDeserializers::deserializeType)
                     .withNodeListOptionally("type-parameters", TypescriptLang.TypeParam::deserialize)
                     .withNodeListOptionally("parameters", Parameters::deserialize)
-                    .withNodeListOptionally("extended", JavaTypes::deserialize)
-                    .withNodeListOptionally("variants", JavaTypes::deserialize);
+                    .withNodeListOptionally("extended", JavaDeserializers::deserializeType)
+                    .withNodeListOptionally("variants", JavaDeserializers::deserializeType);
         }
 
         private static JavaStructureNode from(
@@ -216,29 +214,6 @@ public class JavaLang {
         public Option<CompileResult<JavaStructureNode>> deserialize(Node node) {
             return Destructors.destructWithType(this.type().name().toLowerCase(), node)
                     .map((InitialDestructor deserializer) -> JavaStructureNodeDeserializer.deserializeHelper(this.type(), deserializer));
-        }
-    }
-
-    public static final class JavaTypes {
-        public static CompileResult<JavaType> deserialize(Node node) {
-            return Deserializers.orError("type", node, Lists.of(
-                    Deserializers.wrap(JavaDeserializers::deserializeSymbol),
-                    Deserializers.wrap(JavaTemplateType::deserialize),
-                    Deserializers.wrap(JavaVariadicType::deserialize),
-                    Deserializers.wrap(JavaArrayType::deserialize),
-                    Deserializers.wrap(JavaQualified::deserializeQualified)
-            ));
-        }
-
-        public static Rule createTypeRule() {
-            LazyRule type = new MutableLazyRule();
-            return type.set(new OrRule(Lists.of(
-                    JavaVariadicType.createVariadicRule(type),
-                    JavaArrayType.createArrayRule(type),
-                    JavaTemplateType.createTemplateRule(type),
-                    CommonRules.createSymbolRule(),
-                    JavaQualified.createQualifiedRule()
-            )));
         }
     }
 
@@ -278,7 +253,7 @@ public class JavaLang {
 
     public record JavaVariadicType(JavaType child) implements JavaType {
         public static Option<CompileResult<JavaType>> deserialize(Node node) {
-            return Destructors.destructWithType("variadic", node).map(deserializer -> deserializer.withNode("child", JavaTypes::deserialize)
+            return Destructors.destructWithType("variadic", node).map(deserializer -> deserializer.withNode("child", JavaDeserializers::deserializeType)
                     .complete(JavaVariadicType::new));
         }
 

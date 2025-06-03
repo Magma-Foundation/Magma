@@ -40,7 +40,7 @@ public final class JavaDeserializers {
 
     public static Option<CompileResult<JavaCaller>> deserializeConstruction(Node node) {
         return Destructors.destructWithType("construction", node)
-                .map(deserializer -> deserializer.withNode("type", JavaTypes::deserialize)
+                .map(deserializer -> deserializer.withNode("type", JavaDeserializers::deserializeType)
                         .complete(JavaConstruction::new));
     }
 
@@ -253,7 +253,7 @@ public final class JavaDeserializers {
 
     public static CompileResult<Definition> deserialize0(InitialDestructor deserialize) {
         return deserialize.withString("name")
-                .withNode("type", JavaTypes::deserialize)
+                .withNode("type", JavaDeserializers::deserializeType)
                 .withNodeList("modifiers", Modifier::deserialize)
                 .withNodeListOptionally("annotations", Annotation::deserialize)
                 .withNodeListOptionally("type-parameters", TypescriptLang.TypeParam::deserialize)
@@ -274,5 +274,15 @@ public final class JavaDeserializers {
                 .withNode("destination", Assignables::deserializeError)
                 .withNode("source", JavaDeserializers::deserializeJavaOrError)
                 .complete(tuple -> new Assignment(tuple.left(), tuple.right())));
+    }
+
+    public static CompileResult<JavaType> deserializeType(Node node) {
+        return Deserializers.orError("type", node, Lists.of(
+                Deserializers.wrap(JavaDeserializers::deserializeSymbol),
+                Deserializers.wrap(JavaTemplateType::deserialize),
+                Deserializers.wrap(JavaVariadicType::deserialize),
+                Deserializers.wrap(JavaArrayType::deserialize),
+                Deserializers.wrap(JavaQualified::deserializeQualified)
+        ));
     }
 }

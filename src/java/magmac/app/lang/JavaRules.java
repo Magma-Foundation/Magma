@@ -27,8 +27,8 @@ import magmac.app.compile.rule.fold.DelimitedFolder;
 import magmac.app.compile.rule.split.DividingSplitter;
 import magmac.app.lang.java.JavaDeserializers;
 import magmac.app.lang.java.JavaLang;
-import magmac.app.lang.node.Arguments;
 import magmac.app.lang.java.JavaNamespacedNode;
+import magmac.app.lang.node.Arguments;
 import magmac.app.lang.node.Modifier;
 import magmac.app.lang.node.MultipleCaseValue;
 import magmac.app.lang.node.Operator;
@@ -38,7 +38,7 @@ import magmac.app.lang.node.StructureMembers;
 
 public final class JavaRules {
     public static Rule createConstructionRule() {
-        return new TypeRule("construction", new StripRule(new PrefixRule("new ", new NodeRule("type", JavaLang.JavaTypes.createTypeRule()))));
+        return new TypeRule("construction", new StripRule(new PrefixRule("new ", new NodeRule("type", JavaRules.createTypeRule()))));
     }
 
     public static Rule createInvokableRule(Rule value) {
@@ -52,7 +52,7 @@ public final class JavaRules {
     public static Rule createRootSegmentRule() {
         Rule classMemberRule = StructureMembers.createClassMemberRule();
         return new OrRule(Lists.of(
-                createWhitespaceRule(),
+                JavaRules.createWhitespaceRule(),
                 JavaNamespacedNode.createNamespacedRule("package"),
                 JavaNamespacedNode.createNamespacedRule("import"),
                 JavaRules.createStructureRule("record", classMemberRule),
@@ -68,14 +68,14 @@ public final class JavaRules {
 
     public static Rule createStructureRule(String keyword, Rule structureMember) {
         Rule name = new StripRule(FilterRule.Symbol(new StringRule("name")));
-        Rule beforeContent = attachTypeParams(name);
+        Rule beforeContent = JavaRules.attachTypeParams(name);
 
         Rule withParameters = new OrRule(Lists.of(
-                new StripRule(new SuffixRule(LocatingRule.First(beforeContent, "(", Parameters.createParametersRule(createDefinitionRule())), ")")),
+                new StripRule(new SuffixRule(LocatingRule.First(beforeContent, "(", Parameters.createParametersRule(JavaRules.createDefinitionRule())), ")")),
                 beforeContent
         ));
 
-        Rule type = JavaLang.JavaTypes.createTypeRule();
+        Rule type = JavaRules.createTypeRule();
         Rule extended = NodeListRule.createNodeListRule("extended", new ValueFolder(), type);
         Rule withEnds = new OrRule(Lists.of(
                 LocatingRule.First(withParameters, " extends ", extended),
@@ -146,15 +146,15 @@ public final class JavaRules {
         return new OrRule(Lists.of(
                 new TypeRule("else", new StripRule(new ExactRule("else"))),
                 new TypeRule("try", new StripRule(new ExactRule("try"))),
-                createConditionalRule("if", value),
-                createConditionalRule("while", value),
+                JavaRules.createConditionalRule("if", value),
+                JavaRules.createConditionalRule("while", value),
                 new TypeRule("catch", new StripRule(new PrefixRule("catch", new StripRule(new PrefixRule("(", new SuffixRule(new NodeRule("definition", definition), ")"))))))
         ));
     }
 
     public static Rule createBlockRule(LazyRule functionSegmentRule, Rule value, Rule definition) {
-        Rule header = new NodeRule("header", createBlockHeaderRule(value, definition));
-        return createBlockRule0(header, functionSegmentRule);
+        Rule header = new NodeRule("header", JavaRules.createBlockHeaderRule(value, definition));
+        return JavaRules.createBlockRule0(header, functionSegmentRule);
     }
 
     public static TypeRule createBlockRule0(Rule header, Rule functionSegmentRule) {
@@ -205,35 +205,40 @@ public final class JavaRules {
     }
 
     public static LazyRule initValueRule(Rule segment, LazyRule value, String lambdaInfix, Rule definition) {
-        return value.set(new OrRule(getValueRules(segment, value, lambdaInfix, definition)));
+        return value.set(new OrRule(JavaRules.createValuesRules(segment, value, lambdaInfix, definition)));
     }
 
-    private static List<Rule> getValueRules(Rule functionSegment, LazyRule value, String lambdaInfix, Rule definition) {
+    private static List<Rule> createValuesRules(Rule functionSegment, LazyRule value, String lambdaInfix, Rule definition) {
         List<Rule> ruleList = Lists.of(
-                createSwitchRule(functionSegment, value),
-                createLambdaRule(value, functionSegment, lambdaInfix, definition),
-                createNotRule(value),
-                createCharRule(),
-                createStringRule(),
-                createInvokableRule(value),
-                createIndexRule(value),
-                createNumberRule(),
+                JavaRules.createSwitchRule(functionSegment, value),
+                JavaRules.createLambdaRule(value, functionSegment, lambdaInfix, definition),
+                JavaRules.createNotRule(value),
+                JavaRules.createCharRule(),
+                JavaRules.createStringRule(),
+                JavaRules.createInvokableRule(value),
+                JavaRules.createIndexRule(value),
+                JavaRules.createNumberRule(),
                 CommonRules.createSymbolRule(),
-                createAccessRule("data-access", ".", value),
-                createAccessRule("method-access", "::", value)
+                JavaRules.createAccessRule("data-access", ".", value),
+                JavaRules.createAccessRule("method-access", "::", value),
+                JavaRules.createInstanceOfRule(value)
         );
 
         List<Rule> operatorLists = Iters.fromValues(Operator.values())
-                .map(operator -> createOperationRule(operator, value))
+                .map(operator -> JavaRules.createOperationRule(operator, value))
                 .collect(new ListCollector<>());
 
         return ruleList.addAllLast(operatorLists);
     }
 
+    private static Rule createInstanceOfRule(LazyRule value) {
+        return new TypeRule("instanceof", LocatingRule.Last(new NodeRule("child", value), " instanceof ", new NodeRule("type", JavaRules.createTypeRule())));
+    }
+
     private static TypeRule createSwitchRule(Rule functionSegmentRule, Rule value) {
         NodeRule value1 = new NodeRule("value", value);
         PrefixRule header = new PrefixRule("switch", new StripRule(new PrefixRule("(", new SuffixRule(value1, ")"))));
-        return new TypeRule("switch", createBlockRule0(new StripRule(header), functionSegmentRule));
+        return new TypeRule("switch", JavaRules.createBlockRule0(new StripRule(header), functionSegmentRule));
     }
 
     public static Rule createDefinitionRule() {
@@ -244,9 +249,9 @@ public final class JavaRules {
                 modifiers
         ));
 
-        Rule leftRule1 = attachTypeParams(beforeTypeParams);
+        Rule leftRule1 = JavaRules.attachTypeParams(beforeTypeParams);
 
-        Rule rightRule = new NodeRule("type", JavaLang.JavaTypes.createTypeRule());
+        Rule rightRule = new NodeRule("type", JavaRules.createTypeRule());
         Divider divider = new FoldingDivider(new TypeSeparatorFolder());
         Splitter splitter = DividingSplitter.Last(divider, " ");
         Rule leftRule = new LocatingRule(leftRule1, splitter, rightRule);
@@ -263,7 +268,7 @@ public final class JavaRules {
     }
 
     public static Rule createCaseRule(Rule value, Rule segment) {
-        Rule typeRule = JavaLang.JavaTypes.createTypeRule();
+        Rule typeRule = JavaRules.createTypeRule();
         Rule name = new StripRule(new StringRule("name"));
         Rule last = LocatingRule.Last(new NodeRule("type", typeRule), " ", name);
         Rule definitions = new TypeRule("case-definition", new OrRule(Lists.of(
@@ -289,5 +294,16 @@ public final class JavaRules {
 
         Rule source = new NodeRule("source", value);
         return new TypeRule("assignment", LocatingRule.First(before, "=", source));
+    }
+
+    public static Rule createTypeRule() {
+        LazyRule type = new MutableLazyRule();
+        return type.set(new OrRule(Lists.of(
+                JavaLang.JavaVariadicType.createVariadicRule(type),
+                JavaLang.JavaArrayType.createArrayRule(type),
+                JavaLang.JavaTemplateType.createTemplateRule(type),
+                CommonRules.createSymbolRule(),
+                JavaLang.JavaQualified.createQualifiedRule()
+        )));
     }
 }
