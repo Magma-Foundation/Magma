@@ -191,7 +191,7 @@ FunctionStatement --> Node
 FunctionStatement --> AbstractFunctionStatement
 class FunctionStatement
 AbstractFunctionStatement <|-- FunctionStatement
-? <|-- FunctionStatement
+TypescriptLang.FunctionSegment <|-- FunctionStatement
 Location --> List
 Location --> Joiner
 class Location
@@ -299,7 +299,7 @@ Source --> IOResult
 Source --> Location
 interface Source
 class JavaConstruction
-? <|-- JavaConstruction
+JavaLang.JavaCaller <|-- JavaConstruction
 SimpleUnit --> CompileResult
 SimpleUnit --> Location
 SimpleUnit --> BiFunction
@@ -485,11 +485,11 @@ class ExactRule
 Rule <|-- ExactRule
 Symbol --> JavaLang
 class Symbol
-? <|-- Symbol
-? <|-- Symbol
-? <|-- Symbol
-? <|-- Symbol
-? <|-- Symbol
+magmac.app.lang.common.Symbol <|-- Symbol
+TypescriptLang.Type <|-- Symbol
+JavaLang.JavaLambdaParameter <|-- Symbol
+JavaLang.JavaLambdaHeader <|-- Symbol
+TypescriptLang.Value <|-- Symbol
 class StringContext
 Context <|-- StringContext
 InlinePassResult --> None
@@ -654,8 +654,8 @@ JavaPlantUMLParser --> CompileResult
 JavaPlantUMLParser --> CompileResults
 JavaPlantUMLParser --> Location
 JavaPlantUMLParser --> JavaLang
-JavaPlantUMLParser --> JavaRootSegment
 JavaPlantUMLParser --> JavaNamespacedNode
+JavaPlantUMLParser --> JavaRootSegment
 JavaPlantUMLParser --> PlantUMLDependency
 JavaPlantUMLParser --> PlantUMLFooter
 JavaPlantUMLParser --> PlantUMLHeader
@@ -1432,27 +1432,6 @@ Err --> Function
 Err --> Supplier
 class Err
 Result <|-- Err
-PlantUMLAfterPasser --> Some
-PlantUMLAfterPasser --> List
-PlantUMLAfterPasser --> ListCollector
-PlantUMLAfterPasser --> CompileResult
-PlantUMLAfterPasser --> CompileResultCollector
-PlantUMLAfterPasser --> CompileResults
-PlantUMLAfterPasser --> CompileErrors
-PlantUMLAfterPasser --> InlineNodeList
-PlantUMLAfterPasser --> MapNode
-PlantUMLAfterPasser --> Node
-PlantUMLAfterPasser --> NodeList
-PlantUMLAfterPasser --> NodeListCollector
-PlantUMLAfterPasser --> StringRule
-PlantUMLAfterPasser --> InlinePassResult
-PlantUMLAfterPasser --> ParseResult
-PlantUMLAfterPasser --> ParseUnit
-PlantUMLAfterPasser --> ParseUnitImpl
-PlantUMLAfterPasser --> Passer
-PlantUMLAfterPasser --> ParseState
-class PlantUMLAfterPasser
-Passer <|-- PlantUMLAfterPasser
 HeadedIter --> Option
 HeadedIter --> Iter
 HeadedIter --> Collector

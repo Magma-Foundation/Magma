@@ -11,8 +11,8 @@ import magmac.app.compile.error.CompileResult;
 import magmac.app.compile.error.CompileResults;
 import magmac.app.io.Location;
 import magmac.app.lang.java.JavaLang;
-import magmac.app.lang.java.JavaRootSegment;
 import magmac.app.lang.java.JavaNamespacedNode;
+import magmac.app.lang.java.JavaRootSegment;
 import magmac.app.lang.node.PlantUMLDependency;
 import magmac.app.lang.node.PlantUMLFooter;
 import magmac.app.lang.node.PlantUMLHeader;
@@ -48,14 +48,6 @@ public class JavaPlantUMLParser implements Parser<JavaLang.JavaRoot, PlantUMLRoo
         };
     }
 
-    private static String createSimpleNameFromQualifiedType(JavaLang.Qualified qualifiedType) {
-        return qualifiedType.segments()
-                .iter()
-                .map(Segment::value)
-                .collect(new Joiner("."))
-                .orElse("");
-    }
-
     private static PlantUMLRootSegment createStructureSegment(JavaLang.StructureNode structureNode) {
         var name = structureNode.name();
         var type = structureNode.type();
@@ -72,23 +64,16 @@ public class JavaPlantUMLParser implements Parser<JavaLang.JavaRoot, PlantUMLRoo
             case JavaLang.JavaArrayType _, JavaLang.JavaVariadicType _ -> "?";
             case JavaLang.Symbol symbol -> symbol.value();
             case JavaLang.JavaTemplateType templateType -> JavaPlantUMLParser.createSimpleName(templateType.base());
-            case JavaLang.Qualified qualified -> "?";
+            case JavaLang.Qualified qualified -> JavaPlantUMLParser.createSimpleNameFromQualifiedType(qualified);
         };
     }
 
-    @Override
-    public CompileResult<UnitSet<PlantUMLRoot>> apply(UnitSet<JavaLang.JavaRoot> initial) {
-        var roots = initial.iter()
-                .flatMap(JavaPlantUMLParser::parseRoot)
-                .collect(new ListCollector<>())
-                .addFirst(new PlantUMLHeader())
-                .addLast(new PlantUMLFooter());
-
-        var defaultLocation = new Location(Lists.empty(), "diagram");
-        var mergedRoot = new PlantUMLRoot(roots);
-
-        return CompileResults.Ok(new MapUnitSet<PlantUMLRoot>()
-                .add(new SimpleUnit<>(defaultLocation, mergedRoot)));
+    private static String createSimpleNameFromQualifiedType(JavaLang.Qualified qualified) {
+        return qualified.segments()
+                .iter()
+                .map(Segment::value)
+                .collect(new Joiner("."))
+                .orElse("");
     }
 
     private static Iter<PlantUMLRootSegment> parseRoot(Unit<JavaLang.JavaRoot> unit) {
@@ -121,5 +106,20 @@ public class JavaPlantUMLParser implements Parser<JavaLang.JavaRoot, PlantUMLRoo
                 .map(JavaPlantUMLParser::createSimpleNameFromType)
                 .<PlantUMLRootSegment>map(parent -> new PlantUMLInherits(child, parent))
                 .collect(new ListCollector<>());
+    }
+
+    @Override
+    public CompileResult<UnitSet<PlantUMLRoot>> apply(UnitSet<JavaLang.JavaRoot> initial) {
+        var roots = initial.iter()
+                .flatMap(JavaPlantUMLParser::parseRoot)
+                .collect(new ListCollector<>())
+                .addFirst(new PlantUMLHeader())
+                .addLast(new PlantUMLFooter());
+
+        var defaultLocation = new Location(Lists.empty(), "diagram");
+        var mergedRoot = new PlantUMLRoot(roots);
+
+        return CompileResults.Ok(new MapUnitSet<PlantUMLRoot>()
+                .add(new SimpleUnit<>(defaultLocation, mergedRoot)));
     }
 }
