@@ -8,5 +8,5 @@ export class PathSource {
 	computeName() : String {break;break;return 0;;}
 	read() : IOResult<String> {return 0;;}
 	computeLocation() : Location {return 0;;}
-	computeNamespace() : List<String> {break;break;if(true){ return 0;;}break;break;if(true){ break;break;;}return 0;;}
+	computeNamespace() : List<String> {break;break;if(true){ return 0;;}break;break;if(true){ break;0++;;}return 0;;}
 }

@@ -103,6 +103,7 @@ TypescriptLang --> Block
 TypescriptLang --> Conditional
 TypescriptLang --> ConditionalType
 TypescriptLang --> ParameterizedMethodHeader
+TypescriptLang --> PostVariant
 TypescriptLang --> Segment
 TypescriptLang --> StructureValue
 TypescriptLang --> TypeArguments
@@ -148,14 +149,9 @@ Deserializers --> CompileResult
 Deserializers --> CompileResults
 Deserializers --> NodeContext
 Deserializers --> CompileError
-Deserializers --> InitialDestructor
 Deserializers --> Node
 Deserializers --> ImmutableCompileError
-Deserializers --> Annotation
-Deserializers --> JavaLang
-Deserializers --> Modifier
 Deserializers --> TypedDeserializer
-Deserializers --> TypescriptLang
 class Deserializers
 ParseUnit --> NodeList
 ParseUnit --> ParseState
@@ -430,19 +426,24 @@ JavaDeserializers --> Iters
 JavaDeserializers --> ListCollector
 JavaDeserializers --> CompileResult
 JavaDeserializers --> CompileResults
+JavaDeserializers --> InitialDestructor
 JavaDeserializers --> Node
+JavaDeserializers --> CommonLang
 JavaDeserializers --> Deserializers
 JavaDeserializers --> Destructors
+JavaDeserializers --> Annotation
 JavaDeserializers --> Arguments
 JavaDeserializers --> ConditionalType
 JavaDeserializers --> FunctionSegmentValues
 JavaDeserializers --> FunctionSegments
 JavaDeserializers --> LambdaContents
+JavaDeserializers --> Modifier
 JavaDeserializers --> OperationDeserializer
 JavaDeserializers --> Operator
 JavaDeserializers --> PostVariant
 JavaDeserializers --> StructureStatementValue
 JavaDeserializers --> TypedDeserializer
+JavaDeserializers --> TypescriptLang
 JavaDeserializers --> *
 class JavaDeserializers
 DividingSplitter --> Option

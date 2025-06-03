@@ -12,10 +12,10 @@ export class MutableDivideState {
 	advance() : DivideState {break;break;return 0;;}
 	iter() : Iter<String> {return 0;;}
 	isLevel() : boolean {return 0;;}
-	enter() : DivideState {break;return 0;;}
-	exit() : DivideState {break;return 0;;}
+	enter() : DivideState {0++;return 0;;}
+	exit() : DivideState {0--;return 0;;}
 	isShallow() : boolean {return 0;;}
-	pop() : Option<Tuple2<DivideState, Character>> {if(true){ break;break;return 0;;}if(true){ return 0;;};}
+	pop() : Option<Tuple2<DivideState, Character>> {if(true){ break;0++;return 0;;}if(true){ return 0;;};}
 	popAndAppendToTuple() : Option<Tuple2<DivideState, Character>> {return 0;;}
 	popAndAppendToOption() : Option<DivideState> {return 0;;}
 	peek() : char {return 0;;}

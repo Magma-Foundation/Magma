@@ -25,6 +25,7 @@ import magmac.app.lang.node.Block;
 import magmac.app.lang.node.Conditional;
 import magmac.app.lang.node.ConditionalType;
 import magmac.app.lang.node.ParameterizedMethodHeader;
+import magmac.app.lang.node.PostVariant;
 import magmac.app.lang.node.Segment;
 import magmac.app.lang.node.StructureValue;
 import magmac.app.lang.node.TypeArguments;
@@ -263,6 +264,13 @@ public final class TypescriptLang {
         @Override
         public Node serialize() {
             return new MapNode("construction").withNodeSerialized("type", this.type);
+        }
+    }
+
+    public record Post(PostVariant variant, TypescriptValue value) implements TypescriptFunctionSegmentValue {
+        @Override
+        public Node serialize() {
+            return new MapNode(this.variant.type()).withNodeSerialized("child", this.value);
         }
     }
 

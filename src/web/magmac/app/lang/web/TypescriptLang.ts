@@ -23,6 +23,7 @@ import { Block } from "../../../../magmac/app/lang/node/Block";
 import { Conditional } from "../../../../magmac/app/lang/node/Conditional";
 import { ConditionalType } from "../../../../magmac/app/lang/node/ConditionalType";
 import { ParameterizedMethodHeader } from "../../../../magmac/app/lang/node/ParameterizedMethodHeader";
+import { PostVariant } from "../../../../magmac/app/lang/node/PostVariant";
 import { Segment } from "../../../../magmac/app/lang/node/Segment";
 import { StructureValue } from "../../../../magmac/app/lang/node/StructureValue";
 import { TypeArguments } from "../../../../magmac/app/lang/node/TypeArguments";
@@ -101,6 +102,9 @@ export class TypeParam {
 	serialize() : Node {return 0;;}
 }
 export class Construction {
+	serialize() : Node {return 0;;}
+}
+export class Post {
 	serialize() : Node {return 0;;}
 }
 export class TypescriptLang {

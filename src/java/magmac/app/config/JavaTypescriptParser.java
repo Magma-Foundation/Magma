@@ -188,12 +188,12 @@ class JavaTypescriptParser implements Parser<JavaLang.JavaRoot, TypescriptLang.T
         return switch (child) {
             case JavaBreak javaBreak -> new TypescriptBreak();
             case JavaContinue javaContinue -> new TypescriptContinue();
+            case JavaYieldNode javaYieldNode -> new TypescriptBreak();
+            case JavaPost javaPost -> new TypescriptLang.Post(javaPost.variant(), JavaTypescriptParser.parseValue(javaPost.value()));
             case JavaReturnNode javaReturnNode ->
                     new TypescriptReturnNode(JavaTypescriptParser.parseValue(javaReturnNode.child()));
-            case JavaYieldNode javaYieldNode -> new TypescriptBreak();
             case JavaLang.JavaInvokable javaInvokable ->
                     new TypescriptInvokable(JavaTypescriptParser.parseCaller(javaInvokable.caller()), JavaTypescriptParser.parseArguments(javaInvokable.arguments()));
-            case JavaPost javaPost -> new TypescriptBreak();
             case JavaAssignmentNode javaAssignmentNode -> new TypescriptBreak();
         };
     }
