@@ -6,7 +6,9 @@ import { JavaConstruction } from "../../../magmac/app/lang/java/JavaConstruction
 import { JavaInvokable } from "../../../magmac/app/lang/java/JavaInvokable";
 import { Lang } from "../../../magmac/app/lang/java/Lang";
 import { Arguments } from "../../../magmac/app/lang/node/Arguments";
-import { BlockHeader } from "../../../magmac/app/lang/node/BlockHeader";
+import { FunctionSegments } from "../../../magmac/app/lang/node/FunctionSegments";
+import { JavaBlock } from "../../../magmac/app/lang/node/JavaBlock";
+import { JavaBlockHeader } from "../../../magmac/app/lang/node/JavaBlockHeader";
 import { Catch } from "../../../magmac/app/lang/node/Catch";
 import { Conditional } from "../../../magmac/app/lang/node/Conditional";
 import { ConditionalType } from "../../../magmac/app/lang/node/ConditionalType";
@@ -43,5 +45,6 @@ export class JavaDeserializers {
 	deserializeAccessWithType(type : JavaAccessType) : TypedDeserializer<JavaAccess> {;;}
 	deserializeFunctionStatement(node : Node) : Option<CompileResult<FunctionStatement>> {;;}
 	deserializeReturn(node : Node) : Option<CompileResult<JavaReturnNode>> {;;}
-	deserializeBlockHeader(node : Node) : CompileResult<BlockHeader> {;;}
+	deserializeBlockHeader(node : Node) : CompileResult<JavaBlockHeader> {;;}
+	deserializeBlock(node : Node) : Option<CompileResult<JavaBlock>> {;;}
 }

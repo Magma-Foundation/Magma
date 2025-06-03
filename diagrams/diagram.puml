@@ -10,7 +10,6 @@ JavaPost --> Objects
 class JavaPost
 Post <|-- JavaPost
 JavaFunctionSegmentValue <|-- JavaPost
-interface BlockHeader
 StructureValue --> Option
 StructureValue --> List
 StructureValue --> MapNode
@@ -66,7 +65,7 @@ Catch --> CompileResult
 Catch --> Node
 Catch --> Destructors
 class Catch
-BlockHeader <|-- Catch
+JavaBlockHeader <|-- Catch
 AssignmentNode --> Option
 AssignmentNode --> Lists
 AssignmentNode --> CompileResult
@@ -154,7 +153,6 @@ Values --> Deserializers
 Values --> JavaDeserializers
 Values --> JavaRules
 Values --> LazyRule
-Values --> JavaInvokable
 class Values
 Folder --> DivideState
 interface Folder
@@ -227,29 +225,8 @@ class JavaInvokable
 Invokable <|-- JavaInvokable
 JavaValue <|-- JavaInvokable
 JavaFunctionSegmentValue <|-- JavaInvokable
-Block --> Option
 Block --> List
-Block --> CompileResult
-Block --> MapNode
-Block --> Node
-Block --> LocatingRule
-Block --> NodeRule
-Block --> Rule
-Block --> Splitter
-Block --> StripRule
-Block --> SuffixRule
-Block --> TypeRule
-Block --> FoldingDivider
-Block --> DividingSplitter
-Block --> BlockFolder
-Block --> CommonLang
-Block --> Destructors
-Block --> JavaDeserializers
-Block --> JavaRules
-Block --> LazyRule
 class Block
-JavaFunctionSegment <|-- Block
-TypescriptFunctionSegment <|-- Block
 interface StructureStatementValue
 TypescriptMethod --> Option
 TypescriptMethod --> List
@@ -356,7 +333,7 @@ Else --> CompileResult
 Else --> Node
 Else --> Destructors
 class Else
-BlockHeader <|-- Else
+JavaBlockHeader <|-- Else
 Parser --> UnitSet
 Parser --> Stage
 interface Parser
@@ -537,7 +514,9 @@ JavaDeserializers --> JavaConstruction
 JavaDeserializers --> JavaInvokable
 JavaDeserializers --> Lang
 JavaDeserializers --> Arguments
-JavaDeserializers --> BlockHeader
+JavaDeserializers --> FunctionSegments
+JavaDeserializers --> JavaBlock
+JavaDeserializers --> JavaBlockHeader
 JavaDeserializers --> Catch
 JavaDeserializers --> Conditional
 JavaDeserializers --> ConditionalType
@@ -989,6 +968,12 @@ FilterRule --> NumberFilter
 FilterRule --> SymbolFilter
 class FilterRule
 Rule <|-- FilterRule
+JavaBlock --> List
+JavaBlock --> MapNode
+JavaBlock --> Node
+class JavaBlock
+Block <|-- JavaBlock
+JavaFunctionSegment <|-- JavaBlock
 TypescriptLang --> Lists
 TypescriptLang --> LocatingRule
 TypescriptLang --> NodeRule
@@ -1094,6 +1079,8 @@ JavaTypescriptParser --> UnitSetCollector
 JavaTypescriptParser --> Block
 JavaTypescriptParser --> CaseNode
 JavaTypescriptParser --> FunctionStatement
+JavaTypescriptParser --> JavaBlock
+JavaTypescriptParser --> JavaBlockHeader
 JavaTypescriptParser --> JavaFunctionSegment
 JavaTypescriptParser --> Definition
 JavaTypescriptParser --> EnumValues
@@ -1203,7 +1190,7 @@ Try --> CompileResult
 Try --> Node
 Try --> Destructors
 class Try
-BlockHeader <|-- Try
+JavaBlockHeader <|-- Try
 FunctionStatement --> JavaFunctionSegmentValue
 class FunctionStatement
 JavaFunctionSegment <|-- FunctionStatement
@@ -1245,6 +1232,7 @@ CompileResultCollector --> Collector
 CompileResultCollector --> Ok
 class CompileResultCollector
 Collector <|-- CompileResultCollector
+interface JavaBlockHeader
 interface Error
 MultipleCaseValue --> Option
 MultipleCaseValue --> List
@@ -1829,7 +1817,7 @@ Conditional --> SuffixRule
 Conditional --> TypeRule
 Conditional --> Destructors
 class Conditional
-BlockHeader <|-- Conditional
+JavaBlockHeader <|-- Conditional
 Operation --> MapNode
 Operation --> Node
 Operation --> LocatingRule
@@ -1912,11 +1900,6 @@ HeadedIter --> Predicate
 class HeadedIter
 Iter <|-- HeadedIter
 Lang --> Serializable
-Lang --> Block
-Lang --> CaseNode
-Lang --> FunctionStatement
-Lang --> JavaReturnNode
-Lang --> Whitespace
 class Lang
 Splitter --> Option
 Splitter --> Tuple2

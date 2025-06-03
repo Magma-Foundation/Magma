@@ -12,6 +12,8 @@ import { UnitSetCollector } from "../../../magmac/app/io/sources/UnitSetCollecto
 import { Block } from "../../../magmac/app/lang/node/Block";
 import { CaseNode } from "../../../magmac/app/lang/node/CaseNode";
 import { FunctionStatement } from "../../../magmac/app/lang/node/FunctionStatement";
+import { JavaBlock } from "../../../magmac/app/lang/node/JavaBlock";
+import { JavaBlockHeader } from "../../../magmac/app/lang/node/JavaBlockHeader";
 import { JavaFunctionSegment } from "../../../magmac/app/lang/node/JavaFunctionSegment";
 import { Definition } from "../../../magmac/app/lang/node/Definition";
 import { EnumValues } from "../../../magmac/app/lang/node/EnumValues";

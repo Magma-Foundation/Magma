@@ -17,7 +17,6 @@ import { Deserializers } from "../../../../magmac/app/lang/Deserializers";
 import { JavaDeserializers } from "../../../../magmac/app/lang/JavaDeserializers";
 import { JavaRules } from "../../../../magmac/app/lang/JavaRules";
 import { LazyRule } from "../../../../magmac/app/lang/LazyRule";
-import { JavaInvokable } from "../../../../magmac/app/lang/java/JavaInvokable";
 export class Values {
 	deserializeOrError(node : Node) : CompileResult<JavaValue> {;;}
 	deserialize(node : Node) : Option<CompileResult<JavaValue>> {;;;;}

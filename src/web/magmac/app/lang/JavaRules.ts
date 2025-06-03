@@ -43,4 +43,6 @@ export class JavaRules {
 	createStatementRule(rule : Rule) : Rule {;;;}
 	createLambdaParameterRule(definition : Rule) : Rule {;;}
 	createBlockHeaderRule(value : Rule, definition : Rule) : Rule {;;}
+	createBlockRule(functionSegmentRule : LazyRule, value : Rule, definition : Rule) : Rule {;;;}
+	createBlockRule0(header : Rule, functionSegmentRule : Rule) : TypeRule {;;;;;}
 }

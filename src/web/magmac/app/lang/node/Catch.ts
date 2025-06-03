@@ -3,5 +3,5 @@ import { CompileResult } from "../../../../magmac/app/compile/error/CompileResul
 import { Node } from "../../../../magmac/app/compile/node/Node";
 import { Destructors } from "../../../../magmac/app/lang/Destructors";
 export class Catch {
-	deserialize(node : Node) : Option<CompileResult<BlockHeader>> {;;}
+	deserialize(node : Node) : Option<CompileResult<JavaBlockHeader>> {;;}
 }
