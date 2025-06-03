@@ -11,5 +11,5 @@ export class Some<T> {
 	orElse(other : T) : T {return 0;;}
 	filter(predicate : Predicate<T>) : Option<T> {if(true){ return 0;;}return 0;;}
 	or(other : Supplier<Option<T>>) : Option<T> {return 0;;}
-	ifPresent(consumer : Consumer<T>) : void {break;;}
+	ifPresent(consumer : Consumer<T>) : void {0F( 0);;}
 }

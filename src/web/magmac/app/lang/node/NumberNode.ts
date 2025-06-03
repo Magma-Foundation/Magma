@@ -1,16 +1,4 @@
-import { Option } from "../../../../magmac/api/Option";
-import { CompileResult } from "../../../../magmac/app/compile/error/CompileResult";
-import { MapNode } from "../../../../magmac/app/compile/node/MapNode";
-import { Node } from "../../../../magmac/app/compile/node/Node";
-import { FilterRule } from "../../../../magmac/app/compile/rule/FilterRule";
-import { Rule } from "../../../../magmac/app/compile/rule/Rule";
-import { StringRule } from "../../../../magmac/app/compile/rule/StringRule";
-import { StripRule } from "../../../../magmac/app/compile/rule/StripRule";
-import { TypeRule } from "../../../../magmac/app/compile/rule/TypeRule";
-import { Destructors } from "../../../../magmac/app/lang/Destructors";
-import { TypescriptValue } from "../../../../magmac/app/lang/web/TypescriptValue";
 export class NumberNode {
-	deserialize(node : Node) : Option<CompileResult<NumberNode>> {return 0;;}
-	createNumberRule() : Rule {return 0;;}
-	serialize() : Node {return 0;;}
+	NumberNode(value : String) : public {break;;}
+	value() : String {return 0;;}
 }

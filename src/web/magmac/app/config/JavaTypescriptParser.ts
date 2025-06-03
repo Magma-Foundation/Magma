@@ -9,18 +9,19 @@ import { CompileResultCollector } from "../../../magmac/app/compile/error/Compil
 import { CompileResults } from "../../../magmac/app/compile/error/CompileResults";
 import { Location } from "../../../magmac/app/io/Location";
 import { UnitSetCollector } from "../../../magmac/app/io/sources/UnitSetCollector";
+import { CommonLang } from "../../../magmac/app/lang/CommonLang";
 import { JavaAssignmentNode } from "../../../magmac/app/lang/java/JavaAssignmentNode";
 import { JavaBlock } from "../../../magmac/app/lang/java/JavaBlock";
 import { JavaBreak } from "../../../magmac/app/lang/java/JavaBreak";
 import { JavaCaseNode } from "../../../magmac/app/lang/java/JavaCaseNode";
+import { JavaConstruction } from "../../../magmac/app/lang/java/JavaConstruction";
 import { JavaConstructor } from "../../../magmac/app/lang/java/JavaConstructor";
 import { JavaContinue } from "../../../magmac/app/lang/java/JavaContinue";
-import { JavaDefinition } from "../../../magmac/app/lang/java/JavaDefinition";
 import { JavaEnumValues } from "../../../magmac/app/lang/java/JavaEnumValues";
 import { JavaFunctionSegment } from "../../../magmac/app/lang/java/JavaFunctionSegment";
 import { JavaFunctionSegmentValue } from "../../../magmac/app/lang/java/JavaFunctionSegmentValue";
 import { JavaFunctionStatement } from "../../../magmac/app/lang/java/JavaFunctionStatement";
-import { JavaInvokable } from "../../../magmac/app/lang/java/JavaInvokable";
+import { JavaLang } from "../../../magmac/app/lang/java/JavaLang";
 import { JavaMethod } from "../../../magmac/app/lang/java/JavaMethod";
 import { JavaMethodHeader } from "../../../magmac/app/lang/java/JavaMethodHeader";
 import { JavaNamespacedNode } from "../../../magmac/app/lang/java/JavaNamespacedNode";
@@ -31,83 +32,58 @@ import { JavaRootSegment } from "../../../magmac/app/lang/java/JavaRootSegment";
 import { JavaStructureMember } from "../../../magmac/app/lang/java/JavaStructureMember";
 import { JavaStructureNode } from "../../../magmac/app/lang/java/JavaStructureNode";
 import { JavaStructureStatement } from "../../../magmac/app/lang/java/JavaStructureStatement";
-import { JavaWhitespace } from "../../../magmac/app/lang/java/JavaWhitespace";
 import { JavaYieldNode } from "../../../magmac/app/lang/java/JavaYieldNode";
 import { ConditionalType } from "../../../magmac/app/lang/node/ConditionalType";
-import { Definition } from "../../../magmac/app/lang/node/Definition";
-import { JavaArrayType } from "../../../magmac/app/lang/node/JavaArrayType";
-import { JavaBase } from "../../../magmac/app/lang/node/JavaBase";
-import { JavaBlockHeader } from "../../../magmac/app/lang/node/JavaBlockHeader";
-import { JavaRoot } from "../../../magmac/app/lang/node/JavaRoot";
-import { JavaTemplateType } from "../../../magmac/app/lang/node/JavaTemplateType";
-import { JavaType } from "../../../magmac/app/lang/node/JavaType";
-import { JavaValue } from "../../../magmac/app/lang/node/JavaValue";
-import { NumberNode } from "../../../magmac/app/lang/node/NumberNode";
 import { ParameterizedMethodHeader } from "../../../magmac/app/lang/node/ParameterizedMethodHeader";
-import { Qualified } from "../../../magmac/app/lang/node/Qualified";
 import { Segment } from "../../../magmac/app/lang/node/Segment";
 import { StructureValue } from "../../../magmac/app/lang/node/StructureValue";
-import { Symbol } from "../../../magmac/app/lang/node/Symbol";
 import { TypeArguments } from "../../../magmac/app/lang/node/TypeArguments";
-import { TypeScriptDefinition } from "../../../magmac/app/lang/node/TypeScriptDefinition";
-import { TypeScriptImport } from "../../../magmac/app/lang/node/TypeScriptImport";
-import { TypeScriptMethodHeader } from "../../../magmac/app/lang/node/TypeScriptMethodHeader";
-import { TypeScriptParameter } from "../../../magmac/app/lang/node/TypeScriptParameter";
-import { TypeScriptRootSegment } from "../../../magmac/app/lang/node/TypeScriptRootSegment";
-import { TypeScriptTemplateType } from "../../../magmac/app/lang/node/TypeScriptTemplateType";
-import { TypeScriptType } from "../../../magmac/app/lang/node/TypeScriptType";
-import { TypescriptValue } from "../../../magmac/app/lang/web/TypescriptValue";
-import { TypescriptArrayType } from "../../../magmac/app/lang/node/TypescriptArrayType";
-import { TypescriptBlock } from "../../../magmac/app/lang/node/TypescriptBlock";
-import { TypescriptBlockHeader } from "../../../magmac/app/lang/node/TypescriptBlockHeader";
-import { TypescriptConditional } from "../../../magmac/app/lang/node/TypescriptConditional";
-import { TypescriptConstructor } from "../../../magmac/app/lang/node/TypescriptConstructor";
-import { TypescriptFunctionSegment } from "../../../magmac/app/lang/node/TypescriptFunctionSegment";
-import { TypescriptMethod } from "../../../magmac/app/lang/node/TypescriptMethod";
-import { TypescriptRoot } from "../../../magmac/app/lang/node/TypescriptRoot";
-import { TypescriptStructureMember } from "../../../magmac/app/lang/node/TypescriptStructureMember";
-import { TypescriptStructureNode } from "../../../magmac/app/lang/node/TypescriptStructureNode";
-import { TypescriptStructureType } from "../../../magmac/app/lang/node/TypescriptStructureType";
-import { VariadicType } from "../../../magmac/app/lang/node/VariadicType";
 import { TypescriptBreak } from "../../../magmac/app/lang/web/TypescriptBreak";
+import { TypescriptCaller } from "../../../magmac/app/lang/web/TypescriptCaller";
 import { TypescriptContinue } from "../../../magmac/app/lang/web/TypescriptContinue";
 import { TypescriptFunctionSegmentValue } from "../../../magmac/app/lang/web/TypescriptFunctionSegmentValue";
 import { TypescriptFunctionStatement } from "../../../magmac/app/lang/web/TypescriptFunctionStatement";
+import { TypescriptInvokable } from "../../../magmac/app/lang/web/TypescriptInvokable";
+import { TypescriptLang } from "../../../magmac/app/lang/web/TypescriptLang";
 import { TypescriptReturnNode } from "../../../magmac/app/lang/web/TypescriptReturnNode";
-import { TypescriptWhitespace } from "../../../magmac/app/lang/web/TypescriptWhitespace";
+import { TypescriptSymbol } from "../../../magmac/app/lang/web/TypescriptSymbol";
 import { Parser } from "../../../magmac/app/stage/parse/Parser";
 import { SimpleUnit } from "../../../magmac/app/stage/unit/SimpleUnit";
 import { Unit } from "../../../magmac/app/stage/unit/Unit";
 import { UnitSet } from "../../../magmac/app/stage/unit/UnitSet";
 export class JavaTypescriptParser {
-	parseUnit(unit : Unit<JavaRoot>) : CompileResult<Unit<TypescriptRoot>> {return 0;;}
-	parseRoot(location : Location, root : JavaRoot) : CompileResult<Unit<TypescriptRoot>> {break;return 0;;}
-	parseRootSegment(location : Location, rootSegment : JavaRootSegment) : List<TypeScriptRootSegment> {;;;}
-	getCollect(structureNode : JavaStructureNode) : List<TypeScriptRootSegment> {return 0;;}
-	wrap(value : TypescriptStructureNode) : TypeScriptRootSegment {return 0;;}
-	parseStructure(structureNode : JavaStructureNode) : List<TypescriptStructureNode> {;;;}
-	parseStructureWithType(type : TypescriptStructureType, structureNode : JavaStructureNode) : List<TypescriptStructureNode> {break;break;break;break;break;return 0;;}
-	parseTypeList(list : List<JavaType>) : List<TypeScriptType> {return 0;;}
-	parseStructureMember(structureNode : JavaStructureMember) : Tuple2<List<TypescriptStructureMember>, List<TypescriptStructureNode>> {;;;}
-	getListListTuple2(typescriptStructureMember : TypescriptStructureMember) : Tuple2<List<TypescriptStructureMember>, List<TypescriptStructureNode>> {return 0;;}
-	getList() : Tuple2<List<TypescriptStructureMember>, List<TypescriptStructureNode>> {return 0;;}
-	parseMethod(methodNode : JavaMethod) : TypescriptStructureMember {break;break;break;return 0;;}
-	parseFunctionSegments(segments : List<JavaFunctionSegment>) : List<TypescriptFunctionSegment> {return 0;;}
-	parseFunctionSegment(segment : JavaFunctionSegment) : TypescriptFunctionSegment {;;;}
-	parseFunctionStatement(functionStatement : JavaFunctionStatement) : TypescriptFunctionSegment {return 0;;}
+	parseUnit(unit : Unit<JavaLang.JavaRoot>) : CompileResult<Unit<TypescriptLang.TypescriptRoot>> {return 0;;}
+	parseRoot(location : Location, root : JavaLang.JavaRoot) : CompileResult<Unit<TypescriptLang.TypescriptRoot>> {break;return 0;;}
+	parseRootSegment(location : Location, rootSegment : JavaRootSegment) : List<TypescriptLang.TypeScriptRootSegment> {;;;}
+	getCollect(structureNode : JavaStructureNode) : List<TypescriptLang.TypeScriptRootSegment> {return 0;;}
+	wrap(value : TypescriptLang.TypescriptStructureNode) : TypescriptLang.TypeScriptRootSegment {return 0;;}
+	parseStructure(structureNode : JavaStructureNode) : List<TypescriptLang.TypescriptStructureNode> {;;;}
+	parseStructureWithType(type : TypescriptLang.TypescriptStructureType, structureNode : JavaStructureNode) : List<TypescriptLang.TypescriptStructureNode> {break;break;break;break;break;return 0;;}
+	parseTypeList(list : List<JavaLang.JavaType>) : List<TypescriptLang.TypeScriptType> {return 0;;}
+	parseStructureMember(structureNode : JavaStructureMember) : Tuple2<List<TypescriptLang.TypescriptStructureMember>, List<TypescriptLang.TypescriptStructureNode>> {;;;}
+	getListListTuple2(typescriptStructureMember : TypescriptLang.TypescriptStructureMember) : Tuple2<List<TypescriptLang.TypescriptStructureMember>, List<TypescriptLang.TypescriptStructureNode>> {return 0;;}
+	getList() : Tuple2<List<TypescriptLang.TypescriptStructureMember>, List<TypescriptLang.TypescriptStructureNode>> {return 0;;}
+	parseMethod(methodNode : JavaMethod) : TypescriptLang.TypescriptStructureMember {break;break;break;return 0;;}
+	parseFunctionSegments(segments : List<JavaFunctionSegment>) : List<TypescriptLang.TypescriptFunctionSegment> {return 0;;}
+	parseFunctionSegment(segment : JavaFunctionSegment) : TypescriptLang.TypescriptFunctionSegment {;;;}
+	parseFunctionStatement(functionStatement : JavaFunctionStatement) : TypescriptLang.TypescriptFunctionSegment {return 0;;}
 	parseFunctionStatementValue(child : JavaFunctionSegmentValue) : TypescriptFunctionSegmentValue {;;;}
-	parseValue(child : JavaValue) : TypescriptValue {return 0;;}
-	parseBlock(block : JavaBlock) : TypescriptBlock {return 0;;}
-	parseHeader(header : JavaBlockHeader) : TypescriptBlockHeader {return 0;;}
-	parseParameter(parameter : JavaParameter) : TypeScriptParameter {;;;}
-	parseMethodHeader(header : JavaMethodHeader) : TypeScriptMethodHeader {;;;}
-	parseDefinition(javaDefinition : JavaDefinition) : TypeScriptDefinition {break;;;;}
-	parseQualifiedType(qualified : Qualified) : Symbol {break;return 0;;}
-	parseArrayType(type : JavaArrayType) : TypeScriptType {return 0;;}
-	parseType(variadicType : JavaType) : TypeScriptType {;;;}
-	parseTemplateType(type : JavaTemplateType) : TypeScriptTemplateType {break;break;return 0;;}
-	parseBaseType(base : JavaBase) : Symbol {;;;}
-	parseNamespaced(location : Location, namespaced : JavaNamespacedNode) : TypeScriptRootSegment {;;;}
-	parseImport(location : Location, segments : List<Segment>) : TypeScriptImport {break;break;break;return 0;;}
-	apply(initial : UnitSet<JavaRoot>) : CompileResult<UnitSet<TypescriptRoot>> {return 0;;}
+	parseCaller(caller : JavaLang.JavaCaller) : TypescriptCaller {;;;}
+	parseArguments(arguments : List<JavaLang.JavaArgument>) : List<TypescriptLang.TypescriptArgument> {return 0;;}
+	parseArgument(argument : JavaLang.JavaArgument) : TypescriptLang.TypescriptArgument {;;;}
+	parseValue(child : JavaLang.JavaValue) : TypescriptLang.TypescriptValue {return 0;;}
+	parseBlock(block : JavaBlock) : TypescriptLang.TypescriptBlock {return 0;;}
+	parseHeader(header : JavaLang.JavaBlockHeader) : TypescriptLang.TypescriptBlockHeader {return 0;;}
+	parseParameter(parameter : JavaParameter) : TypescriptLang.TypeScriptParameter {;;;}
+	parseMethodHeader(header : JavaMethodHeader) : TypescriptLang.TypeScriptMethodHeader {;;;}
+	parseDefinition(javaDefinition : JavaLang.JavaDefinition) : TypescriptLang.TypeScriptDefinition {break;;;;}
+	parseSymbol(javaSymbol : JavaLang.JavaSymbol) : TypescriptSymbol {return 0;;}
+	parseQualifiedType(qualified : JavaLang.JavaQualified) : TypescriptSymbol {break;return 0;;}
+	parseArrayType(type : JavaLang.JavaArrayType) : TypescriptLang.TypeScriptType {return 0;;}
+	parseType(variadicType : JavaLang.JavaType) : TypescriptLang.TypeScriptType {;;;}
+	parseTemplateType(type : JavaLang.JavaTemplateType) : TypescriptLang.TypeScriptTemplateType {break;break;return 0;;}
+	parseBaseType(base : JavaLang.JavaBase) : JavaLang.JavaSymbol {;;;}
+	parseNamespaced(location : Location, namespaced : JavaNamespacedNode) : TypescriptLang.TypeScriptRootSegment {;;;}
+	parseImport(location : Location, segments : List<Segment>) : TypescriptLang.TypeScriptImport {break;break;break;return 0;;}
+	apply(initial : UnitSet<JavaLang.JavaRoot>) : CompileResult<UnitSet<TypescriptLang.TypescriptRoot>> {return 0;;}
 }

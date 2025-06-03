@@ -102,7 +102,6 @@ TypescriptLang --> JavaLang
 TypescriptLang --> Block
 TypescriptLang --> Conditional
 TypescriptLang --> ConditionalType
-TypescriptLang --> Definition
 TypescriptLang --> ParameterizedMethodHeader
 TypescriptLang --> Segment
 TypescriptLang --> StructureValue
@@ -154,7 +153,6 @@ Deserializers --> Node
 Deserializers --> ImmutableCompileError
 Deserializers --> Annotation
 Deserializers --> JavaLang
-Deserializers --> Definition
 Deserializers --> Modifier
 Deserializers --> TypedDeserializer
 Deserializers --> TypescriptLang
@@ -180,12 +178,6 @@ Passer --> Node
 Passer --> ParseState
 Passer --> ParseResult
 interface Passer
-class JavaWhitespace
-? <|-- JavaWhitespace
-JavaFunctionSegment <|-- JavaWhitespace
-JavaRootSegment <|-- JavaWhitespace
-JavaParameter <|-- JavaWhitespace
-JavaStructureMember <|-- JavaWhitespace
 StructureMembers --> Lists
 StructureMembers --> CompileResult
 StructureMembers --> Node
@@ -741,7 +733,6 @@ JavaPlantUMLParser --> PlantUMLStructure
 JavaPlantUMLParser --> PlantUMLStructureType
 JavaPlantUMLParser --> Segment
 JavaPlantUMLParser --> JavaStructureNode
-JavaPlantUMLParser --> JavaWhitespace
 JavaPlantUMLParser --> Parser
 JavaPlantUMLParser --> MapUnitSet
 JavaPlantUMLParser --> SimpleUnit
@@ -776,13 +767,6 @@ ValueFolder --> DivideState
 ValueFolder --> Folder
 class ValueFolder
 Folder <|-- ValueFolder
-TypescriptWhitespace --> MapNode
-TypescriptWhitespace --> Node
-class TypescriptWhitespace
-? <|-- TypescriptWhitespace
-? <|-- TypescriptWhitespace
-? <|-- TypescriptWhitespace
-? <|-- TypescriptWhitespace
 SafeFiles --> None
 SafeFiles --> Option
 SafeFiles --> Some
@@ -967,7 +951,7 @@ JavaTypescriptParser --> CompileResultCollector
 JavaTypescriptParser --> CompileResults
 JavaTypescriptParser --> Location
 JavaTypescriptParser --> UnitSetCollector
-JavaTypescriptParser --> TypescriptLang
+JavaTypescriptParser --> CommonLang
 JavaTypescriptParser --> JavaAssignmentNode
 JavaTypescriptParser --> JavaBlock
 JavaTypescriptParser --> JavaBreak
@@ -990,10 +974,8 @@ JavaTypescriptParser --> JavaRootSegment
 JavaTypescriptParser --> JavaStructureMember
 JavaTypescriptParser --> JavaStructureNode
 JavaTypescriptParser --> JavaStructureStatement
-JavaTypescriptParser --> JavaWhitespace
 JavaTypescriptParser --> JavaYieldNode
 JavaTypescriptParser --> ConditionalType
-JavaTypescriptParser --> Definition
 JavaTypescriptParser --> ParameterizedMethodHeader
 JavaTypescriptParser --> Segment
 JavaTypescriptParser --> StructureValue
@@ -1004,9 +986,9 @@ JavaTypescriptParser --> TypescriptContinue
 JavaTypescriptParser --> TypescriptFunctionSegmentValue
 JavaTypescriptParser --> TypescriptFunctionStatement
 JavaTypescriptParser --> TypescriptInvokable
+JavaTypescriptParser --> TypescriptLang
 JavaTypescriptParser --> TypescriptReturnNode
 JavaTypescriptParser --> TypescriptSymbol
-JavaTypescriptParser --> TypescriptWhitespace
 JavaTypescriptParser --> Parser
 JavaTypescriptParser --> SimpleUnit
 JavaTypescriptParser --> Unit
@@ -1277,9 +1259,14 @@ FoldingDivider --> Iter
 FoldingDivider --> Folder
 class FoldingDivider
 Divider <|-- FoldingDivider
+CommonLang --> Option
+CommonLang --> List
 CommonLang --> NodeListRule
 CommonLang --> Rule
 CommonLang --> StatementFolder
+CommonLang --> Annotation
+CommonLang --> Modifier
+CommonLang --> TypescriptLang
 class CommonLang
 InvocationFolder --> DivideState
 InvocationFolder --> Folder
@@ -1443,6 +1430,7 @@ JavaLang --> StripRule
 JavaLang --> SuffixRule
 JavaLang --> TypeRule
 JavaLang --> DelimitedFolder
+JavaLang --> CommonLang
 JavaLang --> CommonRules
 JavaLang --> Deserializers
 JavaLang --> Destructors
@@ -1453,7 +1441,6 @@ JavaLang --> Access
 JavaLang --> Symbol
 JavaLang --> Conditional
 JavaLang --> ConditionalType
-JavaLang --> Definition
 JavaLang --> Deserializer
 JavaLang --> FunctionSegments
 JavaLang --> Lambda
@@ -1517,12 +1504,6 @@ Symbol --> Node
 Symbol --> Serializable
 class Symbol
 Serializable <|-- Symbol
-Definition --> Option
-Definition --> List
-Definition --> Serializable
-Definition --> Annotation
-Definition --> TypescriptLang
-class Definition
 Iters --> Option
 Iters --> EmptyHead
 Iters --> HeadedIter

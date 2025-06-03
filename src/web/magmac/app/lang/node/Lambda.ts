@@ -1,5 +1,6 @@
+import { JavaLang } from "../../../../magmac/app/lang/java/JavaLang";
 export class Lambda {
-	Lambda(header : LambdaHeader, content : JavaLambdaContent) : public {break;break;;}
-	header() : LambdaHeader {return 0;;}
-	content() : JavaLambdaContent {return 0;;}
+	Lambda(header : JavaLang.JavaLambdaHeader, content : JavaLang.JavaLambdaContent) : public {break;break;;}
+	header() : JavaLang.JavaLambdaHeader {return 0;;}
+	content() : JavaLang.JavaLambdaContent {return 0;;}
 }

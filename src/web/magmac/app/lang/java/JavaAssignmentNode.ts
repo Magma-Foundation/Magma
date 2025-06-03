@@ -9,11 +9,8 @@ import { OrRule } from "../../../../magmac/app/compile/rule/OrRule";
 import { Rule } from "../../../../magmac/app/compile/rule/Rule";
 import { TypeRule } from "../../../../magmac/app/compile/rule/TypeRule";
 import { Destructors } from "../../../../magmac/app/lang/Destructors";
-import { Assignable } from "../../../../magmac/app/lang/node/Assignable";
 import { Assignables } from "../../../../magmac/app/lang/node/Assignables";
-import { JavaValue } from "../../../../magmac/app/lang/node/JavaValue";
 import { StructureStatementValue } from "../../../../magmac/app/lang/node/StructureStatementValue";
-import { Values } from "../../../../magmac/app/lang/node/Values";
 import { TypescriptFunctionSegmentValue } from "../../../../magmac/app/lang/web/TypescriptFunctionSegmentValue";
 export class JavaAssignmentNode {
 	deserialize(node : Node) : Option<CompileResult<JavaAssignmentNode>> {return 0;;}

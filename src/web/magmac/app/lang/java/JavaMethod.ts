@@ -16,6 +16,7 @@ import { SuffixRule } from "../../../../magmac/app/compile/rule/SuffixRule";
 import { TypeRule } from "../../../../magmac/app/compile/rule/TypeRule";
 import { CommonLang } from "../../../../magmac/app/lang/CommonLang";
 import { Destructors } from "../../../../magmac/app/lang/Destructors";
+import { JavaRules } from "../../../../magmac/app/lang/JavaRules";
 import { OptionNodeListRule } from "../../../../magmac/app/lang/OptionNodeListRule";
 import { FunctionSegments } from "../../../../magmac/app/lang/node/FunctionSegments";
 import { Parameters } from "../../../../magmac/app/lang/node/Parameters";

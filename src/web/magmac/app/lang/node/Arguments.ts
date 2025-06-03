@@ -5,10 +5,10 @@ import { NodeListRule } from "../../../../magmac/app/compile/rule/NodeListRule";
 import { OrRule } from "../../../../magmac/app/compile/rule/OrRule";
 import { Rule } from "../../../../magmac/app/compile/rule/Rule";
 import { Deserializers } from "../../../../magmac/app/lang/Deserializers";
-import { JavaDeserializers } from "../../../../magmac/app/lang/JavaDeserializers";
+import { JavaDeserializers } from "../../../../magmac/app/lang/java/JavaDeserializers";
 import { JavaRules } from "../../../../magmac/app/lang/JavaRules";
-import { Lang } from "../../../../magmac/app/lang/java/Lang";
+import { JavaLang } from "../../../../magmac/app/lang/java/JavaLang";
 export class Arguments {
-	deserialize(node : Node) : CompileResult<Lang.JavaArgument> {return 0;;}
+	deserialize(node : Node) : CompileResult<JavaLang.JavaArgument> {return 0;;}
 	createArgumentsRule(value : Rule) : Rule {return 0;;}
 }

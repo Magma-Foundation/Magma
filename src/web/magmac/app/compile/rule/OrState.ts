@@ -11,7 +11,7 @@ import { Context } from "../../../../magmac/app/compile/error/context/Context";
 import { CompileError } from "../../../../magmac/app/compile/error/error/CompileError";
 import { ImmutableCompileError } from "../../../../magmac/app/error/ImmutableCompileError";
 export class OrState<T> {
-	constructor() {break;;}
+	constructor() {0F( 0, 0);;}
 	withValue(value : T) : OrState<T> {if(true){ return 0;;}return 0;;}
 	toResult(context : Context) : CompileResult<T> {return 0;;}
 	withError(error : CompileError) : OrState<T> {return 0;;}

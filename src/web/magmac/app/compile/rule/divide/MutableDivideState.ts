@@ -7,8 +7,8 @@ import { Lists } from "../../../../../magmac/api/collect/list/Lists";
 import { Iter } from "../../../../../magmac/api/iter/Iter";
 export class MutableDivideState {
 	MutableDivideState(segments : List<String>, buffer : StringBuilder, input : String) : private {break;break;break;break;;}
-	MutableDivideState(input : String) : public {break;;}
-	append(c : char) : DivideState {break;return 0;;}
+	MutableDivideState(input : String) : public {0F( 0, 0, 0);;}
+	append(c : char) : DivideState {0F( 0);return 0;;}
 	advance() : DivideState {break;break;return 0;;}
 	iter() : Iter<String> {return 0;;}
 	isLevel() : boolean {return 0;;}

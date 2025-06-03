@@ -14,13 +14,12 @@ import { StringRule } from "../../../../magmac/app/compile/rule/StringRule";
 import { StripRule } from "../../../../magmac/app/compile/rule/StripRule";
 import { TypeRule } from "../../../../magmac/app/compile/rule/TypeRule";
 import { Destructors } from "../../../../magmac/app/lang/Destructors";
+import { TypescriptLang } from "../../../../magmac/app/lang/web/TypescriptLang";
 import { CaseDefinition } from "../../../../magmac/app/lang/node/CaseDefinition";
 import { CaseValue } from "../../../../magmac/app/lang/node/CaseValue";
 import { CaseValues } from "../../../../magmac/app/lang/node/CaseValues";
-import { JavaTypes } from "../../../../magmac/app/lang/node/JavaTypes";
 import { MultipleCaseValue } from "../../../../magmac/app/lang/node/MultipleCaseValue";
 import { SingleCaseValue } from "../../../../magmac/app/lang/node/SingleCaseValue";
-import { TypescriptFunctionSegment } from "../../../../magmac/app/lang/node/TypescriptFunctionSegment";
 export class JavaCaseNode {
 	deserialize(node : Node) : Option<CompileResult<JavaCaseNode>> {return 0;;}
 	createCaseRule(value : Rule, segment : Rule) : Rule {break;break;break;break;break;break;break;return 0;;}

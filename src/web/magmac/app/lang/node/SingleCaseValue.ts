@@ -7,6 +7,8 @@ import { StripRule } from "../../../../magmac/app/compile/rule/StripRule";
 import { SuffixRule } from "../../../../magmac/app/compile/rule/SuffixRule";
 import { TypeRule } from "../../../../magmac/app/compile/rule/TypeRule";
 import { Destructors } from "../../../../magmac/app/lang/Destructors";
+import { JavaDeserializers } from "../../../../magmac/app/lang/java/JavaDeserializers";
+import { JavaLang } from "../../../../magmac/app/lang/java/JavaLang";
 export class SingleCaseValue {
 	deserialize(node : Node) : Option<CompileResult<SingleCaseValue>> {return 0;;}
 	createRule(value : Rule) : TypeRule {return 0;;}

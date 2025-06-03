@@ -10,11 +10,9 @@ import { Rule } from "../../../../magmac/app/compile/rule/Rule";
 import { StringRule } from "../../../../magmac/app/compile/rule/StringRule";
 import { StripRule } from "../../../../magmac/app/compile/rule/StripRule";
 import { SuffixRule } from "../../../../magmac/app/compile/rule/SuffixRule";
+import { CommonRules } from "../../../../magmac/app/lang/CommonRules";
 import { Destructors } from "../../../../magmac/app/lang/Destructors";
 import { Arguments } from "../../../../magmac/app/lang/node/Arguments";
-import { JavaValue } from "../../../../magmac/app/lang/node/JavaValue";
-import { Symbols } from "../../../../magmac/app/lang/node/Symbols";
-import { Values } from "../../../../magmac/app/lang/node/Values";
 export class JavaEnumValue {
 	deserialize(node : Node) : CompileResult<JavaEnumValue> {return 0;;}
 	createEnumValueRule(value : Rule) : Rule {break;break;return 0;;}

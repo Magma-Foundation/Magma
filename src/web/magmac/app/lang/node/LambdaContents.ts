@@ -3,6 +3,7 @@ import { CompileResult } from "../../../../magmac/app/compile/error/CompileResul
 import { Node } from "../../../../magmac/app/compile/node/Node";
 import { Deserializers } from "../../../../magmac/app/lang/Deserializers";
 import { JavaRules } from "../../../../magmac/app/lang/JavaRules";
+import { JavaLang } from "../../../../magmac/app/lang/java/JavaLang";
 export class LambdaContents {
-	deserialize(node : Node) : CompileResult<JavaLambdaContent> {return 0;;}
+	deserialize(node : Node) : CompileResult<JavaLang.JavaLambdaContent> {return 0;;}
 }

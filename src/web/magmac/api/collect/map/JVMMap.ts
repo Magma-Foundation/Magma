@@ -11,10 +11,10 @@ import { Supplier } from "../../../../java/util/function/Supplier";
 export class JVMMap<K,  V> {
 	getOrDefault(key : K, other : V) : V {return 0;;}
 	iter() : Iter<Tuple2<K, V>> {return 0;;}
-	put(key : K, value : V) : Map<K, V> {break;return 0;;}
+	put(key : K, value : V) : Map<K, V> {0F( 0, 0);return 0;;}
 	containsKey(key : K) : boolean {return 0;;}
 	get(key : K) : V {return 0;;}
 	isEmpty() : boolean {return 0;;}
-	mapOrPut(key : K, mapper : Function<V, V>, supplier : Supplier<V>) : Map<K, V> {if(true){ break;;}if(true){ break;;}return 0;;}
+	mapOrPut(key : K, mapper : Function<V, V>, supplier : Supplier<V>) : Map<K, V> {if(true){ 0F( 0, 0);;}if(true){ 0F( 0, 0);;}return 0;;}
 	removeByKey(key : K) : Option<Tuple2<Map<K, V>, V>> {if(true){ return 0;;}break;break;return 0;;}
 }

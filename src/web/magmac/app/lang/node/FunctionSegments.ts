@@ -7,7 +7,7 @@ import { Rule } from "../../../../magmac/app/compile/rule/Rule";
 import { StripRule } from "../../../../magmac/app/compile/rule/StripRule";
 import { TypeRule } from "../../../../magmac/app/compile/rule/TypeRule";
 import { Deserializers } from "../../../../magmac/app/lang/Deserializers";
-import { JavaDeserializers } from "../../../../magmac/app/lang/JavaDeserializers";
+import { JavaDeserializers } from "../../../../magmac/app/lang/java/JavaDeserializers";
 import { JavaRules } from "../../../../magmac/app/lang/JavaRules";
 import { LazyRule } from "../../../../magmac/app/lang/LazyRule";
 import { JavaCaseNode } from "../../../../magmac/app/lang/java/JavaCaseNode";

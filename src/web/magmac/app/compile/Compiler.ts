@@ -1,6 +1,6 @@
 import { CompileResult } from "../../../magmac/app/compile/error/CompileResult";
-import { JavaRoot } from "../../../magmac/app/lang/node/JavaRoot";
+import { JavaLang } from "../../../magmac/app/lang/java/JavaLang";
 import { UnitSet } from "../../../magmac/app/stage/unit/UnitSet";
 export interface Compiler {
-	parseAndGenerate(units : UnitSet<JavaRoot>) : CompileResult<UnitSet<String>>;
+	parseAndGenerate(units : UnitSet<JavaLang.JavaRoot>) : CompileResult<UnitSet<String>>;
 }
