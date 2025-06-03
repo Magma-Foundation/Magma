@@ -6,7 +6,7 @@ import magmac.app.compile.rule.StringRule;
 import magmac.app.compile.rule.StripRule;
 import magmac.app.compile.rule.TypeRule;
 
-public class CommonRules {
+public final class CommonRules {
     public static Rule createSymbolRule(String key) {
         return new StripRule(FilterRule.Symbol(new StringRule(key)));
     }

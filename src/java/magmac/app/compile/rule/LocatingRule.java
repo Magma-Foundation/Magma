@@ -34,8 +34,8 @@ public final class LocatingRule implements Rule {
     @Override
     public CompileResult<Node> lex(String input) {
         return this.splitter.split(input).map((Tuple2<String, String> tuple) -> {
-            String left = tuple.left();
-            String right = tuple.right();
+            var left = tuple.left();
+            var right = tuple.right();
             return this.leftRule.lex(left).merge(() -> this.rightRule.lex(right), Node::merge);
         }).orElseGet(() -> CompileErrors.createStringError(this.splitter.createMessage(), input));
     }

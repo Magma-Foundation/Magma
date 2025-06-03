@@ -46,8 +46,8 @@ public final class MapNode implements Node {
 
     private static <T> Node fold(Node node, Iter<Tuple2<String, T>> iter, Function<Node, BiFunction<String, T, Node>> mapper) {
         return iter.fold(node, (Node current, Tuple2<String, T> tuple) -> {
-            String left = tuple.left();
-            T right = tuple.right();
+            var left = tuple.left();
+            var right = tuple.right();
 
             return mapper.apply(current).apply(left, right);
         });
@@ -65,7 +65,7 @@ public final class MapNode implements Node {
     }
 
     private static String formatEntry(int depth, String key, String value) {
-        String indent = MapNode.createIndent(depth + 1);
+        var indent = MapNode.createIndent(depth + 1);
         return indent + key + ": " + value;
     }
 
@@ -75,8 +75,8 @@ public final class MapNode implements Node {
         }
 
         return map.iter().map((Tuple2<String, T> entry) -> {
-            String key = entry.left();
-            T value = entry.right();
+            var key = entry.left();
+            var value = entry.right();
             return MapNode.formatEntry(depth, key, mapper.apply(value));
         });
     }
@@ -89,7 +89,7 @@ public final class MapNode implements Node {
     @Override
     public Option<Tuple2<Node, Node>> removeNode(String key) {
         return this.nodes.removeByKey(key).map(tuple -> {
-            MapNode copy = new MapNode(this.maybeType, this.strings, tuple.left(), this.nodeLists);
+            var copy = new MapNode(this.maybeType, this.strings, tuple.left(), this.nodeLists);
             return new Tuple2<>(copy, tuple.right());
         });
     }
@@ -106,15 +106,15 @@ public final class MapNode implements Node {
 
     @Override
     public String format(int depth) {
-        String typeString = this.maybeType
+        var typeString = this.maybeType
                 .map((String type) -> type + " ")
                 .orElse("");
 
-        Iter<String> stringsStream = MapNode.toStream(depth, this.strings, (String value) -> "\"" + value + "\"");
-        Iter<String> nodesStream = MapNode.toStream(depth, this.nodes, (Node value) -> value.format(depth + 1));
-        Iter<String> nodeListsStream = MapNode.toStream(depth, this.nodeLists, (NodeList values) -> "[" + MapNode.formatNodeList(depth, values) + "]");
+        var stringsStream = MapNode.toStream(depth, this.strings, (String value) -> "\"" + value + "\"");
+        var nodesStream = MapNode.toStream(depth, this.nodes, (Node value) -> value.format(depth + 1));
+        var nodeListsStream = MapNode.toStream(depth, this.nodeLists, (NodeList values) -> "[" + MapNode.formatNodeList(depth, values) + "]");
 
-        String joined = stringsStream.concat(nodesStream)
+        var joined = stringsStream.concat(nodesStream)
                 .concat(nodeListsStream)
                 .collect(new Joiner(", "))
                 .orElse("");
@@ -201,13 +201,13 @@ public final class MapNode implements Node {
     }
 
     @Override
-    public boolean isEmpty() {
-        return this.strings.isEmpty() && this.nodes.isEmpty() && this.nodeLists.isEmpty();
+    public boolean hasContent() {
+        return !this.strings.isEmpty() || !this.nodes.isEmpty() || !this.nodeLists.isEmpty();
     }
 
     @Override
     public <T> Node withNodeListAndSerializer(String key, List<T> list, Function<T, Node> serializer) {
-        NodeList nodeList = list.iter()
+        var nodeList = list.iter()
                 .map(serializer)
                 .collect(new NodeListCollector());
 

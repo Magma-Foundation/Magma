@@ -1,7 +1,7 @@
 package magmac.app.lang.common;
 
 public class StringNode {
-    protected final String value;
+    private final String value;
 
     public StringNode(String value) {
         this.value = value;

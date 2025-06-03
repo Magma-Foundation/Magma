@@ -16,7 +16,7 @@ public class RangeHead implements Head<Integer> {
     @Override
     public Option<Integer> next() {
         if (this.counter < this.length) {
-            int value = this.counter;
+            var value = this.counter;
             this.counter++;
             return new Some<>(value);
         }

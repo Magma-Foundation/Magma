@@ -16,7 +16,7 @@ public class FirstSelector implements Selector {
     @Override
     public Option<Tuple2<String, String>> select(List<String> list) {
         return list.popFirst().map((Tuple2<String, List<String>> tuple) -> {
-            String joined = tuple.right().iter().collect(new Joiner(this.delimiter)).orElse("");
+            var joined = tuple.right().iter().collect(new Joiner(this.delimiter)).orElse("");
             return new Tuple2<String, String>(tuple.left(), joined);
         });
     }

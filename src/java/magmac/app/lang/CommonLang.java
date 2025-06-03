@@ -9,7 +9,7 @@ import magmac.app.lang.common.Annotation;
 import magmac.app.lang.node.Modifier;
 import magmac.app.lang.web.TypescriptLang;
 
-public class CommonLang {
+public final class CommonLang {
     public static class AbstractDefinition<T> {
         protected final String name;
         protected final T type;

@@ -6,7 +6,7 @@ import magmac.api.iter.collect.Joiner;
 public record Location(List<String> namespace, String name) {
     @Override
     public String toString() {
-        String joined = this.namespace.iter().collect(new Joiner(".")).orElse("");
+        var joined = this.namespace.iter().collect(new Joiner(".")).orElse("");
         return joined + "." + this.name;
     }
 }

@@ -39,7 +39,7 @@ public class InitialDestructorImpl implements InitialDestructor {
 
     @Override
     public <T> CompileResult<T> complete(Supplier<T> supplier) {
-        if (!this.node.isEmpty()) {
+        if (this.node.hasContent()) {
             return CompileResults.NodeErr("Fields still present", this.node);
         }
 

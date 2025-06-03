@@ -57,7 +57,7 @@ export class TypescriptRoot {
 	serialize() : Node {return new MapNode( "root").withNodeListAndSerializer( "children", this.children, TypeScriptRootSegment.serialize);;}
 }
 export class TypescriptMethod {
-	serialize() : Node {node : Node=new MapNode( "method").withNodeSerialized( "header", this.header);return this.maybeChildren.map( 0).orElse( node);;}
+	serialize() : Node {node : var=new MapNode( "method").withNodeSerialized( "header", this.header);return this.maybeChildren.map( 0).orElse( node);;}
 }
 export class TemplateType {
 	TemplateType(base : JavaLang.Symbol, typeArguments : TypeArguments<Type>) : public {this.base=base;this.typeArguments=typeArguments;;}

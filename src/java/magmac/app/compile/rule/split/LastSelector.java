@@ -18,7 +18,7 @@ public class LastSelector implements Selector {
     }
 
     private Tuple2<String, String> merge(Tuple2<List<String>, String> tuple) {
-        String joined = tuple.left().iter().collect(new Joiner(this.delimiter)).orElse("");
+        var joined = tuple.left().iter().collect(new Joiner(this.delimiter)).orElse("");
         return new Tuple2<String, String>(joined, tuple.right());
     }
 }

@@ -26,7 +26,7 @@ public final class DividingSplitter implements Splitter {
 
     @Override
     public Option<Tuple2<String, String>> split(String input) {
-        List<String> list = this.divider.divide(input).collect(new ListCollector<>());
+        var list = this.divider.divide(input).collect(new ListCollector<>());
         return this.selector.select(list);
     }
 

@@ -10,7 +10,7 @@ public class ValueFolder implements Folder {
             return state.advance();
         }
 
-        DivideState appended = state.append(c);
+        var appended = state.append(c);
         if ('-' == c) {
             if ('>' == state.peek()) {
                 return state.popAndAppendToOption().orElse(state);

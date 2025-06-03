@@ -19,7 +19,7 @@ public record JVMList<T>(java.util.List<T> elements) implements List<T> {
 
     @Override
     public List<T> addLast(T element) {
-        ArrayList<T> copy = new ArrayList<>(this.elements);
+        var copy = new ArrayList<T>(this.elements);
         copy.add(element);
         return new JVMList<>(copy);
     }
@@ -52,7 +52,7 @@ public record JVMList<T>(java.util.List<T> elements) implements List<T> {
 
     @Override
     public List<T> sort(BiFunction<T, T, Integer> sorter) {
-        ArrayList<T> copy = new ArrayList<>(this.elements);
+        var copy = new ArrayList<T>(this.elements);
         copy.sort(sorter::apply);
         return new JVMList<>(copy);
     }
@@ -73,7 +73,7 @@ public record JVMList<T>(java.util.List<T> elements) implements List<T> {
             return new None<>();
         }
 
-        java.util.List<T> slice = this.elements.subList(0, this.elements.size() - 1);
+        var slice = this.elements.subList(0, this.elements.size() - 1);
         return new Some<>(new Tuple2<>(new JVMList<>(slice), this.elements.getLast()));
     }
 
@@ -83,13 +83,13 @@ public record JVMList<T>(java.util.List<T> elements) implements List<T> {
             return new None<>();
         }
 
-        java.util.List<T> slice = this.elements.subList(1, this.elements.size());
+        var slice = this.elements.subList(1, this.elements.size());
         return new Some<>(new Tuple2<>(this.elements.getFirst(), new JVMList<>(slice)));
     }
 
     @Override
     public List<T> addFirst(T element) {
-        ArrayList<T> copy = new ArrayList<>();
+        var copy = new ArrayList<T>();
         copy.add(element);
         copy.addAll(this.elements);
         return new JVMList<>(copy);

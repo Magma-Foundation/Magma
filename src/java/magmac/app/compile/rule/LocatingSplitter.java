@@ -8,8 +8,8 @@ public record LocatingSplitter(String infix, Locator locator) implements Splitte
     @Override
     public Option<Tuple2<String, String>> split(String input) {
         return this.locator.locate(input, this.infix).map((Integer separator) -> {
-            String left = input.substring(0, separator);
-            String right = input.substring(separator + this.infix.length());
+            var left = input.substring(0, separator);
+            var right = input.substring(separator + this.infix.length());
             return new Tuple2<>(left, right);
         });
     }

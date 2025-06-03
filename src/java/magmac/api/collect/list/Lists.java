@@ -14,7 +14,7 @@ public final class Lists {
 
     public static <T> List<T> repeat(T element, int size) {
         List<T> copy = Lists.empty();
-        int i = 0;
+        var i = 0;
         while (i < size) {
             copy = copy.addLast(element);
             i++;

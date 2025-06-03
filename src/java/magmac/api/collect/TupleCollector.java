@@ -14,8 +14,8 @@ public record TupleCollector<A, AC, B, BC>(
 
     @Override
     public Tuple2<AC, BC> fold(Tuple2<AC, BC> current, Tuple2<A, B> element) {
-        AC leftValue = this.leftCollector.fold(current.left(), element.left());
-        BC rightValue = this.rightCollector.fold(current.right(), element.right());
+        var leftValue = this.leftCollector.fold(current.left(), element.left());
+        var rightValue = this.rightCollector.fold(current.right(), element.right());
         return new Tuple2<>(leftValue, rightValue);
     }
 }

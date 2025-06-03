@@ -16,8 +16,8 @@ import magmac.app.lang.ValueFolder;
 
 public record JavaEnumValues(List<JavaEnumValue> values) implements JavaStructureMember {
     public static TypeRule createEnumValuesRule(Rule value) {
-        Rule enumValue = JavaEnumValue.createEnumValueRule(value);
-        Rule enumValues = NodeListRule.createNodeListRule("children", new ValueFolder(), enumValue);
+        var enumValue = JavaEnumValue.createEnumValueRule(value);
+        var enumValues = NodeListRule.createNodeListRule("children", new ValueFolder(), enumValue);
         Rule withEnd = new StripRule(new SuffixRule(enumValues, ";"));
         return new TypeRule("enum-values", new OrRule(Lists.of(
                 withEnd,

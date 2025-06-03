@@ -37,13 +37,13 @@ public record JavaMethod(
     }
 
     public static Rule createMethodRule(Rule childRule) {
-        NodeRule header = new NodeRule("header", new OrRule(Lists.of(
+        var header = new NodeRule("header", new OrRule(Lists.of(
                 JavaRules.createDefinitionRule(),
                 new TypeRule("constructor", new StripRule(FilterRule.Symbol(new StringRule("name"))))
         )));
 
-        Rule parameters = JavaRules.createParametersRule(JavaRules.createDefinitionRule());
-        Rule content = CommonLang.Statements("children", childRule);
+        var parameters = JavaRules.createParametersRule(JavaRules.createDefinitionRule());
+        var content = CommonLang.Statements("children", childRule);
         Rule rightRule = new StripRule(new PrefixRule("{", new SuffixRule(new StripRule("", content, "after-children"), "}")));
         Rule withParams = new OptionNodeListRule("parameters",
                 new SuffixRule(parameters, ");"),

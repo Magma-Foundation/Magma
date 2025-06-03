@@ -66,7 +66,7 @@ record JVMMap<K, V>(java.util.Map<K, V> map) implements Map<K, V> {
         }
 
         java.util.Map<K, V> copy = new HashMap<>(this.map);
-        V removed = copy.remove(key);
+        var removed = copy.remove(key);
         return new Some<>(new Tuple2<>(new JVMMap<>(copy), removed));
     }
 }

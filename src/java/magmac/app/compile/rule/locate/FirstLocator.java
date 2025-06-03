@@ -7,7 +7,7 @@ import magmac.api.Some;
 public class FirstLocator implements Locator {
     @Override
     public Option<Integer> locate(String input, String infix) {
-        int index = input.indexOf(infix);
+        var index = input.indexOf(infix);
         if (-1 == index) {
             return new None<Integer>();
         }

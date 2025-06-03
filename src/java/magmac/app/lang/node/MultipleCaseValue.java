@@ -16,10 +16,8 @@ import magmac.app.lang.java.JavaFunctionSegment;
 
 public record MultipleCaseValue(List<JavaFunctionSegment> children) implements CaseValue {
     public static Option<CompileResult<CaseValue>> deserialize(Node node) {
-        return Destructors.destructWithType("case-multiple", node).map(destructor -> {
-            return destructor.withNodeList("children", FunctionSegments::deserialize)
-                    .complete(MultipleCaseValue::new);
-        });
+        return Destructors.destructWithType("case-multiple", node).map(destructor -> destructor.withNodeList("children", FunctionSegments::deserialize)
+                .complete(MultipleCaseValue::new));
     }
 
     public static TypeRule createRule(Rule segment) {

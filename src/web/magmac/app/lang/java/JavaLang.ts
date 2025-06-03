@@ -63,8 +63,8 @@ export class Symbol {
 	Symbol(value : String) : public {super( value);;}
 }
 export class JavaArrayType {
-	JavaArrayType(arrayType : JavaType) : public {this.inner=arrayType;;}
-	createArrayRule(rule : Rule) : Rule {child : NodeRule=new NodeRule( "child", rule);return new TypeRule( "array", new StripRule( new SuffixRule( child, "[]")));;}
+	constructor(arrayType : JavaType) {this.inner=arrayType;;}
+	createArrayRule(rule : Rule) : Rule {child : var=new NodeRule( "child", rule);return new TypeRule( "array", new StripRule( new SuffixRule( child, "[]")));;}
 	deserialize(node : Node) : Option<CompileResult<JavaType>> {return Destructors.destructWithType( "array", node).map( 0);;}
 }
 export class JavaRoot {
@@ -103,13 +103,13 @@ export class Catch {
 }
 export class Qualified {
 	deserializeQualified(node : Node) : Option<CompileResult<Qualified>> {return Destructors.destructWithType( "qualified", node).map( 0);;}
-	createQualifiedRule() : TypeRule {return new TypeRule( "qualified", Qualified.createSegmentsRule( "segments"));;}
-	createSegmentsRule(key : String) : Rule {return NodeListRule.createNodeListRule( key, new DelimitedFolder( '.'), CommonRules.createSymbolRule( "value"));;}
+	createQualifiedRule() : TypeRule {return new TypeRule( "qualified", Qualified.createSegmentsRule( ));;}
+	createSegmentsRule() : Rule {return NodeListRule.createNodeListRule( "segments", new DelimitedFolder( '.'), CommonRules.createSymbolRule( "value"));;}
 	serialize() : Node {return new MapNode( "qualified").withNodeListAndSerializer( "segments", this.segments, Segment.serialize);;}
 }
 export class JavaVariadicType {
 	deserialize(node : Node) : Option<CompileResult<JavaType>> {return Destructors.destructWithType( "variadic", node).map( 0);;}
-	createVariadicRule(rule : Rule) : Rule {child : NodeRule=new NodeRule( "child", rule);return new TypeRule( "variadic", new StripRule( new SuffixRule( child, "...")));;}
+	createVariadicRule(rule : Rule) : Rule {child : var=new NodeRule( "child", rule);return new TypeRule( "variadic", new StripRule( new SuffixRule( child, "...")));;}
 }
 export class Number {
 	Number(value : String) : public {super( value);;}
@@ -151,7 +151,7 @@ export class Assignment {
 export class InstanceOf {
 }
 export class StructureNode {
-	StructureNode(type : JavaStructureType, structureNode : StructureValue<JavaType, JavaStructureMember>, parameters : Option<List<JavaParameter>>, variants : Option<List<JavaType>>) : public {this.type=type;this.value=structureNode;this.parameters=parameters;this.variants=variants;;}
+	constructor(type : JavaStructureType, structureNode : StructureValue<JavaType, JavaStructureMember>, parameters : Option<List<JavaParameter>>, variants : Option<List<JavaType>>) {this.type=type;this.value=structureNode;;}
 	type() : JavaStructureType {return this.type;;}
 	name() : String {return this.value.name( );;}
 	implemented() : Option<List<JavaType>> {return this.value.maybeImplemented( );;}

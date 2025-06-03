@@ -85,12 +85,12 @@ public class JavaLang {
     public static final class JavaArrayType implements JavaType {
         public final JavaType inner;
 
-        public JavaArrayType(JavaType arrayType) {
+        JavaArrayType(JavaType arrayType) {
             this.inner = arrayType;
         }
 
         public static Rule createArrayRule(Rule rule) {
-            NodeRule child = new NodeRule("child", rule);
+            var child = new NodeRule("child", rule);
             return new TypeRule("array", new StripRule(new SuffixRule(child, "[]")));
         }
 
@@ -129,10 +129,8 @@ public class JavaLang {
 
     public record JavaLambdaBlockContent(List<JavaFunctionSegment> children) implements JavaLambdaContent {
         public static Option<CompileResult<JavaLambdaBlockContent>> deserialize(Node node) {
-            return Destructors.destructWithType("block", node).map(destructor -> {
-                return destructor.withNodeList("children", FunctionSegments::deserialize)
-                        .complete(JavaLambdaBlockContent::new);
-            });
+            return Destructors.destructWithType("block", node).map(destructor -> destructor.withNodeList("children", FunctionSegments::deserialize)
+                    .complete(JavaLambdaBlockContent::new));
         }
     }
 
@@ -202,11 +200,11 @@ public class JavaLang {
         }
 
         public static TypeRule createQualifiedRule() {
-            return new TypeRule("qualified", Qualified.createSegmentsRule("segments"));
+            return new TypeRule("qualified", Qualified.createSegmentsRule());
         }
 
-        private static Rule createSegmentsRule(String key) {
-            return NodeListRule.createNodeListRule(key, new DelimitedFolder('.'), CommonRules.createSymbolRule("value"));
+        private static Rule createSegmentsRule() {
+            return NodeListRule.createNodeListRule("segments", new DelimitedFolder('.'), CommonRules.createSymbolRule("value"));
         }
 
         @Override
@@ -222,7 +220,7 @@ public class JavaLang {
         }
 
         public static Rule createVariadicRule(Rule rule) {
-            NodeRule child = new NodeRule("child", rule);
+            var child = new NodeRule("child", rule);
             return new TypeRule("variadic", new StripRule(new SuffixRule(child, "...")));
         }
     }
@@ -334,10 +332,8 @@ public class JavaLang {
     public static final class StructureNode implements JavaRootSegment, JavaStructureMember {
         private final JavaStructureType type;
         public final StructureValue<JavaType, JavaStructureMember> value;
-        private final Option<List<JavaParameter>> parameters;
-        private final Option<List<JavaType>> variants;
 
-        public StructureNode(
+        StructureNode(
                 JavaStructureType type,
                 StructureValue<JavaType, JavaStructureMember> structureNode,
                 Option<List<JavaParameter>> parameters,
@@ -345,8 +341,6 @@ public class JavaLang {
         ) {
             this.type = type;
             this.value = structureNode;
-            this.parameters = parameters;
-            this.variants = variants;
         }
 
         public JavaStructureType type() {

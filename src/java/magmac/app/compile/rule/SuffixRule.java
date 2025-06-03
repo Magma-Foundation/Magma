@@ -11,7 +11,7 @@ public record SuffixRule(Rule childRule, String suffix) implements Rule {
             return CompileErrors.createStringError("Suffix '" + this.suffix + "' not present", input);
         }
 
-        String slice = input.substring(0, input.length() - this.suffix.length());
+        var slice = input.substring(0, input.length() - this.suffix.length());
         return this.childRule.lex(slice);
     }
 

@@ -25,7 +25,7 @@ export interface Node {
 	hasNodeList(key : String) : boolean;
 	removeNodeListOrError(key : String) : CompileResult<Tuple2<Node, NodeList>>;
 	removeNodeList(key : String) : Option<Tuple2<Node, NodeList>>;
-	isEmpty() : boolean;
+	hasContent() : boolean;
 	removeString(key : String) : CompileResult<Tuple2<Node, String>>;
 	removeNodeOrError(key : String) : CompileResult<Tuple2<Node, Node>>;
 	withNodeListAndSerializer(key : String, list : List<T>, serializer : Function<T, Node>) : Node;

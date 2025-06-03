@@ -7,7 +7,7 @@ import magmac.app.lang.Deserializers;
 import magmac.app.lang.JavaRules;
 import magmac.app.lang.java.JavaLang;
 
-public class LambdaContents {
+public final class LambdaContents {
     public static CompileResult<JavaLang.JavaLambdaContent> deserialize(Node node) {
         return Deserializers.orError("lambda-content", node, Lists.of(
                 Deserializers.wrap(JavaRules::deserializeLambdaValueContent),

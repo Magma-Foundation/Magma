@@ -16,5 +16,5 @@ export class JVMMap<K,  V> {
 	get(key : K) : V {return this.map.get( key);;}
 	isEmpty() : boolean {return this.map.isEmpty( );;}
 	mapOrPut(key : K, mapper : Function<V, V>, supplier : Supplier<V>) : Map<K, V> {if(true){ this.map.put( key, mapper.apply( this.map.get( key)));;}if(true){ this.map.put( key, supplier.get( ));;}return this;;}
-	removeByKey(key : K) : Option<Tuple2<Map<K, V>, V>> {if(true){ return new None<>( );;}copy : java.util.Map<K, V>=new HashMap<>( this.map);removed : V=copy.remove( key);return new Some<>( new Tuple2<>( new JVMMap<>( copy), removed));;}
+	removeByKey(key : K) : Option<Tuple2<Map<K, V>, V>> {if(true){ return new None<>( );;}copy : java.util.Map<K, V>=new HashMap<>( this.map);removed : var=copy.remove( key);return new Some<>( new Tuple2<>( new JVMMap<>( copy), removed));;}
 }

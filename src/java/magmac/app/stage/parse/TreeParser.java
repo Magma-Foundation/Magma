@@ -27,10 +27,10 @@ public class TreeParser implements Parser<Node, Node> {
     }
 
     private CompileResult<ParseUnit<Node>> parseNodeListEntry(ParseUnit<Node> current, Tuple2<String, NodeList> entry) {
-        Node currentNode = current.right();
-        String key = entry.left();
+        var currentNode = current.right();
+        var key = entry.left();
 
-        CompileResult<ParseUnit<NodeList>> initial = CompileResults.Ok(current.retainWithList());
+        var initial = CompileResults.Ok(current.retainWithList());
         return entry.right()
                 .iter()
                 .fold(initial, (CompileResult<ParseUnit<NodeList>> currentTupleResult, Node node) -> currentTupleResult.flatMapValue((ParseUnit<NodeList> currentTuple) -> currentTuple.merge((ParseState currentState2, NodeList currentElements1) -> this.getParseUnitCompileResult(node, currentState2, currentElements1))))
@@ -46,8 +46,8 @@ public class TreeParser implements Parser<Node, Node> {
                 .flatMapValue(this::parseNodeLists)
                 .flatMapValue(this::parseNodes)
                 .flatMapValue((ParseUnit<Node> nodeListsTuple) -> {
-                    ParseState state1 = nodeListsTuple.left();
-                    Node node = nodeListsTuple.right();
+                    var state1 = nodeListsTuple.left();
+                    var node = nodeListsTuple.right();
                     return this.afterChild.pass(state1, node).orElseGet(() -> new ParseUnitImpl<Node>(state1, node));
                 });
     }
@@ -59,10 +59,10 @@ public class TreeParser implements Parser<Node, Node> {
     }
 
     private CompileResult<ParseUnit<Node>> parseNodeEntry(ParseUnit<Node> current, Tuple2<String, Node> entry) {
-        Node currentNode = current.right();
-        String key = entry.left();
+        var currentNode = current.right();
+        var key = entry.left();
 
-        CompileResult<ParseUnit<Node>> parsed = this.parseTree(current.left(), entry.right());
+        var parsed = this.parseTree(current.left(), entry.right());
         return parsed.mapValue((ParseUnit<Node> value) -> new ParseUnitImpl<>(value.left(), currentNode.withNode(key, value.right())));
     }
 

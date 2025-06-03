@@ -20,12 +20,12 @@ public class FlatMapHead<T, R> implements Head<R> {
     @Override
     public Option<R> next() {
         while (true) {
-            Option<R> maybeInner = this.current.next();
+            var maybeInner = this.current.next();
             if (maybeInner.isPresent()) {
                 return maybeInner;
             }
 
-            Option<T> maybeOuter = this.head.next();
+            var maybeOuter = this.head.next();
             if (maybeOuter.isEmpty()) {
                 return new None<>();
             }

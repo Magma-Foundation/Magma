@@ -5,7 +5,7 @@ import magmac.app.compile.node.Node;
 import magmac.app.lang.Serializable;
 
 public class Symbol implements Serializable {
-    protected final String value;
+    private final String value;
 
     public Symbol(String value) {
         this.value = value;

@@ -33,7 +33,7 @@ public record JavaNamespacedNode(NamespacedType type, List<Segment> segments) im
     }
 
     public static Rule createNamespacedRule(String type) {
-        Rule childRule = NodeListRule.createNodeListRule("segments", new DelimitedFolder('.'), new StringRule("value"));
+        var childRule = NodeListRule.createNodeListRule("segments", new DelimitedFolder('.'), new StringRule("value"));
         return new TypeRule(type, new StripRule(new SuffixRule(new PrefixRule(type + " ", childRule), ";")));
     }
 }

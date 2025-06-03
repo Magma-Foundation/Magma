@@ -10,7 +10,7 @@ public class TypeSeparatorFolder implements Folder {
             return state.advance();
         }
 
-        DivideState appended = state.append(c);
+        var appended = state.append(c);
         if ('<' == c) {
             return appended.enter();
         }

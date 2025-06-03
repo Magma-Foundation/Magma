@@ -123,7 +123,7 @@ public final class TypescriptLang {
     ) implements TypescriptStructureMember {
         @Override
         public Node serialize() {
-            Node node = new MapNode("method")
+            var node = new MapNode("method")
                     .withNodeSerialized("header", this.header);
 
             return this.maybeChildren.map(children -> node.withNodeListSerialized("children", children)).orElse(node);

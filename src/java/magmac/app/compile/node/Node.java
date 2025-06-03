@@ -48,7 +48,7 @@ public interface Node {
 
     Option<Tuple2<Node, NodeList>> removeNodeList(String key);
 
-    boolean isEmpty();
+    boolean hasContent();
 
     CompileResult<Tuple2<Node, String>> removeString(String key);
 

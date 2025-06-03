@@ -17,5 +17,5 @@ export class PlantUMLTargetPlatform {
 	createRule() : Rule {return PlantUMLRoot.createRule( );;}
 	createCompiler() : Compiler {generator : Generator=new RuleGenerator( this.createRule( ));return new StagedCompiler<PlantUMLRoot>( new JavaPlantUMLParser( ), generator);;}
 	createApplication0(targets : Targets) : Application {return new CompileApplication<>( createCompiler( ), targets);;}
-	createApplication() : Application {targetPath : Path=this.createTargetPath( );extension : String=this.createExtension( );targets : Targets=new PathTargets( targetPath, extension);return this.createApplication0( targets);;}
+	createApplication() : Application {targetPath : var=this.createTargetPath( );extension : var=this.createExtension( );targets : Targets=new PathTargets( targetPath, extension);return this.createApplication0( targets);;}
 }

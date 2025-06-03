@@ -5,5 +5,5 @@ import { Joiner } from "../../../../../magmac/api/iter/collect/Joiner";
 export class LastSelector {
 	LastSelector(delimiter : String) : public {this.delimiter=delimiter;;}
 	select(list : List<String>) : Option<Tuple2<String, String>> {return list.popLast( ).map( this.merge);;}
-	merge(tuple : Tuple2<List<String>, String>) : Tuple2<String, String> {joined : String=tuple.left( ).iter( ).collect( new Joiner( this.delimiter)).orElse( "");return new Tuple2<String, String>( joined, tuple.right( ));;}
+	merge(tuple : Tuple2<List<String>, String>) : Tuple2<String, String> {joined : var=tuple.left( ).iter( ).collect( new Joiner( this.delimiter)).orElse( "");return new Tuple2<String, String>( joined, tuple.right( ));;}
 }

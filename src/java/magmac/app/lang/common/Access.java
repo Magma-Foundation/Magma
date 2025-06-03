@@ -1,9 +1,9 @@
 package magmac.app.lang.common;
 
 public class Access<T, V> {
-    protected final T type;
-    protected final V receiver;
-    protected final String property;
+    private final T type;
+    private final V receiver;
+    private final String property;
 
     public Access(T type, V receiver, String property) {
         this.type = type;

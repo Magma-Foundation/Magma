@@ -43,8 +43,8 @@ public final class TypeScriptTargetPlatform implements TargetPlatform {
 
     @Override
     public Application createApplication() {
-        Path targetPath = this.createTargetPath();
-        String extension = this.createExtension();
+        var targetPath = this.createTargetPath();
+        var extension = this.createExtension();
         Targets targets = new PathTargets(targetPath, extension);
         return new CompileApplication<>(this.createCompiler(), targets);
     }

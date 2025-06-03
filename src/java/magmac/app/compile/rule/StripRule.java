@@ -15,8 +15,8 @@ public record StripRule(String beforeKey, Rule rule, String afterKey) implements
 
     @Override
     public CompileResult<String> generate(Node node) {
-        String before = node.findString(this.beforeKey).orElse("");
-        String after = node.findString(this.afterKey).orElse("");
+        var before = node.findString(this.beforeKey).orElse("");
+        var after = node.findString(this.afterKey).orElse("");
         return this.rule.generate(node).mapValue((String result) -> before + result + after);
     }
 }

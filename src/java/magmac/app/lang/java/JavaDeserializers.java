@@ -31,14 +31,14 @@ import magmac.app.lang.web.TypescriptLang;
 import static magmac.app.lang.java.JavaLang.*;
 
 public final class JavaDeserializers {
-    public static CompileResult<JavaCaller> deserializeCaller(Node node) {
+    private static CompileResult<JavaCaller> deserializeCaller(Node node) {
         return Deserializers.orError("caller", node, Lists.of(
                 Deserializers.wrap(JavaDeserializers::deserializeConstruction),
                 Deserializers.wrap(JavaDeserializers::deserializeValue)
         ));
     }
 
-    public static Option<CompileResult<JavaCaller>> deserializeConstruction(Node node) {
+    private static Option<CompileResult<JavaCaller>> deserializeConstruction(Node node) {
         return Destructors.destructWithType("construction", node)
                 .map(deserializer -> deserializer.withNode("type", JavaDeserializers::deserializeType)
                         .complete(JavaConstruction::new));
@@ -61,7 +61,7 @@ public final class JavaDeserializers {
         ));
     }
 
-    public static Option<CompileResult<Access>> deserializeAccess(JavaAccessType type, Node node) {
+    private static Option<CompileResult<Access>> deserializeAccess(JavaAccessType type, Node node) {
         return Destructors.destructWithType(type.type(), node)
                 .map(deserializer -> deserializer.withString("property")
                         .withNode("receiver", JavaDeserializers::deserializeValueOrError)
@@ -80,14 +80,14 @@ public final class JavaDeserializers {
                 .complete(child -> new JavaPost(variant, child)));
     }
 
-    public static Option<CompileResult<Lambda>> deserializeLambda(Node node) {
+    private static Option<CompileResult<Lambda>> deserializeLambda(Node node) {
         return Destructors.destructWithType("lambda", node).map(deserializer -> deserializer
                 .withNode("header", JavaDeserializers::deserializeLambdaHeader)
                 .withNode("content", LambdaContents::deserialize)
                 .complete(tuple -> new Lambda(tuple.left(), tuple.right())));
     }
 
-    public static TypedDeserializer<Access> deserializeAccessWithType(JavaAccessType type) {
+    private static TypedDeserializer<Access> deserializeAccessWithType(JavaAccessType type) {
         return node1 -> JavaDeserializers.deserializeAccess(type, node1);
     }
 
@@ -103,7 +103,7 @@ public final class JavaDeserializers {
                 .map(deserializer -> deserializer.withNode("child", JavaDeserializers::deserializeValueOrError).complete(Return::new));
     }
 
-    public static CompileResult<BlockHeader> deserializeBlockHeader(Node node) {
+    private static CompileResult<BlockHeader> deserializeBlockHeader(Node node) {
         return Deserializers.orError("header", node, Lists.of(
                 Deserializers.wrap(node1 -> JavaDeserializers.deserializeConditional(ConditionalType.If, node1)),
                 Deserializers.wrap(node1 -> JavaDeserializers.deserializeConditional(ConditionalType.While, node1)),
@@ -120,7 +120,7 @@ public final class JavaDeserializers {
                 .complete(tuple -> new Block(tuple.right(), tuple.left())));
     }
 
-    public static Option<CompileResult<Conditional>> deserializeConditional(ConditionalType type, Node node) {
+    private static Option<CompileResult<Conditional>> deserializeConditional(ConditionalType type, Node node) {
         return Destructors.destructWithType(type.name().toLowerCase(), node).map(deserializer -> deserializer.withNode("condition", JavaDeserializers::deserializeValueOrError)
                 .complete(value -> new Conditional(type, value)));
     }
@@ -144,54 +144,50 @@ public final class JavaDeserializers {
         return Destructors.destructWithType("whitespace", node).map(deserializer -> deserializer.complete(Whitespace::new));
     }
 
-    public static Option<CompileResult<Try>> deserializeTry(Node node) {
+    private static Option<CompileResult<Try>> deserializeTry(Node node) {
         return Destructors.destructWithType("try", node)
                 .map(deserializer -> deserializer.complete(Try::new));
     }
 
-    public static Option<CompileResult<Else>> deserializeElse(Node node) {
+    private static Option<CompileResult<Else>> deserializeElse(Node node) {
         return Destructors.destructWithType("else", node).map(deserializer -> deserializer.complete(Else::new));
     }
 
-    public static Option<CompileResult<StringValue>> deserializeString(Node node) {
+    private static Option<CompileResult<StringValue>> deserializeString(Node node) {
         return Destructors.destructWithType("string", node).map(deserializer -> deserializer.withString("value").complete(StringValue::new));
     }
 
-    public static Option<CompileResult<Char>> deserializeChar(Node node) {
+    private static Option<CompileResult<Char>> deserializeChar(Node node) {
         return Destructors.destructWithType("char", node).map(deserializer -> deserializer.withString("value").complete(Char::new));
     }
 
-    public static CompileResult<JavaLambdaHeader> deserializeLambdaHeader(Node node) {
+    private static CompileResult<JavaLambdaHeader> deserializeLambdaHeader(Node node) {
         return Deserializers.orError("lambda-header", node, Lists.of(
                 Deserializers.wrap(JavaDeserializers::deserializeSymbol),
                 Deserializers.wrap(JavaDeserializers::deserializeMultipleHeader)
         ));
     }
 
-    public static Option<CompileResult<JavaLang.Number>> deserializeNumber(Node node) {
+    private static Option<CompileResult<JavaLang.Number>> deserializeNumber(Node node) {
         return Destructors.destructWithType("number", node).map(deserializer -> deserializer.withString("value").complete(JavaLang.Number::new));
     }
 
-    public static Option<CompileResult<Not>> deserializeNot(Node node) {
+    private static Option<CompileResult<Not>> deserializeNot(Node node) {
         return Destructors.destructWithType("not", node).map(deserializer -> deserializer.withNode("child", JavaDeserializers::deserializeValueOrError)
                 .complete(Not::new));
     }
 
-    public static Option<CompileResult<Index>> deserializeIndex(Node value) {
-        return Destructors.destructWithType("index", value).map(destructor -> {
-            return destructor.withNode("parent", JavaDeserializers::deserializeValueOrError)
-                    .withNode("argument", JavaDeserializers::deserializeValueOrError)
-                    .complete(tuple -> new Index(tuple.left(), tuple.right()));
-        });
+    private static Option<CompileResult<Index>> deserializeIndex(Node value) {
+        return Destructors.destructWithType("index", value).map(destructor -> destructor.withNode("parent", JavaDeserializers::deserializeValueOrError)
+                .withNode("argument", JavaDeserializers::deserializeValueOrError)
+                .complete(tuple -> new Index(tuple.left(), tuple.right())));
     }
 
-    public static Option<CompileResult<SwitchNode>> deserializeSwitch(Node node) {
-        return Destructors.destructWithType("switch", node).map(deserializer -> {
-            return deserializer
-                    .withNode("value", JavaDeserializers::deserializeValueOrError)
-                    .withNodeList("children", FunctionSegments::deserialize)
-                    .complete(tuple -> new SwitchNode(tuple.left(), tuple.right()));
-        });
+    private static Option<CompileResult<SwitchNode>> deserializeSwitch(Node node) {
+        return Destructors.destructWithType("switch", node).map(deserializer -> deserializer
+                .withNode("value", JavaDeserializers::deserializeValueOrError)
+                .withNodeList("children", FunctionSegments::deserialize)
+                .complete(tuple -> new SwitchNode(tuple.left(), tuple.right())));
     }
 
     public static Option<CompileResult<Value>> deserializeValue(Node node) {
@@ -210,7 +206,7 @@ public final class JavaDeserializers {
                 Deserializers.wrap(JavaDeserializers::deserializeInstanceOf)
         );
 
-        List<TypedDeserializer<Value>> operatorRules = Iters.fromValues(Operator.values())
+        var operatorRules = Iters.fromValues(Operator.values())
                 .map(JavaDeserializers::wrapAsDeserializer)
                 .collect(new ListCollector<>());
 
@@ -218,13 +214,11 @@ public final class JavaDeserializers {
     }
 
     private static Option<CompileResult<InstanceOf>> deserializeInstanceOf(Node node) {
-        return Destructors.destructWithType("instance-of", node).map(destructor -> {
-            return destructor
-                    .withNode("base", JavaDeserializers::deserializeBase)
-                    .withNode("child", JavaDeserializers::deserializeValueOrError)
-                    .withNodeList("parameters", JavaDeserializers::deserializeParameter)
-                    .complete(tuple -> new InstanceOf(tuple.left().left(), tuple.left().right(), tuple.right()));
-        });
+        return Destructors.destructWithType("instance-of", node).map(destructor -> destructor
+                .withNode("base", JavaDeserializers::deserializeBase)
+                .withNode("child", JavaDeserializers::deserializeValueOrError)
+                .withNodeList("parameters", JavaDeserializers::deserializeParameter)
+                .complete(tuple -> new InstanceOf(tuple.left().left(), tuple.left().right(), tuple.right())));
     }
 
     private static TypedDeserializer<Value> wrapAsDeserializer(Operator operator) {
@@ -235,13 +229,13 @@ public final class JavaDeserializers {
         return JavaDeserializers.deserializeValue(node).orElseGet(() -> CompileResults.NodeErr("Cannot deserialize value", node));
     }
 
-    public static Option<CompileResult<Symbol>> deserializeSymbol(Node node) {
+    private static Option<CompileResult<Symbol>> deserializeSymbol(Node node) {
         return Destructors.destructWithType("symbol", node).map(deserializer -> deserializer.withString("value")
                 .complete(Symbol::new)
                 .mapValue(type -> type));
     }
 
-    public static CompileResult<JavaLambdaParameter> deserializeLambdaParameter(Node node) {
+    private static CompileResult<JavaLambdaParameter> deserializeLambdaParameter(Node node) {
         return Deserializers.orError("lambda-parameter", node, Lists.of(
                 Deserializers.wrap(JavaDeserializers::deserializeSymbol),
                 Deserializers.wrap(JavaDeserializers::deserializeTypedDefinition)
@@ -256,13 +250,11 @@ public final class JavaDeserializers {
         return Destructors.destructWithType("definition", node).map(JavaDeserializers::deserialize0);
     }
 
-    public static Option<CompileResult<JavaLambdaHeader>> deserializeMultipleHeader(Node node) {
-        return Destructors.destructWithType("multiple", node).map(destructor -> {
-            return destructor.withNodeList("parameters", JavaDeserializers::deserializeLambdaParameter).complete(JavaMultipleHeader::new);
-        });
+    private static Option<CompileResult<JavaLambdaHeader>> deserializeMultipleHeader(Node node) {
+        return Destructors.destructWithType("multiple", node).map(destructor -> destructor.withNodeList("parameters", JavaDeserializers::deserializeLambdaParameter).complete(JavaMultipleHeader::new));
     }
 
-    public static CompileResult<Definition> deserialize0(InitialDestructor deserialize) {
+    private static CompileResult<Definition> deserialize0(InitialDestructor deserialize) {
         return deserialize.withString("name")
                 .withNode("type", JavaDeserializers::deserializeType)
                 .withNodeList("modifiers", Modifier::deserialize)
@@ -272,12 +264,10 @@ public final class JavaDeserializers {
     }
 
     public static Option<CompileResult<Case>> deserializeCase(Node node) {
-        return Destructors.destructWithType("case", node).map(destructor -> {
-            return destructor
-                    .withNodeList("definitions", CaseDefinition::deserialize)
-                    .withNode("value", CaseValues::deserializeOrError)
-                    .complete(tuple -> new Case(tuple.left(), tuple.right()));
-        });
+        return Destructors.destructWithType("case", node).map(destructor -> destructor
+                .withNodeList("definitions", CaseDefinition::deserialize)
+                .withNode("value", CaseValues::deserializeOrError)
+                .complete(tuple -> new Case(tuple.left(), tuple.right())));
     }
 
     public static Option<CompileResult<Assignment>> deserializeAssignment(Node node) {
@@ -297,21 +287,21 @@ public final class JavaDeserializers {
         ));
     }
 
-    static CompileResult<Base> deserializeBase(Node node) {
+    private static CompileResult<Base> deserializeBase(Node node) {
         return Deserializers.orError("base", node, Lists.of(
                 Deserializers.wrap(JavaDeserializers::deserializeSymbol),
                 Deserializers.wrap(Qualified::deserializeQualified)
         ));
     }
 
-    public static Option<CompileResult<JavaTemplateType>> deserializeTemplate(Node node) {
+    private static Option<CompileResult<JavaTemplateType>> deserializeTemplate(Node node) {
         return Destructors.destructWithType("template", node).map(deserializer -> deserializer
                 .withNode("base", JavaDeserializers::deserializeBase)
                 .withNodeList("arguments", JavaDeserializers::deserializeType)
                 .complete(tuple -> new JavaTemplateType(tuple.left(), new TypeArguments<JavaType>(tuple.right()))));
     }
 
-    public static CompileResult<JavaArgument> deserializeArguments(Node node) {
+    private static CompileResult<JavaArgument> deserializeArguments(Node node) {
         return Deserializers.orError("argument", node, Lists.of(
                 Deserializers.wrap(JavaDeserializers::deserializeWhitespace),
                 Deserializers.wrap(JavaDeserializers::deserializeValue)

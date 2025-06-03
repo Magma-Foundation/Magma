@@ -18,5 +18,5 @@ export class TypeScriptTargetPlatform {
 	createExtension() : String {return "ts";;}
 	createRule() : Rule {return TypescriptRules.createRule( );;}
 	createCompiler() : Compiler {parser : Parser<JavaLang.JavaRoot, TypescriptLang.TypescriptRoot>=new JavaTypescriptParser( );generator : Generator=new RuleGenerator( this.createRule( ));return new StagedCompiler<TypescriptLang.TypescriptRoot>( parser, generator);;}
-	createApplication() : Application {targetPath : Path=this.createTargetPath( );extension : String=this.createExtension( );targets : Targets=new PathTargets( targetPath, extension);return new CompileApplication<>( this.createCompiler( ), targets);;}
+	createApplication() : Application {targetPath : var=this.createTargetPath( );extension : var=this.createExtension( );targets : Targets=new PathTargets( targetPath, extension);return new CompileApplication<>( this.createCompiler( ), targets);;}
 }

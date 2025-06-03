@@ -5,7 +5,7 @@ import magmac.app.compile.error.CompileResult;
 import magmac.app.compile.node.Node;
 import magmac.app.lang.Deserializers;
 
-public class CaseValues {
+public final class CaseValues {
     public static CompileResult<CaseValue> deserializeOrError(Node node) {
         return Deserializers.orError("case-value", node, Lists.of(
                 Deserializers.wrap(SingleCaseValue::deserialize),

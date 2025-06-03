@@ -35,8 +35,8 @@ public final class StructureMembers {
         LazyRule classMemberRule = new MutableLazyRule();
         LazyRule functionSegmentRule = new MutableLazyRule();
         LazyRule valueLazy = new MutableLazyRule();
-        LazyRule value = JavaRules.initValueRule(functionSegmentRule, valueLazy, "->", JavaRules.createDefinitionRule());
-        Rule functionSegment = FunctionSegments.initFunctionSegmentRule(functionSegmentRule, value, JavaRules.createDefinitionRule());
+        var value = JavaRules.initValueRule(functionSegmentRule, valueLazy, "->", JavaRules.createDefinitionRule());
+        var functionSegment = FunctionSegments.initFunctionSegmentRule(functionSegmentRule, value, JavaRules.createDefinitionRule());
         return classMemberRule.set(new OrRule(Lists.of(
                 JavaRules.createWhitespaceRule(),
                 JavaStructureStatement.createStructureStatementRule(new TypeRule("definition", JavaRules.createDefinitionRule()), value),

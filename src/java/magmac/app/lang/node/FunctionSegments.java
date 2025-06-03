@@ -14,7 +14,7 @@ import magmac.app.lang.JavaRules;
 import magmac.app.lang.LazyRule;
 import magmac.app.lang.java.JavaFunctionSegment;
 
-public class FunctionSegments {
+public final class FunctionSegments {
     public static CompileResult<JavaFunctionSegment> deserialize(Node node) {
         return Deserializers.orError("function-segment", node, Lists.of(
                 Deserializers.wrap(JavaDeserializers::deserializeWhitespace),
@@ -26,7 +26,7 @@ public class FunctionSegments {
     }
 
     public static Rule initFunctionSegmentRule(LazyRule functionSegmentRule, Rule value, Rule definition) {
-        Rule functionSegmentValueRule = FunctionSegmentValues.createFunctionSegmentValueRule(value, definition);
+        var functionSegmentValueRule = FunctionSegmentValues.createFunctionSegmentValueRule(value, definition);
 
         Rule rule = new OrRule(Lists.of(
                 new TypeRule("whitespace", new StripRule(new ExactRule(";"))),

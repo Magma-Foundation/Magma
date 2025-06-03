@@ -11,8 +11,8 @@ import java.nio.file.Path;
 public record PathSource(Path root, Path child) implements Source {
     @Override
     public String computeName() {
-        String fileName = this.child.getFileName().toString();
-        int fileSeparator = fileName.lastIndexOf('.');
+        var fileName = this.child.getFileName().toString();
+        var fileSeparator = fileName.lastIndexOf('.');
         return fileName.substring(0, fileSeparator);
     }
 
@@ -28,13 +28,13 @@ public record PathSource(Path root, Path child) implements Source {
 
     private List<String> computeNamespace() {
         List<String> segments = Lists.empty();
-        Path relative = this.root.relativize(this.child).getParent();
+        var relative = this.root.relativize(this.child).getParent();
         if (null == relative) {
             return Lists.empty();
         }
 
-        int nameCount = relative.getNameCount();
-        int i = 0;
+        var nameCount = relative.getNameCount();
+        var i = 0;
         while (i < nameCount) {
             segments = segments.addLast(relative.getName(i).toString());
             i++;

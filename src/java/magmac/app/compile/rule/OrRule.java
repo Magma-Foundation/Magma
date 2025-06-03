@@ -16,8 +16,8 @@ public record OrRule(List<Rule> rules) implements Rule {
     }
 
     private <T> CompileResult<T> foldAll(Function<Rule, CompileResult<T>> mapper, Context context) {
-        Iter<Rule> ruleIter = this.rules.iter();
-        OrState<T> initial = new OrState<T>();
+        var ruleIter = this.rules.iter();
+        var initial = new OrState<T>();
         return ruleIter.fold(initial, (OrState<T> state, Rule rule) -> OrRule.foldElement(state, rule, mapper))
                 .toResult(context);
     }

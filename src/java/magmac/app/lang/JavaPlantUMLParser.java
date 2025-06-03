@@ -33,7 +33,7 @@ public class JavaPlantUMLParser implements Parser<JavaLang.JavaRoot, PlantUMLRoo
         return switch (namespaced.type()) {
             case Package -> Iters.empty();
             case Import -> {
-                String parent = namespaced.segments().findLast().orElse(null)
+                var parent = namespaced.segments().findLast().orElse(null)
                         .value();
 
                 yield Iters.fromValues(new PlantUMLDependency(child, parent));
@@ -57,8 +57,8 @@ public class JavaPlantUMLParser implements Parser<JavaLang.JavaRoot, PlantUMLRoo
     }
 
     private static PlantUMLRootSegment createStructureSegment(JavaLang.StructureNode structureNode) {
-        String name = structureNode.name();
-        JavaLang.JavaStructureType type = structureNode.type();
+        var name = structureNode.name();
+        var type = structureNode.type();
 
         return switch (type) {
             case Class, Record -> new PlantUMLStructure(PlantUMLStructureType.Class, name);
@@ -78,14 +78,14 @@ public class JavaPlantUMLParser implements Parser<JavaLang.JavaRoot, PlantUMLRoo
 
     @Override
     public CompileResult<UnitSet<PlantUMLRoot>> apply(UnitSet<JavaLang.JavaRoot> initial) {
-        List<PlantUMLRootSegment> roots = initial.iter()
+        var roots = initial.iter()
                 .flatMap(JavaPlantUMLParser::parseRoot)
                 .collect(new ListCollector<>())
                 .addFirst(new PlantUMLHeader())
                 .addLast(new PlantUMLFooter());
 
-        Location defaultLocation = new Location(Lists.empty(), "diagram");
-        PlantUMLRoot mergedRoot = new PlantUMLRoot(roots);
+        var defaultLocation = new Location(Lists.empty(), "diagram");
+        var mergedRoot = new PlantUMLRoot(roots);
 
         return CompileResults.Ok(new MapUnitSet<PlantUMLRoot>()
                 .add(new SimpleUnit<>(defaultLocation, mergedRoot)));
@@ -106,8 +106,8 @@ public class JavaPlantUMLParser implements Parser<JavaLang.JavaRoot, PlantUMLRoo
     }
 
     private static Iter<PlantUMLRootSegment> parseStructure(JavaLang.StructureNode structureNode) {
-        PlantUMLRootSegment segment = JavaPlantUMLParser.createStructureSegment(structureNode);
-        String child = structureNode.name();
+        var segment = JavaPlantUMLParser.createStructureSegment(structureNode);
+        var child = structureNode.name();
 
         return Lists.of(segment)
                 .addAllLast(JavaPlantUMLParser.toInherits(child, structureNode.extended()))

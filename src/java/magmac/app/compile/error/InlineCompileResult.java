@@ -40,8 +40,8 @@ public record InlineCompileResult<T>(Result<T, CompileError> toResult) implement
     }
 
     private T merge(BiFunction<T, T, T> merger, Tuple2<T, T> tuple) {
-        T left0 = tuple.left();
-        T right0 = tuple.right();
+        var left0 = tuple.left();
+        var right0 = tuple.right();
         return merger.apply(left0, right0);
     }
 }

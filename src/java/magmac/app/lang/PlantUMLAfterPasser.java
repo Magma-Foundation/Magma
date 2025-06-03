@@ -33,7 +33,7 @@ public class PlantUMLAfterPasser implements Passer {
 
     private static CompileResult<NodeList> createInherits0(Node type, String child) {
         return PlantUMLAfterPasser.stringifyType(type).mapValue((String parent) -> {
-            Node node = new MapNode("inherits")
+            var node = new MapNode("inherits")
                     .withString("child", child)
                     .withString("parent", parent);
 
@@ -54,8 +54,8 @@ public class PlantUMLAfterPasser implements Passer {
     }
 
     private static CompileResult<NodeList> replaceRootChild(Node child) {
-        CompileResult<NodeList> maybeExtended = PlantUMLAfterPasser.createInherits(child, "extended");
-        CompileResult<NodeList> maybeImplemented = PlantUMLAfterPasser.createInherits(child, "implemented");
+        var maybeExtended = PlantUMLAfterPasser.createInherits(child, "extended");
+        var maybeImplemented = PlantUMLAfterPasser.createInherits(child, "implemented");
         return maybeExtended.flatMapValue((NodeList extendedResult) -> maybeImplemented.mapValue((NodeList implementedResult) -> InlineNodeList.of(child)
                 .addAll(extendedResult)
                 .addAll(implementedResult)));
@@ -78,19 +78,19 @@ public class PlantUMLAfterPasser implements Passer {
     @Override
     public ParseResult pass(ParseState state, Node node) {
         if (node.is("root")) {
-            CompileResult<ParseUnit<Node>> result = PlantUMLAfterPasser.replaceRootChildren(node)
+            var result = PlantUMLAfterPasser.replaceRootChildren(node)
                     .flatMapValue((NodeList values) -> PlantUMLAfterPasser.getTuple2CompileResult(state, node, values));
 
             return new InlinePassResult(new Some<>(result));
         }
 
         if (node.is("import")) {
-            String child = node.findNodeList("segments")
+            var child = node.findNodeList("segments")
                     .orElse(InlineNodeList.empty()).findLast().orElse(null)
                     .findString("value")
                     .orElse("");
 
-            Node dependency = new MapNode("dependency")
+            var dependency = new MapNode("dependency")
                     .withString("parent", state.findLocation().name())
                     .withString("child", child);
 

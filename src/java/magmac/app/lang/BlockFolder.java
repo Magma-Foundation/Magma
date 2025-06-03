@@ -6,7 +6,7 @@ import magmac.app.compile.rule.fold.Folder;
 public class BlockFolder implements Folder {
     @Override
     public DivideState fold(DivideState state, char c) {
-        DivideState appended = state.append(c);
+        var appended = state.append(c);
         if ('{' == c) {
             return appended.advance();
         }

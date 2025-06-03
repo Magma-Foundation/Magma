@@ -69,7 +69,7 @@ public class MutableDivideState implements DivideState {
     @Override
     public Option<Tuple2<DivideState, Character>> pop() {
         if (this.index < this.input.length()) {
-            char c = this.input.charAt(this.index);
+            var c = this.input.charAt(this.index);
             this.index++;
             return new Some<>(new Tuple2<DivideState, Character>(this, c));
         }
@@ -81,7 +81,7 @@ public class MutableDivideState implements DivideState {
     @Override
     public Option<Tuple2<DivideState, Character>> popAndAppendToTuple() {
         return this.pop().map((Tuple2<DivideState, Character> popped) -> {
-            DivideState append = popped.left().append(popped.right());
+            var append = popped.left().append(popped.right());
             return new Tuple2<>(append, popped.right());
         });
     }

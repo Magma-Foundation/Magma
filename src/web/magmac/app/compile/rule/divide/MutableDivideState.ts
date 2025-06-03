@@ -15,7 +15,7 @@ export class MutableDivideState {
 	enter() : DivideState {this.depth++;return this;;}
 	exit() : DivideState {this.depth--;return this;;}
 	isShallow() : boolean {return 1==this.depth;;}
-	pop() : Option<Tuple2<DivideState, Character>> {if(true){ c : char=this.input.charAt( this.index);this.index++;return new Some<>( new Tuple2<DivideState, Character>( this, c));;}if(true){ return new None<>( );;};}
+	pop() : Option<Tuple2<DivideState, Character>> {if(true){ c : var=this.input.charAt( this.index);this.index++;return new Some<>( new Tuple2<DivideState, Character>( this, c));;}if(true){ return new None<>( );;};}
 	popAndAppendToTuple() : Option<Tuple2<DivideState, Character>> {return this.pop( ).map( 0);;}
 	popAndAppendToOption() : Option<DivideState> {return this.popAndAppendToTuple( ).map( Tuple2.left);;}
 	peek() : char {return this.input.charAt( this.index);;}

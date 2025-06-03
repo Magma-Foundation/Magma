@@ -7,10 +7,10 @@ public class SymbolFilter implements Filter {
 
     @Override
     public boolean test(String input) {
-        int length = input.length();
-        int i = 0;
+        var length = input.length();
+        var i = 0;
         while (i < length) {
-            char c = input.charAt(i);
+            var c = input.charAt(i);
             if (SymbolFilter.isValidSymbolChar(c, i)) {
                 i++;
                 continue;

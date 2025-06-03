@@ -23,7 +23,7 @@ import magmac.app.lang.java.JavaStructureStatement;
 import magmac.app.lang.node.FunctionSegments;
 import magmac.app.lang.node.Modifier;
 
-public class TypescriptRules {
+public final class TypescriptRules {
     public static Rule createRule() {
         return new TypeRule("root", CommonLang.Statements("children", new OrRule(Lists.of(
                 JavaRules.createWhitespaceRule(),
@@ -33,8 +33,8 @@ public class TypescriptRules {
         ))));
     }
 
-    public static Rule createStructureMemberRule() {
-        Rule definitionRule = createDefinitionRule();
+    private static Rule createStructureMemberRule() {
+        var definitionRule = createDefinitionRule();
         LazyRule valueLazy = new MutableLazyRule();
         return new OrRule(Lists.of(
                 JavaRules.createWhitespaceRule(),
@@ -50,8 +50,8 @@ public class TypescriptRules {
         ))));
 
         LazyRule functionSegmentRule = new MutableLazyRule();
-        LazyRule value = JavaRules.initValueRule(functionSegmentRule, valueLazy, " => ", definition);
-        Rule children = CommonLang.Statements("children", FunctionSegments.initFunctionSegmentRule(functionSegmentRule, value, definition));
+        var value = JavaRules.initValueRule(functionSegmentRule, valueLazy, " => ", definition);
+        var children = CommonLang.Statements("children", FunctionSegments.initFunctionSegmentRule(functionSegmentRule, value, definition));
         Rule childRule = new SuffixRule(LocatingRule.First(header, " {", new StripRule("", children, "after-children")), "}");
         return new TypeRule("method", new OptionNodeListRule("children",
                 childRule,
@@ -60,22 +60,22 @@ public class TypescriptRules {
     }
 
     private static Rule createConstructorRule(Rule definition) {
-        Rule parametersRule = JavaRules.createParametersRule(definition);
+        var parametersRule = JavaRules.createParametersRule(definition);
         return new TypeRule("constructor", new PrefixRule("constructor(", new SuffixRule(parametersRule, ")")));
     }
 
     private static Rule createDefinitionRule() {
         LazyRule definition = new MutableLazyRule();
-        Rule modifiers = Modifier.createModifiersRule();
+        var modifiers = Modifier.createModifiersRule();
 
-        Rule parameters = JavaRules.createParametersRule(definition);
+        var parameters = JavaRules.createParametersRule(definition);
         Rule name = new StringRule("name");
         Rule leftRule = new OptionNodeListRule("parameters",
                 new SuffixRule(LocatingRule.First(name, "(", parameters), ")"),
                 name
         );
 
-        Rule first = LocatingRule.First(leftRule, " : ", new NodeRule("type", createTypeRule()));
+        var first = LocatingRule.First(leftRule, " : ", new NodeRule("type", createTypeRule()));
         return definition.set(new OptionNodeListRule("modifiers", LocatingRule.Last(modifiers, " ", first), first));
     }
 
@@ -88,21 +88,21 @@ public class TypescriptRules {
         )));
     }
 
-    public static Rule createStructureRule(String type) {
-        Rule children = CommonLang.Statements("members", createStructureMemberRule());
+    private static Rule createStructureRule(String type) {
+        var children = CommonLang.Statements("members", createStructureMemberRule());
         Rule name = new StringRule("name");
-        Rule afterKeyword = LocatingRule.First(JavaRules.attachTypeParams(name), " {", new SuffixRule(children, "\n}\n"));
+        var afterKeyword = LocatingRule.First(JavaRules.attachTypeParams(name), " {", new SuffixRule(children, "\n}\n"));
         return new TypeRule(type, new PrefixRule("export " + type + " ", afterKeyword));
     }
 
-    public static Rule createImportRule() {
+    private static Rule createImportRule() {
         Rule segments = new SuffixRule(NodeListRule.createNodeListRule("segments", new DelimitedFolder('/'), new StringRule("value")), "\";\n");
         Rule leftRule = new NodeListRule("values", new StringRule("value"), new DelimitedDivider(", "));
-        Rule first = LocatingRule.First(leftRule, " } from \"", segments);
+        var first = LocatingRule.First(leftRule, " } from \"", segments);
         return new TypeRule("import", new PrefixRule("import { ", first));
     }
 
-    public static TypeRule createArrayRule(LazyRule orRule) {
+    private static TypeRule createArrayRule(LazyRule orRule) {
         return new TypeRule("array", new SuffixRule(new NodeRule("child", orRule), "[]"));
     }
 }

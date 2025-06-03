@@ -11,7 +11,7 @@ public record PrefixRule(String prefix, Rule childRule) implements Rule {
             return CompileErrors.createStringError("Prefix '" + this.prefix + "' not present", input);
         }
 
-        String sliced = input.substring(this.prefix.length());
+        var sliced = input.substring(this.prefix.length());
         return this.childRule.lex(sliced);
     }
 

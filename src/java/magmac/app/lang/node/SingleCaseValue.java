@@ -14,10 +14,8 @@ import magmac.app.lang.java.JavaLang;
 
 public record SingleCaseValue(JavaLang.Value value) implements CaseValue {
     public static Option<CompileResult<SingleCaseValue>> deserialize(Node node) {
-        return Destructors.destructWithType("case-single", node).map(destructor -> {
-            return destructor.withNode("value", JavaDeserializers::deserializeValueOrError)
-                    .complete(SingleCaseValue::new);
-        });
+        return Destructors.destructWithType("case-single", node).map(destructor -> destructor.withNode("value", JavaDeserializers::deserializeValueOrError)
+                .complete(SingleCaseValue::new));
     }
 
     public static TypeRule createRule(Rule value) {

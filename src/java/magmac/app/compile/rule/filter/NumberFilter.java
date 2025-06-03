@@ -3,10 +3,10 @@ package magmac.app.compile.rule.filter;
 public class NumberFilter implements Filter {
     @Override
     public boolean test(String input) {
-        int length = input.length();
-        int i = 0;
+        var length = input.length();
+        var i = 0;
         while (i < length) {
-            char c = input.charAt(i);
+            var c = input.charAt(i);
             if (Character.isDigit(c)) {
                 i++;
                 continue;

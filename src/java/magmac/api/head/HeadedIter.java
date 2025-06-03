@@ -29,10 +29,10 @@ public record HeadedIter<T>(Head<T> head) implements Iter<T> {
 
     @Override
     public <R> R fold(R initial, BiFunction<R, T, R> folder) {
-        R current = initial;
+        var current = initial;
         while (true) {
-            R finalCurrent = current;
-            Option<R> option = this.head.next().map((T next) -> folder.apply(finalCurrent, next));
+            var finalCurrent = current;
+            var option = this.head.next().map((T next) -> folder.apply(finalCurrent, next));
             if (option.isPresent()) {
                 current = option.orElse(null);
             }

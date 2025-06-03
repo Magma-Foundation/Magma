@@ -28,8 +28,8 @@ public class MergeDiagram implements AfterAll {
     private static Map<String, List<String>> findChildrenWithDependencies(NodeList rootSegments) {
         return rootSegments.iter().fold(Maps.empty(), (Map<String, List<String>> current, Node node) -> {
             if (node.is("dependency")) {
-                String parent = node.findString("parent").orElse("");
-                String child = node.findString("child").orElse("");
+                var parent = node.findString("parent").orElse("");
+                var child = node.findString("child").orElse("");
 
                 return current.mapOrPut(parent, (List<String> stringList) -> stringList.addLast(child), () -> Lists.of(child));
             }
@@ -43,8 +43,8 @@ public class MergeDiagram implements AfterAll {
                 return current;
             }
 
-            String parent = node1.findString("parent").orElse("");
-            String child = node1.findString("child").orElse("");
+            var parent = node1.findString("parent").orElse("");
+            var child = node1.findString("child").orElse("");
 
             return current.mapOrPut(child, (List<String> stringList) -> stringList.addLast(parent), () -> Lists.of(parent));
         });
@@ -62,16 +62,16 @@ public class MergeDiagram implements AfterAll {
                 .flatMap(NodeList::iter)
                 .collect(new ListCollector<>()));
 
-        Map<String, List<String>> childrenWithInheritedTypes = MergeDiagram.findChildrenWithInheritedTypes(oldRootSegments);
-        Map<String, List<String>> childrenWithDependencies = MergeDiagram.findChildrenWithDependencies(oldRootSegments);
-        NodeList newDependencies = childrenWithDependencies.iter().fold(InlineNodeList.empty(), (NodeList current, Tuple2<String, List<String>> entry) -> {
-            String child = entry.left();
-            List<String> currentDependencies = entry.right();
+        var childrenWithInheritedTypes = MergeDiagram.findChildrenWithInheritedTypes(oldRootSegments);
+        var childrenWithDependencies = MergeDiagram.findChildrenWithDependencies(oldRootSegments);
+        var newDependencies = childrenWithDependencies.iter().fold(InlineNodeList.empty(), (NodeList current, Tuple2<String, List<String>> entry) -> {
+            var child = entry.left();
+            var currentDependencies = entry.right();
 
-            List<String> parentDependencies = MergeDiagram.findParentDependencies(child, childrenWithInheritedTypes, childrenWithDependencies);
-            List<String> childWithInheritedTypes = childrenWithInheritedTypes.getOrDefault(child, Lists.empty());
-            List<String> toRemove = parentDependencies.addAllLast(childWithInheritedTypes);
-            List<String> list = currentDependencies.removeAll(toRemove);
+            var parentDependencies = MergeDiagram.findParentDependencies(child, childrenWithInheritedTypes, childrenWithDependencies);
+            var childWithInheritedTypes = childrenWithInheritedTypes.getOrDefault(child, Lists.empty());
+            var toRemove = parentDependencies.addAllLast(childWithInheritedTypes);
+            var list = currentDependencies.removeAll(toRemove);
 
             NodeList others = new InlineNodeList(list.iter()
                     .map((String parent) -> new MapNode("dependency").withString("parent", parent).withString("child", child))
@@ -84,15 +84,15 @@ public class MergeDiagram implements AfterAll {
                 .filter((Node child) -> !child.is("dependency"))
                 .collect(new ListCollector<>()));
 
-        NodeList copy = InlineNodeList.empty()
+        var copy = InlineNodeList.empty()
                 .add(new MapNode("start"))
                 .addAll(withoutDependencies)
                 .addAll(newDependencies)
                 .add(new MapNode("end"));
 
         Node node = new MapNode();
-        Node root = node.withNodeList("children", copy);
-        Location location = new Location(Lists.empty(), "diagram");
+        var root = node.withNodeList("children", copy);
+        var location = new Location(Lists.empty(), "diagram");
         return MergeDiagram.createInitial().add(new SimpleUnit<>(location, root));
     }
 }
