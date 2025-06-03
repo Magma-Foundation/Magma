@@ -32,7 +32,7 @@ public class FunctionSegments {
                 Whitespace.createWhitespaceRule(),
                 JavaRules.createStatementRule(functionSegmentValueRule),
                 JavaRules.createBlockRule(functionSegmentRule, value, definition),
-                JavaReturnNode.createReturnRule(value),
+                JavaRules.createReturnRule(value),
                 CaseNode.createCaseRule(value, functionSegmentRule)
         ));
 

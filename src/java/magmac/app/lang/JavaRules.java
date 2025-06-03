@@ -165,4 +165,8 @@ public final class JavaRules {
         Rule childRule = new StripRule(new PrefixRule("(", new SuffixRule(condition, ")")));
         return new TypeRule(type, new StripRule(new PrefixRule(type, childRule)));
     }
+
+    public static Rule createReturnRule(Rule value) {
+        return new TypeRule("return", new StripRule(new PrefixRule("return ", new NodeRule("child", value))));
+    }
 }

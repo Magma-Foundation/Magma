@@ -184,8 +184,8 @@ class JavaTypescriptParser implements Parser<JavaRoot, TypescriptRoot> {
         return switch (segment) {
             case JavaBlock block -> JavaTypescriptParser.parseBlock(block);
             case CaseNode caseNode -> new Whitespace();
-            case FunctionStatement functionStatement -> new Whitespace();
             case JavaReturnNode javaReturnNode -> new Whitespace();
+            case FunctionStatement functionStatement -> new Whitespace();
             case Whitespace whitespace -> new Whitespace();
         };
     }

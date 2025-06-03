@@ -30,7 +30,7 @@ public final class FunctionSegmentValues {
         return new OrRule(Lists.of(
                 JavaRules.createInvokableRule(value),
                 AssignmentNode.createAssignmentRule(definition, value),
-                JavaReturnNode.createReturnRule(value),
+                JavaRules.createReturnRule(value),
                 JavaRules.createYieldRule(value),
                 JavaPost.createPostRule("post-increment", "++", value),
                 JavaPost.createPostRule("post-decrement", "--", value),
