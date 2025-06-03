@@ -110,11 +110,11 @@ public class JavaLang {
         }
     }
 
-    public record JavaRoot(List<JavaRootSegment> children) {
-        public static CompileResult<JavaRoot> getChildren(Node node, Deserializer<JavaRootSegment> deserializer) {
+    public record Root(List<JavaRootSegment> children) {
+        public static CompileResult<Root> getChildren(Node node, Deserializer<JavaRootSegment> deserializer) {
             return Destructors.destruct(node)
                     .withNodeList("children", deserializer)
-                    .complete(JavaRoot::new);
+                    .complete(Root::new);
         }
     }
 
@@ -153,8 +153,8 @@ public class JavaLang {
     }
 
     public record JavaStructureNodeDeserializer(
-            JavaStructureType type) implements TypedDeserializer<StructureNode> {
-        private static CompileResult<StructureNode> deserializeHelper(JavaStructureType type, InitialDestructor deserializer) {
+            JavaStructureType type) implements TypedDeserializer<Structure> {
+        private static CompileResult<Structure> deserializeHelper(JavaStructureType type, InitialDestructor deserializer) {
             return JavaStructureNodeDeserializer.attachOptionals(JavaStructureNodeDeserializer.attachRequired(deserializer))
                     .complete(tuple -> JavaStructureNodeDeserializer.from(type, tuple));
         }
@@ -173,16 +173,16 @@ public class JavaLang {
                     .withNodeListOptionally("variants", JavaDeserializers::deserializeType);
         }
 
-        private static StructureNode from(
+        private static Structure from(
                 JavaStructureType type,
                 Tuple2<Tuple2<Tuple2<Tuple2<Tuple2<Tuple2<Tuple2<String, List<Modifier>>, List<JavaStructureMember>>, Option<List<JavaType>>>, Option<List<TypescriptLang.TypeParam>>>, Option<List<JavaParameter>>>, Option<List<JavaType>>>, Option<List<JavaType>>> tuple) {
-            return new StructureNode(type,
+            return new Structure(type,
                     new StructureValue<JavaType, JavaStructureMember>(tuple.left().left().left().left().left().left().left(), tuple.left().left().left().left().left().left().right(), tuple.left().left().left().left().left().right(), tuple.left().left().left().right(), tuple.left().right(), tuple.left().left().left().left().right()), tuple.left().left().right(),
                     tuple.right()
             );
         }
 
-        public Option<CompileResult<StructureNode>> deserialize(Node node) {
+        public Option<CompileResult<Structure>> deserialize(Node node) {
             return Destructors.destructWithType(this.type().name().toLowerCase(), node)
                     .map((InitialDestructor deserializer) -> JavaStructureNodeDeserializer.deserializeHelper(this.type(), deserializer));
         }
@@ -318,11 +318,11 @@ public class JavaLang {
     public record InstanceOf(Value value, InstanceOfDefinition definition) implements Value {
     }
 
-    public static final class StructureNode implements JavaRootSegment, JavaStructureMember {
+    public static final class Structure implements JavaRootSegment, JavaStructureMember {
         public final StructureValue<JavaType, JavaStructureMember> value;
         private final JavaStructureType type;
 
-        StructureNode(
+        Structure(
                 JavaStructureType type,
                 StructureValue<JavaType, JavaStructureMember> structureNode,
                 Option<List<JavaParameter>> parameters,

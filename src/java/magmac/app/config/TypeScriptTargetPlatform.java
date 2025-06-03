@@ -36,7 +36,7 @@ public final class TypeScriptTargetPlatform implements TargetPlatform {
 
     @Override
     public Compiler createCompiler() {
-        Parser<JavaLang.JavaRoot, TypescriptLang.TypescriptRoot> parser = new JavaTypescriptParser();
+        Parser<JavaLang.Root, TypescriptLang.TypescriptRoot> parser = new JavaTypescriptParser();
         Generator generator = new RuleGenerator(this.createRule());
         return new StagedCompiler<TypescriptLang.TypescriptRoot>(parser, generator);
     }

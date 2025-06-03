@@ -4,6 +4,7 @@ import magmac.api.Tuple2;
 import magmac.api.collect.TupleCollector;
 import magmac.api.collect.list.List;
 import magmac.api.collect.list.Lists;
+import magmac.api.iter.Iter;
 import magmac.api.iter.collect.Joiner;
 import magmac.api.iter.collect.ListCollector;
 import magmac.app.compile.error.CompileResult;
@@ -41,12 +42,12 @@ import magmac.app.stage.unit.SimpleUnit;
 import magmac.app.stage.unit.Unit;
 import magmac.app.stage.unit.UnitSet;
 
-class JavaTypescriptParser implements Parser<JavaLang.JavaRoot, TypescriptLang.TypescriptRoot> {
-    private static CompileResult<Unit<TypescriptLang.TypescriptRoot>> parseUnit(Unit<JavaLang.JavaRoot> unit) {
+class JavaTypescriptParser implements Parser<JavaLang.Root, TypescriptLang.TypescriptRoot> {
+    private static CompileResult<Unit<TypescriptLang.TypescriptRoot>> parseUnit(Unit<JavaLang.Root> unit) {
         return unit.destruct(JavaTypescriptParser::parseRoot);
     }
 
-    private static CompileResult<Unit<TypescriptLang.TypescriptRoot>> parseRoot(Location location, JavaLang.JavaRoot root) {
+    private static CompileResult<Unit<TypescriptLang.TypescriptRoot>> parseRoot(Location location, JavaLang.Root root) {
         var rootSegments = root.children()
                 .iter()
                 .map(rootSegment -> JavaTypescriptParser.parseRootSegment(location, rootSegment))
@@ -60,12 +61,12 @@ class JavaTypescriptParser implements Parser<JavaLang.JavaRoot, TypescriptLang.T
         return switch (rootSegment) {
             case JavaLang.Whitespace whitespace -> Lists.of(new TypescriptLang.Whitespace());
             case JavaNamespacedNode namespaced -> Lists.of(JavaTypescriptParser.parseNamespaced(location, namespaced));
-            case JavaLang.StructureNode structureNode -> JavaTypescriptParser.getCollect(structureNode);
+            case JavaLang.Structure structure -> JavaTypescriptParser.getCollect(structure);
         };
     }
 
-    private static List<TypescriptLang.TypeScriptRootSegment> getCollect(JavaLang.StructureNode structureNode) {
-        return JavaTypescriptParser.parseStructure(structureNode)
+    private static List<TypescriptLang.TypeScriptRootSegment> getCollect(JavaLang.Structure structure) {
+        return JavaTypescriptParser.parseStructure(structure)
                 .iter()
                 .map(JavaTypescriptParser::wrap)
                 .collect(new ListCollector<>());
@@ -75,21 +76,21 @@ class JavaTypescriptParser implements Parser<JavaLang.JavaRoot, TypescriptLang.T
         return value;
     }
 
-    private static List<TypescriptLang.StructureNode> parseStructure(JavaLang.StructureNode structureNode) {
-        return switch (structureNode.type()) {
+    private static List<TypescriptLang.StructureNode> parseStructure(JavaLang.Structure structure) {
+        return switch (structure.type()) {
             case Class, Record ->
-                    JavaTypescriptParser.parseStructureWithType(TypescriptLang.StructureType.Class, structureNode);
+                    JavaTypescriptParser.parseStructureWithType(TypescriptLang.StructureType.Class, structure);
             case Interface ->
-                    JavaTypescriptParser.parseStructureWithType(TypescriptLang.StructureType.Interface, structureNode);
+                    JavaTypescriptParser.parseStructureWithType(TypescriptLang.StructureType.Interface, structure);
             case Enum -> Lists.empty();
         };
     }
 
     private static List<TypescriptLang.StructureNode> parseStructureWithType(
             TypescriptLang.StructureType type,
-            JavaLang.StructureNode structureNode
+            JavaLang.Structure structure
     ) {
-        var value = structureNode.value;
+        var value = structure.value;
         var membersTuple = value.members()
                 .iter()
                 .map(JavaTypescriptParser::parseStructureMember)
@@ -128,8 +129,8 @@ class JavaTypescriptParser implements Parser<JavaLang.JavaRoot, TypescriptLang.T
             case JavaStructureStatement structureStatement -> JavaTypescriptParser.getList();
             case JavaMethod methodNode ->
                     JavaTypescriptParser.getListListTuple2(JavaTypescriptParser.parseMethod(methodNode));
-            case JavaLang.StructureNode javaStructureNode ->
-                    new Tuple2<>(Lists.empty(), JavaTypescriptParser.parseStructure(javaStructureNode));
+            case JavaLang.Structure javaStructure ->
+                    new Tuple2<>(Lists.empty(), JavaTypescriptParser.parseStructure(javaStructure));
         };
     }
 
@@ -373,9 +374,54 @@ class JavaTypescriptParser implements Parser<JavaLang.JavaRoot, TypescriptLang.T
         return new TypescriptLang.TypeScriptImport(Lists.of(last), before.addAllLast(segments));
     }
 
+    private static Tuple2<List<String>, String> attachNamespace(Location location, Tuple2<List<String>, String> tuple) {
+        var namespace = location.namespace().addAllLast(tuple.left());
+        return new Tuple2<>(namespace, tuple.right());
+    }
+
+    private static List<Tuple2<List<String>, String>> findStructuresInRootSegment(JavaRootSegment child) {
+        if (child instanceof JavaLang.Structure structure) {
+            return JavaTypescriptParser.findStructuresInNode(Lists.empty(), structure);
+        }
+
+        return Lists.empty();
+    }
+
+    private static Iter<Tuple2<List<String>, String>> findStructuresWithLocation(Location location, JavaLang.Root root) {
+        return root.children()
+                .iter()
+                .map(JavaTypescriptParser::findStructuresInRootSegment)
+                .flatMap(List::iter)
+                .map(tuple -> JavaTypescriptParser.attachNamespace(location, tuple));
+    }
+
+    private static List<Tuple2<List<String>, String>> findStructuresInMember(List<String> namespace, JavaStructureMember member) {
+        if (member instanceof JavaLang.Structure structure) {
+            return JavaTypescriptParser.findStructuresInNode(namespace, structure);
+        }
+
+        return Lists.empty();
+    }
+
+    private static List<Tuple2<List<String>, String>> findStructuresInNode(List<String> namespace, JavaLang.Structure structure) {
+        var name = structure.name();
+        var collect = structure.value.members()
+                .iter()
+                .map(child -> JavaTypescriptParser.findStructuresInMember(namespace.addLast(name), child))
+                .flatMap(List::iter)
+                .collect(new ListCollector<>());
+
+        var entry = new Tuple2<List<String>, String>(namespace, name);
+        return collect.addLast(entry);
+    }
+
     @Override
-    public CompileResult<UnitSet<TypescriptLang.TypescriptRoot>> apply(UnitSet<JavaLang.JavaRoot> initial) {
-        return initial.iter()
+    public CompileResult<UnitSet<TypescriptLang.TypescriptRoot>> apply(UnitSet<JavaLang.Root> set) {
+        var collect = set.iter()
+                .flatMap(roots -> roots.destruct(JavaTypescriptParser::findStructuresWithLocation))
+                .collect(new ListCollector<>());
+
+        return set.iter()
                 .map(JavaTypescriptParser::parseUnit)
                 .collect(new CompileResultCollector<>(new UnitSetCollector<>()));
     }

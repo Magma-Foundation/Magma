@@ -31,20 +31,20 @@ final class Main {
                 .ifPresent(error -> Console.handleError(error.display()));
     }
 
-    private static Option<Error> getNext(UnitSet<JavaLang.JavaRoot> result) {
+    private static Option<Error> getNext(UnitSet<JavaLang.Root> result) {
         return Iters.fromValues(new PlantUMLTargetPlatform(), new TypeScriptTargetPlatform())
                 .map((TargetPlatform platform) -> Main.run(result, platform))
                 .flatMap(Iters::fromOption)
                 .next();
     }
 
-    private static Result<UnitSet<JavaLang.JavaRoot>, ApplicationError> loadSources(Sources sources) {
+    private static Result<UnitSet<JavaLang.Root>, ApplicationError> loadSources(Sources sources) {
         Lexer lexer = new RuleLexer(JavaRules.createRule());
-        return new LexingStage<JavaLang.JavaRoot>(lexer, node -> JavaLang.JavaRoot.getChildren(node, JavaDeserializers::deserializeRootSegment))
+        return new LexingStage<JavaLang.Root>(lexer, node -> JavaLang.Root.getChildren(node, JavaDeserializers::deserializeRootSegment))
                 .getUnitSetApplicationErrorResult(sources);
     }
 
-    private static Option<Error> run(UnitSet<JavaLang.JavaRoot> roots, TargetPlatform platform) {
+    private static Option<Error> run(UnitSet<JavaLang.Root> roots, TargetPlatform platform) {
         return platform.createApplication().parseAndStore(roots);
     }
 }

@@ -1,4 +1,4 @@
 package magmac.app.lang.java;
 
-public sealed interface JavaStructureMember permits JavaEnumValues, JavaMethod, JavaLang.StructureNode, JavaStructureStatement, JavaLang.Whitespace {
+public sealed interface JavaStructureMember permits JavaEnumValues, JavaMethod, JavaLang.Structure, JavaStructureStatement, JavaLang.Whitespace {
 }

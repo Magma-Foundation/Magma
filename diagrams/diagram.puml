@@ -835,6 +835,7 @@ JavaTypescriptParser --> Tuple2
 JavaTypescriptParser --> TupleCollector
 JavaTypescriptParser --> List
 JavaTypescriptParser --> Lists
+JavaTypescriptParser --> Iter
 JavaTypescriptParser --> Joiner
 JavaTypescriptParser --> ListCollector
 JavaTypescriptParser --> CompileResult
