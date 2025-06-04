@@ -16,8 +16,7 @@
   "main": "./src/index.ts",
   "scripts": {
     "start": "ts-node ./src/web/magmac/Main.ts",
-    "dev": "nodemon",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "nodemon"
   },
   "devDependencies": {
     "@types/node": "^22.15.23",
