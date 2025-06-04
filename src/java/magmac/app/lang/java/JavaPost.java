@@ -23,10 +23,10 @@ public final class JavaPost extends Post implements JavaFunctionSegmentValue {
     }
 
     public PostVariant variant() {
-        return variant;
+        return this.variant;
     }
 
     public JavaLang.Value value() {
-        return value;
+        return this.value;
     }
 }

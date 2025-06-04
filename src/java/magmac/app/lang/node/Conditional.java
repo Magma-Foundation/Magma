@@ -15,10 +15,10 @@ public class Conditional<V> {
     }
 
     public ConditionalType type() {
-        return type;
+        return this.type;
     }
 
     public V condition() {
-        return condition;
+        return this.condition;
     }
 }

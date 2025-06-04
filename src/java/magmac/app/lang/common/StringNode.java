@@ -8,6 +8,6 @@ public class StringNode {
     }
 
     public String value() {
-        return value;
+        return this.value;
     }
 }

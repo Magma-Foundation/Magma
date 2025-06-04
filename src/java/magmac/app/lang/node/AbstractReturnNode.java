@@ -12,6 +12,6 @@ public class AbstractReturnNode<V> {
     }
 
     public V child() {
-        return child;
+        return this.child;
     }
 }

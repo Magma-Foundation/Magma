@@ -11,6 +11,6 @@ public class NumberNode {
     }
 
     public String value() {
-        return value;
+        return this.value;
     }
 }

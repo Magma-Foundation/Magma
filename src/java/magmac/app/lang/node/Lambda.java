@@ -17,10 +17,10 @@ public class Lambda {
     }
 
     public JavaLang.JavaLambdaHeader header() {
-        return header;
+        return this.header;
     }
 
     public JavaLang.JavaLambdaContent content() {
-        return content;
+        return this.content;
     }
 }
