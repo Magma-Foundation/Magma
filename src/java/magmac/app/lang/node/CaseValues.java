@@ -1,5 +1,10 @@
 package magmac.app.lang.node;
 
+/**
+ * Utility class that deserializes the body of a {@code case} statement. It can
+ * parse either a simple {@code case x;} or a block {@code case x { ... }}.
+ */
+
 import magmac.api.collect.list.Lists;
 import magmac.app.compile.error.CompileResult;
 import magmac.app.compile.node.Node;

@@ -1,5 +1,10 @@
 package magmac.app.lang.node;
 
+/**
+ * A lambda expression consisting of a header (parameters) and content. For
+ * example {@code (x) -> x + 1} would be represented by this node.
+ */
+
 import magmac.app.lang.java.JavaLang;
 
 public class Lambda {

@@ -1,5 +1,10 @@
 package magmac.app.lang.node;
 
+/**
+ * Represents a single case value in a switch statement. A sample syntax is
+ * {@code case 1;}, where the value {@code 1} is captured by this node.
+ */
+
 import magmac.api.Option;
 import magmac.app.compile.error.CompileResult;
 import magmac.app.compile.node.Node;

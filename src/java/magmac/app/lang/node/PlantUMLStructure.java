@@ -1,5 +1,10 @@
 package magmac.app.lang.node;
 
+/**
+ * Node representing a structure declaration in PlantUML such as
+ * {@code class MyClass}.
+ */
+
 import magmac.app.compile.node.MapNode;
 import magmac.app.compile.node.Node;
 import magmac.app.compile.rule.PrefixRule;

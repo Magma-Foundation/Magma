@@ -1,5 +1,10 @@
 package magmac.app.lang.node;
 
+/**
+ * Turns a binary operation node such as {@code a + b} into a typed
+ * {@link operation} record.
+ */
+
 import magmac.api.Option;
 import magmac.app.compile.error.CompileResult;
 import magmac.app.compile.node.Node;

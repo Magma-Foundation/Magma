@@ -1,5 +1,10 @@
 package magmac.app.lang.node;
 
+/**
+ * The label that introduces a {@code switch} branch. In code it appears as
+ * {@code case name:} or with a type like {@code case name(Type)}.
+ */
+
 import magmac.api.Option;
 import magmac.app.compile.error.CompileResult;
 import magmac.app.compile.node.Node;

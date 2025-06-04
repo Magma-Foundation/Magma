@@ -1,5 +1,10 @@
 package magmac.app.lang.node;
 
+/**
+ * Deserialization helpers for individual statements inside a function body,
+ * such as {@code return x;} or {@code doWork();}.
+ */
+
 import magmac.api.collect.list.Lists;
 import magmac.app.compile.error.CompileResult;
 import magmac.app.compile.node.Node;

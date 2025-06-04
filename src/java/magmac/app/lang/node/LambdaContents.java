@@ -1,5 +1,10 @@
 package magmac.app.lang.node;
 
+/**
+ * Deserializes the body of a lambda expression. It can be either a single value
+ * like {@code x -> x + 1} or a block of statements.
+ */
+
 import magmac.api.collect.list.Lists;
 import magmac.app.compile.error.CompileResult;
 import magmac.app.compile.node.Node;

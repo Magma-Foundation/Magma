@@ -1,5 +1,9 @@
 package magmac.app.lang.node;
 
+/**
+ * Builds the parser rules for all valid PlantUML root segments.
+ */
+
 import magmac.api.collect.list.Lists;
 import magmac.app.compile.rule.OrRule;
 import magmac.app.compile.rule.Rule;

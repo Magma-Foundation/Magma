@@ -1,5 +1,9 @@
 package magmac.app.lang.node;
 
+/**
+ * Top level element for a PlantUML file. It contains all diagram segments.
+ */
+
 import magmac.api.collect.list.List;
 import magmac.app.compile.node.MapNode;
 import magmac.app.compile.node.Node;
