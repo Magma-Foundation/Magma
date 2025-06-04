@@ -86,4 +86,40 @@ public class DecoratedFolderTest {
         var segments = this.divide("a,\"b\nc\",d");
         assertEquals(java.util.List.of("a", "\"b\nc\"", "d"), segments);
     }
+
+    @Test
+    public void testSingleQuoteWithNewline() {
+        var segments = this.divide("a,'b\nc',d");
+        assertEquals(java.util.List.of("a", "'b\nc'", "d"), segments);
+    }
+
+    @Test
+    public void testUnterminatedSingleQuote() {
+        var segments = this.divide("'a,b");
+        assertEquals(java.util.List.of("'a,b"), segments);
+    }
+
+    @Test
+    public void testUnterminatedDoubleQuote() {
+        var segments = this.divide("a,\"b,c");
+        assertEquals(java.util.List.of("a", "\"b,c"), segments);
+    }
+
+    @Test
+    public void testUnterminatedBlockComment() {
+        var segments = this.divide("a,/*b,c");
+        assertEquals(java.util.List.of("a", "/*b,c"), segments);
+    }
+
+    @Test
+    public void testBlockCommentWithCommentMarker() {
+        var segments = this.divide("a,/*b//c*/d,e");
+        assertEquals(java.util.List.of("a", "/*b//c*/", "d", "e"), segments);
+    }
+
+    @Test
+    public void testDelimiterCreation() {
+        Folder folder = new DecoratedFolder(new DelimitedFolder(','));
+        assertEquals(",", folder.createDelimiter());
+    }
 }
