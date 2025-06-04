@@ -182,7 +182,12 @@ public final class JavaRules {
     }
 
     public static Rule createCommentRule() {
-        return new TypeRule("comment", new StringRule("value"));
+        Rule value = new StripRule(new StringRule("value"));
+
+        Rule line = new PrefixRule("//", new SuffixRule(value, "\r\n"));
+        Rule block = new PrefixRule("/*", new SuffixRule(value, "*/"));
+
+        return new TypeRule("comment", new OrRule(Lists.of(line, block)));
     }
 
     private static StripRule createWhitespaceRule() {
