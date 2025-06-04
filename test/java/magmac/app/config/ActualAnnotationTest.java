@@ -8,6 +8,7 @@ import magmac.app.lang.java.JavaLang;
 import magmac.app.lang.java.JavaMethod;
 import magmac.app.lang.node.Modifier;
 import magmac.app.config.TypeMap;
+import magmac.app.io.Location;
 import org.junit.jupiter.api.Test;
 
 
@@ -21,8 +22,11 @@ public class ActualAnnotationTest {
         JavaLang.Definition header = new JavaLang.Definition(new Some<>(annotations), modifiers, "f", new None<>(), new JavaLang.Symbol("void"));
         JavaMethod method = new JavaMethod(header, Lists.empty(), new Some<>(Lists.of(new JavaLang.Whitespace())));
 
-        TypeMap typeMap = new TypeMap(Lists.empty());
-        var member = JavaTypescriptParser.parseMethod(method, typeMap);
+        Location loc = new Location(Lists.of("test"), "A");
+        TypeMap typeMap = new TypeMap(Lists.empty(), loc);
+        var member = JavaTypescriptParser.parseMethod(method, typeMap)
+                .toResult()
+                .match(v -> v, e -> { throw new RuntimeException(e.display()); });
         assertTrue(member instanceof magmac.app.lang.web.TypescriptLang.TypescriptMethod);
         var tm = (magmac.app.lang.web.TypescriptLang.TypescriptMethod) member;
         assertTrue(tm.maybeChildren().isEmpty());

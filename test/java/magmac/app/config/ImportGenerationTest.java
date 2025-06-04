@@ -45,7 +45,7 @@ public class ImportGenerationTest {
                 .filter(unit -> unit.destruct((l, r) -> l.equals(locA)))
                 .next()
                 .map(unit -> unit.destruct((l, r) -> r))
-                .orElseThrow();
+                .orElseGet(() -> { throw new RuntimeException(); });
 
         List<magmac.app.lang.web.TypescriptLang.TypeScriptRootSegment> children = tsRootA.children();
         boolean hasImport = children.iter().filter(c -> c instanceof magmac.app.lang.web.TypescriptLang.TypeScriptImport)
