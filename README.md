@@ -38,6 +38,7 @@ See [`docs/architecture.md`](docs/architecture.md) for an overview of how the co
 For details on how the PlantUML class diagram is generated see [`docs/diagram-generation.md`](docs/diagram-generation.md).
 The inspection report produced by IntelliJ is summarised in [`docs/inspection/tasks.md`](docs/inspection/tasks.md).
 For a high level roadmap and a list of missing Java→TypeScript features see [`docs/roadmap.md`](docs/roadmap.md).
+Suggestions for profiling the compiler's performance can be found in [`docs/performance-profiling.md`](docs/performance-profiling.md).
 
 Instance fields in the Java sources are always accessed using `this`. Java does
 not require it, but TypeScript does, and using the same convention avoids an
