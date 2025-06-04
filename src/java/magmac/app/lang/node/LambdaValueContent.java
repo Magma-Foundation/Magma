@@ -15,6 +15,6 @@ public class LambdaValueContent {
     }
 
     public JavaLang.Value value() {
-        return value;
+        return this.value;
     }
 }

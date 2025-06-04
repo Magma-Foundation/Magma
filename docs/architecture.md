@@ -39,6 +39,10 @@ to other languages. Features currently in use include:
 - the `var` keyword for local variables
 - basic loops and standard library collections/streams
 
+All instance field accesses in the Java sources are explicitly qualified with
+`this`. While optional in Java, TypeScript requires `this` and enforcing the
+style here simplifies the compiler's cross-compilation step.
+
 The following features are **not** used:
 
 - reflection or dynamic class loading

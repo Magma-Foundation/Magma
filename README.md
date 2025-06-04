@@ -34,6 +34,10 @@ See [`docs/architecture.md`](docs/architecture.md) for an overview of how the co
 For details on how the PlantUML class diagram is generated see [`docs/diagram-generation.md`](docs/diagram-generation.md).
 The inspection report produced by IntelliJ is summarised in [`docs/inspection/tasks.md`](docs/inspection/tasks.md).
 
+Instance fields in the Java sources are always accessed using `this`. Java does
+not require it, but TypeScript does, and using the same convention avoids an
+extra lookup step when translating the compiler.
+
 ## Continuous Integration
 
 The repository is built on every pull request using a GitHub Actions workflow.
