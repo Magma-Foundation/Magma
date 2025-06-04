@@ -49,12 +49,12 @@ class JavaTypescriptParser implements Parser<JavaLang.Root, TypescriptLang.Types
 
     private static CompileResult<Unit<TypescriptLang.TypescriptRoot>> parseUnit(Unit<JavaLang.Root> unit, List<Tuple2<List<String>, String>> types) {
         return unit.destruct((location, root) -> {
-            TypeMap map = new TypeMap(types, location);
+            CompileState map = new CompileState(types, location);
             return JavaTypescriptParser.parseRoot(location, root, map);
         });
     }
 
-    private static CompileResult<Unit<TypescriptLang.TypescriptRoot>> parseRoot(Location location, JavaLang.Root root, TypeMap typeMap) {
+    private static CompileResult<Unit<TypescriptLang.TypescriptRoot>> parseRoot(Location location, JavaLang.Root root, CompileState typeMap) {
         var result = root.children()
                 .iter()
                 .map(rootSegment -> JavaTypescriptParser.parseRootSegment(location, rootSegment, typeMap))
@@ -79,7 +79,7 @@ class JavaTypescriptParser implements Parser<JavaLang.Root, TypescriptLang.Types
                 });
     }
 
-    private static CompileResult<List<TypescriptLang.TypeScriptRootSegment>> parseRootSegment(Location location, JavaRootSegment rootSegment, TypeMap typeMap) {
+    private static CompileResult<List<TypescriptLang.TypeScriptRootSegment>> parseRootSegment(Location location, JavaRootSegment rootSegment, CompileState typeMap) {
         return switch (rootSegment) {
             case JavaLang.Whitespace whitespace -> CompileResults.Ok(Lists.of(new TypescriptLang.Whitespace()));
             case JavaLang.Comment comment -> CompileResults.Ok(Lists.of(new TypescriptLang.Comment(comment.value())));
@@ -89,7 +89,7 @@ class JavaTypescriptParser implements Parser<JavaLang.Root, TypescriptLang.Types
         };
     }
 
-    private static CompileResult<List<TypescriptLang.TypeScriptRootSegment>> getCollect(JavaLang.Structure structure, TypeMap typeMap) {
+    private static CompileResult<List<TypescriptLang.TypeScriptRootSegment>> getCollect(JavaLang.Structure structure, CompileState typeMap) {
         return JavaTypescriptParser.parseStructure(structure, typeMap)
                 .mapValue(list -> list.iter()
                         .map(JavaTypescriptParser::wrap)
@@ -100,7 +100,7 @@ class JavaTypescriptParser implements Parser<JavaLang.Root, TypescriptLang.Types
         return value;
     }
 
-    private static CompileResult<List<TypescriptLang.StructureNode>> parseStructure(JavaLang.Structure structure, TypeMap typeMap) {
+    private static CompileResult<List<TypescriptLang.StructureNode>> parseStructure(JavaLang.Structure structure, CompileState typeMap) {
         return switch (structure.type()) {
             case Class, Record ->
                     JavaTypescriptParser.parseStructureWithType(TypescriptLang.StructureType.Class, structure, typeMap);
@@ -113,7 +113,7 @@ class JavaTypescriptParser implements Parser<JavaLang.Root, TypescriptLang.Types
     private static CompileResult<List<TypescriptLang.StructureNode>> parseStructureWithType(
             TypescriptLang.StructureType type,
             JavaLang.Structure structure,
-            TypeMap typeMap
+            CompileState typeMap
     ) {
         var value = structure.value;
         var membersTuple = value.members()
@@ -155,13 +155,13 @@ class JavaTypescriptParser implements Parser<JavaLang.Root, TypescriptLang.Types
         });
     }
 
-    private static CompileResult<List<TypescriptLang.Type>> parseTypeList(List<JavaLang.JavaType> list, TypeMap typeMap) {
+    private static CompileResult<List<TypescriptLang.Type>> parseTypeList(List<JavaLang.JavaType> list, CompileState typeMap) {
         return list.iter()
                 .map(variadicType -> JavaTypescriptParser.parseType(variadicType, typeMap))
                 .collect(new CompileResultCollector<>(new ListCollector<>()));
     }
 
-    private static CompileResult<Tuple2<List<TypescriptLang.TypescriptStructureMember>, List<TypescriptLang.StructureNode>>> parseStructureMember(JavaStructureMember structureNode, TypeMap typeMap) {
+    private static CompileResult<Tuple2<List<TypescriptLang.TypescriptStructureMember>, List<TypescriptLang.StructureNode>>> parseStructureMember(JavaStructureMember structureNode, CompileState typeMap) {
         return switch (structureNode) {
             case JavaLang.Whitespace whitespace -> CompileResults.Ok(JavaTypescriptParser.getList());
             case JavaLang.Comment comment ->
@@ -183,7 +183,7 @@ class JavaTypescriptParser implements Parser<JavaLang.Root, TypescriptLang.Types
         return JavaTypescriptParser.getListListTuple2(new TypescriptLang.Whitespace());
     }
 
-    static CompileResult<TypescriptLang.TypescriptStructureMember> parseMethod(JavaMethod methodNode, TypeMap typeMap) {
+    static CompileResult<TypescriptLang.TypescriptStructureMember> parseMethod(JavaMethod methodNode, CompileState typeMap) {
         var parameters = methodNode.parameters()
                 .iter()
                 .map(parameter -> JavaTypescriptParser.parseParameter(parameter, typeMap))
@@ -214,13 +214,13 @@ class JavaTypescriptParser implements Parser<JavaLang.Root, TypescriptLang.Types
                 ));
     }
 
-    private static List<TypescriptLang.FunctionSegment> parseFunctionSegments(List<JavaFunctionSegment> segments, TypeMap typeMap) {
+    private static List<TypescriptLang.FunctionSegment> parseFunctionSegments(List<JavaFunctionSegment> segments, CompileState typeMap) {
         return segments.iter()
                 .map(segment -> JavaTypescriptParser.parseFunctionSegment(segment, typeMap))
                 .collect(new ListCollector<>());
     }
 
-    private static TypescriptLang.FunctionSegment parseFunctionSegment(JavaFunctionSegment segment, TypeMap typeMap) {
+    private static TypescriptLang.FunctionSegment parseFunctionSegment(JavaFunctionSegment segment, CompileState typeMap) {
         return switch (segment) {
             case JavaLang.Whitespace whitespace -> new TypescriptLang.Whitespace();
             case JavaLang.Comment comment -> new TypescriptLang.Comment(comment.value());
@@ -233,7 +233,7 @@ class JavaTypescriptParser implements Parser<JavaLang.Root, TypescriptLang.Types
         };
     }
 
-    private static TypescriptLang.FunctionSegment parseFunctionStatement(JavaLang.FunctionStatement functionStatement, TypeMap typeMap) {
+    private static TypescriptLang.FunctionSegment parseFunctionStatement(JavaLang.FunctionStatement functionStatement, CompileState typeMap) {
         var oldValue = JavaTypescriptParser.parseFunctionStatementValue(functionStatement.child(), typeMap);
         var newValue = JavaTypescriptParser.getOldValue(oldValue);
         return new FunctionStatement(newValue);
@@ -252,7 +252,7 @@ class JavaTypescriptParser implements Parser<JavaLang.Root, TypescriptLang.Types
         return oldValue;
     }
 
-    private static TypescriptLang.FunctionSegment.Value parseFunctionStatementValue(JavaFunctionSegmentValue child, TypeMap typeMap) {
+    private static TypescriptLang.FunctionSegment.Value parseFunctionStatementValue(JavaFunctionSegmentValue child, CompileState typeMap) {
         return switch (child) {
             case JavaBreak javaBreak -> new TypescriptLang.Break();
             case JavaContinue javaContinue -> new TypescriptLang.Continue();
@@ -267,7 +267,7 @@ class JavaTypescriptParser implements Parser<JavaLang.Root, TypescriptLang.Types
         };
     }
 
-    private static TypescriptLang.Assignable parseAssignable(JavaLang.Assignable assignable, TypeMap typeMap) {
+    private static TypescriptLang.Assignable parseAssignable(JavaLang.Assignable assignable, CompileState typeMap) {
         return switch (assignable) {
             case JavaLang.Definition definition -> JavaTypescriptParser.parseDefinition(definition, typeMap).match(
                     d -> d,
@@ -277,11 +277,11 @@ class JavaTypescriptParser implements Parser<JavaLang.Root, TypescriptLang.Types
         };
     }
 
-    private static TypescriptLang.Invokable parseInvokable(JavaLang.Invokable invokable, TypeMap typeMap) {
+    private static TypescriptLang.Invokable parseInvokable(JavaLang.Invokable invokable, CompileState typeMap) {
         return new TypescriptLang.Invokable(JavaTypescriptParser.parseCaller(invokable.caller(), typeMap), JavaTypescriptParser.parseArguments(invokable.arguments(), typeMap));
     }
 
-    private static Caller parseCaller(JavaLang.JavaCaller caller, TypeMap typeMap) {
+    private static Caller parseCaller(JavaLang.JavaCaller caller, CompileState typeMap) {
         return switch (caller) {
             case JavaLang.Value javaValue -> JavaTypescriptParser.parseValue(javaValue, typeMap);
             case JavaLang.Construction javaConstruction -> new TypescriptLang.Construction(
@@ -291,13 +291,13 @@ class JavaTypescriptParser implements Parser<JavaLang.Root, TypescriptLang.Types
         };
     }
 
-    private static List<TypescriptLang.Argument> parseArguments(List<JavaLang.JavaArgument> arguments, TypeMap typeMap) {
+    private static List<TypescriptLang.Argument> parseArguments(List<JavaLang.JavaArgument> arguments, CompileState typeMap) {
         return arguments.iter()
                 .map(argument -> JavaTypescriptParser.parseArgument(argument, typeMap))
                 .collect(new ListCollector<>());
     }
 
-    private static TypescriptLang.Argument parseArgument(JavaLang.JavaArgument argument, TypeMap typeMap) {
+    private static TypescriptLang.Argument parseArgument(JavaLang.JavaArgument argument, CompileState typeMap) {
         return switch (argument) {
             case JavaLang.Whitespace whitespace -> new TypescriptLang.Whitespace();
             case JavaLang.Comment comment -> new TypescriptLang.Comment(comment.value());
@@ -305,7 +305,7 @@ class JavaTypescriptParser implements Parser<JavaLang.Root, TypescriptLang.Types
         };
     }
 
-    private static TypescriptLang.Value parseValue(JavaLang.Value child, TypeMap typeMap) {
+    private static TypescriptLang.Value parseValue(JavaLang.Value child, CompileState typeMap) {
         return switch (child) {
             case JavaLang.Access access -> JavaTypescriptParser.parseAccess(access, typeMap);
             case JavaLang.Char aChar -> new TypescriptLang.Char(aChar.value());
@@ -322,19 +322,19 @@ class JavaTypescriptParser implements Parser<JavaLang.Root, TypescriptLang.Types
         };
     }
 
-    private static TypescriptLang.Access parseAccess(JavaLang.Access access, TypeMap typeMap) {
+    private static TypescriptLang.Access parseAccess(JavaLang.Access access, CompileState typeMap) {
         return new TypescriptLang.Access(JavaTypescriptParser.parseValue(access.receiver(), typeMap), access.property());
     }
 
-    private static TypescriptLang.Index parseIndex(JavaLang.Index index, TypeMap typeMap) {
+    private static TypescriptLang.Index parseIndex(JavaLang.Index index, CompileState typeMap) {
         return new TypescriptLang.Index(JavaTypescriptParser.parseValue(index.parent(), typeMap), JavaTypescriptParser.parseValue(index.argument(), typeMap));
     }
 
-    private static TypescriptLang.Operation parseOperation(JavaLang.operation operation, TypeMap typeMap) {
+    private static TypescriptLang.Operation parseOperation(JavaLang.operation operation, CompileState typeMap) {
         return new TypescriptLang.Operation(JavaTypescriptParser.parseValue(operation.left(), typeMap), operation.operator(), JavaTypescriptParser.parseValue(operation.right(), typeMap));
     }
 
-    private static TypescriptLang.Block parseBlock(JavaLang.Block block, TypeMap typeMap) {
+    private static TypescriptLang.Block parseBlock(JavaLang.Block block, CompileState typeMap) {
         return new TypescriptLang.Block(JavaTypescriptParser.parseHeader(block.header()), JavaTypescriptParser.parseFunctionSegments(block.segments(), typeMap));
     }
 
@@ -342,7 +342,7 @@ class JavaTypescriptParser implements Parser<JavaLang.Root, TypescriptLang.Types
         return new TypescriptLang.TypescriptConditional(ConditionalType.If, new Symbol("true"));
     }
 
-    private static CompileResult<TypescriptLang.TypeScriptParameter> parseParameter(JavaParameter parameter, TypeMap typeMap) {
+    private static CompileResult<TypescriptLang.TypeScriptParameter> parseParameter(JavaParameter parameter, CompileState typeMap) {
         return switch (parameter) {
             case JavaLang.Whitespace whitespace -> CompileResults.Ok(new TypescriptLang.Whitespace());
             case JavaLang.Comment comment -> CompileResults.Ok(new TypescriptLang.Comment(comment.value()));
@@ -351,7 +351,7 @@ class JavaTypescriptParser implements Parser<JavaLang.Root, TypescriptLang.Types
         };
     }
 
-    private static CompileResult<TypescriptLang.TypeScriptMethodHeader> parseMethodHeader(JavaMethodHeader header, TypeMap typeMap) {
+    private static CompileResult<TypescriptLang.TypeScriptMethodHeader> parseMethodHeader(JavaMethodHeader header, CompileState typeMap) {
         return switch (header) {
             case JavaConstructor constructor -> CompileResults.Ok(new TypescriptLang.TypescriptConstructor());
             case JavaLang.Definition javaDefinition ->
@@ -359,7 +359,7 @@ class JavaTypescriptParser implements Parser<JavaLang.Root, TypescriptLang.Types
         };
     }
 
-    private static CompileResult<TypescriptLang.Definition> parseDefinition(JavaLang.Definition definition, TypeMap typeMap) {
+    private static CompileResult<TypescriptLang.Definition> parseDefinition(JavaLang.Definition definition, CompileState typeMap) {
         var maybeAnnotations = definition.maybeAnnotations();
         var maybeModifiers = definition.modifiers();
         var maybeTypeParameters = definition.maybeTypeParams();
@@ -380,15 +380,15 @@ class JavaTypescriptParser implements Parser<JavaLang.Root, TypescriptLang.Types
         }
     }
 
-    private static CompileResult<Symbol> parseSymbol(JavaLang.Symbol symbol, TypeMap typeMap) {
+    private static CompileResult<Symbol> parseSymbol(JavaLang.Symbol symbol, CompileState state) {
         return switch (symbol.value()) {
             case "byte", "short", "int", "long", "float", "double" -> CompileResults.Ok(new Symbol("number"));
             case "boolean" -> CompileResults.Ok(new Symbol("boolean"));
             case "char", "String" -> CompileResults.Ok(new Symbol("string"));
             case "void" -> CompileResults.Ok(new Symbol("void"));
-            default -> typeMap.find(symbol.value())
+            default -> state.find(symbol.value())
                     .map(loc -> {
-                        typeMap.registerImport(loc);
+                        state.registerImport(loc);
                         return CompileResults.Ok(new Symbol(symbol.value()));
                     })
                     .orElseGet(() -> CompileResults.fromErrWithString("Unknown type", symbol.value()));
@@ -405,12 +405,12 @@ class JavaTypescriptParser implements Parser<JavaLang.Root, TypescriptLang.Types
         return CompileResults.Ok(new Symbol(joined));
     }
 
-    private static CompileResult<TypescriptLang.Type> parseArrayType(JavaLang.JavaArrayType type, TypeMap typeMap) {
+    private static CompileResult<TypescriptLang.Type> parseArrayType(JavaLang.JavaArrayType type, CompileState typeMap) {
         return JavaTypescriptParser.parseType(type.inner, typeMap)
                 .mapValue(TypescriptLang.ArrayType::new);
     }
 
-    private static CompileResult<TypescriptLang.Type> parseType(JavaLang.JavaType variadicType, TypeMap typeMap) {
+    private static CompileResult<TypescriptLang.Type> parseType(JavaLang.JavaType variadicType, CompileState typeMap) {
         return switch (variadicType) {
             case JavaLang.Symbol symbol ->
                     JavaTypescriptParser.parseSymbol(symbol, typeMap).mapValue(s -> (TypescriptLang.Type) s);
@@ -423,7 +423,7 @@ class JavaTypescriptParser implements Parser<JavaLang.Root, TypescriptLang.Types
         };
     }
 
-    private static CompileResult<TypescriptLang.TemplateType> parseTemplateType(JavaLang.JavaTemplateType type, TypeMap typeMap) {
+    private static CompileResult<TypescriptLang.TemplateType> parseTemplateType(JavaLang.JavaTemplateType type, CompileState typeMap) {
         var base = JavaTypescriptParser.parseBaseType(type.base());
         var listResult = type.typeArguments()
                 .map(list -> JavaTypescriptParser.parseTypeList(list, typeMap)
@@ -434,52 +434,57 @@ class JavaTypescriptParser implements Parser<JavaLang.Root, TypescriptLang.Types
 
     private static JavaLang.Symbol parseBaseType(JavaLang.Base base) {
         return switch (base) {
-            case JavaLang.Qualified qualifiedType -> {
-                var joined = qualifiedType.segments()
-                        .iter()
-                        .map(Segment::value)
-                        .collect(new Joiner("."))
-                        .orElse("");
-
-                yield new JavaLang.Symbol(joined);
-            }
+            case JavaLang.Qualified qualifiedType -> JavaTypescriptParser.parseQualifiedTypeAsBase(qualifiedType);
             case JavaLang.Symbol symbol -> symbol;
         };
     }
 
-    private static CompileResult<TypescriptLang.TypeScriptRootSegment> parseNamespaced(Location location, JavaNamespacedNode namespaced, TypeMap typeMap) {
+    private static JavaLang.Symbol parseQualifiedTypeAsBase(JavaLang.Qualified qualifiedType) {
+        var joined = qualifiedType.segments()
+                .iter()
+                .map(Segment::value)
+                .collect(new Joiner("."))
+                .orElse("");
+
+        return new JavaLang.Symbol(joined);
+    }
+
+    private static CompileResult<TypescriptLang.TypeScriptRootSegment> parseNamespaced(Location location, JavaNamespacedNode namespaced, CompileState typeMap) {
         return switch (namespaced.type()) {
             case Package -> CompileResults.Ok(new TypescriptLang.Whitespace());
-            case Import -> {
-                var segments = namespaced.segments();
-                var lastValue = segments.findLast().map(Segment::value).orElse("");
-                if ("*".equals(lastValue)) {
-                    yield CompileResults.Ok(new TypescriptLang.Whitespace());
-                }
-                var joined = segments.iter()
-                        .map(Segment::value)
-                        .collect(new Joiner("."))
-                        .orElse("");
-
-                var exists = typeMap.types().iter()
-                        .filter(tuple -> {
-                            var path = tuple.left().addLast(tuple.right())
-                                    .iter()
-                                    .collect(new Joiner("."))
-                                    .orElse("");
-                            return path.equals(joined);
-                        })
-                        .next()
-                        .isPresent();
-
-                if (exists) {
-                    yield CompileResults.Ok(JavaTypescriptParser.parseImport(location, segments));
-                }
-                else {
-                    yield CompileResults.fromErrWithString("Unknown import", joined);
-                }
-            }
+            case Import -> JavaTypescriptParser.parseImport(location, namespaced, typeMap);
         };
+    }
+
+    private static CompileResult<TypescriptLang.TypeScriptRootSegment> parseImport(Location location, JavaNamespacedNode namespaced, CompileState typeMap) {
+        var segments = namespaced.segments();
+        var lastValue = segments.findLast().map(Segment::value).orElse("");
+        if ("*".equals(lastValue)) {
+            return CompileResults.Ok(new TypescriptLang.Whitespace());
+        }
+
+        var joined = segments.iter()
+                .map(Segment::value)
+                .collect(new Joiner("."))
+                .orElse("");
+
+        var exists = typeMap.types().iter()
+                .filter(tuple -> {
+                    var path = tuple.left().addLast(tuple.right())
+                            .iter()
+                            .collect(new Joiner("."))
+                            .orElse("");
+                    return path.equals(joined);
+                })
+                .next()
+                .isPresent();
+
+        if (exists) {
+            return CompileResults.Ok(JavaTypescriptParser.parseImport(location, segments));
+        }
+        else {
+            return CompileResults.fromErrWithString("Unknown import", joined);
+        }
     }
 
     private static TypescriptLang.TypeScriptImport parseImport(Location location, List<Segment> segments) {

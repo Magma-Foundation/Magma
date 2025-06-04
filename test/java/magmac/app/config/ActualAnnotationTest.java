@@ -24,7 +24,7 @@ class ActualAnnotationTest {
         var method = new JavaMethod(header, Lists.empty(), new Some<>(Lists.of(new JavaLang.Whitespace())));
 
         var loc = new Location(Lists.of("test"), "A");
-        var typeMap = new TypeMap(Lists.empty(), loc);
+        var typeMap = new CompileState(Lists.empty(), loc);
         JavaTypescriptParser.parseMethod(method, typeMap)
                 .toResult()
                 .consume(member -> {

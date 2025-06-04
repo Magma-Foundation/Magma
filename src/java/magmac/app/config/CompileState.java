@@ -1,11 +1,9 @@
 package magmac.app.config;
 
 import magmac.api.Option;
-import magmac.api.Some;
 import magmac.api.Tuple2;
 import magmac.api.collect.list.List;
 import magmac.api.iter.collect.ListCollector;
-import magmac.api.iter.Iters;
 import magmac.app.io.Location;
 
 import java.util.HashSet;
@@ -15,12 +13,12 @@ import java.util.Set;
  * Keeps track of known type locations and the imports required for the
  * currently parsed file.
  */
-public final class TypeMap {
+public final class CompileState {
     private final List<Tuple2<List<String>, String>> types;
     private final Location location;
     private final Set<Location> imports = new HashSet<>();
 
-    public TypeMap(List<Tuple2<List<String>, String>> types, Location location) {
+    public CompileState(List<Tuple2<List<String>, String>> types, Location location) {
         this.types = types;
         this.location = location;
     }
