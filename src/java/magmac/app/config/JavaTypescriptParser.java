@@ -335,7 +335,12 @@ class JavaTypescriptParser implements Parser<JavaLang.Root, TypescriptLang.Types
     }
 
     private static Symbol parseSymbol(JavaLang.Symbol symbol) {
-        return new Symbol(symbol.value());
+        return switch (symbol.value()) {
+            case "byte", "short", "int", "long", "float", "double" -> new Symbol("number");
+            case "boolean" -> new Symbol("boolean");
+            case "char", "String" -> new Symbol("string");
+            default -> new Symbol(symbol.value());
+        };
     }
 
     private static Symbol parseQualifiedType(JavaLang.Qualified qualified) {
