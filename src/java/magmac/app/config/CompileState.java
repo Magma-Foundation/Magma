@@ -17,6 +17,7 @@ public final class CompileState {
     private final List<Tuple2<List<String>, String>> types;
     private final Location location;
     private final Set<Location> imports = new HashSet<>();
+    private final Set<String> values = new HashSet<>();
 
     public CompileState(List<Tuple2<List<String>, String>> types, Location location) {
         this.types = types;
@@ -49,6 +50,20 @@ public final class CompileState {
         if (!loc.equals(this.location)) {
             this.imports.add(loc);
         }
+    }
+
+    /**
+     * Registers that a value with the given name exists in the current scope.
+     */
+    public void registerValue(String name) {
+        this.values.add(name);
+    }
+
+    /**
+     * Returns whether a value with the given name has been registered.
+     */
+    public boolean hasValue(String name) {
+        return this.values.contains(name);
     }
 
     /**
