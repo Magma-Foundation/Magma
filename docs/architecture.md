@@ -16,7 +16,21 @@ The `CompileApplication` ties everything together. It loads the source units, ru
 
 The relationships between the main classes are illustrated in `diagram.png` in this folder:
 
+
 ![Architecture Diagram](diagram.png)
+
+## Result Wrappers
+
+The compiler uses a generic `Result<T, E>` interface for operations that can
+fail. To avoid dragging specific error types through unrelated modules, small
+wrapper interfaces fix the error type and expose domain‑specific helpers. The
+existing `CompileResult` wraps `Result<T, CompileError>` for all compilation
+steps. IO utilities follow the same pattern with `IOResult` wrapping
+`Result<T, IOException>`.
+
+Several parts of the application still return `Result< T, ApplicationError>`
+directly. Introducing an `ApplicationResult` wrapper would mirror the compile
+and IO layers and keep high‑level error handling consistent across the codebase.
 
 ## Bootstrapping Approach
 
