@@ -1,5 +1,10 @@
 package magmac.app.lang.node;
 
+/**
+ * Parses the pieces that form a function body. For example a block with
+ * statements or a single return expression.
+ */
+
 import magmac.api.collect.list.Lists;
 import magmac.app.compile.error.CompileResult;
 import magmac.app.compile.node.Node;

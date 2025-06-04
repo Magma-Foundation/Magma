@@ -3,3 +3,4 @@
 /node_modules
 /src/web
 /lib/*.jar
+/log.txt

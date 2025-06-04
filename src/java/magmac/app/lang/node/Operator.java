@@ -1,5 +1,8 @@
 package magmac.app.lang.node;
 
+/**
+ * Enumeration of supported binary operators like {@code +} or {@code ==}.
+ */
 public enum Operator {
     Add("add", "+"),
     And("and", "&&"),

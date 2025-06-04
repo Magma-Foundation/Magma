@@ -1,5 +1,9 @@
 package magmac.app.lang.node;
 
+/**
+ * Represents a keyword modifier such as {@code public} or {@code static}.
+ */
+
 import magmac.app.compile.error.CompileResult;
 import magmac.app.compile.node.MapNode;
 import magmac.app.compile.node.Node;

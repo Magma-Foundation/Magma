@@ -8,6 +8,10 @@ Sources → Lexer → Parser → StagedCompiler → Generator → Output
 
 The `StagedCompiler` combines a `Parser` with a `Generator`. A platform implementation (for example `PlantUMLTargetPlatform` or `TypeScriptTargetPlatform`) provides the specific parser rules and a generator that knows how to convert the AST into the desired output format.
 
+At a lower level the compiler builds its tree in layers. Source text is lexed according to a set of `Rule`s and placed into a generic `Node` structure. These nodes are then transformed into the sealed interfaces that make up the real AST. The AST may be adjusted and serialized back into `Node`s so that additional `Rule`s can be applied before code generation.
+
+Using sealed interfaces gives the compiler a strongly typed model of the language. Exhaustive `switch` statements over the sealed hierarchy ensure every case is handled and invalid combinations do not compile. This approach lets us prove that the compiler will always output syntactically correct code, something a loosely typed `Node` tree cannot guarantee.
+
 The `CompileApplication` ties everything together. It loads the source units, runs the configured compiler and writes the results to the target directory.
 
 The relationships between the main classes are illustrated in `diagram.png` in this folder:

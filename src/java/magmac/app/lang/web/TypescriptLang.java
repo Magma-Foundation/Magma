@@ -279,6 +279,11 @@ public final class TypescriptLang {
         }
     }
 
+    /**
+     * Invocation node for the TypeScript AST. An example syntax would be
+     * {@code myFunc(1, "a")}. The {@code caller} field stores {@code myFunc}
+     * and the {@code arguments} list holds {@code 1} and {@code "a"}.
+     */
     public static class Invokable extends magmac.app.lang.java.Invokable<Caller, Argument> implements Value, FunctionSegment.Value {
         public Invokable(Caller caller, List<Argument> arguments) {
             super(caller, arguments);

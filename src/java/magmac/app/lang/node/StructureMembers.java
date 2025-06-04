@@ -1,5 +1,10 @@
 package magmac.app.lang.node;
 
+/**
+ * Deserializes members inside a class or interface body such as methods and
+ * nested structures.
+ */
+
 import magmac.api.collect.list.Lists;
 import magmac.app.compile.error.CompileResult;
 import magmac.app.compile.node.Node;

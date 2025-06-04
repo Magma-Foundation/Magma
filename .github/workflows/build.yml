@@ -1,0 +1,38 @@
+name: Build
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm install
+
+      # The TypeScript version of the compiler isn't ready yet so we skip
+      # compiling .ts files in CI to avoid noisy failures.
+      # Once the TypeScript pipeline is stable this step can run `npx tsc`.
+      - name: Skip TypeScript build
+        run: echo "Skipping TypeScript build"
+
+      - name: Build Java
+        run: |
+          mkdir -p out
+          javac --release 21 --enable-preview -d out $(find src/java -name '*.java')

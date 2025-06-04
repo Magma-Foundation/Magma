@@ -1,5 +1,13 @@
 package magmac.app.lang.node;
 
+/**
+ * Represents a case body containing multiple statements.
+ * Example syntax:
+ * {@code case 1 {
+ *     doSomething();
+ * }}
+ */
+
 import magmac.api.Option;
 import magmac.api.collect.list.List;
 import magmac.app.compile.error.CompileResult;
