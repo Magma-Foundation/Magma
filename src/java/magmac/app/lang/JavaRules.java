@@ -8,6 +8,7 @@ import magmac.api.iter.collect.ListCollector;
 import magmac.app.compile.error.CompileResult;
 import magmac.app.compile.node.Node;
 import magmac.app.compile.rule.ContextRule;
+import magmac.app.compile.rule.DiscardRule;
 import magmac.app.compile.rule.ExactRule;
 import magmac.app.compile.rule.FilterRule;
 import magmac.app.compile.rule.LocatingRule;
@@ -18,13 +19,12 @@ import magmac.app.compile.rule.PrefixRule;
 import magmac.app.compile.rule.Rule;
 import magmac.app.compile.rule.StringRule;
 import magmac.app.compile.rule.StripRule;
-import magmac.app.compile.rule.StripSpaceRule;
 import magmac.app.compile.rule.SuffixRule;
 import magmac.app.compile.rule.TypeRule;
 import magmac.app.compile.rule.divide.Divider;
 import magmac.app.compile.rule.divide.FoldingDivider;
-import magmac.app.compile.rule.fold.DelimitedFolder;
 import magmac.app.compile.rule.fold.DecoratedFolder;
+import magmac.app.compile.rule.fold.DelimitedFolder;
 import magmac.app.compile.rule.split.DividingSplitter;
 import magmac.app.lang.java.JavaDeserializers;
 import magmac.app.lang.java.JavaLang;
@@ -183,9 +183,10 @@ public final class JavaRules {
     }
 
     public static Rule createCommentRule() {
-        Rule line = new StripSpaceRule(new PrefixRule("//", new SuffixRule(new StringRule("value"), "\r\n")));
-        Rule block = new StripSpaceRule(new PrefixRule("/*", new SuffixRule(new StringRule("value"), "*/")));
+        var last = LocatingRule.Last(new StringRule("value"), "\n", new DiscardRule());
+        var line = LocatingRule.First(new DiscardRule(), "//", last);
 
+        var block = new StripRule(new PrefixRule("/*", new SuffixRule(new StringRule("value"), "*/")));
         return new TypeRule("comment", new OrRule(Lists.of(line, block)));
     }
 
