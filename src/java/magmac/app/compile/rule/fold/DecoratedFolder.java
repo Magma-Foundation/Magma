@@ -20,7 +20,7 @@ public class DecoratedFolder implements Folder {
         if (state.inLineComment()) {
             state = state.append(c);
             if ('\n' == c) {
-                state = state.inLineComment(false).advance();
+                state = state.endLineComment().advance();
             }
             return state.last(c);
         }
@@ -28,56 +28,40 @@ public class DecoratedFolder implements Folder {
         if (state.inBlockComment()) {
             state = state.append(c);
             if ('*' == last && '/' == c) {
-                state = state.inBlockComment(false).advance();
+                state = state.endBlockComment().advance();
             }
             return state.last(c);
         }
 
         if (state.inSingle()) {
-            state = state.append(c);
-            if (state.escape()) {
-                state = state.escape(false);
-            } else if ('\\' == c) {
-                state = state.escape(true);
-            } else if ('\'' == c) {
-                state = state.inSingle(false);
-            }
-            return state.last(c);
+            return this.handleSingleQuote(state, c);
         }
 
         if (state.inDouble()) {
-            state = state.append(c);
-            if (state.escape()) {
-                state = state.escape(false);
-            } else if ('\\' == c) {
-                state = state.escape(true);
-            } else if ('\"' == c) {
-                state = state.inDouble(false);
-            }
-            return state.last(c);
+            return this.handleDoubleQuote(state, c);
         }
 
         if ('\'' == c) {
             state = state.append(c)
-                    .inSingle(true)
-                    .escape(false);
+                    .startSingle()
+                    .endEscape();
             return state.last(c);
         }
 
         if ('\"' == c) {
             state = state.append(c)
-                    .inDouble(true)
-                    .escape(false);
+                    .startDouble()
+                    .endEscape();
             return state.last(c);
         }
 
         if ('/' == last && '/' == c) {
-            state = state.append(c).inLineComment(true);
+            state = state.append(c).startLineComment();
             return state.last(c);
         }
 
         if ('/' == last && '*' == c) {
-            state = state.append(c).inBlockComment(true);
+            state = state.append(c).startBlockComment();
             return state.last(c);
         }
 
@@ -88,5 +72,37 @@ public class DecoratedFolder implements Folder {
     @Override
     public String createDelimiter() {
         return this.inner.createDelimiter();
+    }
+
+    /**
+     * Handles characters inside a single quoted sequence.
+     */
+    private DivideState handleSingleQuote(DivideState state, char c) {
+        state = state.append(c);
+        if (state.escape()) {
+            state = state.endEscape();
+        } else if ('\\' == c) {
+            state = state.startEscape();
+        } else if ('\'' == c) {
+            state = state.endSingle();
+        }
+        return state.last(c);
+    }
+
+    /**
+     * Handles characters inside a double quoted sequence.
+     * Escaped characters are skipped and the quote ends on a newline or
+     * the matching double quote.
+     */
+    private DivideState handleDoubleQuote(DivideState state, char c) {
+        state = state.append(c);
+        if (state.escape()) {
+            state = state.endEscape();
+        } else if ('\\' == c) {
+            state = state.startEscape();
+        } else if ('\"' == c) {
+            state = state.endDouble();
+        }
+        return state.last(c);
     }
 }
