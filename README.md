@@ -24,6 +24,18 @@ java -cp packages/compiler-java/out magmac.Main
 
 This will scan the sources, run the compiler pipeline and write the generated outputs to the directories configured by each `TargetPlatform` (for example `diagrams` for PlantUML files and `src/web` for TypeScript files).
 
+### TypeScript build
+
+A recent Node.js runtime (version 18 or newer is recommended) is required to experiment with the TypeScript version of the compiler. From the repository root install the dependencies and launch the entry point:
+
+```bash
+cd packages/compiler-ts
+npm install
+npm start
+```
+
+The script executes `ts-node` and runs the TypeScript build of `magmac.Main`.
+
 Primitive Java types are translated to their TypeScript equivalents. Numeric primitives
 (`byte`, `short`, `int`, `long`, `float`, `double`) become `number`, `boolean` stays
 `boolean` and `char` or `String` are emitted as `string`.
