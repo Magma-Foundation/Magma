@@ -39,7 +39,7 @@ import magmac.app.lang.node.TypedDeserializer;
 import magmac.app.lang.web.TypescriptLang;
 
 public class JavaLang {
-    public sealed interface JavaArgument permits Value, Whitespace {
+    public sealed interface JavaArgument permits Value, Whitespace, Comment {
     }
 
     public sealed interface JavaCaller permits Construction, Value {
@@ -287,6 +287,23 @@ public class JavaLang {
             JavaRootSegment,
             JavaParameter,
             JavaStructureMember {
+    }
+
+    public static final class Comment implements
+            JavaArgument,
+            JavaFunctionSegment,
+            JavaRootSegment,
+            JavaParameter,
+            JavaStructureMember {
+        private final String value;
+
+        public Comment(String value) {
+            this.value = value;
+        }
+
+        public String value() {
+            return this.value;
+        }
     }
 
     public static final class FunctionStatement extends AbstractFunctionStatement<JavaFunctionSegmentValue> implements JavaFunctionSegment {

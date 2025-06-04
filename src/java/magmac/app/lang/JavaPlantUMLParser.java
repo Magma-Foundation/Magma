@@ -92,7 +92,7 @@ public class JavaPlantUMLParser implements Parser<JavaLang.Root, PlantUMLRoot> {
 
     private static Iter<PlantUMLRootSegment> parseRootSegment(String fileName, JavaRootSegment rootSegment) {
         return switch (rootSegment) {
-            case JavaLang.Whitespace _ -> Iters.empty();
+            case JavaLang.Whitespace _, JavaLang.Comment _ -> Iters.empty();
             case JavaNamespacedNode namespaced -> JavaPlantUMLParser.parseNamespaced(fileName, namespaced);
             case JavaLang.Structure structure -> JavaPlantUMLParser.parseStructure(structure);
         };

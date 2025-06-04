@@ -1,4 +1,4 @@
 package magmac.app.lang.java;
 
-public sealed interface JavaParameter permits JavaLang.Definition, JavaLang.Whitespace {
+public sealed interface JavaParameter permits JavaLang.Definition, JavaLang.Whitespace, JavaLang.Comment {
 }

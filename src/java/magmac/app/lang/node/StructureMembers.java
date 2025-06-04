@@ -21,6 +21,7 @@ public final class StructureMembers {
     public static CompileResult<JavaStructureMember> deserialize(Node node) {
         return Deserializers.orError("structure-members", node, Lists.of(
                 Deserializers.wrap(JavaDeserializers::deserializeWhitespace),
+                Deserializers.wrap(JavaDeserializers::deserializeComment),
                 Deserializers.wrap(JavaMethod::deserialize),
                 Deserializers.wrap(JavaStructureStatement::deserialize),
                 Deserializers.wrap(JavaEnumValues::deserialize),
@@ -39,6 +40,7 @@ public final class StructureMembers {
         var functionSegment = FunctionSegments.initFunctionSegmentRule(functionSegmentRule, value, JavaRules.createDefinitionRule());
         return classMemberRule.set(new OrRule(Lists.of(
                 JavaRules.createTypedWhitespaceRule(),
+                JavaRules.createCommentRule(),
                 JavaStructureStatement.createStructureStatementRule(new TypeRule("definition", JavaRules.createDefinitionRule()), value),
                 JavaMethod.createMethodRule(functionSegment),
                 JavaEnumValues.createEnumValuesRule(value),

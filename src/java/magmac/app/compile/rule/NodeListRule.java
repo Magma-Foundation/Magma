@@ -9,6 +9,7 @@ import magmac.app.compile.node.NodeListCollector;
 import magmac.app.compile.rule.divide.Divider;
 import magmac.app.compile.rule.divide.FoldingDivider;
 import magmac.app.compile.rule.fold.Folder;
+import magmac.app.compile.rule.fold.DecoratedFolder;
 import magmac.app.lang.ValueFolder;
 
 public final class NodeListRule implements Rule {
@@ -27,7 +28,7 @@ public final class NodeListRule implements Rule {
     }
 
     public static Rule createNodeListRule(String key, Folder folder, Rule childRule) {
-        return new NodeListRule(key, childRule, new FoldingDivider(folder));
+        return new NodeListRule(key, childRule, new FoldingDivider(new DecoratedFolder(folder)));
     }
 
     @Override
