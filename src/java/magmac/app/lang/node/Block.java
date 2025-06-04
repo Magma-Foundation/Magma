@@ -1,5 +1,11 @@
 package magmac.app.lang.node;
 
+/**
+ * Generic holder for a block of code. The header describes the block (for
+ * example an {@code if} condition) and the children are the statements inside
+ * the braces: {@code if (cond) { ... }}.
+ */
+
 import magmac.api.collect.list.List;
 
 public class Block<H, S> {

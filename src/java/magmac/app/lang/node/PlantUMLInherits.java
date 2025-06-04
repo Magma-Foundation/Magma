@@ -1,5 +1,9 @@
 package magmac.app.lang.node;
 
+/**
+ * Represents a PlantUML inheritance arrow such as {@code Parent <|-- Child}.
+ */
+
 import magmac.app.compile.node.MapNode;
 import magmac.app.compile.node.Node;
 import magmac.app.compile.rule.LocatingRule;

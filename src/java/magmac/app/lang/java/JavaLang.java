@@ -79,6 +79,11 @@ public class JavaLang {
     public record InstanceOfDefinitionWithName(Base base, String name) implements InstanceOfDefinition {
     }
 
+    /**
+     * Invocation of a callable expression. For example {@code doStuff(5)} will
+     * be represented by an {@code Invokable} where {@code doStuff} is the caller
+     * and {@code 5} is stored in the argument list.
+     */
     public static final class Invokable extends magmac.app.lang.java.Invokable<JavaCaller, JavaArgument> implements Value, JavaFunctionSegmentValue {
         public Invokable(JavaCaller caller, List<JavaArgument> arguments) {
             super(caller, arguments);

@@ -1,5 +1,9 @@
 package magmac.app.lang.node;
 
+/**
+ * A PlantUML dependency arrow such as {@code A --> B}.
+ */
+
 import magmac.app.compile.node.MapNode;
 import magmac.app.compile.node.Node;
 import magmac.app.compile.rule.LocatingRule;

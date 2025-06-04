@@ -1,5 +1,9 @@
 package magmac.app.lang.node;
 
+/**
+ * Represents the closing {@code @enduml} tag of a PlantUML diagram.
+ */
+
 import magmac.app.compile.node.MapNode;
 import magmac.app.compile.node.Node;
 import magmac.app.compile.rule.ExactRule;

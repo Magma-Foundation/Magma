@@ -8,6 +8,11 @@ import magmac.app.compile.rule.TypeRule;
 import magmac.app.lang.node.Post;
 import magmac.app.lang.node.PostVariant;
 
+/**
+ * Represents a postfix operation such as {@code value++} or {@code value--}.
+ * The {@link PostVariant} determines the specific operator while the child
+ * {@link JavaLang.Value} holds the expression being modified.
+ */
 public final class JavaPost extends Post implements JavaFunctionSegmentValue {
     public JavaPost(PostVariant variant, JavaLang.Value value) {
         super(variant, value);

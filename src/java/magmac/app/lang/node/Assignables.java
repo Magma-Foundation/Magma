@@ -1,5 +1,10 @@
 package magmac.app.lang.node;
 
+/**
+ * Helpers for turning {@link Node} structures into assignable values. For
+ * example the left hand side of {@code a = 5} is deserialized using this class.
+ */
+
 import magmac.api.collect.list.Lists;
 import magmac.app.compile.error.CompileResult;
 import magmac.app.compile.node.Node;

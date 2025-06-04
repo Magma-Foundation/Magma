@@ -1,5 +1,8 @@
 package magmac.app.lang.node;
 
+/**
+ * Enumerates the supported postfix operators.
+ */
 public enum PostVariant {
     Increment("post-increment"),
     Decrement("post-decrement");
