@@ -12,7 +12,7 @@ public class ValueFolder implements Folder {
 
         var appended = state.append(c);
         if ('-' == c) {
-            if ('>' == state.peek()) {
+            if (state.peek().filter(n -> n == '>').isPresent()) {
                 return state.popAndAppendToOption().orElse(state);
             }
         }

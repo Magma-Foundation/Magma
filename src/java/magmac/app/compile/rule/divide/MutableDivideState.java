@@ -104,8 +104,11 @@ public class MutableDivideState implements DivideState {
     }
 
     @Override
-    public char peek() {
-        return this.input.charAt(this.index);
+    public Option<Character> peek() {
+        if (this.index < this.input.length()) {
+            return new Some<>(this.input.charAt(this.index));
+        }
+        return new None<>();
     }
 
     @Override
@@ -114,8 +117,14 @@ public class MutableDivideState implements DivideState {
     }
 
     @Override
-    public DivideState inSingle(boolean inSingle) {
-        this.inSingle = inSingle;
+    public DivideState startSingle() {
+        this.inSingle = true;
+        return this;
+    }
+
+    @Override
+    public DivideState endSingle() {
+        this.inSingle = false;
         return this;
     }
 
@@ -125,8 +134,14 @@ public class MutableDivideState implements DivideState {
     }
 
     @Override
-    public DivideState inDouble(boolean inDouble) {
-        this.inDouble = inDouble;
+    public DivideState startDouble() {
+        this.inDouble = true;
+        return this;
+    }
+
+    @Override
+    public DivideState endDouble() {
+        this.inDouble = false;
         return this;
     }
 
@@ -136,8 +151,14 @@ public class MutableDivideState implements DivideState {
     }
 
     @Override
-    public DivideState inLineComment(boolean inLineComment) {
-        this.inLineComment = inLineComment;
+    public DivideState startLineComment() {
+        this.inLineComment = true;
+        return this;
+    }
+
+    @Override
+    public DivideState endLineComment() {
+        this.inLineComment = false;
         return this;
     }
 
@@ -147,8 +168,14 @@ public class MutableDivideState implements DivideState {
     }
 
     @Override
-    public DivideState inBlockComment(boolean inBlockComment) {
-        this.inBlockComment = inBlockComment;
+    public DivideState startBlockComment() {
+        this.inBlockComment = true;
+        return this;
+    }
+
+    @Override
+    public DivideState endBlockComment() {
+        this.inBlockComment = false;
         return this;
     }
 
@@ -158,8 +185,14 @@ public class MutableDivideState implements DivideState {
     }
 
     @Override
-    public DivideState escape(boolean escape) {
-        this.escape = escape;
+    public DivideState startEscape() {
+        this.escape = true;
+        return this;
+    }
+
+    @Override
+    public DivideState endEscape() {
+        this.escape = false;
         return this;
     }
 
