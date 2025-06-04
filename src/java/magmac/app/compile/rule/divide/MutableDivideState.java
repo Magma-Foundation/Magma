@@ -14,12 +14,24 @@ public class MutableDivideState implements DivideState {
     private StringBuilder buffer;
     private int depth;
     private int index = 0;
+    private boolean inSingle;
+    private boolean inDouble;
+    private boolean inLineComment;
+    private boolean inBlockComment;
+    private boolean escape;
+    private char last;
 
     private MutableDivideState(List<String> segments, StringBuilder buffer, String input) {
         this.segments = segments;
         this.buffer = buffer;
         this.input = input;
         this.depth = 0;
+        this.inSingle = false;
+        this.inDouble = false;
+        this.inLineComment = false;
+        this.inBlockComment = false;
+        this.escape = false;
+        this.last = 0;
     }
 
     public MutableDivideState(String input) {
@@ -94,5 +106,71 @@ public class MutableDivideState implements DivideState {
     @Override
     public char peek() {
         return this.input.charAt(this.index);
+    }
+
+    @Override
+    public boolean inSingle() {
+        return this.inSingle;
+    }
+
+    @Override
+    public DivideState inSingle(boolean inSingle) {
+        this.inSingle = inSingle;
+        return this;
+    }
+
+    @Override
+    public boolean inDouble() {
+        return this.inDouble;
+    }
+
+    @Override
+    public DivideState inDouble(boolean inDouble) {
+        this.inDouble = inDouble;
+        return this;
+    }
+
+    @Override
+    public boolean inLineComment() {
+        return this.inLineComment;
+    }
+
+    @Override
+    public DivideState inLineComment(boolean inLineComment) {
+        this.inLineComment = inLineComment;
+        return this;
+    }
+
+    @Override
+    public boolean inBlockComment() {
+        return this.inBlockComment;
+    }
+
+    @Override
+    public DivideState inBlockComment(boolean inBlockComment) {
+        this.inBlockComment = inBlockComment;
+        return this;
+    }
+
+    @Override
+    public boolean escape() {
+        return this.escape;
+    }
+
+    @Override
+    public DivideState escape(boolean escape) {
+        this.escape = escape;
+        return this;
+    }
+
+    @Override
+    public char last() {
+        return this.last;
+    }
+
+    @Override
+    public DivideState last(char c) {
+        this.last = c;
+        return this;
     }
 }

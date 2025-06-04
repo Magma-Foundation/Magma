@@ -357,6 +357,24 @@ public final class TypescriptLang {
         }
     }
 
+    public static class Comment implements
+            TypeScriptRootSegment,
+            TypescriptStructureMember,
+            TypeScriptParameter,
+            FunctionSegment,
+            Argument {
+        private final String value;
+
+        public Comment(String value) {
+            this.value = value;
+        }
+
+        @Override
+        public Node serialize() {
+            return new MapNode("comment").withString("value", this.value);
+        }
+    }
+
     public record Assignment(Assignable assignable, Value value) implements FunctionSegment.Value {
         @Override
         public Node serialize() {

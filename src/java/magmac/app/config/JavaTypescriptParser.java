@@ -67,6 +67,7 @@ class JavaTypescriptParser implements Parser<JavaLang.Root, TypescriptLang.Types
     private static CompileResult<List<TypescriptLang.TypeScriptRootSegment>> parseRootSegment(Location location, JavaRootSegment rootSegment, TypeMap typeMap) {
         return switch (rootSegment) {
             case JavaLang.Whitespace whitespace -> CompileResults.Ok(Lists.of(new TypescriptLang.Whitespace()));
+            case JavaLang.Comment comment -> CompileResults.Ok(Lists.of(new TypescriptLang.Comment(comment.value())));
             case JavaNamespacedNode namespaced -> JavaTypescriptParser.parseNamespaced(location, namespaced, typeMap).mapValue(Lists::of);
             case JavaLang.Structure structure -> CompileResults.Ok(JavaTypescriptParser.getCollect(structure, typeMap));
         };
@@ -133,6 +134,7 @@ class JavaTypescriptParser implements Parser<JavaLang.Root, TypescriptLang.Types
     private static Tuple2<List<TypescriptLang.TypescriptStructureMember>, List<TypescriptLang.StructureNode>> parseStructureMember(JavaStructureMember structureNode, TypeMap typeMap) {
         return switch (structureNode) {
             case JavaLang.Whitespace whitespace -> JavaTypescriptParser.getList();
+            case JavaLang.Comment comment -> JavaTypescriptParser.getListListTuple2(new TypescriptLang.Comment(comment.value()));
             case JavaEnumValues enumValues -> JavaTypescriptParser.getList();
             case JavaStructureStatement structureStatement -> JavaTypescriptParser.getList();
             case JavaMethod methodNode ->
@@ -170,6 +172,7 @@ class JavaTypescriptParser implements Parser<JavaLang.Root, TypescriptLang.Types
     private static TypescriptLang.FunctionSegment parseFunctionSegment(JavaFunctionSegment segment, TypeMap typeMap) {
         return switch (segment) {
             case JavaLang.Whitespace whitespace -> new TypescriptLang.Whitespace();
+            case JavaLang.Comment comment -> new TypescriptLang.Comment(comment.value());
             case JavaLang.Block block -> JavaTypescriptParser.parseBlock(block, typeMap);
             case JavaLang.Case caseNode -> new TypescriptLang.Whitespace();
             case JavaLang.Return aReturn ->
@@ -241,6 +244,7 @@ class JavaTypescriptParser implements Parser<JavaLang.Root, TypescriptLang.Types
     private static TypescriptLang.Argument parseArgument(JavaLang.JavaArgument argument, TypeMap typeMap) {
         return switch (argument) {
             case JavaLang.Whitespace whitespace -> new TypescriptLang.Whitespace();
+            case JavaLang.Comment comment -> new TypescriptLang.Comment(comment.value());
             case JavaLang.Value value -> JavaTypescriptParser.parseValue(value, typeMap);
         };
     }
@@ -285,6 +289,7 @@ class JavaTypescriptParser implements Parser<JavaLang.Root, TypescriptLang.Types
     private static TypescriptLang.TypeScriptParameter parseParameter(JavaParameter parameter, TypeMap typeMap) {
         return switch (parameter) {
             case JavaLang.Whitespace whitespace -> new TypescriptLang.Whitespace();
+            case JavaLang.Comment comment -> new TypescriptLang.Comment(comment.value());
             case JavaLang.Definition javaDefinition -> JavaTypescriptParser.parseDefinition(javaDefinition, typeMap);
         };
     }

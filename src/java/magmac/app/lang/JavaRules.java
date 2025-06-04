@@ -23,6 +23,7 @@ import magmac.app.compile.rule.TypeRule;
 import magmac.app.compile.rule.divide.Divider;
 import magmac.app.compile.rule.divide.FoldingDivider;
 import magmac.app.compile.rule.fold.DelimitedFolder;
+import magmac.app.compile.rule.fold.DecoratedFolder;
 import magmac.app.compile.rule.split.DividingSplitter;
 import magmac.app.lang.java.JavaDeserializers;
 import magmac.app.lang.java.JavaLang;
@@ -44,7 +45,7 @@ public final class JavaRules {
         Rule childRule = new OrRule(Lists.of(JavaRules.createConstructionRule(), value));
         Rule caller = new NodeRule("caller", new SuffixRule(childRule, "("));
         var arguments = JavaRules.createArgumentsRule(value);
-        var splitter = DividingSplitter.Last(new FoldingDivider(new InvocationFolder()), "");
+        var splitter = DividingSplitter.Last(new FoldingDivider(new DecoratedFolder(new InvocationFolder())), "");
         return new TypeRule("invokable", new StripRule(new SuffixRule(new LocatingRule(caller, splitter, arguments), ")")));
     }
 
@@ -52,6 +53,7 @@ public final class JavaRules {
         var classMemberRule = StructureMembers.createClassMemberRule();
         return new OrRule(Lists.of(
                 JavaRules.createTypedWhitespaceRule(),
+                JavaRules.createCommentRule(),
                 JavaNamespacedNode.createNamespacedRule("package"),
                 JavaNamespacedNode.createNamespacedRule("import"),
                 JavaRules.createStructureRule("record", classMemberRule),
@@ -160,7 +162,7 @@ public final class JavaRules {
 
     private static TypeRule createBlockRule0(Rule header, Rule functionSegmentRule) {
         var children = CommonLang.Statements("children", functionSegmentRule);
-        var first = DividingSplitter.First(new FoldingDivider(new BlockFolder()), "");
+        var first = DividingSplitter.First(new FoldingDivider(new DecoratedFolder(new BlockFolder())), "");
         Rule childRule = new LocatingRule(new SuffixRule(header, "{"), first, children);
         return new TypeRule("block", new StripRule(new SuffixRule(childRule, "}")));
     }
@@ -177,6 +179,10 @@ public final class JavaRules {
 
     public static Rule createTypedWhitespaceRule() {
         return new TypeRule("whitespace", JavaRules.createWhitespaceRule());
+    }
+
+    public static Rule createCommentRule() {
+        return new TypeRule("comment", new StringRule("value"));
     }
 
     private static StripRule createWhitespaceRule() {
@@ -267,7 +273,7 @@ public final class JavaRules {
         var leftRule1 = JavaRules.attachTypeParams(beforeTypeParams);
 
         Rule rightRule = new NodeRule("type", JavaRules.createTypeRule());
-        Divider divider = new FoldingDivider(new TypeSeparatorFolder());
+        Divider divider = new FoldingDivider(new DecoratedFolder(new TypeSeparatorFolder()));
         var splitter = DividingSplitter.Last(divider, " ");
         Rule leftRule = new LocatingRule(leftRule1, splitter, rightRule);
         Rule stripRule = new StripRule(LocatingRule.Last(leftRule, " ", new StripRule(FilterRule.Symbol(new StringRule("name")))));
@@ -343,6 +349,7 @@ public final class JavaRules {
         return new OptionNodeListRule("arguments",
                 Values("arguments", new OrRule(Lists.of(
                         JavaRules.createTypedWhitespaceRule(),
+                        JavaRules.createCommentRule(),
                         value
                 ))),
                 JavaRules.createWhitespaceRule()
@@ -352,6 +359,7 @@ public final class JavaRules {
     public static Rule createParametersRule(Rule definition) {
         return NodeListRule.createNodeListRule("parameters", new ValueFolder(), new OrRule(Lists.of(
                 JavaRules.createTypedWhitespaceRule(),
+                JavaRules.createCommentRule(),
                 definition
         )));
     }

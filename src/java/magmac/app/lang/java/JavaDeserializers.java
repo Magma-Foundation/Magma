@@ -52,6 +52,7 @@ public final class JavaDeserializers {
     public static CompileResult<JavaRootSegment> deserializeRootSegment(Node node) {
         return Deserializers.orError("root-segment", node, Lists.of(
                 Deserializers.wrap(JavaDeserializers::deserializeWhitespace),
+                Deserializers.wrap(JavaDeserializers::deserializeComment),
                 JavaNamespacedNode::deserialize,
                 Deserializers.wrap(new JavaStructureNodeDeserializer(JavaStructureType.Class)),
                 Deserializers.wrap(new JavaStructureNodeDeserializer(JavaStructureType.Interface)),
@@ -142,6 +143,11 @@ public final class JavaDeserializers {
 
     public static Option<CompileResult<Whitespace>> deserializeWhitespace(Node node) {
         return Destructors.destructWithType("whitespace", node).map(deserializer -> deserializer.complete(Whitespace::new));
+    }
+
+    public static Option<CompileResult<Comment>> deserializeComment(Node node) {
+        return Destructors.destructWithType("comment", node)
+                .map(deserializer -> deserializer.withString("value").complete(Comment::new));
     }
 
     private static Option<CompileResult<Try>> deserializeTry(Node node) {
@@ -328,6 +334,7 @@ public final class JavaDeserializers {
     private static CompileResult<JavaArgument> deserializeArguments(Node node) {
         return Deserializers.orError("argument", node, Lists.of(
                 Deserializers.wrap(JavaDeserializers::deserializeWhitespace),
+                Deserializers.wrap(JavaDeserializers::deserializeComment),
                 Deserializers.wrap(JavaDeserializers::deserializeValue)
         ));
     }
@@ -335,6 +342,7 @@ public final class JavaDeserializers {
     public static CompileResult<JavaParameter> deserializeParameter(Node node) {
         return Deserializers.orError("parameter", node, Lists.of(
                 Deserializers.wrap(JavaDeserializers::deserializeWhitespace),
+                Deserializers.wrap(JavaDeserializers::deserializeComment),
                 Deserializers.wrap(JavaDeserializers::deserializeTypedDefinition)
         ));
     }

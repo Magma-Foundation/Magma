@@ -27,4 +27,28 @@ public interface DivideState {
     Option<DivideState> popAndAppendToOption();
 
     char peek();
+
+    boolean inSingle();
+
+    DivideState inSingle(boolean inSingle);
+
+    boolean inDouble();
+
+    DivideState inDouble(boolean inDouble);
+
+    boolean inLineComment();
+
+    DivideState inLineComment(boolean inLineComment);
+
+    boolean inBlockComment();
+
+    DivideState inBlockComment(boolean inBlockComment);
+
+    boolean escape();
+
+    DivideState escape(boolean escape);
+
+    char last();
+
+    DivideState last(char c);
 }
