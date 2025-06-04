@@ -49,7 +49,7 @@ class JavaTypescriptParser implements Parser<JavaLang.Root, TypescriptLang.Types
 
     private static CompileResult<Unit<TypescriptLang.TypescriptRoot>> parseUnit(Unit<JavaLang.Root> unit, List<Tuple2<List<String>, String>> types) {
         return unit.destruct((location, root) -> {
-            CompileState map = new CompileState(types, location);
+            var map = new CompileState(types, location);
             return JavaTypescriptParser.parseRoot(location, root, map);
         });
     }
@@ -194,24 +194,19 @@ class JavaTypescriptParser implements Parser<JavaLang.Root, TypescriptLang.Types
         var headerAndParams = header.and(() -> parameters)
                 .mapValue(tuple -> new ParameterizedMethodHeader<TypescriptLang.TypeScriptParameter>(tuple.left(), tuple.right()));
 
-        var maybeChildren = methodNode.maybeChildren();
+        var maybeOldChildren = methodNode.maybeChildren();
         if (methodNode.header() instanceof JavaLang.Definition def) {
-            boolean hasActual = def.maybeAnnotations()
-                    .map(list -> list.iter().filter(a -> "Actual".equals(a.value())).next().isPresent())
-                    .orElse(false);
-            boolean isStatic = def.modifiers().iter().filter(m -> "static".equals(m.value())).next().isPresent();
+            boolean hasActual = def.hasActual();
+            var isStatic = def.isStatic();
             if (hasActual && isStatic) {
-                maybeChildren = new None<>();
+                maybeOldChildren = new None<>();
             }
         }
 
-        Option<List<JavaFunctionSegment>> maybeChildrenFinal = maybeChildren;
-
-        return headerAndParams.mapValue(parameterizedHeader ->
-                new TypescriptLang.TypescriptMethod(
-                        parameterizedHeader,
-                        maybeChildrenFinal.map(segments -> JavaTypescriptParser.parseFunctionSegments(segments, typeMap))
-                ));
+        var maybeNewChildren = maybeOldChildren.map(segments -> JavaTypescriptParser.parseFunctionSegments(segments, typeMap));
+        return headerAndParams.mapValue(parameterizedHeader -> new TypescriptLang.TypescriptMethod(
+                parameterizedHeader, maybeNewChildren
+        ));
     }
 
     private static List<TypescriptLang.FunctionSegment> parseFunctionSegments(List<JavaFunctionSegment> segments, CompileState typeMap) {

@@ -281,6 +281,19 @@ public class JavaLang {
         public Definition(Option<List<Annotation>> maybeAnnotations, List<Modifier> modifiers, String name, Option<List<TypescriptLang.TypeParam>> maybeTypeParams, JavaType type) {
             super(maybeAnnotations, modifiers, name, maybeTypeParams, type);
         }
+
+        public boolean isStatic() {
+            return this.modifiers.iter()
+                    .filter(modifier -> "static".equals(modifier.value()))
+                    .next()
+                    .isPresent();
+        }
+
+        public boolean hasActual() {
+            return this.maybeAnnotations
+                    .map(JavaLang::isActualWithin)
+                    .orElse(false);
+        }
     }
 
     public record JavaMultipleHeader(List<JavaLambdaParameter> parameters) implements JavaLambdaHeader {
@@ -372,6 +385,10 @@ public class JavaLang {
     }
 
     public record Construction(JavaType type) implements JavaCaller {
+    }
+
+    private static boolean isActualWithin(List<Annotation> list) {
+        return list.iter().filter(annotation -> "Actual".equals(annotation.value())).next().isPresent();
     }
 
     public enum JavaAccessType {
