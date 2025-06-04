@@ -434,52 +434,57 @@ class JavaTypescriptParser implements Parser<JavaLang.Root, TypescriptLang.Types
 
     private static JavaLang.Symbol parseBaseType(JavaLang.Base base) {
         return switch (base) {
-            case JavaLang.Qualified qualifiedType -> {
-                var joined = qualifiedType.segments()
-                        .iter()
-                        .map(Segment::value)
-                        .collect(new Joiner("."))
-                        .orElse("");
-
-                yield new JavaLang.Symbol(joined);
-            }
+            case JavaLang.Qualified qualifiedType -> JavaTypescriptParser.parseQualifiedTypeAsBase(qualifiedType);
             case JavaLang.Symbol symbol -> symbol;
         };
+    }
+
+    private static JavaLang.Symbol parseQualifiedTypeAsBase(JavaLang.Qualified qualifiedType) {
+        var joined = qualifiedType.segments()
+                .iter()
+                .map(Segment::value)
+                .collect(new Joiner("."))
+                .orElse("");
+
+        return new JavaLang.Symbol(joined);
     }
 
     private static CompileResult<TypescriptLang.TypeScriptRootSegment> parseNamespaced(Location location, JavaNamespacedNode namespaced, TypeMap typeMap) {
         return switch (namespaced.type()) {
             case Package -> CompileResults.Ok(new TypescriptLang.Whitespace());
-            case Import -> {
-                var segments = namespaced.segments();
-                var lastValue = segments.findLast().map(Segment::value).orElse("");
-                if ("*".equals(lastValue)) {
-                    yield CompileResults.Ok(new TypescriptLang.Whitespace());
-                }
-                var joined = segments.iter()
-                        .map(Segment::value)
-                        .collect(new Joiner("."))
-                        .orElse("");
-
-                var exists = typeMap.types().iter()
-                        .filter(tuple -> {
-                            var path = tuple.left().addLast(tuple.right())
-                                    .iter()
-                                    .collect(new Joiner("."))
-                                    .orElse("");
-                            return path.equals(joined);
-                        })
-                        .next()
-                        .isPresent();
-
-                if (exists) {
-                    yield CompileResults.Ok(JavaTypescriptParser.parseImport(location, segments));
-                }
-                else {
-                    yield CompileResults.fromErrWithString("Unknown import", joined);
-                }
-            }
+            case Import -> JavaTypescriptParser.parseImport(location, namespaced, typeMap);
         };
+    }
+
+    private static CompileResult<TypescriptLang.TypeScriptRootSegment> parseImport(Location location, JavaNamespacedNode namespaced, TypeMap typeMap) {
+        var segments = namespaced.segments();
+        var lastValue = segments.findLast().map(Segment::value).orElse("");
+        if ("*".equals(lastValue)) {
+            return CompileResults.Ok(new TypescriptLang.Whitespace());
+        }
+
+        var joined = segments.iter()
+                .map(Segment::value)
+                .collect(new Joiner("."))
+                .orElse("");
+
+        var exists = typeMap.types().iter()
+                .filter(tuple -> {
+                    var path = tuple.left().addLast(tuple.right())
+                            .iter()
+                            .collect(new Joiner("."))
+                            .orElse("");
+                    return path.equals(joined);
+                })
+                .next()
+                .isPresent();
+
+        if (exists) {
+            return CompileResults.Ok(JavaTypescriptParser.parseImport(location, segments));
+        }
+        else {
+            return CompileResults.fromErrWithString("Unknown import", joined);
+        }
     }
 
     private static TypescriptLang.TypeScriptImport parseImport(Location location, List<Segment> segments) {

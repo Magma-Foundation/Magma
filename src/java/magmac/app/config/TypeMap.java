@@ -1,11 +1,9 @@
 package magmac.app.config;
 
 import magmac.api.Option;
-import magmac.api.Some;
 import magmac.api.Tuple2;
 import magmac.api.collect.list.List;
 import magmac.api.iter.collect.ListCollector;
-import magmac.api.iter.Iters;
 import magmac.app.io.Location;
 
 import java.util.HashSet;
