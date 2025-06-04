@@ -37,6 +37,7 @@ Primitive Java types are translated to their TypeScript equivalents. Numeric pri
 See [`docs/architecture.md`](docs/architecture.md) for an overview of how the compiler is structured.
 For details on how the PlantUML class diagram is generated see [`docs/diagram-generation.md`](docs/diagram-generation.md).
 The inspection report produced by IntelliJ is summarised in [`docs/inspection/tasks.md`](docs/inspection/tasks.md).
+For a high level roadmap and a list of missing Java→TypeScript features see [`docs/roadmap.md`](docs/roadmap.md).
 
 Instance fields in the Java sources are always accessed using `this`. Java does
 not require it, but TypeScript does, and using the same convention avoids an
