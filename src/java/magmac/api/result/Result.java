@@ -2,6 +2,7 @@ package magmac.api.result;
 
 import magmac.api.Tuple2;
 
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -34,4 +35,6 @@ public interface Result<T, X> {
      * Maps the error value using {@code mapper}.
      */
     <R> Result<T, R> mapErr(Function<X, R> mapper);
+
+    void consume(Consumer<T> whenOk, Consumer<X> whenErr);
 }

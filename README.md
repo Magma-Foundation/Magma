@@ -24,6 +24,10 @@ java -cp out magmac.Main
 
 This will scan the sources, run the compiler pipeline and write the generated outputs to the directories configured by each `TargetPlatform` (for example `diagrams` for PlantUML files and `src/web` for TypeScript files).
 
+Primitive Java types are translated to their TypeScript equivalents. Numeric primitives
+(`byte`, `short`, `int`, `long`, `float`, `double`) become `number`, `boolean` stays
+`boolean` and `char` or `String` are emitted as `string`.
+
 ## Repository Layout
 
 - `src/java` – Java source code for the compiler implementation

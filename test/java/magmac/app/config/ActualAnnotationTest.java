@@ -1,30 +1,39 @@
 package magmac.app.config;
 
-import magmac.api.Some;
 import magmac.api.None;
+import magmac.api.Some;
 import magmac.api.collect.list.Lists;
+import magmac.app.io.Location;
 import magmac.app.lang.common.Annotation;
 import magmac.app.lang.java.JavaLang;
 import magmac.app.lang.java.JavaMethod;
 import magmac.app.lang.node.Modifier;
-import magmac.app.config.TypeMap;
+import magmac.app.lang.web.TypescriptLang.TypescriptMethod;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import static org.junit.jupiter.api.Assertions.*;
-
-public class ActualAnnotationTest {
+class ActualAnnotationTest {
     @Test
-    public void staticMethodAnnotatedActualLosesBody() throws Exception {
+    void staticMethodAnnotatedActualLosesBody() {
         var annotations = Lists.of(new Annotation("Actual"));
         var modifiers = Lists.of(new Modifier("public"), new Modifier("static"));
-        JavaLang.Definition header = new JavaLang.Definition(new Some<>(annotations), modifiers, "f", new None<>(), new JavaLang.Symbol("void"));
-        JavaMethod method = new JavaMethod(header, Lists.empty(), new Some<>(Lists.of(new JavaLang.Whitespace())));
+        var header = new JavaLang.Definition(new Some<>(annotations), modifiers, "f", new None<>(), new JavaLang.Symbol("void"));
+        var method = new JavaMethod(header, Lists.empty(), new Some<>(Lists.of(new JavaLang.Whitespace())));
 
-        TypeMap typeMap = new TypeMap(Lists.empty());
-        var member = JavaTypescriptParser.parseMethod(method, typeMap);
-        assertTrue(member instanceof magmac.app.lang.web.TypescriptLang.TypescriptMethod);
-        var tm = (magmac.app.lang.web.TypescriptLang.TypescriptMethod) member;
-        assertTrue(tm.maybeChildren().isEmpty());
+        var loc = new Location(Lists.of("test"), "A");
+        var typeMap = new TypeMap(Lists.empty(), loc);
+        JavaTypescriptParser.parseMethod(method, typeMap)
+                .toResult()
+                .consume(member -> {
+                    assertInstanceOf(TypescriptMethod.class, member);
+                    var tm = (TypescriptMethod) member;
+                    assertTrue(tm.maybeChildren().isEmpty());
+                }, err -> {
+                    Assertions.fail(err.display());
+                });
+
     }
 }

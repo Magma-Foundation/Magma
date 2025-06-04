@@ -1,10 +1,11 @@
 package magmac.app.config;
 
+import magmac.api.None;
+import magmac.api.Option;
+import magmac.api.Some;
 import magmac.api.Tuple2;
 import magmac.api.collect.TupleCollector;
 import magmac.api.collect.list.List;
-import magmac.api.Option;
-import magmac.api.None;
 import magmac.api.collect.list.Lists;
 import magmac.api.iter.Iter;
 import magmac.api.iter.collect.Joiner;
@@ -43,12 +44,14 @@ import magmac.app.stage.parse.Parser;
 import magmac.app.stage.unit.SimpleUnit;
 import magmac.app.stage.unit.Unit;
 import magmac.app.stage.unit.UnitSet;
-import magmac.app.config.TypeMap;
 
 class JavaTypescriptParser implements Parser<JavaLang.Root, TypescriptLang.TypescriptRoot> {
 
-    private static CompileResult<Unit<TypescriptLang.TypescriptRoot>> parseUnit(Unit<JavaLang.Root> unit, TypeMap typeMap) {
-        return unit.destruct((location, root) -> JavaTypescriptParser.parseRoot(location, root, typeMap));
+    private static CompileResult<Unit<TypescriptLang.TypescriptRoot>> parseUnit(Unit<JavaLang.Root> unit, List<Tuple2<List<String>, String>> types) {
+        return unit.destruct((location, root) -> {
+            TypeMap map = new TypeMap(types, location);
+            return JavaTypescriptParser.parseRoot(location, root, map);
+        });
     }
 
     private static CompileResult<Unit<TypescriptLang.TypescriptRoot>> parseRoot(Location location, JavaLang.Root root, TypeMap typeMap) {
@@ -58,44 +61,56 @@ class JavaTypescriptParser implements Parser<JavaLang.Root, TypescriptLang.Types
                 .collect(new CompileResultCollector<>(new ListCollector<>()));
 
         return result.mapValue((List<List<TypescriptLang.TypeScriptRootSegment>> lists) ->
-                lists.iter()
-                        .flatMap(List::iter)
-                        .collect(new ListCollector<>()))
-                .mapValue((List<TypescriptLang.TypeScriptRootSegment> segments) ->
-                        new SimpleUnit<>(location, new TypescriptLang.TypescriptRoot(segments)));
+                        lists.iter()
+                                .flatMap(List::iter)
+                                .collect(new ListCollector<>()))
+                .mapValue((List<TypescriptLang.TypeScriptRootSegment> segments) -> {
+                    var imports = typeMap.importList()
+                            .iter()
+                            .map(loc -> loc.namespace().addLast(loc.name())
+                                    .iter()
+                                    .map(Segment::new)
+                                    .collect(new ListCollector<>()))
+                            .map(segs -> (TypescriptLang.TypeScriptRootSegment) JavaTypescriptParser.parseImport(location, segs))
+                            .collect(new ListCollector<>());
+
+                    var finalSegments = imports.addAllLast(segments);
+                    return new SimpleUnit<>(location, new TypescriptLang.TypescriptRoot(finalSegments));
+                });
     }
 
     private static CompileResult<List<TypescriptLang.TypeScriptRootSegment>> parseRootSegment(Location location, JavaRootSegment rootSegment, TypeMap typeMap) {
         return switch (rootSegment) {
             case JavaLang.Whitespace whitespace -> CompileResults.Ok(Lists.of(new TypescriptLang.Whitespace()));
             case JavaLang.Comment comment -> CompileResults.Ok(Lists.of(new TypescriptLang.Comment(comment.value())));
-            case JavaNamespacedNode namespaced -> JavaTypescriptParser.parseNamespaced(location, namespaced, typeMap).mapValue(Lists::of);
-            case JavaLang.Structure structure -> CompileResults.Ok(JavaTypescriptParser.getCollect(structure, typeMap));
+            case JavaNamespacedNode namespaced ->
+                    JavaTypescriptParser.parseNamespaced(location, namespaced, typeMap).mapValue(Lists::of);
+            case JavaLang.Structure structure -> JavaTypescriptParser.getCollect(structure, typeMap);
         };
     }
 
-    private static List<TypescriptLang.TypeScriptRootSegment> getCollect(JavaLang.Structure structure, TypeMap typeMap) {
+    private static CompileResult<List<TypescriptLang.TypeScriptRootSegment>> getCollect(JavaLang.Structure structure, TypeMap typeMap) {
         return JavaTypescriptParser.parseStructure(structure, typeMap)
-                .iter()
-                .map(JavaTypescriptParser::wrap)
-                .collect(new ListCollector<>());
+                .mapValue(list -> list.iter()
+                        .map(JavaTypescriptParser::wrap)
+                        .collect(new ListCollector<>()));
     }
 
     private static TypescriptLang.TypeScriptRootSegment wrap(TypescriptLang.StructureNode value) {
         return value;
     }
 
-    private static List<TypescriptLang.StructureNode> parseStructure(JavaLang.Structure structure, TypeMap typeMap) {
+    private static CompileResult<List<TypescriptLang.StructureNode>> parseStructure(JavaLang.Structure structure, TypeMap typeMap) {
         return switch (structure.type()) {
             case Class, Record ->
                     JavaTypescriptParser.parseStructureWithType(TypescriptLang.StructureType.Class, structure, typeMap);
             case Interface ->
                     JavaTypescriptParser.parseStructureWithType(TypescriptLang.StructureType.Interface, structure, typeMap);
-            case Enum -> Lists.empty();
+            case Enum -> CompileResults.Ok(Lists.empty());
         };
     }
 
-    private static List<TypescriptLang.StructureNode> parseStructureWithType(
+    private static CompileResult<List<TypescriptLang.StructureNode>> parseStructureWithType(
             TypescriptLang.StructureType type,
             JavaLang.Structure structure,
             TypeMap typeMap
@@ -104,44 +119,59 @@ class JavaTypescriptParser implements Parser<JavaLang.Root, TypescriptLang.Types
         var membersTuple = value.members()
                 .iter()
                 .map(structureNode -> JavaTypescriptParser.parseStructureMember(structureNode, typeMap))
-                .collect(new TupleCollector<>(new ListCollector<>(), new ListCollector<>()));
+                .collect(new CompileResultCollector<>(new TupleCollector<>(new ListCollector<>(), new ListCollector<>())));
+        return membersTuple.flatMapValue(tuple -> {
+            var members = tuple.left()
+                    .iter()
+                    .flatMap(List::iter)
+                    .collect(new ListCollector<>());
 
-        var members = membersTuple.left()
-                .iter()
-                .flatMap(List::iter)
-                .collect(new ListCollector<>());
+            var structures = tuple.right()
+                    .iter()
+                    .flatMap(List::iter)
+                    .collect(new ListCollector<>());
 
-        var structures = membersTuple.right()
-                .iter()
-                .flatMap(List::iter)
-                .collect(new ListCollector<>());
+            var extendedResult = value.maybeExtended()
+                    .map(list -> JavaTypescriptParser.parseTypeList(list, typeMap)
+                            .mapValue(types -> (Option<List<TypescriptLang.Type>>) new Some<>(types)))
+                    .orElseGet(() -> CompileResults.Ok(new None<>()));
 
-        var structureNode1 = new StructureValue<TypescriptLang.Type, TypescriptLang.TypescriptStructureMember>(
-                value.name(),
-                value.modifiers(),
-                members,
-                value.maybeTypeParams(),
-                value.maybeExtended().map(list -> JavaTypescriptParser.parseTypeList(list, typeMap)),
-                value.maybeImplemented().map(list1 -> JavaTypescriptParser.parseTypeList(list1, typeMap))
-        );
+            var implementedResult = value.maybeImplemented()
+                    .map(list1 -> JavaTypescriptParser.parseTypeList(list1, typeMap)
+                            .mapValue(types -> (Option<List<TypescriptLang.Type>>) new Some<>(types)))
+                    .orElseGet(() -> CompileResults.Ok(new None<>()));
 
-        return structures.addLast(new TypescriptLang.StructureNode(type, structureNode1));
+            return extendedResult.and(() -> implementedResult).mapValue(extImpl -> {
+                var structureNode1 = new StructureValue<TypescriptLang.Type, TypescriptLang.TypescriptStructureMember>(
+                        value.name(),
+                        value.modifiers(),
+                        members,
+                        value.maybeTypeParams(),
+                        extImpl.left(),
+                        extImpl.right()
+                );
+                return structures.addLast(new TypescriptLang.StructureNode(type, structureNode1));
+            });
+        });
     }
 
-    private static List<TypescriptLang.Type> parseTypeList(List<JavaLang.JavaType> list, TypeMap typeMap) {
-        return list.iter().map(variadicType -> JavaTypescriptParser.parseType(variadicType, typeMap)).collect(new ListCollector<>());
+    private static CompileResult<List<TypescriptLang.Type>> parseTypeList(List<JavaLang.JavaType> list, TypeMap typeMap) {
+        return list.iter()
+                .map(variadicType -> JavaTypescriptParser.parseType(variadicType, typeMap))
+                .collect(new CompileResultCollector<>(new ListCollector<>()));
     }
 
-    private static Tuple2<List<TypescriptLang.TypescriptStructureMember>, List<TypescriptLang.StructureNode>> parseStructureMember(JavaStructureMember structureNode, TypeMap typeMap) {
+    private static CompileResult<Tuple2<List<TypescriptLang.TypescriptStructureMember>, List<TypescriptLang.StructureNode>>> parseStructureMember(JavaStructureMember structureNode, TypeMap typeMap) {
         return switch (structureNode) {
-            case JavaLang.Whitespace whitespace -> JavaTypescriptParser.getList();
-            case JavaLang.Comment comment -> JavaTypescriptParser.getListListTuple2(new TypescriptLang.Comment(comment.value()));
-            case JavaEnumValues enumValues -> JavaTypescriptParser.getList();
-            case JavaStructureStatement structureStatement -> JavaTypescriptParser.getList();
+            case JavaLang.Whitespace whitespace -> CompileResults.Ok(JavaTypescriptParser.getList());
+            case JavaLang.Comment comment ->
+                    CompileResults.Ok(JavaTypescriptParser.getListListTuple2(new TypescriptLang.Comment(comment.value())));
+            case JavaEnumValues enumValues -> CompileResults.Ok(JavaTypescriptParser.getList());
+            case JavaStructureStatement structureStatement -> CompileResults.Ok(JavaTypescriptParser.getList());
             case JavaMethod methodNode ->
-                    JavaTypescriptParser.getListListTuple2(JavaTypescriptParser.parseMethod(methodNode, typeMap));
+                    JavaTypescriptParser.parseMethod(methodNode, typeMap).mapValue(JavaTypescriptParser::getListListTuple2);
             case JavaLang.Structure javaStructure ->
-                    new Tuple2<>(Lists.empty(), JavaTypescriptParser.parseStructure(javaStructure, typeMap));
+                    JavaTypescriptParser.parseStructure(javaStructure, typeMap).mapValue(structs -> new Tuple2<>(Lists.empty(), structs));
         };
     }
 
@@ -153,30 +183,35 @@ class JavaTypescriptParser implements Parser<JavaLang.Root, TypescriptLang.Types
         return JavaTypescriptParser.getListListTuple2(new TypescriptLang.Whitespace());
     }
 
-    static TypescriptLang.TypescriptStructureMember parseMethod(JavaMethod methodNode, TypeMap typeMap) {
+    static CompileResult<TypescriptLang.TypescriptStructureMember> parseMethod(JavaMethod methodNode, TypeMap typeMap) {
         var parameters = methodNode.parameters()
                 .iter()
                 .map(parameter -> JavaTypescriptParser.parseParameter(parameter, typeMap))
-                .collect(new ListCollector<>());
+                .collect(new CompileResultCollector<>(new ListCollector<>()));
 
         var header = JavaTypescriptParser.parseMethodHeader(methodNode.header(), typeMap);
-        var parameterizedHeader = new ParameterizedMethodHeader<TypescriptLang.TypeScriptParameter>(header, parameters);
+
+        var headerAndParams = header.and(() -> parameters)
+                .mapValue(tuple -> new ParameterizedMethodHeader<TypescriptLang.TypeScriptParameter>(tuple.left(), tuple.right()));
 
         var maybeChildren = methodNode.maybeChildren();
         if (methodNode.header() instanceof JavaLang.Definition def) {
             boolean hasActual = def.maybeAnnotations()
-                    .map(list -> list.iter().filter(a -> a.value().equals("Actual")).next().isPresent())
+                    .map(list -> list.iter().filter(a -> "Actual".equals(a.value())).next().isPresent())
                     .orElse(false);
-            boolean isStatic = def.modifiers().iter().filter(m -> m.value().equals("static")).next().isPresent();
+            boolean isStatic = def.modifiers().iter().filter(m -> "static".equals(m.value())).next().isPresent();
             if (hasActual && isStatic) {
                 maybeChildren = new None<>();
             }
         }
 
-        return new TypescriptLang.TypescriptMethod(
-                parameterizedHeader,
-                maybeChildren.map(segments -> JavaTypescriptParser.parseFunctionSegments(segments, typeMap))
-        );
+        Option<List<JavaFunctionSegment>> maybeChildrenFinal = maybeChildren;
+
+        return headerAndParams.mapValue(parameterizedHeader ->
+                new TypescriptLang.TypescriptMethod(
+                        parameterizedHeader,
+                        maybeChildrenFinal.map(segments -> JavaTypescriptParser.parseFunctionSegments(segments, typeMap))
+                ));
     }
 
     private static List<TypescriptLang.FunctionSegment> parseFunctionSegments(List<JavaFunctionSegment> segments, TypeMap typeMap) {
@@ -234,7 +269,10 @@ class JavaTypescriptParser implements Parser<JavaLang.Root, TypescriptLang.Types
 
     private static TypescriptLang.Assignable parseAssignable(JavaLang.Assignable assignable, TypeMap typeMap) {
         return switch (assignable) {
-            case JavaLang.Definition definition -> JavaTypescriptParser.parseDefinition(definition, typeMap);
+            case JavaLang.Definition definition -> JavaTypescriptParser.parseDefinition(definition, typeMap).match(
+                    d -> d,
+                    err -> new TypescriptLang.Definition(definition.maybeAnnotations(), definition.modifiers(), definition.name(), definition.maybeTypeParams(), new Symbol("?"))
+            );
             case JavaLang.Value value -> JavaTypescriptParser.parseValue(value, typeMap);
         };
     }
@@ -246,8 +284,10 @@ class JavaTypescriptParser implements Parser<JavaLang.Root, TypescriptLang.Types
     private static Caller parseCaller(JavaLang.JavaCaller caller, TypeMap typeMap) {
         return switch (caller) {
             case JavaLang.Value javaValue -> JavaTypescriptParser.parseValue(javaValue, typeMap);
-            case JavaLang.Construction javaConstruction ->
-                    new TypescriptLang.Construction(JavaTypescriptParser.parseType(javaConstruction.type(), typeMap));
+            case JavaLang.Construction javaConstruction -> new TypescriptLang.Construction(
+                    JavaTypescriptParser.parseType(javaConstruction.type(), typeMap)
+                            .match(t -> t, err -> new Symbol("?"))
+            );
         };
     }
 
@@ -302,22 +342,24 @@ class JavaTypescriptParser implements Parser<JavaLang.Root, TypescriptLang.Types
         return new TypescriptLang.TypescriptConditional(ConditionalType.If, new Symbol("true"));
     }
 
-    private static TypescriptLang.TypeScriptParameter parseParameter(JavaParameter parameter, TypeMap typeMap) {
+    private static CompileResult<TypescriptLang.TypeScriptParameter> parseParameter(JavaParameter parameter, TypeMap typeMap) {
         return switch (parameter) {
-            case JavaLang.Whitespace whitespace -> new TypescriptLang.Whitespace();
-            case JavaLang.Comment comment -> new TypescriptLang.Comment(comment.value());
-            case JavaLang.Definition javaDefinition -> JavaTypescriptParser.parseDefinition(javaDefinition, typeMap);
+            case JavaLang.Whitespace whitespace -> CompileResults.Ok(new TypescriptLang.Whitespace());
+            case JavaLang.Comment comment -> CompileResults.Ok(new TypescriptLang.Comment(comment.value()));
+            case JavaLang.Definition javaDefinition ->
+                    JavaTypescriptParser.parseDefinition(javaDefinition, typeMap).mapValue(p -> p);
         };
     }
 
-    private static TypescriptLang.TypeScriptMethodHeader parseMethodHeader(JavaMethodHeader header, TypeMap typeMap) {
+    private static CompileResult<TypescriptLang.TypeScriptMethodHeader> parseMethodHeader(JavaMethodHeader header, TypeMap typeMap) {
         return switch (header) {
-            case JavaConstructor constructor -> new TypescriptLang.TypescriptConstructor();
-            case JavaLang.Definition javaDefinition -> JavaTypescriptParser.parseDefinition(javaDefinition, typeMap);
+            case JavaConstructor constructor -> CompileResults.Ok(new TypescriptLang.TypescriptConstructor());
+            case JavaLang.Definition javaDefinition ->
+                    JavaTypescriptParser.parseDefinition(javaDefinition, typeMap).mapValue(d -> d);
         };
     }
 
-    private static TypescriptLang.Definition parseDefinition(JavaLang.Definition definition, TypeMap typeMap) {
+    private static CompileResult<TypescriptLang.Definition> parseDefinition(JavaLang.Definition definition, TypeMap typeMap) {
         var maybeAnnotations = definition.maybeAnnotations();
         var maybeModifiers = definition.modifiers();
         var maybeTypeParameters = definition.maybeTypeParams();
@@ -325,48 +367,69 @@ class JavaTypescriptParser implements Parser<JavaLang.Root, TypescriptLang.Types
         var oldName = definition.name();
 
         if (type instanceof JavaLang.JavaVariadicType(var child)) {
-            var newType = new TypescriptLang.ArrayType(JavaTypescriptParser.parseType(child, typeMap));
-            var name = "..." + oldName;
-            return new TypescriptLang.Definition(maybeAnnotations, maybeModifiers, name, maybeTypeParameters, newType);
+            return JavaTypescriptParser.parseType(child, typeMap)
+                    .mapValue(inner -> {
+                        var newType = new TypescriptLang.ArrayType(inner);
+                        var name = "..." + oldName;
+                        return new TypescriptLang.Definition(maybeAnnotations, maybeModifiers, name, maybeTypeParameters, newType);
+                    });
         }
         else {
-            return new TypescriptLang.Definition(maybeAnnotations, maybeModifiers, oldName, maybeTypeParameters, JavaTypescriptParser.parseType(definition.type(), typeMap));
+            return JavaTypescriptParser.parseType(definition.type(), typeMap)
+                    .mapValue(parsed -> new TypescriptLang.Definition(maybeAnnotations, maybeModifiers, oldName, maybeTypeParameters, parsed));
         }
     }
 
-    private static Symbol parseSymbol(JavaLang.Symbol symbol) {
-        return new Symbol(symbol.value());
+    private static CompileResult<Symbol> parseSymbol(JavaLang.Symbol symbol, TypeMap typeMap) {
+        return switch (symbol.value()) {
+            case "byte", "short", "int", "long", "float", "double" -> CompileResults.Ok(new Symbol("number"));
+            case "boolean" -> CompileResults.Ok(new Symbol("boolean"));
+            case "char", "String" -> CompileResults.Ok(new Symbol("string"));
+            case "void" -> CompileResults.Ok(new Symbol("void"));
+            default -> typeMap.find(symbol.value())
+                    .map(loc -> {
+                        typeMap.registerImport(loc);
+                        return CompileResults.Ok(new Symbol(symbol.value()));
+                    })
+                    .orElseGet(() -> CompileResults.fromErrWithString("Unknown type", symbol.value()));
+        };
     }
 
-    private static Symbol parseQualifiedType(JavaLang.Qualified qualified) {
+    private static CompileResult<Symbol> parseQualifiedType(JavaLang.Qualified qualified) {
         var joined = qualified.segments()
                 .iter()
                 .map(Segment::value)
                 .collect(new Joiner("."))
                 .orElse("");
 
-        return new Symbol(joined);
+        return CompileResults.Ok(new Symbol(joined));
     }
 
-    private static TypescriptLang.Type parseArrayType(JavaLang.JavaArrayType type, TypeMap typeMap) {
-        return new TypescriptLang.ArrayType(JavaTypescriptParser.parseType(type.inner, typeMap));
+    private static CompileResult<TypescriptLang.Type> parseArrayType(JavaLang.JavaArrayType type, TypeMap typeMap) {
+        return JavaTypescriptParser.parseType(type.inner, typeMap)
+                .mapValue(TypescriptLang.ArrayType::new);
     }
 
-    private static TypescriptLang.Type parseType(JavaLang.JavaType variadicType, TypeMap typeMap) {
+    private static CompileResult<TypescriptLang.Type> parseType(JavaLang.JavaType variadicType, TypeMap typeMap) {
         return switch (variadicType) {
-            case JavaLang.Symbol symbol -> JavaTypescriptParser.parseSymbol(symbol);
+            case JavaLang.Symbol symbol ->
+                    JavaTypescriptParser.parseSymbol(symbol, typeMap).mapValue(s -> (TypescriptLang.Type) s);
             case JavaLang.JavaArrayType type -> JavaTypescriptParser.parseArrayType(type, typeMap);
             case JavaLang.JavaTemplateType templateType ->
-                    JavaTypescriptParser.parseTemplateType(templateType, typeMap);
-            case JavaLang.JavaVariadicType type -> new Symbol("?");
-            case JavaLang.Qualified qualified -> JavaTypescriptParser.parseQualifiedType(qualified);
+                    JavaTypescriptParser.parseTemplateType(templateType, typeMap).mapValue(t -> (TypescriptLang.Type) t);
+            case JavaLang.JavaVariadicType type -> CompileResults.Ok(new Symbol("?"));
+            case JavaLang.Qualified qualified ->
+                    JavaTypescriptParser.parseQualifiedType(qualified).mapValue(s -> (TypescriptLang.Type) s);
         };
     }
 
-    private static TypescriptLang.TemplateType parseTemplateType(JavaLang.JavaTemplateType type, TypeMap typeMap) {
+    private static CompileResult<TypescriptLang.TemplateType> parseTemplateType(JavaLang.JavaTemplateType type, TypeMap typeMap) {
         var base = JavaTypescriptParser.parseBaseType(type.base());
-        var listOption = type.typeArguments().map(list -> JavaTypescriptParser.parseTypeList(list, typeMap));
-        return new TypescriptLang.TemplateType(base, listOption);
+        var listResult = type.typeArguments()
+                .map(list -> JavaTypescriptParser.parseTypeList(list, typeMap)
+                        .mapValue(types -> (Option<List<TypescriptLang.Type>>) new Some<>(types)))
+                .orElseGet(() -> CompileResults.Ok(new None<>()));
+        return listResult.mapValue(option -> new TypescriptLang.TemplateType(base, option));
     }
 
     private static JavaLang.Symbol parseBaseType(JavaLang.Base base) {
@@ -482,7 +545,7 @@ class JavaTypescriptParser implements Parser<JavaLang.Root, TypescriptLang.Types
                 .collect(new ListCollector<>());
 
         return set.iter()
-                .map(unit -> JavaTypescriptParser.parseUnit(unit, new TypeMap(types)))
+                .map(unit -> JavaTypescriptParser.parseUnit(unit, types))
                 .collect(new CompileResultCollector<>(new UnitSetCollector<>()));
     }
 }
