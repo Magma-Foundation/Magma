@@ -51,20 +51,24 @@ class JavaTypescriptParser implements Parser<JavaLang.Root, TypescriptLang.Types
     }
 
     private static CompileResult<Unit<TypescriptLang.TypescriptRoot>> parseRoot(Location location, JavaLang.Root root, TypeMap typeMap) {
-        var rootSegments = root.children()
+        var result = root.children()
                 .iter()
                 .map(rootSegment -> JavaTypescriptParser.parseRootSegment(location, rootSegment, typeMap))
-                .flatMap(List::iter)
-                .collect(new ListCollector<>());
+                .collect(new CompileResultCollector<>(new ListCollector<>()));
 
-        return CompileResults.Ok(new SimpleUnit<>(location, new TypescriptLang.TypescriptRoot(rootSegments)));
+        return result.mapValue((List<List<TypescriptLang.TypeScriptRootSegment>> lists) ->
+                lists.iter()
+                        .flatMap(List::iter)
+                        .collect(new ListCollector<>()))
+                .mapValue((List<TypescriptLang.TypeScriptRootSegment> segments) ->
+                        new SimpleUnit<>(location, new TypescriptLang.TypescriptRoot(segments)));
     }
 
-    private static List<TypescriptLang.TypeScriptRootSegment> parseRootSegment(Location location, JavaRootSegment rootSegment, TypeMap typeMap) {
+    private static CompileResult<List<TypescriptLang.TypeScriptRootSegment>> parseRootSegment(Location location, JavaRootSegment rootSegment, TypeMap typeMap) {
         return switch (rootSegment) {
-            case JavaLang.Whitespace whitespace -> Lists.of(new TypescriptLang.Whitespace());
-            case JavaNamespacedNode namespaced -> Lists.of(JavaTypescriptParser.parseNamespaced(location, namespaced));
-            case JavaLang.Structure structure -> JavaTypescriptParser.getCollect(structure, typeMap);
+            case JavaLang.Whitespace whitespace -> CompileResults.Ok(Lists.of(new TypescriptLang.Whitespace()));
+            case JavaNamespacedNode namespaced -> JavaTypescriptParser.parseNamespaced(location, namespaced, typeMap).mapValue(Lists::of);
+            case JavaLang.Structure structure -> CompileResults.Ok(JavaTypescriptParser.getCollect(structure, typeMap));
         };
     }
 
@@ -359,8 +363,39 @@ class JavaTypescriptParser implements Parser<JavaLang.Root, TypescriptLang.Types
         };
     }
 
-    private static TypescriptLang.TypeScriptRootSegment parseNamespaced(Location location, JavaNamespacedNode namespaced) {
-        return new TypescriptLang.Whitespace();
+    private static CompileResult<TypescriptLang.TypeScriptRootSegment> parseNamespaced(Location location, JavaNamespacedNode namespaced, TypeMap typeMap) {
+        return switch (namespaced.type()) {
+            case Package -> CompileResults.Ok(new TypescriptLang.Whitespace());
+            case Import -> {
+                var segments = namespaced.segments();
+                var lastValue = segments.findLast().map(Segment::value).orElse("");
+                if ("*".equals(lastValue)) {
+                    yield CompileResults.Ok(new TypescriptLang.Whitespace());
+                }
+                var joined = segments.iter()
+                        .map(Segment::value)
+                        .collect(new Joiner("."))
+                        .orElse("");
+
+                var exists = typeMap.types.iter()
+                        .filter(tuple -> {
+                            var path = tuple.left().addLast(tuple.right())
+                                    .iter()
+                                    .collect(new Joiner("."))
+                                    .orElse("");
+                            return path.equals(joined);
+                        })
+                        .next()
+                        .isPresent();
+
+                if (exists) {
+                    yield CompileResults.Ok(JavaTypescriptParser.parseImport(location, segments));
+                }
+                else {
+                    yield CompileResults.fromErrWithString("Unknown import", joined);
+                }
+            }
+        };
     }
 
     private static TypescriptLang.TypeScriptImport parseImport(Location location, List<Segment> segments) {
