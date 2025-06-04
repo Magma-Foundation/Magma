@@ -31,3 +31,4 @@ This will scan the sources, run the compiler pipeline and write the generated ou
 - `docs/` – Documentation and architecture diagrams
 
 See [`docs/architecture.md`](docs/architecture.md) for an overview of how the compiler is structured.
+For details on how the PlantUML class diagram is generated see [`docs/diagram-generation.md`](docs/diagram-generation.md).
