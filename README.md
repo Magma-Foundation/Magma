@@ -48,6 +48,7 @@ Primitive Java types are translated to their TypeScript equivalents. Numeric pri
 - `docs/` – Documentation and architecture diagrams
 
 See [`docs/architecture.md`](docs/architecture.md) for an overview of how the compiler is structured.
+General refactoring plans are tracked in [`docs/architecture-improvements.md`](docs/architecture-improvements.md).
 For details on how the PlantUML class diagram is generated see [`docs/diagram-generation.md`](docs/diagram-generation.md).
 The inspection report produced by IntelliJ is summarised in [`docs/inspection/tasks.md`](docs/inspection/tasks.md).
 For a high level roadmap and a list of missing Java→TypeScript features see [`docs/roadmap.md`](docs/roadmap.md).
