@@ -18,6 +18,7 @@ import magmac.app.compile.rule.PrefixRule;
 import magmac.app.compile.rule.Rule;
 import magmac.app.compile.rule.StringRule;
 import magmac.app.compile.rule.StripRule;
+import magmac.app.compile.rule.StripSpaceRule;
 import magmac.app.compile.rule.SuffixRule;
 import magmac.app.compile.rule.TypeRule;
 import magmac.app.compile.rule.divide.Divider;
@@ -182,10 +183,8 @@ public final class JavaRules {
     }
 
     public static Rule createCommentRule() {
-        Rule value = new StripRule(new StringRule("value"));
-
-        Rule line = new PrefixRule("//", new SuffixRule(value, "\r\n"));
-        Rule block = new PrefixRule("/*", new SuffixRule(value, "*/"));
+        Rule line = new StripSpaceRule(new PrefixRule("//", new SuffixRule(new StringRule("value"), "\r\n")));
+        Rule block = new StripSpaceRule(new PrefixRule("/*", new SuffixRule(new StringRule("value"), "*/")));
 
         return new TypeRule("comment", new OrRule(Lists.of(line, block)));
     }

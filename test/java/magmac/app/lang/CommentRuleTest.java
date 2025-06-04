@@ -23,9 +23,17 @@ public class CommentRuleTest {
     }
 
     @Test
-    public void testLineCommentWithWhitespace() {
+    public void testLineCommentWithInternalWhitespace() {
         Rule rule = JavaRules.createCommentRule();
         Node node = lex(rule, "//  hello  \r\n");
+        assertTrue(node.is("comment"));
+        assertEquals("  hello  ", node.findString("value").orElse(null));
+    }
+
+    @Test
+    public void testLineCommentSurroundedWhitespace() {
+        Rule rule = JavaRules.createCommentRule();
+        Node node = lex(rule, "  //hello\r\n  ");
         assertTrue(node.is("comment"));
         assertEquals("hello", node.findString("value").orElse(null));
     }
@@ -39,9 +47,17 @@ public class CommentRuleTest {
     }
 
     @Test
-    public void testBlockCommentWithWhitespace() {
+    public void testBlockCommentWithInternalWhitespace() {
         Rule rule = JavaRules.createCommentRule();
         Node node = lex(rule, "/*  hi  */");
+        assertTrue(node.is("comment"));
+        assertEquals("  hi  ", node.findString("value").orElse(null));
+    }
+
+    @Test
+    public void testBlockCommentSurroundedWhitespace() {
+        Rule rule = JavaRules.createCommentRule();
+        Node node = lex(rule, "  /*hi*/  ");
         assertTrue(node.is("comment"));
         assertEquals("hi", node.findString("value").orElse(null));
     }
