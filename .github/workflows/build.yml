@@ -24,6 +24,7 @@ jobs:
           cache: 'npm'
 
       - name: Install dependencies
+        working-directory: packages/compiler-ts
         run: npm install
 
       # The TypeScript version of the compiler isn't ready yet so we skip
@@ -62,6 +63,7 @@ jobs:
           cache: 'npm'
 
       - name: Install dependencies
+        working-directory: packages/compiler-ts
         run: npm install
 
       - name: Download build artifacts
