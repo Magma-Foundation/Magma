@@ -2,7 +2,7 @@ package magmac.app.compile.rule;
 
 import magmac.api.Tuple2;
 import magmac.app.compile.error.CompileResult;
-import magmac.app.compile.error.error.CompileErrors;
+import magmac.app.compile.error.type.CompileErrors;
 import magmac.app.compile.node.Node;
 import magmac.app.compile.rule.locate.FirstLocator;
 import magmac.app.compile.rule.locate.LastLocator;

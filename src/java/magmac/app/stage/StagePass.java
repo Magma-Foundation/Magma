@@ -7,7 +7,7 @@ import magmac.app.stage.result.ParseResult;
 /**
  * Performs a single pass over a parse tree.
  */
-public interface Passer {
+public interface StagePass {
     /**
      * Processes the given {@code node} within the provided parse state.
      */

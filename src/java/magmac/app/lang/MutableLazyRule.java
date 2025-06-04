@@ -4,7 +4,7 @@ import magmac.api.None;
 import magmac.api.Option;
 import magmac.api.Some;
 import magmac.app.compile.error.CompileResult;
-import magmac.app.compile.error.error.CompileErrors;
+import magmac.app.compile.error.type.CompileErrors;
 import magmac.app.compile.node.Node;
 import magmac.app.compile.rule.Rule;
 

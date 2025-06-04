@@ -6,7 +6,7 @@ import magmac.api.result.Result;
 import magmac.app.compile.error.context.Context;
 import magmac.app.compile.error.context.NodeContext;
 import magmac.app.compile.error.context.StringContext;
-import magmac.app.compile.error.error.CompileError;
+import magmac.app.compile.error.type.CompileError;
 import magmac.app.compile.node.Node;
 import magmac.app.error.ImmutableCompileError;
 

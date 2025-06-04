@@ -1,7 +1,7 @@
 package magmac.app.compile.rule;
 
 import magmac.app.compile.error.CompileResult;
-import magmac.app.compile.error.error.CompileErrors;
+import magmac.app.compile.error.type.CompileErrors;
 import magmac.app.compile.node.Node;
 
 public record PrefixRule(String prefix, Rule childRule) implements Rule {

@@ -4,7 +4,7 @@ import magmac.api.collect.list.Lists;
 import magmac.app.compile.error.CompileResult;
 import magmac.app.compile.error.CompileResultCollector;
 import magmac.app.compile.error.context.NodeContext;
-import magmac.app.compile.error.error.CompileError;
+import magmac.app.compile.error.type.CompileError;
 import magmac.app.compile.node.Node;
 import magmac.app.compile.rule.Rule;
 import magmac.app.error.ImmutableCompileError;

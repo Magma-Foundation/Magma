@@ -2,7 +2,7 @@ package magmac.app.compile.error;
 
 import magmac.api.Tuple2;
 import magmac.api.result.Result;
-import magmac.app.compile.error.error.CompileError;
+import magmac.app.compile.error.type.CompileError;
 
 import java.util.function.BiFunction;
 import java.util.function.Function;
