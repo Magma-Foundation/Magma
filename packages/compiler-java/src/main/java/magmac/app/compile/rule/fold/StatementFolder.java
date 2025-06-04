@@ -12,6 +12,13 @@ public class StatementFolder implements Folder {
         if ('}' == c && appended.isShallow()) {
             return appended.advance().exit();
         }
+        if ('\n' == c && appended.isLevel()
+                && !appended.inLineComment()
+                && !appended.inBlockComment()
+                && !appended.inSingle()
+                && !appended.inDouble()) {
+            return appended.advance();
+        }
         if ('{' == c || '(' == c) {
             return appended.enter();
         }

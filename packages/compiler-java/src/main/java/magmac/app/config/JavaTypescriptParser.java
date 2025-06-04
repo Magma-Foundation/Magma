@@ -535,6 +535,10 @@ class JavaTypescriptParser implements Parser<JavaLang.Root, TypescriptLang.Types
                 .next()
                 .isPresent();
 
+        if (joined.startsWith("java.")) {
+            exists = true;
+        }
+
         if (exists) {
             return CompileResults.Ok(JavaTypescriptParser.parseImport(location, segments));
         }
