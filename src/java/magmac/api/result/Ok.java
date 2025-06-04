@@ -2,6 +2,7 @@ package magmac.api.result;
 
 import magmac.api.Tuple2;
 
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -34,4 +35,10 @@ public record Ok<T, X>(T value) implements Result<T, X> {
     public <R> Result<T, R> mapErr(Function<X, R> mapper) {
         return new Ok<>(this.value);
     }
+
+    @Override
+    public void consume(Consumer<T> whenOk, Consumer<X> whenErr) {
+        whenOk.accept(this.value);
+    }
+
 }
