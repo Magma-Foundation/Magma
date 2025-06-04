@@ -4,7 +4,7 @@ This project can produce a UML class diagram describing its own structure. The d
 
 ## Self-hosted generation
 
-When the compiler is executed it scans the Java sources located in `src/java`. The `PlantUMLTargetPlatform` configures a pipeline which uses `JavaPlantUMLParser` to parse these sources into an AST. That AST is converted into a list of `PlantUMLRootSegment` nodes and merged by `MergeDiagram`. Finally the `RuleGenerator` serialises the nodes back into PlantUML text.
+When the compiler is executed it scans the Java sources located in `packages/compiler-java/src/main/java`. The `PlantUMLTargetPlatform` configures a pipeline which uses `JavaPlantUMLParser` to parse these sources into an AST. That AST is converted into a list of `PlantUMLRootSegment` nodes and merged by `MergeDiagram`. Finally the `RuleGenerator` serialises the nodes back into PlantUML text.
 
 Because the input sources are the compiler's own files, the diagram is effectively produced by the compiler reading itself.
 
@@ -12,7 +12,7 @@ The generated `.puml` file can be rendered with any PlantUML renderer or convert
 
 ## Included elements
 
-The parser records each class, interface and enum that appears in `src/java` and
+The parser records each class, interface and enum that appears in `packages/compiler-java/src/main/java` and
 adds `extends`/`implements` relationships.  Generic type arguments on those
 clauses are turned into dependency edges as well.  Examples of enum definitions
 can be seen in the generated output:
