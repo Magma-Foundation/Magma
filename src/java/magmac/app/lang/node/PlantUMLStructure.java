@@ -19,6 +19,6 @@ public record PlantUMLStructure(PlantUMLStructureType type, String name) impleme
 
     @Override
     public Node serialize() {
-        return new MapNode(this.type.name().toLowerCase()).withString("name", this.name);
+        return new MapNode(this.type.text()).withString("name", this.name);
     }
 }

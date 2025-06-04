@@ -89,7 +89,7 @@ public final class TypescriptLang {
 
         @Override
         public Node serialize() {
-            return new MapNode(this.type.name().toLowerCase())
+            return new MapNode(this.type.text())
                     .withString("name", this.value.name())
                     .withNodeListAndSerializer("modifiers", this.value.modifiers(), Serializable::serialize)
                     .withNodeListAndSerializer("members", this.value.members(), Serializable::serialize)
@@ -156,7 +156,7 @@ public final class TypescriptLang {
 
         @Override
         public Node serialize() {
-            return new MapNode(this.type.name().toLowerCase())
+            return new MapNode(this.type.text())
                     .withNodeSerialized("condition", this.condition);
         }
     }
@@ -367,8 +367,18 @@ public final class TypescriptLang {
     }
 
     public enum StructureType {
-        Class,
-        Enum,
-        Interface
+        Class("class"),
+        Enum("enum"),
+        Interface("interface");
+
+        private final String text;
+
+        StructureType(String text) {
+            this.text = text;
+        }
+
+        public String text() {
+            return this.text;
+        }
     }
 }

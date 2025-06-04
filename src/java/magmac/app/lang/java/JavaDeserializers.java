@@ -121,7 +121,7 @@ public final class JavaDeserializers {
     }
 
     private static Option<CompileResult<Conditional>> deserializeConditional(ConditionalType type, Node node) {
-        return Destructors.destructWithType(type.name().toLowerCase(), node).map(deserializer -> deserializer.withNode("condition", JavaDeserializers::deserializeValueOrError)
+        return Destructors.destructWithType(type.text(), node).map(deserializer -> deserializer.withNode("condition", JavaDeserializers::deserializeValueOrError)
                 .complete(value -> new Conditional(type, value)));
     }
 
