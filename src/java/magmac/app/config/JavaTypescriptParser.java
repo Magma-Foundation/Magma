@@ -59,26 +59,34 @@ class JavaTypescriptParser implements Parser<JavaLang.Root, TypescriptLang.Types
                 .iter()
                 .fold(
                         CompileResults.Ok(Lists.<TypescriptLang.TypeScriptRootSegment>empty()),
-                        (current, child) -> current.flatMapValue(list ->
-                                JavaTypescriptParser.parseRootSegment(location, child, typeMap)
-                                        .mapValue(list::addAllLast))
+                        (current, child) -> JavaTypescriptParser.getListCompileResult(location, typeMap, current, child)
                 );
 
         return segmentsResult.mapValue(segments -> {
-            var imports = buildImports(location, typeMap);
+            var imports = JavaTypescriptParser.buildImports(location, typeMap);
             var finalSegments = imports.addAllLast(segments);
             return new SimpleUnit<>(location, new TypescriptLang.TypescriptRoot(finalSegments));
         });
     }
 
+    private static CompileResult<List<TypescriptLang.TypeScriptRootSegment>> getListCompileResult(Location location, CompileState typeMap, CompileResult<List<TypescriptLang.TypeScriptRootSegment>> current, JavaRootSegment child) {
+        return current.flatMapValue(list ->
+                JavaTypescriptParser.parseRootSegment(location, child, typeMap)
+                        .mapValue(list::addAllLast));
+    }
+
     private static List<TypescriptLang.TypeScriptRootSegment> buildImports(Location location, CompileState typeMap) {
         return typeMap.importList()
                 .iter()
-                .map(loc -> loc.namespace().addLast(loc.name())
-                        .iter()
-                        .map(Segment::new)
-                        .collect(new ListCollector<>()))
+                .map(JavaTypescriptParser::getCollect)
                 .map(segs -> (TypescriptLang.TypeScriptRootSegment) JavaTypescriptParser.parseImport(location, segs))
+                .collect(new ListCollector<>());
+    }
+
+    private static List<Segment> getCollect(Location loc) {
+        return loc.namespace().addLast(loc.name())
+                .iter()
+                .map(Segment::new)
                 .collect(new ListCollector<>());
     }
 
@@ -94,9 +102,13 @@ class JavaTypescriptParser implements Parser<JavaLang.Root, TypescriptLang.Types
 
     private static CompileResult<List<TypescriptLang.TypeScriptRootSegment>> getCollect(JavaLang.Structure structure, CompileState typeMap) {
         return JavaTypescriptParser.parseStructure(structure, typeMap)
-                .mapValue(list -> list.iter()
-                        .map(JavaTypescriptParser::wrap)
-                        .collect(new ListCollector<>()));
+                .mapValue(JavaTypescriptParser::getCollect);
+    }
+
+    private static List<TypescriptLang.TypeScriptRootSegment> getCollect(List<TypescriptLang.StructureNode> list) {
+        return list.iter()
+                .map(JavaTypescriptParser::wrap)
+                .collect(new ListCollector<>());
     }
 
     private static TypescriptLang.TypeScriptRootSegment wrap(TypescriptLang.StructureNode value) {
@@ -123,38 +135,40 @@ class JavaTypescriptParser implements Parser<JavaLang.Root, TypescriptLang.Types
                 .iter()
                 .map(structureNode -> JavaTypescriptParser.parseStructureMember(structureNode, typeMap))
                 .collect(new CompileResultCollector<>(new TupleCollector<>(new ListCollector<>(), new ListCollector<>())));
-        return membersTuple.flatMapValue(tuple -> {
-            var members = tuple.left()
-                    .iter()
-                    .flatMap(List::iter)
-                    .collect(new ListCollector<>());
+        return membersTuple.flatMapValue(tuple -> JavaTypescriptParser.getListCompileResult(type, typeMap, tuple, value));
+    }
 
-            var structures = tuple.right()
-                    .iter()
-                    .flatMap(List::iter)
-                    .collect(new ListCollector<>());
+    private static CompileResult<List<TypescriptLang.StructureNode>> getListCompileResult(TypescriptLang.StructureType type, CompileState typeMap, Tuple2<List<List<TypescriptLang.TypescriptStructureMember>>, List<List<TypescriptLang.StructureNode>>> tuple, StructureValue<JavaLang.JavaType, JavaStructureMember> value) {
+        var members = tuple.left()
+                .iter()
+                .flatMap(List::iter)
+                .collect(new ListCollector<>());
 
-            var extendedResult = value.maybeExtended()
-                    .map(list -> JavaTypescriptParser.parseTypeList(list, typeMap)
-                            .mapValue(types -> (Option<List<TypescriptLang.Type>>) new Some<>(types)))
-                    .orElseGet(() -> CompileResults.Ok(new None<>()));
+        var structures = tuple.right()
+                .iter()
+                .flatMap(List::iter)
+                .collect(new ListCollector<>());
 
-            var implementedResult = value.maybeImplemented()
-                    .map(list1 -> JavaTypescriptParser.parseTypeList(list1, typeMap)
-                            .mapValue(types -> (Option<List<TypescriptLang.Type>>) new Some<>(types)))
-                    .orElseGet(() -> CompileResults.Ok(new None<>()));
+        var extendedResult = value.maybeExtended()
+                .map(list -> JavaTypescriptParser.parseTypeList(list, typeMap)
+                        .mapValue(types -> (Option<List<TypescriptLang.Type>>) new Some<>(types)))
+                .orElseGet(() -> CompileResults.Ok(new None<>()));
 
-            return extendedResult.and(() -> implementedResult).mapValue(extImpl -> {
-                var structureNode1 = new StructureValue<TypescriptLang.Type, TypescriptLang.TypescriptStructureMember>(
-                        value.name(),
-                        value.modifiers(),
-                        members,
-                        value.maybeTypeParams(),
-                        extImpl.left(),
-                        extImpl.right()
-                );
-                return structures.addLast(new TypescriptLang.StructureNode(type, structureNode1));
-            });
+        var implementedResult = value.maybeImplemented()
+                .map(list1 -> JavaTypescriptParser.parseTypeList(list1, typeMap)
+                        .mapValue(types -> (Option<List<TypescriptLang.Type>>) new Some<>(types)))
+                .orElseGet(() -> CompileResults.Ok(new None<>()));
+
+        return extendedResult.and(() -> implementedResult).mapValue(extImpl -> {
+            var structureNode1 = new StructureValue<TypescriptLang.Type, TypescriptLang.TypescriptStructureMember>(
+                    value.name(),
+                    value.modifiers(),
+                    members,
+                    value.maybeTypeParams(),
+                    extImpl.left(),
+                    extImpl.right()
+            );
+            return structures.addLast(new TypescriptLang.StructureNode(type, structureNode1));
         });
     }
 
@@ -467,13 +481,7 @@ class JavaTypescriptParser implements Parser<JavaLang.Root, TypescriptLang.Types
                 .orElse("");
 
         var exists = typeMap.types().iter()
-                .filter(tuple -> {
-                    var path = tuple.left().addLast(tuple.right())
-                            .iter()
-                            .collect(new Joiner("."))
-                            .orElse("");
-                    return path.equals(joined);
-                })
+                .filter(tuple -> JavaTypescriptParser.extracted(tuple, joined))
                 .next()
                 .isPresent();
 
@@ -483,6 +491,14 @@ class JavaTypescriptParser implements Parser<JavaLang.Root, TypescriptLang.Types
         else {
             return CompileResults.fromErrWithString("Unknown import", joined);
         }
+    }
+
+    private static boolean extracted(Tuple2<List<String>, String> tuple, String joined) {
+        var path = tuple.left().addLast(tuple.right())
+                .iter()
+                .collect(new Joiner("."))
+                .orElse("");
+        return path.equals(joined);
     }
 
     private static TypescriptLang.TypeScriptImport parseImport(Location location, List<Segment> segments) {
