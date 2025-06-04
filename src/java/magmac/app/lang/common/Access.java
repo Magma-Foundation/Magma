@@ -7,13 +7,11 @@ public class Access<V, R, T> {
     private final V variant;
     private final R receiver;
     private final String property;
-    private final Option<List<T>> maybeArguments;
 
     public Access(V variant, R receiver, String property, Option<List<T>> maybeArguments) {
         this.variant = variant;
         this.receiver = receiver;
         this.property = property;
-        this.maybeArguments = maybeArguments;
     }
 
     public V type() {

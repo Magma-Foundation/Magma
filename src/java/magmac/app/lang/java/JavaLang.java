@@ -69,7 +69,7 @@ public class JavaLang {
     public interface JavaLambdaParameter {
     }
 
-    public interface InstanceOfDefinition {
+    interface InstanceOfDefinition {
     }
 
     public record InstanceOfDefinitionWithParameters(Base base,
@@ -401,7 +401,7 @@ public class JavaLang {
             this.text = text;
         }
 
-        public String text() {
+        String text() {
             return this.text;
         }
     }

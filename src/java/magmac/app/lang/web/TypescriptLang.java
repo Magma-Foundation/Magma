@@ -395,7 +395,7 @@ public final class TypescriptLang {
             this.text = text;
         }
 
-        public String text() {
+        String text() {
             return this.text;
         }
     }
