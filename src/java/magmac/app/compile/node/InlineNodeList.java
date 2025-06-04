@@ -1,7 +1,6 @@
 package magmac.app.compile.node;
 
 import magmac.api.Option;
-import magmac.api.Some;
 import magmac.api.collect.list.List;
 import magmac.api.collect.list.Lists;
 import magmac.api.iter.Iter;
