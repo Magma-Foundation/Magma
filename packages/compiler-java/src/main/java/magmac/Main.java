@@ -24,7 +24,7 @@ import java.nio.file.Paths;
 
 final class Main {
     public static void main() {
-        Sources sources = new PathSources(Paths.get(".", "src", "java"));
+        Sources sources = new PathSources(Paths.get(".", "packages", "compiler-java", "src", "main", "java"));
 
         Main.loadSources(sources)
                 .match(Main::getNext, Some::new)
