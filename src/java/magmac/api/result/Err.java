@@ -5,6 +5,10 @@ import magmac.api.Tuple2;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+/**
+ * Error variant of {@link Result}.
+ */
+
 public record Err<T, X>(X error) implements Result<T, X> {
     @Override
     public <R> Result<R, X> mapValue(Function<T, R> mapper) {

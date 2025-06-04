@@ -5,6 +5,10 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
+/**
+ * Option variant representing a present value.
+ */
+
 public record Some<T>(T value) implements Option<T> {
     @Override
     public <R> Option<R> map(Function<T, R> mapper) {

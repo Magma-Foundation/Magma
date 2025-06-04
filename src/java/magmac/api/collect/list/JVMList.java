@@ -12,6 +12,10 @@ import magmac.api.iter.collect.ListCollector;
 import java.util.ArrayList;
 import java.util.function.BiFunction;
 
+/**
+ * {@link List} implementation backed by a Java {@link java.util.List}.
+ */
+
 public record JVMList<T>(java.util.List<T> elements) implements List<T> {
     public JVMList() {
         this(new ArrayList<>());

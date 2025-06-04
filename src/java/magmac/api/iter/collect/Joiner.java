@@ -4,6 +4,10 @@ import magmac.api.None;
 import magmac.api.Option;
 import magmac.api.Some;
 
+/**
+ * Collector that concatenates strings using a delimiter.
+ */
+
 public record Joiner(String delimiter) implements Collector<String, Option<String>> {
     public Joiner() {
         this("");
