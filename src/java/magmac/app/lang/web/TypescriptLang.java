@@ -19,6 +19,7 @@ import magmac.app.lang.node.ParameterizedMethodHeader;
 import magmac.app.lang.node.PostVariant;
 import magmac.app.lang.node.Segment;
 import magmac.app.lang.node.StructureValue;
+import magmac.app.lang.web.Indentation;
 
 public final class TypescriptLang {
     /** Argument to a TypeScript function call. */
@@ -124,8 +125,9 @@ public final class TypescriptLang {
     public record TypescriptRoot(List<TypeScriptRootSegment> children) implements Serializable {
         @Override
         public Node serialize() {
-            return new MapNode("root")
+            Node node = new MapNode("root")
                     .withNodeListAndSerializer("children", this.children, TypeScriptRootSegment::serialize);
+            return Indentation.apply(node);
         }
     }
 

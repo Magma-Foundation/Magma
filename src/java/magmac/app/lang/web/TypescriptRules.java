@@ -52,7 +52,7 @@ public final class TypescriptRules {
         LazyRule functionSegmentRule = new MutableLazyRule();
         var value = JavaRules.initValueRule(functionSegmentRule, valueLazy, " => ", definition);
         var children = CommonLang.Statements("children", FunctionSegments.initFunctionSegmentRule(functionSegmentRule, value, definition));
-        Rule childRule = new SuffixRule(LocatingRule.First(header, " {", new StripRule("", children, "after-children")), "}");
+        Rule childRule = new SuffixRule(LocatingRule.First(header, " {", new StripRule(children)), "}");
         return new TypeRule("method", new OptionNodeListRule("children",
                 childRule,
                 new SuffixRule(header, ";")

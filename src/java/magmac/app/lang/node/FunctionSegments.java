@@ -44,7 +44,7 @@ public final class FunctionSegments {
                 JavaRules.createCaseRule(value, functionSegmentRule)
         ));
 
-        return functionSegmentRule.set(new StripRule("before", rule, ""));
+        return functionSegmentRule.set(new StripRule(rule));
     }
 
 }
