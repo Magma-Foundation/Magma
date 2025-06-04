@@ -5,6 +5,9 @@ import magmac.app.stage.parse.ParseState;
 
 import java.util.function.BiFunction;
 
+/**
+ * Compilation unit produced by the parser.
+ */
 public interface ParseUnit<T> {
     Unit<T> toLocationUnit();
 

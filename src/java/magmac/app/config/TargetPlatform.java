@@ -6,6 +6,9 @@ import magmac.app.compile.rule.Rule;
 
 import java.nio.file.Path;
 
+/**
+ * Creates the components for generating output for a specific target.
+ */
 public interface TargetPlatform {
     Application createApplication();
 

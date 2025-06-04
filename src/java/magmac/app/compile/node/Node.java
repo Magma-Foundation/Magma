@@ -9,6 +9,9 @@ import magmac.app.lang.Serializable;
 
 import java.util.function.Function;
 
+/**
+ * Generic tree node used by the compiler front end.
+ */
 public interface Node {
     CompileResult<NodeList> findNodeListOrError(String key);
 
