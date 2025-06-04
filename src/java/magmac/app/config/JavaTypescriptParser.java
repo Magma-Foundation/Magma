@@ -330,7 +330,7 @@ class JavaTypescriptParser implements Parser<JavaLang.Root, TypescriptLang.Types
             case JavaLang.Symbol symbol -> new TypescriptLang.Symbol(symbol.value());
             case JavaLang.Lambda javaLambda -> new TypescriptLang.Number("0");
             case JavaLang.SwitchNode javaSwitchNode -> new TypescriptLang.Number("0");
-            case JavaLang.InstanceOf instanceOf -> new TypescriptLang.Number("0");
+            case JavaLang.InstanceOf instanceOf -> JavaTypescriptParser.parseInstanceOf(instanceOf, typeMap);
         };
     }
 
@@ -344,6 +344,21 @@ class JavaTypescriptParser implements Parser<JavaLang.Root, TypescriptLang.Types
 
     private static TypescriptLang.Operation parseOperation(JavaLang.operation operation, CompileState typeMap) {
         return new TypescriptLang.Operation(JavaTypescriptParser.parseValue(operation.left(), typeMap), operation.operator(), JavaTypescriptParser.parseValue(operation.right(), typeMap));
+    }
+
+    private static TypescriptLang.InstanceOf parseInstanceOf(JavaLang.InstanceOf instanceOf, CompileState typeMap) {
+        var value = JavaTypescriptParser.parseValue(instanceOf.value(), typeMap);
+
+        JavaLang.Base base = switch (instanceOf.definition()) {
+            case JavaLang.InstanceOfDefinitionWithParameters(var b, var params) -> b;
+            case JavaLang.InstanceOfDefinitionWithName(var b, var name) -> b;
+            default -> new JavaLang.Symbol("?");
+        };
+
+        var type = JavaTypescriptParser.parseSymbol(JavaTypescriptParser.parseBaseType(base), typeMap)
+                .match(t -> (TypescriptLang.Type) t, err -> new Symbol("?"));
+
+        return new TypescriptLang.InstanceOf(value, type);
     }
 
     private static TypescriptLang.Block parseBlock(JavaLang.Block block, CompileState typeMap) {
