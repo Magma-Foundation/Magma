@@ -21,35 +21,48 @@ import magmac.app.lang.node.Segment;
 import magmac.app.lang.node.StructureValue;
 
 public final class TypescriptLang {
+    /** Argument to a TypeScript function call. */
     public interface Argument extends Serializable {
     }
 
+    /** Parameter definition inside a function header. */
     public interface TypeScriptParameter extends Serializable {
     }
 
+    /** Header introducing a block of statements. */
     public interface TypescriptBlockHeader extends Serializable {
     }
 
+    /** Member that can appear inside a structure body. */
     public interface TypescriptStructureMember extends Serializable {
     }
 
+    /** Signature of a TypeScript method. */
     public interface TypeScriptMethodHeader extends Serializable {
     }
 
+    /** A concrete type node. */
     public interface Type extends Serializable {
     }
 
+    /** Segment that can occur at the top level of a source file. */
     public interface TypeScriptRootSegment extends Serializable {
     }
 
+    /** Segment that forms part of a function. */
     public interface FunctionSegment extends Serializable {
+        /**
+         * Value contained within a function segment.
+         */
         interface Value extends Serializable {
         }
     }
 
+    /** Expression value within the TypeScript language. */
     public interface Value extends Caller, Argument, Assignable {
     }
 
+    /** Something that can appear on the left hand side of an assignment. */
     public interface Assignable extends Serializable {
     }
 

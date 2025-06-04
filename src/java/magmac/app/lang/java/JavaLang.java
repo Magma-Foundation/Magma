@@ -39,33 +39,45 @@ import magmac.app.lang.node.TypedDeserializer;
 import magmac.app.lang.web.TypescriptLang;
 
 public class JavaLang {
+    /** Argument to a Java callable or operation. */
     public sealed interface JavaArgument permits Value, Whitespace, Comment {
     }
 
+    /** Expression that can be invoked like a function. */
     public sealed interface JavaCaller permits Construction, Value {
     }
 
+    /** Value that can appear on the left side of an assignment. */
     public sealed interface Assignable {
     }
 
+    /**
+     * Any Java expression value.
+     */
     public sealed interface Value extends JavaCaller, JavaArgument, Assignable permits Access, Char, Index, InstanceOf, Invokable, Lambda, Not, Number, StringValue, SwitchNode, Symbol, operation {
     }
 
+    /** Header introducing a conditional or try block. */
     public sealed interface BlockHeader permits Catch, Conditional, Else, Try {
     }
 
+    /** Base element used by complex type expressions. */
     public sealed interface Base extends Serializable permits Qualified, Symbol {
     }
 
+    /** Contents of a lambda expression body. */
     public interface JavaLambdaContent {
     }
 
+    /** Type appearing in Java source code. */
     public sealed interface JavaType permits JavaArrayType, Symbol, JavaTemplateType, Qualified, JavaVariadicType {
     }
 
+    /** Parameter list header of a lambda expression. */
     public interface JavaLambdaHeader {
     }
 
+    /** Single parameter in a lambda expression. */
     public interface JavaLambdaParameter {
     }
 

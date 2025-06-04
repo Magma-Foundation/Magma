@@ -5,6 +5,9 @@ import magmac.api.Tuple2;
 import magmac.api.Option;
 import magmac.api.iter.Iter;
 
+/**
+ * Mutable state machine used by a {@link Divider} implementation.
+ */
 public interface DivideState {
     DivideState append(char c);
 

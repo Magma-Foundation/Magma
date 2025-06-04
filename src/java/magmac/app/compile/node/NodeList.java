@@ -6,6 +6,9 @@ import magmac.app.compile.error.CompileResult;
 
 import java.util.function.Function;
 
+/**
+ * Immutable collection of {@link Node} values.
+ */
 public interface NodeList {
     Iter<Node> iter();
 

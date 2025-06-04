@@ -5,6 +5,9 @@ import magmac.app.compile.error.CompileResult;
 
 import java.util.function.Function;
 
+/**
+ * Collection of compilation units that can be processed together.
+ */
 public interface UnitSet<T> {
     Iter<T> iterValues();
 
