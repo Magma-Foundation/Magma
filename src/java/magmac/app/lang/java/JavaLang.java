@@ -188,7 +188,7 @@ public class JavaLang {
         }
 
         public Option<CompileResult<Structure>> deserialize(Node node) {
-            return Destructors.destructWithType(this.type().name().toLowerCase(), node)
+            return Destructors.destructWithType(this.type().text(), node)
                     .map((InitialDestructor deserializer) -> JavaStructureNodeDeserializer.deserializeHelper(this.type(), deserializer));
         }
     }
@@ -390,9 +390,19 @@ public class JavaLang {
     }
 
     public enum JavaStructureType {
-        Class,
-        Record,
-        Enum,
-        Interface
+        Class("class"),
+        Record("record"),
+        Enum("enum"),
+        Interface("interface");
+
+        private final String text;
+
+        JavaStructureType(String text) {
+            this.text = text;
+        }
+
+        public String text() {
+            return this.text;
+        }
     }
 }
