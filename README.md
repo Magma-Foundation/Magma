@@ -32,6 +32,7 @@ This will scan the sources, run the compiler pipeline and write the generated ou
 
 See [`docs/architecture.md`](docs/architecture.md) for an overview of how the compiler is structured.
 For details on how the PlantUML class diagram is generated see [`docs/diagram-generation.md`](docs/diagram-generation.md).
+The inspection report produced by IntelliJ is summarised in [`docs/inspection/tasks.md`](docs/inspection/tasks.md).
 
 ## Continuous Integration
 
