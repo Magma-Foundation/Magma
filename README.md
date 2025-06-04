@@ -10,16 +10,16 @@ ends will be added starting with C output via Clang and eventually LLVM.
 
 ## Getting Started
 
-The sources are located in `src/java`. A modern JDK (17 or newer) is required to build the project. A simple way to compile everything into the `out` directory is:
+The sources are located in `packages/compiler-java/src/main/java`. A modern JDK (17 or newer) is required to build the project. A simple way to compile everything into the `packages/compiler-java/out` directory is:
 
 ```bash
-javac -d out $(find src/java -name '*.java')
+javac -d packages/compiler-java/out $(find packages/compiler-java/src/main/java -name '*.java')
 ```
 
 The entry point of the compiler is `magmac.Main`. After compiling you can run:
 
 ```bash
-java -cp out magmac.Main
+java -cp packages/compiler-java/out magmac.Main
 ```
 
 This will scan the sources, run the compiler pipeline and write the generated outputs to the directories configured by each `TargetPlatform` (for example `diagrams` for PlantUML files and `src/web` for TypeScript files).
@@ -30,7 +30,8 @@ Primitive Java types are translated to their TypeScript equivalents. Numeric pri
 
 ## Repository Layout
 
-- `src/java` – Java source code for the compiler implementation
+- `packages/compiler-java/src/main/java` – Java source code for the compiler implementation
+- `packages/compiler-ts` – TypeScript tooling and build configuration
 - `diagrams/` – PlantUML files produced by the compiler
 - `docs/` – Documentation and architecture diagrams
 
