@@ -2,7 +2,6 @@ package magmac.app.compile.rule.split;
 
 import magmac.api.Option;
 import magmac.api.Tuple2;
-import magmac.api.collect.list.List;
 import magmac.api.iter.collect.ListCollector;
 import magmac.app.compile.rule.Splitter;
 import magmac.app.compile.rule.divide.Divider;

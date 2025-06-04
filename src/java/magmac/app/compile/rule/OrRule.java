@@ -1,7 +1,6 @@
 package magmac.app.compile.rule;
 
 import magmac.api.collect.list.List;
-import magmac.api.iter.Iter;
 import magmac.app.compile.error.CompileResult;
 import magmac.app.compile.error.context.Context;
 import magmac.app.compile.error.context.NodeContext;

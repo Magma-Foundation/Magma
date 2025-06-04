@@ -28,10 +28,10 @@ public class RuleGenerator implements Generator {
 
     private CompileResult<Unit<String>> generateEntry(Unit<Node> entry) {
         return entry.mapValue(this.rootRule::generate)
-                .mapErr(err -> this.getDestruct(entry, err));
+                .mapErr(err -> RuleGenerator.getDestruct(entry, err));
     }
 
-    private CompileError getDestruct(Unit<Node> entry, CompileError err) {
+    private static CompileError getDestruct(Unit<Node> entry, CompileError err) {
         return entry.destruct((location, node) -> {
             var message = "Failed to generate unit at location: '" + location + "'";
             return new ImmutableCompileError(message, new NodeContext(node), Lists.of(err));

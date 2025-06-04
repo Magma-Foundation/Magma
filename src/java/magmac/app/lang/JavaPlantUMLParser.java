@@ -3,12 +3,12 @@ package magmac.app.lang;
 import magmac.api.Option;
 import magmac.api.collect.list.List;
 import magmac.api.collect.list.Lists;
+import magmac.api.collect.map.Map;
+import magmac.api.collect.map.Maps;
 import magmac.api.iter.Iter;
 import magmac.api.iter.Iters;
 import magmac.api.iter.collect.Joiner;
 import magmac.api.iter.collect.ListCollector;
-import magmac.api.collect.map.Map;
-import magmac.api.collect.map.Maps;
 import magmac.app.compile.error.CompileResult;
 import magmac.app.compile.error.CompileResults;
 import magmac.app.io.Location;
@@ -128,21 +128,23 @@ public class JavaPlantUMLParser implements Parser<JavaLang.Root, PlantUMLRoot> {
                         current.mapOrPut(dep.child(), (List<String> list) -> list.addLast(dep.parent()), () -> Lists.of(dep.parent())));
 
         return segments.iter()
-                .filter(segment -> {
-                    if (!(segment instanceof PlantUMLDependency dependency)) {
-                        return true;
-                    }
-
-                    List<String> directParents = adjacency.getOrDefault(dependency.child(), Lists.empty());
-
-                    boolean transitive = directParents.iter()
-                            .filter(p -> !p.equals(dependency.parent()))
-                            .map(p -> adjacency.getOrDefault(p, Lists.empty()).contains(dependency.parent()))
-                            .fold(false, (Boolean acc, Boolean has) -> acc || has);
-
-                    return !transitive;
-                })
+                .filter(segment -> JavaPlantUMLParser.extracted(segment, adjacency))
                 .collect(new ListCollector<>());
+    }
+
+    private static boolean extracted(PlantUMLRootSegment segment, Map<String, List<String>> adjacency) {
+        if (!(segment instanceof PlantUMLDependency(String child, String parent))) {
+            return true;
+        }
+
+        List<String> directParents = adjacency.getOrDefault(child, Lists.empty());
+
+        boolean transitive = directParents.iter()
+                .filter(p -> !p.equals(parent))
+                .map(p -> adjacency.getOrDefault(p, Lists.empty()).contains(parent))
+                .fold(false, (Boolean acc, Boolean has) -> acc || has);
+
+        return !transitive;
     }
 
     @Override
