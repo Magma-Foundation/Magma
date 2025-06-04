@@ -8,6 +8,7 @@ import magmac.api.result.Result;
 import magmac.app.io.IOResult;
 import magmac.app.io.InlineIOResult;
 import magmac.app.io.SafeFiles;
+import magmac.app.annotation.Actual;
 import magmac.app.stage.unit.SimpleUnit;
 import magmac.app.stage.unit.Unit;
 import magmac.app.stage.unit.UnitSet;
@@ -16,6 +17,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
+@Actual
 public record PathSources(Path root) implements Sources {
     private static IOResult<Unit<String>> getTuple2IOResult(PathSource source) {
         return source.read().mapValue((String input) -> new SimpleUnit<>(source.computeLocation(), input));
