@@ -55,28 +55,31 @@ class JavaTypescriptParser implements Parser<JavaLang.Root, TypescriptLang.Types
     }
 
     private static CompileResult<Unit<TypescriptLang.TypescriptRoot>> parseRoot(Location location, JavaLang.Root root, CompileState typeMap) {
-        var result = root.children()
+        var segmentsResult = root.children()
                 .iter()
-                .map(rootSegment -> JavaTypescriptParser.parseRootSegment(location, rootSegment, typeMap))
-                .collect(new CompileResultCollector<>(new ListCollector<>()));
+                .fold(
+                        CompileResults.Ok(Lists.<TypescriptLang.TypeScriptRootSegment>empty()),
+                        (current, child) -> current.flatMapValue(list ->
+                                JavaTypescriptParser.parseRootSegment(location, child, typeMap)
+                                        .mapValue(list::addAllLast))
+                );
 
-        return result.mapValue((List<List<TypescriptLang.TypeScriptRootSegment>> lists) ->
-                        lists.iter()
-                                .flatMap(List::iter)
-                                .collect(new ListCollector<>()))
-                .mapValue((List<TypescriptLang.TypeScriptRootSegment> segments) -> {
-                    var imports = typeMap.importList()
-                            .iter()
-                            .map(loc -> loc.namespace().addLast(loc.name())
-                                    .iter()
-                                    .map(Segment::new)
-                                    .collect(new ListCollector<>()))
-                            .map(segs -> (TypescriptLang.TypeScriptRootSegment) JavaTypescriptParser.parseImport(location, segs))
-                            .collect(new ListCollector<>());
+        return segmentsResult.mapValue(segments -> {
+            var imports = buildImports(location, typeMap);
+            var finalSegments = imports.addAllLast(segments);
+            return new SimpleUnit<>(location, new TypescriptLang.TypescriptRoot(finalSegments));
+        });
+    }
 
-                    var finalSegments = imports.addAllLast(segments);
-                    return new SimpleUnit<>(location, new TypescriptLang.TypescriptRoot(finalSegments));
-                });
+    private static List<TypescriptLang.TypeScriptRootSegment> buildImports(Location location, CompileState typeMap) {
+        return typeMap.importList()
+                .iter()
+                .map(loc -> loc.namespace().addLast(loc.name())
+                        .iter()
+                        .map(Segment::new)
+                        .collect(new ListCollector<>()))
+                .map(segs -> (TypescriptLang.TypeScriptRootSegment) JavaTypescriptParser.parseImport(location, segs))
+                .collect(new ListCollector<>());
     }
 
     private static CompileResult<List<TypescriptLang.TypeScriptRootSegment>> parseRootSegment(Location location, JavaRootSegment rootSegment, CompileState typeMap) {
