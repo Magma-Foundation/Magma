@@ -18,12 +18,12 @@ The Magmac compiler is designed to become a **bootstrapped, self‑hosting compi
 
 The TypeScript pipeline is incomplete and several constructs are emitted as placeholders. Notable gaps include:
 
-- **Lambda, `switch` and `instanceof` expressions** are mapped to `0` during conversion. The relevant code can be seen in `JavaTypescriptParser`:
+- **Lambda and `switch` expressions** are mapped to `0` during conversion. The relevant code can be seen in `JavaTypescriptParser`:
   ```java
   case JavaLang.Lambda javaLambda -> new TypescriptLang.Number("0");
   case JavaLang.SwitchNode javaSwitchNode -> new TypescriptLang.Number("0");
-  case JavaLang.InstanceOf instanceOf -> new TypescriptLang.Number("0");
   ```
+- **`instanceof` expressions are now supported via the `InstanceOf` node.**
 - **Block headers** such as `if`, `for` or `while` are not parsed. The parser always emits `if (true)`:
   ```java
   private static TypescriptLang.TypescriptBlockHeader parseHeader(JavaLang.BlockHeader header) {
