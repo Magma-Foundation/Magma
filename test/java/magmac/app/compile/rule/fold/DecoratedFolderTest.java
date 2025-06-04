@@ -54,4 +54,36 @@ public class DecoratedFolderTest {
         var segments = this.divide("\"a\\\"b,c\",d");
         assertEquals(java.util.List.of("\"a\\\"b,c\"", "d"), segments);
     }
+
+    @Test
+    public void testCommentMarkersInsideQuotes() {
+        var segments = this.divide("a,'//b',c");
+        assertEquals(java.util.List.of("a", "'//b'", "c"), segments);
+        segments = this.divide("a,\"/*b*/\",c");
+        assertEquals(java.util.List.of("a", "\"/*b*/\"", "c"), segments);
+    }
+
+    @Test
+    public void testQuotesInsideBlockComment() {
+        var segments = this.divide("a,/*'b,c'*/d,e");
+        assertEquals(java.util.List.of("a", "/*'b,c'*/", "d", "e"), segments);
+    }
+
+    @Test
+    public void testBlockCommentWithNewline() {
+        var segments = this.divide("a,/*b\nc*/d,e");
+        assertEquals(java.util.List.of("a", "/*b\nc*/", "d", "e"), segments);
+    }
+
+    @Test
+    public void testLineCommentNoNewline() {
+        var segments = this.divide("a,//b,c");
+        assertEquals(java.util.List.of("a", "//b,c"), segments);
+    }
+
+    @Test
+    public void testMultilineDoubleQuote() {
+        var segments = this.divide("a,\"b\nc\",d");
+        assertEquals(java.util.List.of("a", "\"b\nc\"", "d"), segments);
+    }
 }
