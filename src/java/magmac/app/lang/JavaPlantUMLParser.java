@@ -7,6 +7,8 @@ import magmac.api.iter.Iter;
 import magmac.api.iter.Iters;
 import magmac.api.iter.collect.Joiner;
 import magmac.api.iter.collect.ListCollector;
+import magmac.api.collect.map.Map;
+import magmac.api.collect.map.Maps;
 import magmac.app.compile.error.CompileResult;
 import magmac.app.compile.error.CompileResults;
 import magmac.app.io.Location;
@@ -118,11 +120,38 @@ public class JavaPlantUMLParser implements Parser<JavaLang.Root, PlantUMLRoot> {
         return new PlantUMLInherits(child, parent);
     }
 
+    private static List<PlantUMLRootSegment> removeTransitiveDependencies(List<PlantUMLRootSegment> segments) {
+        Map<String, List<String>> adjacency = segments.iter()
+                .filter(segment -> segment instanceof PlantUMLDependency)
+                .map(segment -> (PlantUMLDependency) segment)
+                .fold(Maps.empty(), (Map<String, List<String>> current, PlantUMLDependency dep) ->
+                        current.mapOrPut(dep.child(), (List<String> list) -> list.addLast(dep.parent()), () -> Lists.of(dep.parent())));
+
+        return segments.iter()
+                .filter(segment -> {
+                    if (!(segment instanceof PlantUMLDependency dependency)) {
+                        return true;
+                    }
+
+                    List<String> directParents = adjacency.getOrDefault(dependency.child(), Lists.empty());
+
+                    boolean transitive = directParents.iter()
+                            .filter(p -> !p.equals(dependency.parent()))
+                            .map(p -> adjacency.getOrDefault(p, Lists.empty()).contains(dependency.parent()))
+                            .fold(false, (Boolean acc, Boolean has) -> acc || has);
+
+                    return !transitive;
+                })
+                .collect(new ListCollector<>());
+    }
+
     @Override
     public CompileResult<UnitSet<PlantUMLRoot>> apply(UnitSet<JavaLang.Root> initial) {
-        var roots = initial.iter()
+        var segments = initial.iter()
                 .flatMap(JavaPlantUMLParser::parseRoot)
-                .collect(new ListCollector<>())
+                .collect(new ListCollector<>());
+
+        var roots = JavaPlantUMLParser.removeTransitiveDependencies(segments)
                 .addFirst(new PlantUMLHeader())
                 .addLast(new PlantUMLFooter());
 
