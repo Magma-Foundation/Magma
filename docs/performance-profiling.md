@@ -30,6 +30,8 @@ When running the TypeScript build of the compiler through Node.js you can collec
   ts-node --cpu-prof ./src/web/magmac/Main.ts
   ```
   This writes a `isolate-0x*.cpuprofile` file that can be loaded in Chrome DevTools.
+- Pass `--cpu-prof-dir <dir>` or `--cpu-prof-name <name>` to control where the
+  profile is written.
 - For memory analysis use `--heap-prof` in a similar manner.
 
 Source maps generated during the TypeScript compilation allow you to map hot paths back to the original source files when examining the profile.
