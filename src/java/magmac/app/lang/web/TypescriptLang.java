@@ -345,6 +345,15 @@ public final class TypescriptLang {
         }
     }
 
+    public record InstanceOf(Value value, Type type) implements Value {
+        @Override
+        public Node serialize() {
+            return new MapNode("instance-of")
+                    .withNodeSerialized("child", this.value)
+                    .withNodeSerialized("type", this.type);
+        }
+    }
+
     public record Operation(
             Value left,
             Operator operator,
