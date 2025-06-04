@@ -32,3 +32,10 @@ This will scan the sources, run the compiler pipeline and write the generated ou
 
 See [`docs/architecture.md`](docs/architecture.md) for an overview of how the compiler is structured.
 For details on how the PlantUML class diagram is generated see [`docs/diagram-generation.md`](docs/diagram-generation.md).
+
+## Continuous Integration
+
+The repository is built on every pull request using a GitHub Actions workflow.
+It compiles the Java sources with JDK&nbsp;21 and preview features enabled.
+Compilation of the generated TypeScript is currently **skipped** because the
+compiler's TypeScript pipeline is still under development.
