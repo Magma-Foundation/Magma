@@ -44,11 +44,12 @@ public final class JavaDeserializers {
                 .map(destructor -> destructor.withString("value").complete(factory));
     }
 
-    private static <T> CompileResult<T> commonWrap(String type, Node node, TypedDeserializer<T> tail) {
+    @SuppressWarnings("unchecked")
+    private static <T> CompileResult<T> commonWrap(String type, Node node, TypedDeserializer<? extends T> tail) {
         return Deserializers.orError(type, node, Lists.of(
-                Deserializers.wrap(JavaDeserializers::deserializeWhitespace),
-                Deserializers.wrap(JavaDeserializers::deserializeComment),
-                Deserializers.wrap(tail)
+                (TypedDeserializer<T>) Deserializers.wrap(JavaDeserializers::deserializeWhitespace),
+                (TypedDeserializer<T>) Deserializers.wrap(JavaDeserializers::deserializeComment),
+                (TypedDeserializer<T>) Deserializers.wrap(tail)
         ));
     }
     private static CompileResult<JavaCaller> deserializeCaller(Node node) {
@@ -351,10 +352,10 @@ public final class JavaDeserializers {
     }
 
     private static CompileResult<JavaArgument> deserializeArguments(Node node) {
-        return JavaDeserializers.commonWrap("argument", node, JavaDeserializers::deserializeValue);
+        return JavaDeserializers.<JavaArgument>commonWrap("argument", node, n -> (Option) JavaDeserializers.deserializeValue(n));
     }
 
     public static CompileResult<JavaParameter> deserializeParameter(Node node) {
-        return JavaDeserializers.commonWrap("parameter", node, JavaDeserializers::deserializeTypedDefinition);
+        return JavaDeserializers.<JavaParameter>commonWrap("parameter", node, n -> (Option) JavaDeserializers.deserializeTypedDefinition(n));
     }
 }
