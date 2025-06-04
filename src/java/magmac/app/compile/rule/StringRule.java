@@ -3,7 +3,7 @@ package magmac.app.compile.rule;
 import magmac.api.result.Ok;
 import magmac.app.compile.error.CompileResult;
 import magmac.app.compile.error.CompileResults;
-import magmac.app.compile.error.error.CompileErrors;
+import magmac.app.compile.error.type.CompileErrors;
 import magmac.app.compile.node.MapNode;
 import magmac.app.compile.node.Node;
 

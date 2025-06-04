@@ -10,7 +10,7 @@ import magmac.api.result.Ok;
 import magmac.app.compile.error.CompileResult;
 import magmac.app.compile.error.CompileResults;
 import magmac.app.compile.error.context.Context;
-import magmac.app.compile.error.error.CompileError;
+import magmac.app.compile.error.type.CompileError;
 import magmac.app.error.ImmutableCompileError;
 
 record OrState<T>(Option<T> maybeValue, List<CompileError> errors) {

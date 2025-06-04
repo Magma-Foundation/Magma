@@ -13,7 +13,7 @@ import magmac.api.iter.collect.Joiner;
 import magmac.api.result.Ok;
 import magmac.app.compile.error.CompileResult;
 import magmac.app.compile.error.CompileResults;
-import magmac.app.compile.error.error.CompileErrors;
+import magmac.app.compile.error.type.CompileErrors;
 
 import java.util.function.BiFunction;
 import java.util.function.Function;

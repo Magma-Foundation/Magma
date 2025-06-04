@@ -1,4 +1,4 @@
-package magmac.app.compile.error.error;
+package magmac.app.compile.error.type;
 
 import magmac.api.collect.list.List;
 import magmac.api.error.Error;

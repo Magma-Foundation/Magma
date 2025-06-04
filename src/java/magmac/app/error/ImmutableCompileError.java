@@ -6,7 +6,7 @@ import magmac.api.collect.list.Lists;
 import magmac.api.iter.collect.Joiner;
 import magmac.api.iter.collect.Max;
 import magmac.app.compile.error.context.Context;
-import magmac.app.compile.error.error.CompileError;
+import magmac.app.compile.error.type.CompileError;
 
 public record ImmutableCompileError(String message, Context context,
                                     List<CompileError> errors) implements CompileError {

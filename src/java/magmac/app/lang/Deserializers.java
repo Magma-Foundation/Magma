@@ -7,7 +7,7 @@ import magmac.api.iter.Iters;
 import magmac.app.compile.error.CompileResult;
 import magmac.app.compile.error.CompileResults;
 import magmac.app.compile.error.context.NodeContext;
-import magmac.app.compile.error.error.CompileError;
+import magmac.app.compile.error.type.CompileError;
 import magmac.app.compile.node.Node;
 import magmac.app.error.ImmutableCompileError;
 import magmac.app.lang.node.TypedDeserializer;
