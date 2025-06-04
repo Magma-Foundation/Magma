@@ -220,35 +220,41 @@ class JavaTypescriptParser implements Parser<JavaLang.Root, TypescriptLang.Types
             }
         }
 
-        var maybeNewChildren = maybeOldChildren.map(segments -> JavaTypescriptParser.parseFunctionSegments(segments, typeMap));
-        return headerAndParams.mapValue(parameterizedHeader -> new TypescriptLang.TypescriptMethod(
-                parameterizedHeader, maybeNewChildren
-        ));
+        CompileResult<Option<List<TypescriptLang.FunctionSegment>>> maybeNewChildren = maybeOldChildren
+                .map(segments -> JavaTypescriptParser.parseFunctionSegments(segments, typeMap)
+                        .mapValue(s -> (Option<List<TypescriptLang.FunctionSegment>>) new Some<>(s)))
+                .orElseGet(() -> CompileResults.Ok(new None<>()));
+
+        return headerAndParams.and(() -> maybeNewChildren)
+                .mapValue(tuple -> new TypescriptLang.TypescriptMethod(tuple.left(), tuple.right()));
     }
 
-    private static List<TypescriptLang.FunctionSegment> parseFunctionSegments(List<JavaFunctionSegment> segments, CompileState typeMap) {
+    private static CompileResult<List<TypescriptLang.FunctionSegment>> parseFunctionSegments(List<JavaFunctionSegment> segments, CompileState typeMap) {
         return segments.iter()
                 .map(segment -> JavaTypescriptParser.parseFunctionSegment(segment, typeMap))
-                .collect(new ListCollector<>());
+                .collect(new CompileResultCollector<>(new ListCollector<>()));
     }
 
-    private static TypescriptLang.FunctionSegment parseFunctionSegment(JavaFunctionSegment segment, CompileState typeMap) {
+    private static CompileResult<TypescriptLang.FunctionSegment> parseFunctionSegment(JavaFunctionSegment segment, CompileState typeMap) {
         return switch (segment) {
-            case JavaLang.Whitespace whitespace -> new TypescriptLang.Whitespace();
-            case JavaLang.Comment comment -> new TypescriptLang.Comment(comment.value());
-            case JavaLang.Block block -> JavaTypescriptParser.parseBlock(block, typeMap);
-            case JavaLang.Case caseNode -> new TypescriptLang.Whitespace();
+            case JavaLang.Whitespace whitespace -> CompileResults.Ok(new TypescriptLang.Whitespace());
+            case JavaLang.Comment comment -> CompileResults.Ok(new TypescriptLang.Comment(comment.value()));
+            case JavaLang.Block block -> JavaTypescriptParser.parseBlock(block, typeMap).mapValue(b -> (TypescriptLang.FunctionSegment) b);
+            case JavaLang.Case caseNode -> CompileResults.Ok(new TypescriptLang.Whitespace());
             case JavaLang.Return aReturn ->
-                    new TypescriptLang.Return(JavaTypescriptParser.parseValue(aReturn.child(), typeMap));
+                    JavaTypescriptParser.parseValue(aReturn.child(), typeMap)
+                            .mapValue(v -> (TypescriptLang.FunctionSegment) new TypescriptLang.Return(v));
             case JavaLang.FunctionStatement functionStatement ->
-                    JavaTypescriptParser.parseFunctionStatement(functionStatement, typeMap);
+                    JavaTypescriptParser.parseFunctionStatement(functionStatement, typeMap).mapValue(fs -> (TypescriptLang.FunctionSegment) fs);
         };
     }
 
-    private static TypescriptLang.FunctionSegment parseFunctionStatement(JavaLang.FunctionStatement functionStatement, CompileState typeMap) {
-        var oldValue = JavaTypescriptParser.parseFunctionStatementValue(functionStatement.child(), typeMap);
-        var newValue = JavaTypescriptParser.getOldValue(oldValue);
-        return new FunctionStatement(newValue);
+    private static CompileResult<TypescriptLang.FunctionSegment> parseFunctionStatement(JavaLang.FunctionStatement functionStatement, CompileState typeMap) {
+        return JavaTypescriptParser.parseFunctionStatementValue(functionStatement.child(), typeMap)
+                .mapValue(oldValue -> {
+                    var newValue = JavaTypescriptParser.getOldValue(oldValue);
+                    return (TypescriptLang.FunctionSegment) new FunctionStatement(newValue);
+                });
     }
 
     private static TypescriptLang.FunctionSegment.Value getOldValue(TypescriptLang.FunctionSegment.Value oldValue) {
@@ -264,90 +270,114 @@ class JavaTypescriptParser implements Parser<JavaLang.Root, TypescriptLang.Types
         return oldValue;
     }
 
-    private static TypescriptLang.FunctionSegment.Value parseFunctionStatementValue(JavaFunctionSegmentValue child, CompileState typeMap) {
+    private static CompileResult<TypescriptLang.FunctionSegment.Value> parseFunctionStatementValue(JavaFunctionSegmentValue child, CompileState typeMap) {
         return switch (child) {
-            case JavaBreak javaBreak -> new TypescriptLang.Break();
-            case JavaContinue javaContinue -> new TypescriptLang.Continue();
-            case JavaYieldNode javaYieldNode -> new TypescriptLang.Break();
+            case JavaBreak javaBreak -> CompileResults.Ok(new TypescriptLang.Break());
+            case JavaContinue javaContinue -> CompileResults.Ok(new TypescriptLang.Continue());
+            case JavaYieldNode javaYieldNode -> CompileResults.Ok(new TypescriptLang.Break());
             case JavaPost javaPost ->
-                    new TypescriptLang.Post(javaPost.variant(), JavaTypescriptParser.parseValue(javaPost.value(), typeMap));
+                    JavaTypescriptParser.parseValue(javaPost.value(), typeMap)
+                            .mapValue(v -> (TypescriptLang.FunctionSegment.Value) new TypescriptLang.Post(javaPost.variant(), v));
             case JavaLang.Return aReturn ->
-                    new TypescriptLang.Return(JavaTypescriptParser.parseValue(aReturn.child(), typeMap));
-            case JavaLang.Invokable invokable -> JavaTypescriptParser.parseInvokable(invokable, typeMap);
+                    JavaTypescriptParser.parseValue(aReturn.child(), typeMap)
+                            .mapValue(v -> (TypescriptLang.FunctionSegment.Value) new TypescriptLang.Return(v));
+            case JavaLang.Invokable invokable ->
+                    JavaTypescriptParser.parseInvokable(invokable, typeMap).mapValue(v -> (TypescriptLang.FunctionSegment.Value) v);
             case JavaLang.Assignment assignment ->
-                    new TypescriptLang.Assignment(JavaTypescriptParser.parseAssignable(assignment.assignable(), typeMap), JavaTypescriptParser.parseValue(assignment.value(), typeMap));
+                    JavaTypescriptParser.parseAssignable(assignment.assignable(), typeMap)
+                            .and(() -> JavaTypescriptParser.parseValue(assignment.value(), typeMap))
+                            .mapValue(tuple -> (TypescriptLang.FunctionSegment.Value) new TypescriptLang.Assignment(tuple.left(), tuple.right()));
         };
     }
 
-    private static TypescriptLang.Assignable parseAssignable(JavaLang.Assignable assignable, CompileState typeMap) {
+    private static CompileResult<TypescriptLang.Assignable> parseAssignable(JavaLang.Assignable assignable, CompileState typeMap) {
         return switch (assignable) {
-            case JavaLang.Definition definition -> JavaTypescriptParser.parseDefinition(definition, typeMap).match(
-                    d -> d,
-                    err -> new TypescriptLang.Definition(definition.maybeAnnotations(), definition.modifiers(), definition.name(), definition.maybeTypeParams(), new Symbol("?"))
-            );
-            case JavaLang.Value value -> JavaTypescriptParser.parseValue(value, typeMap);
+            case JavaLang.Definition definition ->
+                    JavaTypescriptParser.parseDefinition(definition, typeMap)
+                            .mapValue(d -> {
+                                typeMap.registerValue(definition.name());
+                                return (TypescriptLang.Assignable) d;
+                            });
+            case JavaLang.Value value ->
+                    JavaTypescriptParser.parseValue(value, typeMap).mapValue(v -> (TypescriptLang.Assignable) v);
         };
     }
 
-    private static TypescriptLang.Invokable parseInvokable(JavaLang.Invokable invokable, CompileState typeMap) {
-        return new TypescriptLang.Invokable(JavaTypescriptParser.parseCaller(invokable.caller(), typeMap), JavaTypescriptParser.parseArguments(invokable.arguments(), typeMap));
+    private static CompileResult<TypescriptLang.Invokable> parseInvokable(JavaLang.Invokable invokable, CompileState typeMap) {
+        return JavaTypescriptParser.parseCaller(invokable.caller(), typeMap)
+                .and(() -> JavaTypescriptParser.parseArguments(invokable.arguments(), typeMap))
+                .mapValue(tuple -> new TypescriptLang.Invokable(tuple.left(), tuple.right()));
     }
 
-    private static Caller parseCaller(JavaLang.JavaCaller caller, CompileState typeMap) {
+    private static CompileResult<Caller> parseCaller(JavaLang.JavaCaller caller, CompileState typeMap) {
         return switch (caller) {
-            case JavaLang.Value javaValue -> JavaTypescriptParser.parseValue(javaValue, typeMap);
-            case JavaLang.Construction javaConstruction -> new TypescriptLang.Construction(
+            case JavaLang.Value javaValue -> JavaTypescriptParser.parseValue(javaValue, typeMap).mapValue(v -> (Caller) v);
+            case JavaLang.Construction javaConstruction ->
                     JavaTypescriptParser.parseType(javaConstruction.type(), typeMap)
-                            .match(t -> t, err -> new Symbol("?"))
-            );
+                            .mapValue(t -> (Caller) new TypescriptLang.Construction(t));
         };
     }
 
-    private static List<TypescriptLang.Argument> parseArguments(List<JavaLang.JavaArgument> arguments, CompileState typeMap) {
+    private static CompileResult<List<TypescriptLang.Argument>> parseArguments(List<JavaLang.JavaArgument> arguments, CompileState typeMap) {
         return arguments.iter()
                 .map(argument -> JavaTypescriptParser.parseArgument(argument, typeMap))
-                .collect(new ListCollector<>());
+                .collect(new CompileResultCollector<>(new ListCollector<>()));
     }
 
-    private static TypescriptLang.Argument parseArgument(JavaLang.JavaArgument argument, CompileState typeMap) {
+    private static CompileResult<TypescriptLang.Argument> parseArgument(JavaLang.JavaArgument argument, CompileState typeMap) {
         return switch (argument) {
-            case JavaLang.Whitespace whitespace -> new TypescriptLang.Whitespace();
-            case JavaLang.Comment comment -> new TypescriptLang.Comment(comment.value());
-            case JavaLang.Value value -> JavaTypescriptParser.parseValue(value, typeMap);
+            case JavaLang.Whitespace whitespace -> CompileResults.Ok(new TypescriptLang.Whitespace());
+            case JavaLang.Comment comment -> CompileResults.Ok(new TypescriptLang.Comment(comment.value()));
+            case JavaLang.Value value -> JavaTypescriptParser.parseValue(value, typeMap).mapValue(v -> (TypescriptLang.Argument) v);
         };
     }
 
-    private static TypescriptLang.Value parseValue(JavaLang.Value child, CompileState typeMap) {
+    private static CompileResult<TypescriptLang.Value> parseValue(JavaLang.Value child, CompileState typeMap) {
         return switch (child) {
-            case JavaLang.Access access -> JavaTypescriptParser.parseAccess(access, typeMap);
-            case JavaLang.Char aChar -> new TypescriptLang.Char(aChar.value());
-            case JavaLang.Index index -> JavaTypescriptParser.parseIndex(index, typeMap);
-            case JavaLang.Invokable invokable -> JavaTypescriptParser.parseInvokable(invokable, typeMap);
-            case JavaLang.Not not -> new TypescriptLang.Not(JavaTypescriptParser.parseValue(not.value(), typeMap));
-            case JavaLang.Number number -> new TypescriptLang.Number(number.value());
-            case JavaLang.operation operation -> JavaTypescriptParser.parseOperation(operation, typeMap);
-            case JavaLang.StringValue javaStringNode -> new TypescriptLang.StringValue(javaStringNode.value());
-            case JavaLang.Symbol symbol -> new TypescriptLang.Symbol(symbol.value());
-            case JavaLang.Lambda javaLambda -> new TypescriptLang.Number("0");
-            case JavaLang.SwitchNode javaSwitchNode -> new TypescriptLang.Number("0");
-            case JavaLang.InstanceOf instanceOf -> JavaTypescriptParser.parseInstanceOf(instanceOf, typeMap);
+            case JavaLang.Access access -> JavaTypescriptParser.parseAccess(access, typeMap).mapValue(v -> (TypescriptLang.Value) v);
+            case JavaLang.Char aChar -> CompileResults.Ok(new TypescriptLang.Char(aChar.value()));
+            case JavaLang.Index index -> JavaTypescriptParser.parseIndex(index, typeMap).mapValue(v -> (TypescriptLang.Value) v);
+            case JavaLang.Invokable invokable -> JavaTypescriptParser.parseInvokable(invokable, typeMap).mapValue(v -> (TypescriptLang.Value) v);
+            case JavaLang.Not not -> JavaTypescriptParser.parseValue(not.value(), typeMap).mapValue(TypescriptLang.Not::new);
+            case JavaLang.Number number -> CompileResults.Ok(new TypescriptLang.Number(number.value()));
+            case JavaLang.operation operation -> JavaTypescriptParser.parseOperation(operation, typeMap).mapValue(v -> (TypescriptLang.Value) v);
+            case JavaLang.StringValue javaStringNode -> CompileResults.Ok(new TypescriptLang.StringValue(javaStringNode.value()));
+            case JavaLang.Symbol symbol -> {
+                if (typeMap.hasValue(symbol.value())) {
+                    yield CompileResults.Ok(new TypescriptLang.Symbol(symbol.value()));
+                }
+                else if (typeMap.find(symbol.value()).isPresent()) {
+                    yield CompileResults.fromErrWithString("Invalid value", symbol.value());
+                }
+                else {
+                    yield CompileResults.fromErrWithString("Unknown value", symbol.value());
+                }
+            }
+            case JavaLang.Lambda javaLambda -> CompileResults.Ok(new TypescriptLang.Number("0"));
+            case JavaLang.SwitchNode javaSwitchNode -> CompileResults.Ok(new TypescriptLang.Number("0"));
+            case JavaLang.InstanceOf instanceOf -> JavaTypescriptParser.parseInstanceOf(instanceOf, typeMap).mapValue(v -> (TypescriptLang.Value) v);
         };
     }
 
-    private static TypescriptLang.Access parseAccess(JavaLang.Access access, CompileState typeMap) {
-        return new TypescriptLang.Access(JavaTypescriptParser.parseValue(access.receiver(), typeMap), access.property());
+    private static CompileResult<TypescriptLang.Access> parseAccess(JavaLang.Access access, CompileState typeMap) {
+        return JavaTypescriptParser.parseValue(access.receiver(), typeMap)
+                .mapValue(v -> new TypescriptLang.Access(v, access.property()));
     }
 
-    private static TypescriptLang.Index parseIndex(JavaLang.Index index, CompileState typeMap) {
-        return new TypescriptLang.Index(JavaTypescriptParser.parseValue(index.parent(), typeMap), JavaTypescriptParser.parseValue(index.argument(), typeMap));
+    private static CompileResult<TypescriptLang.Index> parseIndex(JavaLang.Index index, CompileState typeMap) {
+        return JavaTypescriptParser.parseValue(index.parent(), typeMap)
+                .and(() -> JavaTypescriptParser.parseValue(index.argument(), typeMap))
+                .mapValue(tuple -> new TypescriptLang.Index(tuple.left(), tuple.right()));
     }
 
-    private static TypescriptLang.Operation parseOperation(JavaLang.operation operation, CompileState typeMap) {
-        return new TypescriptLang.Operation(JavaTypescriptParser.parseValue(operation.left(), typeMap), operation.operator(), JavaTypescriptParser.parseValue(operation.right(), typeMap));
+    private static CompileResult<TypescriptLang.Operation> parseOperation(JavaLang.operation operation, CompileState typeMap) {
+        return JavaTypescriptParser.parseValue(operation.left(), typeMap)
+                .and(() -> JavaTypescriptParser.parseValue(operation.right(), typeMap))
+                .mapValue(tuple -> new TypescriptLang.Operation(tuple.left(), operation.operator(), tuple.right()));
     }
 
-    private static TypescriptLang.InstanceOf parseInstanceOf(JavaLang.InstanceOf instanceOf, CompileState typeMap) {
-        var value = JavaTypescriptParser.parseValue(instanceOf.value(), typeMap);
+    private static CompileResult<TypescriptLang.InstanceOf> parseInstanceOf(JavaLang.InstanceOf instanceOf, CompileState typeMap) {
+        return JavaTypescriptParser.parseValue(instanceOf.value(), typeMap).flatMapValue(value -> {
 
         JavaLang.Base base = switch (instanceOf.definition()) {
             case JavaLang.InstanceOfDefinitionWithParameters(var b, var params) -> b;
@@ -355,14 +385,15 @@ class JavaTypescriptParser implements Parser<JavaLang.Root, TypescriptLang.Types
             default -> new JavaLang.Symbol("?");
         };
 
-        var type = JavaTypescriptParser.parseSymbol(JavaTypescriptParser.parseBaseType(base), typeMap)
-                .match(t -> (TypescriptLang.Type) t, err -> new Symbol("?"));
-
-        return new TypescriptLang.InstanceOf(value, type);
+        return JavaTypescriptParser.parseSymbol(JavaTypescriptParser.parseBaseType(base), typeMap)
+                .mapValue(t -> (TypescriptLang.Type) t)
+                .mapValue(type -> new TypescriptLang.InstanceOf(value, type));
+        });
     }
 
-    private static TypescriptLang.Block parseBlock(JavaLang.Block block, CompileState typeMap) {
-        return new TypescriptLang.Block(JavaTypescriptParser.parseHeader(block.header()), JavaTypescriptParser.parseFunctionSegments(block.segments(), typeMap));
+    private static CompileResult<TypescriptLang.Block> parseBlock(JavaLang.Block block, CompileState typeMap) {
+        return JavaTypescriptParser.parseFunctionSegments(block.segments(), typeMap)
+                .mapValue(segments -> new TypescriptLang.Block(JavaTypescriptParser.parseHeader(block.header()), segments));
     }
 
     private static TypescriptLang.TypescriptBlockHeader parseHeader(JavaLang.BlockHeader header) {
@@ -374,7 +405,11 @@ class JavaTypescriptParser implements Parser<JavaLang.Root, TypescriptLang.Types
             case JavaLang.Whitespace whitespace -> CompileResults.Ok(new TypescriptLang.Whitespace());
             case JavaLang.Comment comment -> CompileResults.Ok(new TypescriptLang.Comment(comment.value()));
             case JavaLang.Definition javaDefinition ->
-                    JavaTypescriptParser.parseDefinition(javaDefinition, typeMap).mapValue(p -> p);
+                    JavaTypescriptParser.parseDefinition(javaDefinition, typeMap)
+                            .mapValue(p -> {
+                                typeMap.registerValue(javaDefinition.name());
+                                return (TypescriptLang.TypeScriptParameter) p;
+                            });
         };
     }
 
