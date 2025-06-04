@@ -3,6 +3,8 @@ package magmac.app.config;
 import magmac.api.Tuple2;
 import magmac.api.collect.TupleCollector;
 import magmac.api.collect.list.List;
+import magmac.api.Option;
+import magmac.api.None;
 import magmac.api.collect.list.Lists;
 import magmac.api.iter.Iter;
 import magmac.api.iter.collect.Joiner;
@@ -41,10 +43,9 @@ import magmac.app.stage.parse.Parser;
 import magmac.app.stage.unit.SimpleUnit;
 import magmac.app.stage.unit.Unit;
 import magmac.app.stage.unit.UnitSet;
+import magmac.app.config.TypeMap;
 
 class JavaTypescriptParser implements Parser<JavaLang.Root, TypescriptLang.TypescriptRoot> {
-    private record TypeMap(List<Tuple2<List<String>, String>> types) {
-    }
 
     private static CompileResult<Unit<TypescriptLang.TypescriptRoot>> parseUnit(Unit<JavaLang.Root> unit, TypeMap typeMap) {
         return unit.destruct((location, root) -> JavaTypescriptParser.parseRoot(location, root, typeMap));
@@ -152,7 +153,7 @@ class JavaTypescriptParser implements Parser<JavaLang.Root, TypescriptLang.Types
         return JavaTypescriptParser.getListListTuple2(new TypescriptLang.Whitespace());
     }
 
-    private static TypescriptLang.TypescriptStructureMember parseMethod(JavaMethod methodNode, TypeMap typeMap) {
+    static TypescriptLang.TypescriptStructureMember parseMethod(JavaMethod methodNode, TypeMap typeMap) {
         var parameters = methodNode.parameters()
                 .iter()
                 .map(parameter -> JavaTypescriptParser.parseParameter(parameter, typeMap))
@@ -160,7 +161,22 @@ class JavaTypescriptParser implements Parser<JavaLang.Root, TypescriptLang.Types
 
         var header = JavaTypescriptParser.parseMethodHeader(methodNode.header(), typeMap);
         var parameterizedHeader = new ParameterizedMethodHeader<TypescriptLang.TypeScriptParameter>(header, parameters);
-        return new TypescriptLang.TypescriptMethod(parameterizedHeader, methodNode.maybeChildren().map(segments -> JavaTypescriptParser.parseFunctionSegments(segments, typeMap)));
+
+        var maybeChildren = methodNode.maybeChildren();
+        if (methodNode.header() instanceof JavaLang.Definition def) {
+            boolean hasActual = def.maybeAnnotations()
+                    .map(list -> list.iter().filter(a -> a.value().equals("Actual")).next().isPresent())
+                    .orElse(false);
+            boolean isStatic = def.modifiers().iter().filter(m -> m.value().equals("static")).next().isPresent();
+            if (hasActual && isStatic) {
+                maybeChildren = new None<>();
+            }
+        }
+
+        return new TypescriptLang.TypescriptMethod(
+                parameterizedHeader,
+                maybeChildren.map(segments -> JavaTypescriptParser.parseFunctionSegments(segments, typeMap))
+        );
     }
 
     private static List<TypescriptLang.FunctionSegment> parseFunctionSegments(List<JavaFunctionSegment> segments, TypeMap typeMap) {
@@ -382,7 +398,7 @@ class JavaTypescriptParser implements Parser<JavaLang.Root, TypescriptLang.Types
                         .collect(new Joiner("."))
                         .orElse("");
 
-                var exists = typeMap.types.iter()
+                var exists = typeMap.types().iter()
                         .filter(tuple -> {
                             var path = tuple.left().addLast(tuple.right())
                                     .iter()

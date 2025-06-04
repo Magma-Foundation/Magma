@@ -4,6 +4,7 @@ import magmac.api.Option;
 import magmac.api.iter.Iters;
 import magmac.app.io.Location;
 import magmac.app.io.SafeFiles;
+import magmac.app.annotation.Actual;
 import magmac.app.stage.unit.Unit;
 import magmac.app.stage.unit.UnitSet;
 
@@ -11,6 +12,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
+@Actual
 public record PathTargets(Path root, String extension) implements Targets {
 
     @Override

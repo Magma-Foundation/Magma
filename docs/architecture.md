@@ -47,5 +47,5 @@ The following features are **not** used:
 
 - reflection or dynamic class loading
 - multi-threading and synchronization primitives
-- Java modules or annotations other than `@Override`
+- Java modules or annotations other than `@Override`. A special `@Actual` annotation marks platform specific code that is omitted from the TypeScript build.
 - advanced I/O or networking APIs

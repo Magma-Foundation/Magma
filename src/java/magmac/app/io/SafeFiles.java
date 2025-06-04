@@ -7,12 +7,14 @@ import magmac.api.collect.list.JVMList;
 import magmac.api.iter.Iter;
 import magmac.api.result.Err;
 import magmac.api.result.Ok;
+import magmac.app.annotation.Actual;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.stream.Collectors;
 
+@Actual
 public final class SafeFiles {
     public static Option<IOException> writeString(Path target, String output) {
         try {
