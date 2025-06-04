@@ -48,8 +48,11 @@ import magmac.app.config.TypeMap;
 
 class JavaTypescriptParser implements Parser<JavaLang.Root, TypescriptLang.TypescriptRoot> {
 
-    private static CompileResult<Unit<TypescriptLang.TypescriptRoot>> parseUnit(Unit<JavaLang.Root> unit, TypeMap typeMap) {
-        return unit.destruct((location, root) -> JavaTypescriptParser.parseRoot(location, root, typeMap));
+    private static CompileResult<Unit<TypescriptLang.TypescriptRoot>> parseUnit(Unit<JavaLang.Root> unit, List<Tuple2<List<String>, String>> types) {
+        return unit.destruct((location, root) -> {
+            TypeMap map = new TypeMap(types, location);
+            return JavaTypescriptParser.parseRoot(location, root, map);
+        });
     }
 
     private static CompileResult<Unit<TypescriptLang.TypescriptRoot>> parseRoot(Location location, JavaLang.Root root, TypeMap typeMap) {
@@ -62,8 +65,19 @@ class JavaTypescriptParser implements Parser<JavaLang.Root, TypescriptLang.Types
                 lists.iter()
                         .flatMap(List::iter)
                         .collect(new ListCollector<>()))
-                .mapValue((List<TypescriptLang.TypeScriptRootSegment> segments) ->
-                        new SimpleUnit<>(location, new TypescriptLang.TypescriptRoot(segments)));
+                .mapValue((List<TypescriptLang.TypeScriptRootSegment> segments) -> {
+                    var imports = typeMap.importList()
+                            .iter()
+                            .map(loc -> loc.namespace().addLast(loc.name())
+                                    .iter()
+                                    .map(Segment::new)
+                                    .collect(new ListCollector<>()))
+                            .map(segs -> (TypescriptLang.TypeScriptRootSegment) JavaTypescriptParser.parseImport(location, segs))
+                            .collect(new ListCollector<>());
+
+                    var finalSegments = imports.addAllLast(segments);
+                    return new SimpleUnit<>(location, new TypescriptLang.TypescriptRoot(finalSegments));
+                });
     }
 
     private static CompileResult<List<TypescriptLang.TypeScriptRootSegment>> parseRootSegment(Location location, JavaRootSegment rootSegment, TypeMap typeMap) {
@@ -372,7 +386,10 @@ class JavaTypescriptParser implements Parser<JavaLang.Root, TypescriptLang.Types
             case "boolean" -> CompileResults.Ok(new Symbol("boolean"));
             case "char", "String" -> CompileResults.Ok(new Symbol("string"));
             default -> typeMap.find(symbol.value())
-                    .map(loc -> CompileResults.Ok(new Symbol(symbol.value())))
+                    .map(loc -> {
+                        typeMap.registerImport(loc);
+                        return CompileResults.Ok(new Symbol(symbol.value()));
+                    })
                     .orElseGet(() -> CompileResults.fromErrWithString("Unknown type", symbol.value()));
         };
     }
@@ -525,7 +542,7 @@ class JavaTypescriptParser implements Parser<JavaLang.Root, TypescriptLang.Types
                 .collect(new ListCollector<>());
 
         return set.iter()
-                .map(unit -> JavaTypescriptParser.parseUnit(unit, new TypeMap(types)))
+                .map(unit -> JavaTypescriptParser.parseUnit(unit, types))
                 .collect(new CompileResultCollector<>(new UnitSetCollector<>()));
     }
 }
