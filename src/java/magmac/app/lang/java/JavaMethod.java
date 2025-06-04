@@ -44,7 +44,7 @@ public record JavaMethod(
 
         var parameters = JavaRules.createParametersRule(JavaRules.createDefinitionRule());
         var content = CommonLang.Statements("children", childRule);
-        Rule rightRule = new StripRule(new PrefixRule("{", new SuffixRule(new StripRule("", content, "after-children"), "}")));
+        Rule rightRule = new StripRule(new PrefixRule("{", new SuffixRule(new StripRule(content), "}")));
         Rule withParams = new OptionNodeListRule("parameters",
                 new SuffixRule(parameters, ");"),
                 LocatingRule.First(parameters, ")", rightRule)
