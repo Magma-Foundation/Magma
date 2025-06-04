@@ -41,10 +41,11 @@ public class CompoundDestructorImpl<T> implements CompoundDestructor<T> {
 
     @Override
     public <R> CompoundDestructor<Tuple2<T, R>> withNode(String key, Function<Node, CompileResult<R>> deserializer) {
-        return new CompoundDestructorImpl<Tuple2<T, R>>(this.current.flatMapValue((Tuple2<Node, T> inner) -> inner.left().removeNodeOrError(key).flatMapValue((Tuple2<Node, Node> removed) -> {
-            var right = removed.right();
-            return deserializer.apply(right).flatMapValue((R newRight) -> CompileResults.Ok(new Tuple2<>(removed.left(), new Tuple2<>(inner.right(), newRight))));
-        })));
+        return new CompoundDestructorImpl<>(this.current.flatMapValue(
+                inner -> inner.left()
+                        .removeNodeOrError(key)
+                        .flatMapValue(removed -> this.mapRemovedNode(deserializer, inner, removed))
+        ));
     }
 
     @Override
@@ -69,6 +70,16 @@ public class CompoundDestructorImpl<T> implements CompoundDestructor<T> {
             Tuple2<Node, Node> tuple
     ) {
         return deserializer.apply(tuple.right()).flatMapValue(deserialized -> CompileResults.Ok(new Tuple2<>(tuple.left(), new Tuple2<>(inner.right(), new Some<>(deserialized)))));
+    }
+
+    private <R> CompileResult<Tuple2<Node, Tuple2<T, R>>> mapRemovedNode(
+            Function<Node, CompileResult<R>> deserializer,
+            Tuple2<Node, T> inner,
+            Tuple2<Node, Node> removed
+    ) {
+        var right = removed.right();
+        return deserializer.apply(right)
+                .flatMapValue(newRight -> CompileResults.Ok(new Tuple2<>(removed.left(), new Tuple2<>(inner.right(), newRight))));
     }
 
     private <R> CompileResult<Tuple2<Node, Tuple2<T, Option<List<R>>>>> mapElements(

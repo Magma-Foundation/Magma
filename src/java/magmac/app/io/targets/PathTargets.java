@@ -24,20 +24,22 @@ public record PathTargets(Path root, String extension) implements Targets {
     }
 
     private Option<IOException> write(Unit<String> entry) {
-        return entry.destruct((Location location, String output) -> {
-            var targetParent = location.namespace()
-                    .iter()
-                    .fold(this.root, Path::resolve);
+        return entry.destruct(this::writePair);
+    }
 
-            if (!Files.exists(targetParent)) {
-                var maybeError = SafeFiles.createDirectories(targetParent);
-                if (maybeError.isPresent()) {
-                    return maybeError;
-                }
+    private Option<IOException> writePair(Location location, String output) {
+        var targetParent = location.namespace()
+                .iter()
+                .fold(this.root, Path::resolve);
+
+        if (!Files.exists(targetParent)) {
+            var maybeError = SafeFiles.createDirectories(targetParent);
+            if (maybeError.isPresent()) {
+                return maybeError;
             }
+        }
 
-            var target = targetParent.resolve(location.name() + "." + this.extension);
-            return SafeFiles.writeString(target, output);
-        });
+        var target = targetParent.resolve(location.name() + "." + this.extension);
+        return SafeFiles.writeString(target, output);
     }
 }
